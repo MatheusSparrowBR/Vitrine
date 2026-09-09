@@ -17,6 +17,7 @@ import './events.css'
 import './city-home.css'
 import './auth-page.css'
 import './billing-plans.css'
+import './public-polish.css'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
@@ -43,8 +44,8 @@ function EventRoute({citySlug}){
  const [city,setCity]=React.useState(supabase?null:{id:'fallback',name:'Laguna',state:'SC',slug:citySlug,active:true}),[loading,setLoading]=React.useState(Boolean(supabase))
  React.useEffect(()=>{let live=true;(async()=>{if(!supabase){setLoading(false);return}const {data}=await supabase.from('cities').select('id,name,state,slug,country,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(live){setCity(data||null);setLoading(false)}})();return()=>{live=false}},[citySlug])
  if(loading)return <div className="app"><div className="loader"/></div>
- if(!city)return <div className="app"><main className="page section"><a className="link" href="/laguna">← Voltar</a><div className="empty"><h3>Cidade não encontrada.</h3></div></main></div>
- return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href={`/${city.slug}`}><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href={`/${city.slug}/empresas`}>Explorar</a><a href={`/${city.slug}/promocoes`}>Promoções</a><a href="/planos">Planos</a></nav></div></header><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>
+ if(!city)return <div className="app"><main className="page section"><a className="back-link" href="/laguna">← Voltar</a><div className="empty"><h3>Cidade não encontrada.</h3></div></main></div>
+ return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href={`/${city.slug}`}><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href={`/${city.slug}/empresas`}>Explorar</a><a href={`/${city.slug}/promocoes`}>Promoções</a><a href={`/${city.slug}/eventos`}>Eventos</a><a href="/planos">Planos</a></nav></div></header><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>
 }
 
 function RootRoute(){
