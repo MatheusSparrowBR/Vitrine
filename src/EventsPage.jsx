@@ -12,7 +12,7 @@ export default function EventsPage({supabase,city,onBack}){
       if(!supabase||!city?.id){setLoading(false);return}
       setLoading(true);setError('')
       const today=new Date().toISOString().slice(0,10)
-      const {data,error}=await supabase.from('events').select('*').eq('city_id',city.id).eq('active',true).gte('event_date',today).order('featured',{ascending:false}).order('event_date').order('start_time')
+      const {data,error}=await supabase.from('events').select('id,title,description,image_url,event_date,start_time,end_time,location,address,category,price,external_url,featured').eq('city_id',city.id).eq('active',true).gte('event_date',today).order('featured',{ascending:false}).order('event_date').order('start_time')
       if(!live)return
       if(error)setError(error.message)
       setEvents(data||[])
@@ -42,6 +42,7 @@ export default function EventsPage({supabase,city,onBack}){
       <div className="vl-event-body">
         <span className="vl-event-date">{formatDate(event.event_date)}</span>
         <h3>{event.title}</h3>
+        {event.category&&<span className="section-kicker">{event.category}</span>}
         {event.description&&<p>{event.description}</p>}
         <div className="vl-event-meta">
           {event.start_time&&<>🕐 {String(event.start_time).slice(0,5)}{event.end_time?`–${String(event.end_time).slice(0,5)}`:''}<br/></>}
