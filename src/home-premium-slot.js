@@ -2,14 +2,14 @@ const SLOT='data-vl-premium-slot'
 const HOME_RX=/^\/[^/]+\/?$/
 
 function schedule(){window.clearTimeout(window.__vlPremiumSlotTimer);window.__vlPremiumSlotTimer=window.setTimeout(update,120)}
-function isCityHome(){return HOME_RX.test(location.pathname)&&!location.pathname.startsWith('/admin')&&!location.pathname.startsWith('/conta')&&!location.pathname.startsWith('/planos')}
+function isCityHome(){return HOME_RX.test(location.pathname)}
 function update(){
   const existing=document.querySelector(`[${SLOT}]`)
   if(!isCityHome()){existing?.remove();return}
-  const hasBanner=Boolean(document.querySelector('.hero + section[data-vl-premium-banner="active"]'))
-  if(hasBanner){existing?.remove();return}
   const hero=document.querySelector('.hero')
-  if(!hero){return schedule()}
+  if(!hero)return schedule()
+  const hasBanner=Boolean(document.querySelector('.hero + section.page.section .content-card'))
+  if(hasBanner){existing?.remove();return}
   if(existing)return
   const section=document.createElement('section')
   section.className='page section vl-premium-empty-slot'
