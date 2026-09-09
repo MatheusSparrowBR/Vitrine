@@ -15,11 +15,11 @@ function styleActive(section){
   const kicker=section.querySelector('.section-kicker')
   const heading=section.querySelector('h2')
   if(kicker)kicker.textContent='ESPAÇO PUBLICITÁRIO'
-  if(heading)heading.textContent='Banner Premium da cidade'
+  if(heading)heading.textContent=''
   const card=section.querySelector('.content-card')
   if(card){
     card.classList.add('vl-premium-banner-card')
-    card.setAttribute('aria-label','Banner Premium da cidade')
+    card.setAttribute('aria-label','Espaço publicitário Premium')
   }
 }
 function update(){
@@ -41,7 +41,7 @@ function update(){
   const section=document.createElement('section')
   section.className='page section vl-premium-empty-slot'
   section.setAttribute(SLOT,'empty')
-  section.innerHTML='<div class="vl-premium-empty-card"><div class="vl-premium-empty-icon">★</div><div><span class="section-kicker">ESPAÇO PUBLICITÁRIO</span><h2>Banner Premium da cidade</h2><p>Este espaço é reservado para empresas que desejam colocar sua promoção em destaque na página inicial.</p><strong>Entre em contato para anunciar no VitrineLocal.</strong></div></div>'
+  section.innerHTML='<div class="vl-premium-empty-card"><div class="vl-premium-empty-icon">★</div><div><span class="section-kicker">ESPAÇO PUBLICITÁRIO</span><h2></h2><p>Este espaço é reservado para empresas que desejam colocar sua promoção em destaque na página inicial.</p><strong>Entre em contato para anunciar no VitrineLocal.</strong></div></div>'
   hero.insertAdjacentElement('afterend',section)
 }
 function install(){
