@@ -8,6 +8,7 @@ import AdminHomePage from './AdminHomePage.jsx'
 import CityHomePage from './CityHomePage.jsx'
 import AccountPage from './AccountPage.jsx'
 import AuthPage from './AuthPage.jsx'
+import PasswordUpdatePage from './PasswordUpdatePage.jsx'
 import BillingPlansPage from './BillingPlansPage.jsx'
 import { BusinessesPage,PromotionsPage,BusinessProfilePage,NotFoundPage } from './PublicCatalogPages.jsx'
 import { PrivacyPage,TermsPage } from './LegalPages.jsx'
@@ -27,7 +28,7 @@ const partsOf=p=>p.split('/').filter(Boolean).map(decodeURIComponent)
 function getCityRoute(path){
  const p=partsOf(path)
  if(p.length===0)return {kind:'home',citySlug:'laguna'}
- if(p.length===1&&!['login','planos','conta','admin','privacidade','termos'].includes(p[0].toLowerCase()))return {kind:'home',citySlug:p[0].toLowerCase()}
+ if(p.length===1&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha'].includes(p[0].toLowerCase()))return {kind:'home',citySlug:p[0].toLowerCase()}
  if(p.length===2&&!['admin'].includes(p[0].toLowerCase())){
   const citySlug=p[0].toLowerCase(),child=p[1].toLowerCase()
   if(child==='eventos')return {kind:'events',citySlug}
@@ -51,6 +52,7 @@ function RootRoute(){
  if(path==='/login')return <AuthPage/>
  if(path==='/planos')return <BillingPlansPage/>
  if(path==='/conta')return <AccountPage/>
+ if(path==='/atualizar-senha')return <PasswordUpdatePage/>
  if(path==='/privacidade')return <PrivacyPage/>
  if(path==='/termos')return <TermsPage/>
  if(path==='/admin')return <AdminHomePage/>
