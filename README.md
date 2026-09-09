@@ -5,14 +5,14 @@ SaaS de descoberta e divulgação de empresas, promoções e conteúdo local. O 
 ## Stack
 
 - React 19 + Vite 8
-- Supabase Auth + Postgres + RLS
+- Supabase Auth + Postgres + RLS + Storage
 - GitHub como repositório
 
 ## Supabase
 
 Projeto: `Vitrine` (`sa-east-1`).
 
-O banco inicial contém cidades, categorias, empresas, fotos, produtos/serviços, promoções, posts, envios da comunidade, planos, assinaturas, anúncios e eventos de analytics. Laguna/SC, categorias e os planos Free/Pro/Premium já estão semeados.
+O banco contém cidades, categorias, empresas, fotos, produtos/serviços, promoções, posts, envios da comunidade, planos, assinaturas, anúncios e eventos de analytics. Laguna/SC, categorias e os planos Free/Pro/Premium já estão semeados.
 
 ## Configuração local
 
@@ -34,6 +34,7 @@ Nunca coloque chaves secretas/service role no frontend.
 - Envio de conteúdo da comunidade com moderação.
 - Painel administrativo.
 - Banner Premium da Home cadastrado/publicado somente pelo administrador.
+- Upload das artes Premium para o bucket `premium-banners` do Supabase Storage.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
 
 ## Banner Premium da Home
@@ -42,6 +43,9 @@ Nunca coloque chaves secretas/service role no frontend.
 - Banner vinculado a uma empresa e cidade.
 - Cadastro e publicação restritos ao administrador.
 - Novo banner entra inativo/em revisão.
+- A arte é validada no navegador e aceita JPG, PNG ou WebP de até 10 MB.
+- A imagem é enviada para o Supabase Storage e o caminho do objeto é salvo em `advertisements.image_path`.
+- Ao excluir um banner, o sistema tenta remover também o objeto correspondente do Storage.
 - Admin pode publicar, pausar ou excluir.
 - Prioridade controla a ordem.
 - Início e fim permitem programação.
