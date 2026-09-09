@@ -13,6 +13,7 @@ import './events.css'
 import './city-home.css'
 import './auth-page.css'
 import './billing-plans.css'
+import './admin-premium-nav.js'
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabase=URL&&KEY?createClient(URL,KEY):null
