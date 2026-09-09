@@ -25,6 +25,10 @@ function selectedCity() {
   return state.cities.find((city) => city.slug === state.selectedSlug) || null
 }
 
+function normalizedSelect(value = '') {
+  return value.replace(/\s+/g, '')
+}
+
 function rewriteRequest(input, init) {
   const request = new Request(input, init)
   if (request.method.toUpperCase() !== 'GET') return request
@@ -43,10 +47,10 @@ function rewriteRequest(input, init) {
   }
 
   // Only the public promotions query from main.jsx is city-scoped.
-  // Owner/admin queries are intentionally left global.
+  // Owner/admin queries remain global so their dashboards can show every company/city.
   if (city && url.pathname.includes('/rest/v1/promotions') && !url.searchParams.has('business_id')) {
     const select = url.searchParams.get('select') || ''
-    if (select === '*,businesses(name,slug)') {
+    if (normalizedSelect(select) === '*,businesses(name,slug)') {
       url.searchParams.set('select', '*,businesses!inner(name,slug)')
       url.searchParams.set('businesses.city_id', `eq.${city.id}`)
       return new Request(url.toString(), request)
@@ -54,7 +58,7 @@ function rewriteRequest(input, init) {
     return request
   }
 
-  // Public company profile requests by slug are bound to the selected city.
+  // A public business profile request filtered by slug is also bound to the selected city.
   if (city && url.pathname.endsWith('/rest/v1/businesses')) {
     const hasSlug = url.searchParams.has('slug')
     const hasCityId = url.searchParams.has('city_id')
