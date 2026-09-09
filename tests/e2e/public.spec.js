@@ -16,13 +16,15 @@ test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
  expect(heroBackground).toContain('laguna-hero.svg')
 })
 
-test('home mantém dock de categorias imediatamente após o hero',async({page})=>{
+test('home mantém dock de categorias em uma única faixa visual',async({page})=>{
  await page.goto('/laguna')
- const hero=page.locator('.hero')
  const categorySlot=page.locator('.vl-category-slot')
  await expect(categorySlot).toBeVisible()
- const relation=await hero.evaluate(el=>el.nextElementSibling?.className||'')
- expect(relation).toContain('vl-category-slot')
+ await expect(categorySlot.locator('.category-card')).toHaveCount(10)
+ const style=await categorySlot.locator('.category-grid').evaluate(el=>({display:getComputedStyle(el).display,flexWrap:getComputedStyle(el).flexWrap,overflowX:getComputedStyle(el).overflowX}))
+ expect(style.display).toBe('flex')
+ expect(style.flexWrap).toBe('nowrap')
+ expect(['auto','scroll']).toContain(style.overflowX)
 })
 
 test('agenda possui URL por cidade e retorno',async({page})=>{
@@ -37,6 +39,16 @@ test('catalogo possui retorno e navegacao sem sublinhado',async({page})=>{
  await expect(page.getByRole('heading',{name:'Empresas em Laguna'})).toBeVisible()
  await expect(page.getByRole('link',{name:/Voltar para Laguna/})).toBeVisible()
  await expect(page.locator('.nav-actions a').first()).toHaveCSS('text-decoration-line','none')
+})
+
+test('catalogo e perfil usam componentes visuais preparados',async({page})=>{
+ await page.goto('/laguna/empresas')
+ await expect(page.locator('.toolbar .searchbox')).toBeVisible()
+ const cards=page.locator('.business-card')
+ if(await cards.count()){
+  await expect(cards.first().locator('.business-rating')).toBeVisible()
+  await expect(cards.first().locator('.business-footer')).toBeVisible()
+ }
 })
 
 test('promocoes publicas carregam sem erro visual',async({page})=>{
