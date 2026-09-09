@@ -17,7 +17,7 @@ async function isAdmin() {
   return profile?.role === 'admin'
 }
 
-function styles() {
+function injectStyles() {
   if (document.getElementById('vl-cities-admin-css')) return
   const style = document.createElement('style')
   style.id = 'vl-cities-admin-css'
@@ -100,16 +100,24 @@ async function openModal() {
   try { await loadCities(); render() } catch (error) { root.innerHTML = `<div class="vlcity-backdrop"><div class="vlcity-modal"><button class="vlcity-close" id="vlcity-close">×</button><h2>Erro ao carregar cidades</h2><p>${esc(error?.message || 'Erro desconhecido.')}</p></div></div>`; root.querySelector('#vlcity-close').onclick = closeModal }
 }
 
-function boot() {
-  const observer = new MutationObserver(() => {
-    const nav = document.querySelector('.admin-nav')
-    if (!nav || nav.querySelector('[data-vl-cities-admin]')) return
-    const button = document.createElement('button')
-    button.type = 'button'; button.className = 'admin-nav-item'; button.dataset.vlCitiesAdmin = 'true'; button.innerHTML = '<span>📍</span>Cidades'; button.onclick = openModal
+function wireExistingOrCreateButton() {
+  const nav = document.querySelector('.admin-nav')
+  if (!nav || nav.querySelector('[data-vl-cities-admin]')) return
+  let button = [...nav.querySelectorAll('button')].find((item) => (item.textContent || '').trim() === 'Cidades')
+  if (!button) {
+    button = document.createElement('button')
+    button.type = 'button'; button.className = 'admin-nav-item'; button.innerHTML = '<span>📍</span>Cidades'
     const anchor = [...nav.querySelectorAll('button')].find((item) => (item.textContent || '').includes('Categorias'))
     if (anchor) anchor.insertAdjacentElement('afterend', button); else nav.appendChild(button)
-  })
+  }
+  button.dataset.vlCitiesAdmin = 'true'
+  button.onclick = openModal
+}
+
+function boot() {
+  const observer = new MutationObserver(wireExistingOrCreateButton)
   observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true })
+  wireExistingOrCreateButton()
 }
 
 boot()
