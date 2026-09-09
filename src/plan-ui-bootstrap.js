@@ -6,6 +6,7 @@ const db=url&&key?createClient(url,key):null
 const labels={photos_limit:'Fotos/mídias',items_limit:'Produtos/serviços',promotions_limit:'Promoções',ai_posts_limit:'Gerações com IA'}
 const planNames={free:'Grátis',pro:'Pro',premium:'Premium'}
 let timer=0
+let rendering=false
 
 function css(){if(document.getElementById('vl-plan-ui-css'))return;const s=document.createElement('style');s.id='vl-plan-ui-css';s.textContent=`
 .vl-plan-panel{grid-column:1/-1;margin:0 0 16px;padding:18px;border:1px solid rgba(31,109,242,.18);border-radius:18px;background:linear-gradient(135deg,#fff,#f5f8ff);box-shadow:0 8px 30px rgba(15,35,65,.06)}
@@ -30,7 +31,7 @@ async function getUsage(businessId){
 function selectedBusinessId(){const buttons=[...document.querySelectorAll('.business-picker button')];const active=buttons.find(x=>x.classList.contains('active'));return active?.getAttribute('data-business-id')||active?.dataset?.businessId||null}
 
 async function render(){
- if(!db)return
+ if(!db||rendering)return
  const {data:{session}}=await db.auth.getSession();if(!session)return
  const owner=await db.from('businesses').select('id').eq('owner_id',session.user.id).order('created_at',{ascending:false}).limit(20);const ids=(owner.data||[]).map(x=>x.id);if(!ids.length)return
  const id=selectedBusinessId()||ids[0];const usage=await getUsage(id);if(!usage)return
@@ -46,5 +47,6 @@ async function render(){
  buttons.forEach(b=>{const text=(b.textContent||'').toLowerCase();let lock=false;if(text.includes('promoção')&&limits.promotions>=0&&counts.promotions>=limits.promotions)lock=true;if(text.includes('produto')&&limits.items>=0&&counts.items>=limits.items)lock=true;if(text.includes('galeria')&&limits.photos>=0&&counts.photos>=limits.photos)lock=true;b.classList.toggle('vl-plan-locked',lock);if(lock)b.setAttribute('title','Limite do seu plano atingido. Faça upgrade para continuar.')})
 }
 
-function boot(){css();const observer=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(render,250)});observer.observe(document.body,{subtree:true,childList:true});render();setInterval(render,10000)}
+function scheduleRender(){clearTimeout(timer);timer=setTimeout(()=>render(),250)}
+function boot(){css();const observer=new MutationObserver(mutations=>{if(mutations.length&&mutations.every(m=>m.target instanceof Element&&(m.target.id==='vl-plan-panel'||m.target.closest?.('#vl-plan-panel'))))return;scheduleRender()});observer.observe(document.body,{subtree:true,childList:true});render();setInterval(render,10000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot()
