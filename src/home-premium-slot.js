@@ -3,17 +3,44 @@ const HOME_RX=/^\/[^/]+\/?$/
 
 function schedule(){window.clearTimeout(window.__vlPremiumSlotTimer);window.__vlPremiumSlotTimer=window.setTimeout(update,120)}
 function isCityHome(){const p=location.pathname;return HOME_RX.test(p)&&!p.startsWith('/admin')&&!p.startsWith('/conta')&&!p.startsWith('/planos')}
+function findPremiumSection(){
+  return [...document.querySelectorAll('.page.section')].find(section=>{
+    const heading=section.querySelector('h2')?.textContent?.trim().toLowerCase()
+    return heading==='oferta em destaque'&&section.querySelector('.content-card')
+  })
+}
+function styleActive(section){
+  section.classList.add('vl-premium-active-slot')
+  section.setAttribute(SLOT,'true')
+  const kicker=section.querySelector('.section-kicker')
+  const heading=section.querySelector('h2')
+  if(kicker)kicker.textContent='ESPAÇO PUBLICITÁRIO'
+  if(heading)heading.textContent='Banner Premium da cidade'
+  const card=section.querySelector('.content-card')
+  if(card){
+    card.classList.add('vl-premium-banner-card')
+    card.setAttribute('aria-label','Banner Premium da cidade')
+  }
+}
 function update(){
-  const existing=document.querySelector(`[${SLOT}]`)
-  if(!isCityHome()){existing?.remove();return}
+  if(!isCityHome()){
+    document.querySelector(`[${SLOT}]`)?.removeAttribute(SLOT)
+    return
+  }
   const hero=document.querySelector('.hero')
   if(!hero)return
-  const hasBanner=Boolean(document.querySelector('.hero + section.page.section .content-card'))
-  if(hasBanner){existing?.remove();return}
-  if(existing)return
+  const active=findPremiumSection()
+  if(active){
+    styleActive(active)
+    if(hero.nextElementSibling!==active)hero.insertAdjacentElement('afterend',active)
+    document.querySelectorAll(`[${SLOT}].vl-premium-empty-slot`).forEach(node=>node.remove())
+    return
+  }
+  const existing=document.querySelector(`[${SLOT}].vl-premium-empty-slot`)
+  if(existing){if(hero.nextElementSibling!==existing)hero.insertAdjacentElement('afterend',existing);return}
   const section=document.createElement('section')
   section.className='page section vl-premium-empty-slot'
-  section.setAttribute(SLOT,'true')
+  section.setAttribute(SLOT,'empty')
   section.innerHTML='<div class="vl-premium-empty-card"><div class="vl-premium-empty-icon">★</div><div><span class="section-kicker">ESPAÇO PUBLICITÁRIO</span><h2>Banner Premium da cidade</h2><p>Este espaço é reservado para empresas que desejam colocar sua promoção em destaque na página inicial.</p><strong>Entre em contato para anunciar no VitrineLocal.</strong></div></div>'
   hero.insertAdjacentElement('afterend',section)
 }
