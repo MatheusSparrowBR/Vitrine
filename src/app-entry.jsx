@@ -18,6 +18,7 @@ import './city-home.css'
 import './auth-page.css'
 import './billing-plans.css'
 import './public-polish.css'
+import './vitrine-ux-adjustments.css'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
