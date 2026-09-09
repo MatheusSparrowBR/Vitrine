@@ -1,0 +1,13 @@
+drop policy if exists "Public can read active events" on public.events;
+drop policy if exists "Authenticated can read active or manage events" on public.events;
+drop policy if exists "Admins can delete events" on public.events;
+drop policy if exists "Admins can manage events" on public.events;
+drop policy if exists "Admins can update events" on public.events;
+drop policy if exists "public read future active events" on public.events;
+drop policy if exists "admins manage events" on public.events;
+create policy "public read future active events" on public.events for select to anon using (active=true and event_date >= current_date);
+create policy "authenticated read future active events or admin" on public.events for select to authenticated using ((active=true and event_date >= current_date) or public.is_admin());
+create policy "admins insert events" on public.events for insert to authenticated with check (public.is_admin());
+create policy "admins update events" on public.events for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins delete events" on public.events for delete to authenticated using (public.is_admin());
+drop index if exists public.events_city_slug_unique_idx;
