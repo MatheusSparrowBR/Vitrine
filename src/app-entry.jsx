@@ -5,6 +5,7 @@ import EventsPage from './EventsPage.jsx'
 import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
 import './core.css'
 import './events.css'
+import './home-premium-slot.css'
 import './home-premium-slot.js'
 import './admin-premium-nav.js'
 
