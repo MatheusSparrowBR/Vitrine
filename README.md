@@ -29,10 +29,21 @@ Nunca coloque chaves secretas/service role no frontend.
 - Catálogo de empresas.
 - Login e criação de conta.
 - Cadastro de empresa autenticado com status inicial `pending`.
-- Área básica da conta.
-- Estrutura para feed local, promoções, anúncios e analytics.
+- Perfis públicos completos.
+- Promoções e área do comerciante.
+- Envio de conteúdo da comunidade com moderação.
+- Painel administrativo.
+- Banner Premium da Home cadastrado/publicado somente pelo administrador.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
 
-## Próxima etapa
+## Banner Premium da Home
 
-Adicionar aprovação administrativa, perfis públicos completos, upload de mídia via Storage, promoções, conteúdo da comunidade, geração de posts com IA, analytics do comerciante e integração oficial com Instagram/Meta.
+- Espaço de destaque logo abaixo do hero da Home.
+- Banners vinculados a uma empresa e cidade.
+- Cadastro restrito ao administrador.
+- Novo banner entra inativo/em revisão.
+- Admin pode publicar, pausar ou excluir.
+- Prioridade controla a ordem.
+- Início e fim permitem programação.
+- Múltiplos banners podem alternar automaticamente.
+- O fluxo de cobrança automática do Premium ficará conectado posteriormente ao mesmo cadastro.
