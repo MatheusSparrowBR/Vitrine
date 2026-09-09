@@ -1,0 +1,29 @@
+/* Ajustes finos solicitados após a referência visual */
+.vl-category-slot>.category-grid{padding:15px!important;gap:7px!important}
+.vl-category-slot .category-card{min-height:94px!important;padding:11px 7px!important}
+.vl-category-slot .category-icon{width:44px!important;height:44px!important;font-size:19px!important}
+.vl-category-slot .category-card strong{font-size:11px!important}
+.vl-category-slot .category-card span:last-child{font-size:9px!important}
+
+/* Banner Premium: área previsível, sem crescimento excessivo pela imagem */
+.vl-premium-real{grid-template-columns:320px minmax(0,1fr)!important;width:100%!important;min-height:180px!important;height:180px!important}
+.vl-premium-media{width:320px!important;height:180px!important;min-height:180px!important;overflow:hidden!important;background:#eef4fb!important}
+.vl-premium-media img{width:100%!important;height:100%!important;min-height:0!important;max-width:100%!important;object-fit:cover!important;object-position:center!important;display:block!important}
+.vl-premium-copy{min-width:0!important;overflow:hidden!important}
+
+/* Horários do perfil público: leitura um pouco maior */
+.public-hours-grid{gap:4px!important}
+.public-hour{padding:11px 12px!important;font-size:11px!important;line-height:1.4!important}
+.public-hour strong,.public-hour span{font-size:11px!important}
+
+/* Proteção para logos reaproveitados por componentes de catálogo */
+.business-logo,.business-logo img,.company-logo,.company-logo img{max-width:100%;height:auto;object-fit:contain!important;object-position:center!important}
+
+@media(max-width:680px){
+  .vl-category-slot>.category-grid{padding:10px!important;gap:6px!important}
+  .vl-category-slot .category-card{min-height:104px!important;padding:12px 7px!important}
+  .vl-category-slot .category-icon{width:46px!important;height:46px!important}
+  .vl-premium-real{grid-template-columns:1fr!important;height:auto!important;min-height:0!important}
+  .vl-premium-media{width:100%!important;height:180px!important;min-height:180px!important}
+  .vl-premium-copy{padding:20px 22px!important}
+}
