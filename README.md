@@ -39,11 +39,11 @@ Nunca coloque chaves secretas/service role no frontend.
 ## Banner Premium da Home
 
 - Espaço de destaque logo abaixo do hero da Home.
-- Banners vinculados a uma empresa e cidade.
-- Cadastro restrito ao administrador.
+- Banner vinculado a uma empresa e cidade.
+- Cadastro e publicação restritos ao administrador.
 - Novo banner entra inativo/em revisão.
 - Admin pode publicar, pausar ou excluir.
 - Prioridade controla a ordem.
 - Início e fim permitem programação.
-- Múltiplos banners podem alternar automaticamente.
-- O fluxo de cobrança automática do Premium ficará conectado posteriormente ao mesmo cadastro.
+- Múltiplos banners alternam automaticamente na Home.
+- Cobrança automática do Premium ficará conectada posteriormente; até lá, a confirmação é administrativa.
