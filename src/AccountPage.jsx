@@ -3,38 +3,127 @@ import {createClient} from '@supabase/supabase-js'
 import PlanUsagePanel,{PLAN_USAGE_STYLE} from './PlanUsageReact.jsx'
 import './core.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=U&&K?createClient(U,K):null
-const BUCKET='business-media'
-const IMAGE_TYPES=new Set(['image/jpeg','image/png','image/webp','image/gif'])
-const VIDEO_TYPES=new Set(['video/mp4','video/webm','video/quicktime'])
-const DAYS={monday:'Segunda',tuesday:'Terça',wednesday:'Quarta',thursday:'Quinta',friday:'Sexta',saturday:'Sábado',sunday:'Domingo'}
-const DEFAULT_HOURS=Object.fromEntries(Object.keys(DAYS).map(k=>[k,{open:'',close:'',closed:k==='sunday'}]))
-const emptyStats={profile_view:0,whatsapp_click:0,instagram_click:0,website_click:0,map_click:0}
+const URL=import.meta.env.VITE_SUPABASE_URL
+const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const db=URL&&KEY?createClient(URL,KEY):null
+
+const emptyForm={name:'',short_description:'',description:'',phone:'',whatsapp:'',website_url:'',instagram_url:'',address:''}
 
 export default function AccountPage(){
- const [session,setSession]=useState(null),[loading,setLoading]=useState(true)
- useEffect(()=>{let live=true;(async()=>{if(!db){setLoading(false);return}const {data:{session:s}}=await db.auth.getSession();if(live){setSession(s);setLoading(false)}})();const sub=db?.auth.onAuthStateChange((_e,s)=>setSession(s||null));return()=>{live=false;sub?.data?.subscription?.unsubscribe()}},[])
- useEffect(()=>{if(!db)return;const id='vl-plan-style';if(document.getElementById(id))return;const s=document.createElement('style');s.id=id;s.textContent=PLAN_USAGE_STYLE;document.head.appendChild(s);return()=>s.remove()},[])
- if(loading)return <div className="app"><main className="page section"><div className="empty"><h3>Carregando sua conta…</h3></div></main></div>
- if(!session)return <div className="app"><main className="page section"><div className="empty"><h3>Entre para acessar sua conta</h3><p>O painel de empresa fica disponível somente para usuários autenticados.</p><a className="btn primary" href="/login?next=%2Fconta">Entrar</a></div></main></div>
+ const [session,setSession]=useState(null)
+ const [loading,setLoading]=useState(true)
+ useEffect(()=>{
+  let live=true
+  async function load(){
+   if(!db){setLoading(false);return}
+   const {data}=await db.auth.getSession()
+   if(live){setSession(data.session||null);setLoading(false)}
+  }
+  load()
+  const listener=db?.auth.onAuthStateChange((_event,next)=>setSession(next||null))
+  return()=>{live=false;listener?.data?.subscription?.unsubscribe()}
+ },[])
+ useEffect(()=>{
+  if(!db)return
+  const id='vl-plan-style'
+  if(document.getElementById(id))return
+  const style=document.createElement('style')
+  style.id=id
+  style.textContent=PLAN_USAGE_STYLE
+  document.head.appendChild(style)
+  return()=>style.remove()
+ },[])
+ if(loading)return <main className="page section"><div className="empty"><h3>Carregando sua conta…</h3></div></main>
+ if(!session)return <main className="page section"><div className="empty"><h1>Entre para acessar sua conta</h1><p>O painel de empresa fica disponível para usuários autenticados.</p><a className="btn primary" href="/login?next=%2Fconta">Entrar</a></div></main>
  return <OwnerDashboard session={session}/>
 }
 
 function OwnerDashboard({session}){
- const [businesses,setBusinesses]=useState([]),[selected,setSelected]=useState(null),[data,setData]=useState({photos:[],items:[],promotions:[]}),[stats,setStats]=useState(emptyStats),[categories,setCategories]=useState([]),[draft,setDraft]=useState(null),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[message,setMessage]=useState({text:'',error:false})
- const notify=(text,error=false)=>{setMessage({text,error});window.clearTimeout(window.__vlAccountToast);window.__vlAccountToast=window.setTimeout(()=>setMessage({text:'',error:false}),3500)}
- async function loadBusinesses(){if(!db)return;setLoading(true);const [b,c]=await Promise.all([db.from('businesses').select('id,name,status,city_id,category_id').eq('owner_id',session.user.id).order('created_at',{ascending:false}),db.from('categories').select('id,name').eq('active',true).order('sort_order').order('name')]);if(b.error)notify(b.error.message,true);setBusinesses(b.data||[]);setCategories(c.data||[]);const first=b.data?.[0];if(!selected&&first)setSelected(first);if(selected){const fresh=(b.data||[]).find(x=>x.id===selected.id);if(fresh)setSelected(fresh)}setLoading(false)}
- async function loadBusiness(id){if(!db||!id)return;const [b,p,i,pr,a]=await Promise.all([db.from('businesses').select('*,categories(id,name),cities(id,name,state,slug)').eq('id',id).single(),db.from('business_photos').select('*').eq('business_id',id).order('sort_order'),db.from('business_items').select('*').eq('business_id',id).order('sort_order'),db.from('promotions').select('id,title,status,starts_at,ends_at').eq('business_id',id).order('created_at',{ascending:false}),db.from('analytics_events').select('event_type').eq('business_id',id)]);if(b.error){notify(b.error.message,true);return}setSelected(b.data);setData({photos:p.data||[],items:i.data||[],promotions:pr.data||[]});const next={...emptyStats};(a.data||[]).forEach(x=>{if(x.event_type in next)next[x.event_type]++});setStats(next);setDraft({name:b.data.name||'',short_description:b.data.short_description||'',description:b.data.description||'',phone:b.data.phone||'',whatsapp:b.data.whatsapp||'',website_url:b.data.website_url||'',instagram_url:b.data.instagram_url||'',facebook_url:b.data.facebook_url||'',address:b.data.address||'',neighborhood:b.data.neighborhood||'',category_id:b.data.category_id||'',opening_hours:normalizedHours(b.data.opening_hours),logo_url:b.data.logo_url||'',cover_url:b.data.cover_url||''})}
- useEffect(()=>{loadBusinesses()},[])
- useEffect(()=>{if(selected?.id)loadBusiness(selected.id)},[selected?.id])
- async function save(){if(!selected||!draft||!db)return;setSaving(true);const payload={...draft,opening_hours:draft.opening_hours};delete payload.logo_url;delete payload.cover_url;const {error}=await db.from('businesses').update(payload).eq('id',selected.id);if(error)notify(error.message,true);else{notify('Dados da empresa atualizados.');await loadBusiness(selected.id);await loadBusinesses()}setSaving(false)}
- async function uploadMedia(file,kind){if(!selected||!db||!file)return;const ok=kind==='photo'?IMAGE_TYPES.has(file.type)||VIDEO_TYPES.has(file.type):IMAGE_TYPES.has(file.type);if(!ok)return notify('Formato de arquivo não suportado.',true);if(file.size>50*1024*1024)return notify('Arquivo acima de 50 MB.',true);const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':file.type==='image/webp'?'webp':file.type==='image/gif'?'gif':file.type==='video/mp4'?'mp4':file.type==='video/webm'?'webm':'mov';const path=`${selected.id}/${crypto.randomUUID()}.${ext}`;const up=await db.storage.from(BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});if(up.error)return notify(up.error.message,true);const url=db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;if(kind==='logo'||kind==='cover'){const field=kind==='logo'?'logo':'cover';const {error}=await db.from('businesses').update({[field+'_url']:url,[field+'_path']:path}).eq('id',selected.id);if(error){await db.storage.from(BUCKET).remove([path]).catch(()=>{});return notify(error.message,true)}notify('Imagem atualizada.')}else{const {error}=await db.from('business_photos').insert({business_id:selected.id,image_url:url,image_path:path,sort_order:data.photos.length});if(error){await db.storage.from(BUCKET).remove([path]).catch(()=>{});return notify(error.message,true)}notify('Mídia adicionada.')}await loadBusiness(selected.id)}
- async function deletePhoto(row){if(!db||!selected)return;const {error}=await db.from('business_photos').delete().eq('id',row.id);if(error)return notify(error.message,true);if(row.image_path)await db.storage.from(BUCKET).remove([row.image_path]).catch(()=>{});notify('Mídia removida.');await loadBusiness(selected.id)}
- async function addItem(){if(!db||!selected)return;const name=window.prompt('Nome do produto/serviço');if(!name?.trim())return;const description=window.prompt('Descrição (opcional)')||null;const priceInput=window.prompt('Preço (opcional)');const price=priceInput?Number(priceInput.replace(',','.')):null;const {error}=await db.from('business_items').insert({business_id:selected.id,name:name.trim(),description,price:Number.isFinite(price)?price:null,active:true,sort_order:data.items.length});if(error)notify(error.message,true);else{notify('Produto/serviço adicionado.');await loadBusiness(selected.id)}}
- async function deleteItem(row){if(!db)return;const {error}=await db.from('business_items').delete().eq('id',row.id);if(error)notify(error.message,true);else{notify('Produto/serviço removido.');await loadBusiness(selected.id)}}
- async function addPromotion(){if(!db||!selected)return;const title=window.prompt('Título da promoção');if(!title?.trim())return;const description=window.prompt('Descrição')||null;const priceInput=window.prompt('Preço promocional (opcional)');const price=priceInput?Number(priceInput.replace(',','.')):null;const {error}=await db.from('promotions').insert({business_id:selected.id,title:title.trim(),description,price:Number.isFinite(price)?price:null,status:'pending_review'});if(error)notify(error.message,true);else{notify('Promoção enviada para revisão.');await loadBusiness(selected.id)}}
- if(loading&&!businesses.length)return <div className="app"><main className="page section"><div className="empty"><h3>Carregando conta…</h3></div></main></div>
- return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href="/laguna"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href="/planos">Planos</a><button onClick={async()=>{await db?.auth.signOut();location.href='/laguna'}}>Sair</button></nav></div></header><main className="page"><div className="dashboard-header"><div><span className="section-kicker">MINHA CONTA</span><h1>Painel da empresa</h1><p>Gerencie suas informações, mídia, produtos, promoções e acompanhe o consumo do plano.</p></div><a className="btn" href="/laguna">← Voltar ao site</a></div>{message.text&&<div className={`empty ${message.error?'danger-text':''}`} style={{marginTop:12,padding:12}}>{message.text}</div>}{businesses.length===0?<div className="empty" style={{marginTop:20}}><h3>Você ainda não possui uma empresa</h3><p>O cadastro de empresa será disponibilizado a partir da área pública.</p><a className="btn primary" href="/laguna">Voltar ao site</a></div>:<><div className="stats">{[['profile_view','Visualizações'],['whatsapp_click','WhatsApp'],['instagram_click','Instagram'],['website_click','Site']].map(([k,l])=><div className="stat" key={k}><span>{l}</span><strong>{stats[k]}</strong><small>eventos registrados</small></div>)}</div><div className="owner-layout"><aside className="panel"><h3>Minhas empresas</h3><div className="business-picker">{businesses.map(b=><button key={b.id} className={selected?.id===b.id?'active':''} onClick={()=>setSelected(b)}><strong>{b.name}</strong><small className="muted">{b.status}</small></button>)}</div></aside>{selected&&draft&&<section><PlanUsagePanel businessId={selected.id}/><div className="panel"><h3>Dados da empresa</h3><div className="form-grid"><label className="field"><span>Nome</span><input value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label className="field"><span>Categoria</span><select value={draft.category_id} onChange={e=>setDraft({...draft,category_id:e.target.value})}><option value="">Selecione</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label className="field full"><span>Descrição curta</span><input value={draft.short_description} onChange={e=>setDraft({...draft,short_description:e.target.value})} maxLength={180}/></label><label className="field full"><span>Descrição</span><textarea value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})} rows="5"/></label><label className="field"><span>Telefone</span><input value={draft.phone} onChange={e=>setDraft({...draft,phone:e.target.value})}/></label><label className="field"><span>WhatsApp</span><input value={draft.whatsapp} onChange={e=>setDraft({...draft,whatsapp:e.target.value})}/></label><label className="field"><span>Site</span><input value={draft.website_url} onChange={e=>setDraft({...draft,website_url:e.target.value})}/></label><label className="field"><span>Instagram</span><input value={draft.instagram_url} onChange={e=>setDraft({...draft,instagram_url:e.target.value})}/></label><label className="field"><span>Facebook</span><input value={draft.facebook_url} onChange={e=>setDraft({...draft,facebook_url:e.target.value})}/></label><label className="field"><span>Bairro</span><input value={draft.neighborhood} onChange={e=>setDraft({...draft,neighborhood:e.target.value})}/></label><label className="field full"><span>Endereço</span><input value={draft.address} onChange={e=>setDraft({...draft,address:e.target.value})}/></label></div><div className="form-actions"><button className="btn primary" disabled={saving} onClick={save}>{saving?'Salvando…':'Salvar alterações'}</button></div></div><div className="panel" style={{marginTop:16}}><h3>Imagem da empresa</h3><div className="upload-box"><label>Logo<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e=>uploadMedia(e.target.files?.[0],'logo')}/></label><label>Capa<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e=>uploadMedia(e.target.files?.[0],'cover')}/></label></div></div><div className="panel" style={{marginTop:16}}><div className="mini-list"><div className="mini-row"><strong>Mídias</strong><button className="small-btn" onClick={()=>document.getElementById('account-media-input')?.click()}>Adicionar</button><input id="account-media-input" hidden type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" onChange={e=>uploadMedia(e.target.files?.[0],'photo')}/></div>{data.photos.length?<div className="gallery-owner">{data.photos.map(p=><figure key={p.id}>{p.video_url?<video src={p.video_url} controls/>:<img src={p.image_url} alt=""/>}<figcaption><button className="small-btn danger-text" onClick={()=>deletePhoto(p)}>Excluir</button></figcaption></figure>)}</div>:<div className="empty"><p>Nenhuma mídia adicionada.</p></div>}</div></div><div className="panel" style={{marginTop:16}}><div className="mini-list"><div className="mini-row"><strong>Produtos e serviços</strong><button className="small-btn" onClick={addItem}>Adicionar</button></div>{data.items.length?data.items.map(item=><div className="mini-row" key={item.id}><span><strong>{item.name}</strong><small>{item.description||'Sem descrição'}</small></span><button className="small-btn danger-text" onClick={()=>deleteItem(item)}>Excluir</button></div>):<div className="empty"><p>Nenhum produto ou serviço.</p></div>}</div></div><div className="panel" style={{marginTop:16}}><div className="mini-list"><div className="mini-row"><strong>Promoções</strong><button className="small-btn" onClick={addPromotion}>Criar promoção</button></div>{data.promotions.length?data.promotions.map(p=><div className="mini-row" key={p.id}><span><strong>{p.title}</strong><small>{p.status}</small></span></div>):<div className="empty"><p>Nenhuma promoção cadastrada.</p></div>}</div></div></section>}</div></>}
+ const [businesses,setBusinesses]=useState([])
+ const [selectedId,setSelectedId]=useState('')
+ const [business,setBusiness]=useState(null)
+ const [form,setForm]=useState(emptyForm)
+ const [loading,setLoading]=useState(true)
+ const [saving,setSaving]=useState(false)
+ const [message,setMessage]=useState('')
 
-function normalizedHours(value){const src=value&&typeof value==='object'?value:{};return Object.fromEntries(Object.keys(DAYS).map(k=>[k,{...DEFAULT_HOURS[k],...(src[k]||{})}]))}
+ async function loadBusinesses(){
+  if(!db)return
+  setLoading(true)
+  const {data,error}=await db.from('businesses').select('id,name,status,short_description,description,phone,whatsapp,website_url,instagram_url,address').eq('owner_id',session.user.id).order('created_at',{ascending:false})
+  if(error){setMessage(error.message);setLoading(false);return}
+  const rows=data||[]
+  setBusinesses(rows)
+  const nextId=selectedId&&rows.some(row=>row.id===selectedId)?selectedId:(rows[0]?.id||'')
+  setSelectedId(nextId)
+  setLoading(false)
+ }
+
+ async function loadBusiness(id){
+  if(!db||!id)return
+  const {data,error}=await db.from('businesses').select('id,name,status,short_description,description,phone,whatsapp,website_url,instagram_url,address').eq('id',id).maybeSingle()
+  if(error){setMessage(error.message);return}
+  if(data){setBusiness(data);setForm({name:data.name||'',short_description:data.short_description||'',description:data.description||'',phone:data.phone||'',whatsapp:data.whatsapp||'',website_url:data.website_url||'',instagram_url:data.instagram_url||'',address:data.address||''})}
+ }
+
+ useEffect(()=>{loadBusinesses()},[session.user.id])
+ useEffect(()=>{if(selectedId)loadBusiness(selectedId)},[selectedId])
+
+ async function save(){
+  if(!db||!business)return
+  setSaving(true)
+  setMessage('')
+  const {data,error}=await db.from('businesses').update(form).eq('id',business.id).select('id,name,status,short_description,description,phone,whatsapp,website_url,instagram_url,address').single()
+  if(error){setMessage(error.message)}
+  else{setBusiness(data);setMessage('Dados atualizados com sucesso.');await loadBusinesses()}
+  setSaving(false)
+ }
+
+ async function logout(){
+  await db?.auth.signOut()
+  location.href='/laguna'
+ }
+
+ if(loading)return <main className="page section"><div className="empty"><h3>Carregando empresas…</h3></div></main>
+ if(!businesses.length)return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href="/laguna"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href="/planos">Planos</a><button onClick={logout}>Sair</button></nav></div></header><main className="page section"><div className="empty"><span className="section-kicker">MINHA CONTA</span><h1>Nenhuma empresa cadastrada</h1><p>Cadastre sua empresa pelo site para começar a gerenciar sua presença no VitrineLocal.</p><a className="btn primary" href="/laguna">Voltar ao site</a></div></main></div>
+
+ return <div className="app">
+  <header className="topbar"><div className="nav">
+   <a className="brand" href="/laguna"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a>
+   <div className="nav-spacer"/>
+   <nav className="nav-actions"><a href="/planos">Planos</a><button onClick={logout}>Sair</button></nav>
+  </div></header>
+  <main className="page">
+   <div className="dashboard-header">
+    <div><span className="section-kicker">MINHA CONTA</span><h1>Painel da empresa</h1><p>Gerencie os dados públicos da sua empresa e acompanhe o consumo do plano.</p></div>
+    <a className="btn" href="/laguna">← Voltar ao site</a>
+   </div>
+   {message&&<div className="empty" style={{margin:'12px 0',padding:12}}>{message}</div>}
+   <div className="owner-layout">
+    <aside className="panel">
+     <h3>Minhas empresas</h3>
+     <div className="business-picker">
+      {businesses.map(row=><button key={row.id} className={selectedId===row.id?'active':''} onClick={()=>setSelectedId(row.id)}><strong>{row.name}</strong><small className="muted">{row.status}</small></button>)}
+     </div>
+    </aside>
+    {business&&<section>
+     <PlanUsagePanel businessId={business.id}/>
+     <div className="panel">
+      <h3>Dados da empresa</h3>
+      <div className="form-grid">
+       <label className="field"><span>Nome</span><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>
+       <label className="field"><span>Telefone</span><input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></label>
+       <label className="field full"><span>Descrição curta</span><input maxLength={180} value={form.short_description} onChange={e=>setForm({...form,short_description:e.target.value})}/></label>
+       <label className="field full"><span>Descrição</span><textarea rows="6" value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label>
+       <label className="field"><span>WhatsApp</span><input value={form.whatsapp} onChange={e=>setForm({...form,whatsapp:e.target.value})}/></label>
+       <label className="field"><span>Instagram</span><input value={form.instagram_url} onChange={e=>setForm({...form,instagram_url:e.target.value})}/></label>
+       <label className="field"><span>Site</span><input value={form.website_url} onChange={e=>setForm({...form,website_url:e.target.value})}/></label>
+       <label className="field full"><span>Endereço</span><input value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/></label>
+      </div>
+      <div className="form-actions"><button className="btn primary" disabled={saving} onClick={save}>{saving?'Salvando…':'Salvar alterações'}</button></div>
+     </div>
+    </section>}
+   </div>
+  </main>
+ </div>
+}
