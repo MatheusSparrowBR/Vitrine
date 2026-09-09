@@ -7,7 +7,7 @@ function update(){
   const existing=document.querySelector(`[${SLOT}]`)
   if(!isCityHome()){existing?.remove();return}
   const hero=document.querySelector('.hero')
-  if(!hero)return schedule()
+  if(!hero)return
   const hasBanner=Boolean(document.querySelector('.hero + section.page.section .content-card'))
   if(hasBanner){existing?.remove();return}
   if(existing)return
@@ -22,6 +22,8 @@ function install(){
   window.addEventListener('load',()=>window.setTimeout(update,150),{once:true})
   window.addEventListener('popstate',schedule)
   document.addEventListener('change',e=>{if(e.target?.matches?.('.city-select'))schedule()})
+  const root=document.getElementById('root')
+  if(root){const observer=new MutationObserver(mutations=>{if(mutations.some(m=>[...m.addedNodes].some(node=>node.nodeType===1&&!node.hasAttribute?.(SLOT))))schedule()});observer.observe(root,{childList:true,subtree:true})}
   const originalPush=history.pushState
   history.pushState=function(...args){const result=originalPush.apply(this,args);schedule();return result}
   const originalReplace=history.replaceState
