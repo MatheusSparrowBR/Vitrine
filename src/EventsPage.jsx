@@ -1,7 +1,5 @@
 import React,{useEffect,useState} from 'react'
-
-const URL=import.meta.env.VITE_SUPABASE_URL
-const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+import './events.css'
 
 export default function EventsPage({supabase,city,onBack}){
   const [events,setEvents]=useState([])
