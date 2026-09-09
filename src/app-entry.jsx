@@ -2,8 +2,11 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { createClient } from '@supabase/supabase-js'
 import EventsPage from './EventsPage.jsx'
+import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
 import './core.css'
 import './events.css'
+import './home-premium-slot.js'
+import './admin-premium-nav.js'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -15,6 +18,10 @@ function parseEventRoute(pathname = location.pathname) {
     return { citySlug: parts[0].toLowerCase() }
   }
   return null
+}
+
+function isAdminBannerRoute(pathname = location.pathname) {
+  return pathname === '/admin/banners' || pathname === '/admin/banners/'
 }
 
 function EventRoute() {
@@ -29,12 +36,7 @@ function EventRoute() {
         setLoading(false)
         return
       }
-      const { data } = await supabase
-        .from('cities')
-        .select('id,name,state,slug,country,active')
-        .eq('slug', route.citySlug)
-        .eq('active', true)
-        .maybeSingle()
+      const { data } = await supabase.from('cities').select('id,name,state,slug,country,active').eq('slug', route.citySlug).eq('active', true).maybeSingle()
       if (!active) return
       setCity(data || null)
       setLoading(false)
@@ -56,10 +58,17 @@ function EventRoute() {
   return <div className="app"><EventsPage supabase={supabase} city={city} onBack={goHome} /></div>
 }
 
+function AdminBannerRoute() {
+  return <AdminPremiumBannerPage supabase={supabase} />
+}
+
 const isEventsRoute = Boolean(parseEventRoute())
+const isBannerEditorRoute = isAdminBannerRoute()
 
 if (isEventsRoute) {
   createRoot(document.getElementById('root')).render(<EventRoute />)
+} else if (isBannerEditorRoute) {
+  createRoot(document.getElementById('root')).render(<AdminBannerRoute />)
 } else {
   import('./main-clean.jsx')
 }
