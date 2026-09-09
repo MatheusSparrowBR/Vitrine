@@ -35,6 +35,9 @@ Nunca coloque chaves secretas/service role no frontend.
 - Painel administrativo.
 - Banner Premium da Home cadastrado/publicado somente pelo administrador.
 - Upload das artes Premium para o bucket `premium-banners` do Supabase Storage.
+- Upload de fotos e vídeos das empresas para `business-media`.
+- Upload privado de fotos e vídeos enviados pela comunidade para `community-submissions`.
+- Mídia da comunidade aprovada é copiada para `community-published` antes da publicação no feed.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
 
 ## Banner Premium da Home
@@ -51,3 +54,12 @@ Nunca coloque chaves secretas/service role no frontend.
 - Início e fim permitem programação.
 - Múltiplos banners alternam automaticamente na Home.
 - Cobrança automática do Premium ficará conectada posteriormente; até lá, a confirmação é administrativa.
+
+## Mídia de empresas e comunidade
+
+- Empresa: proprietários autenticados podem enviar múltiplos arquivos de imagem/vídeo para a galeria da empresa.
+- Comunidade: usuário autenticado pode enviar uma foto ou vídeo diretamente pelo formulário; o arquivo fica privado até a moderação.
+- Administração: conteúdos pendentes usam URL assinada para pré-visualização.
+- Aprovação: a mídia privada é transferida para o bucket público `community-published`, o post é criado e o arquivo privado é removido.
+- Rejeição: a submissão é marcada como rejeitada e a mídia privada é removida.
+- Buckets, limites de tamanho e políticas RLS são versionados nas migrations do Supabase.
