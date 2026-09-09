@@ -27,6 +27,8 @@ Nunca coloque chaves secretas/service role no frontend.
 
 - Home com busca e categorias.
 - Catálogo de empresas.
+- Diretório público otimizado via `public_business_directory` para leituras públicas de empresas.
+- Diagnóstico visual no navegador para erros de chamadas ao Supabase.
 - Login e criação de conta.
 - Cadastro de empresa autenticado com status inicial `pending`.
 - Perfis públicos completos.
@@ -63,3 +65,7 @@ Nunca coloque chaves secretas/service role no frontend.
 - Aprovação: a mídia privada é transferida para o bucket público `community-published`, o post é criado e o arquivo privado é removido.
 - Rejeição: a submissão é marcada como rejeitada e a mídia privada é removida.
 - Buckets, limites de tamanho e políticas RLS são versionados nas migrations do Supabase.
+
+## Diagnóstico do diretório público
+
+As leituras públicas de `businesses` feitas pelo frontend são redirecionadas para `public_business_directory`, preservando o formato esperado pelos componentes React (`categories` e `cities`). O runtime também cria um painel de diagnóstico fixo quando uma requisição ao Supabase retorna erro HTTP ou falha de rede, mostrando operação, status e mensagem sem expor chaves ou cabeçalhos.
