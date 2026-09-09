@@ -17,16 +17,21 @@ export default function AdminPlanAssignments({supabase,onToast}){
  }
  useEffect(()=>{load()},[])
  async function changePlan(row,code){
-  if(!code||code===row.plan_code)return
-  const ok=window.confirm(`Alterar ${row.business_name} para o plano ${plans.find(p=>p.code===code)?.name||code}?`)
-  if(!ok)return
-  setSaving(row.business_id)
+  if(!code)return
+  const plan=plans.find(p=>p.code===code)
   const raw=ends[row.business_id]||''
   const end=raw?new Date(`${raw}T23:59:59`).toISOString():null
+  const samePlan=code===row.plan_code
+  const currentEnd=row.subscription_ends_at?new Date(row.subscription_ends_at).toLocaleDateString('pt-BR'):'sem validade'
+  const newEnd=raw?new Date(`${raw}T00:00:00`).toLocaleDateString('pt-BR'):'sem validade'
+  if(samePlan&&currentEnd===newEnd)return
+  const ok=window.confirm(`Aplicar ${plan?.name||code} para ${row.business_name}?\n\nPlano: ${samePlan?'manter '+(row.plan_name||row.plan_code):`${row.plan_name||row.plan_code} → ${plan?.name||code}`}\nValidade: ${newEnd}`)
+  if(!ok)return
+  setSaving(row.business_id)
   const {error}=await supabase.rpc('admin_set_business_plan',{p_business_id:row.business_id,p_plan_code:code,p_ends_at:end})
   setSaving('')
   if(error){onToast?.(error.message,true);return}
-  onToast?.(`Plano da empresa "${row.business_name}" alterado para ${plans.find(p=>p.code===code)?.name||code}.`)
+  onToast?.(`Plano da empresa "${row.business_name}" atualizado.`)
   await load()
  }
  const visible=rows.filter(r=>{
