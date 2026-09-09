@@ -3,15 +3,43 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabase = url && key ? createClient(url, key) : null
+const BUCKET = 'premium-banners'
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const state = { ads: [], index: 0, modalOpen: false, initialized: false, publicBooted: false, rotationStarted: false }
 
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]))
 const isoOrNull = (value) => value ? new Date(value).toISOString() : null
+const getFileExtension = (file) => ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[file.type] || 'bin')
 
 async function getLagunaId() {
   if (!supabase) return null
   const { data } = await supabase.from('cities').select('id').eq('slug', 'laguna').maybeSingle()
   return data?.id || null
+}
+
+async function uploadBannerImage(file) {
+  if (!supabase) throw new Error('Supabase não está configurado.')
+  if (!file) throw new Error('Selecione uma imagem.')
+  if (!ALLOWED_TYPES.has(file.type)) throw new Error('Formato inválido. Use JPG, PNG ou WebP.')
+  if (file.size > MAX_IMAGE_BYTES) throw new Error('A imagem deve ter no máximo 10 MB.')
+
+  const path = `home/${crypto.randomUUID()}.${getFileExtension(file)}`
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+    cacheControl: '31536000',
+    contentType: file.type,
+    upsert: false,
+  })
+  if (error) throw error
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
+  return { path, url: data.publicUrl }
+}
+
+async function removeBannerImage(path) {
+  if (!supabase || !path) return
+  const { error } = await supabase.storage.from(BUCKET).remove([path])
+  if (error) console.warn('Não foi possível remover a arte do Storage:', error.message)
 }
 
 async function loadPublicBanners() {
@@ -93,7 +121,7 @@ async function openAdminModal() {
     supabase.auth.getUser(),
     supabase.from('cities').select('id,name,state').eq('active', true).order('name'),
     supabase.from('businesses').select('id,name').eq('status', 'active').order('name').limit(200),
-    supabase.from('advertisements').select('id,title,image_url,active,priority,starts_at,ends_at,cities(name,state),businesses(name)').eq('placement', 'home_banner').order('created_at', { ascending: false }).limit(100),
+    supabase.from('advertisements').select('id,title,image_url,image_path,active,priority,starts_at,ends_at,cities(name,state),businesses(name)').eq('placement', 'home_banner').order('created_at', { ascending: false }).limit(100),
   ])
   if (!userData.user) { state.modalOpen = false; return }
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', userData.user.id).maybeSingle()
@@ -114,13 +142,17 @@ async function openAdminModal() {
           <label>Título do banner<input name="title" maxlength="90" required placeholder="Ex.: 20% OFF nesta semana"></label>
           <label>Prioridade<input name="priority" type="number" min="0" max="999" value="0"></label>
           <label class="full">Descrição curta<input name="description" maxlength="160" placeholder="Texto que aparece no banner"></label>
-          <label class="full">URL da imagem<input name="image_url" type="url" required placeholder="https://..."></label>
-          <label class="full">Link ao clicar<input name="target_url" type="url" placeholder="WhatsApp, Instagram ou página da empresa"></label>
+          <label class="full">Arte do banner
+            <div class="vl-upload-row"><input id="vl-banner-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" required><span class="vl-upload-hint">JPG, PNG ou WebP · até 10 MB</span></div>
+            <div id="vl-banner-preview" class="vl-image-preview" aria-live="polite"><span>Nenhuma imagem selecionada</span></div>
+          </label>
+          <label class="full">Link ao clicar<input name="target_url" type="url" placeholder="https://..."></label>
           <label>Início<input name="starts_at" type="datetime-local"></label>
           <label>Fim<input name="ends_at" type="datetime-local"></label>
         </div>
-        <div class="vl-admin-note">Fluxo: cadastro administrativo → revisão da arte/texto → publicar. A cobrança automática do Premium será conectada depois; até lá, a confirmação do pagamento fica sob controle do administrador.</div>
-        <button class="primary-btn full" type="submit">Cadastrar banner para revisão</button>
+        <div class="vl-admin-note">Ao enviar, a imagem sobe para o Storage privado de escrita e público somente para leitura. O banner entra em revisão; publicar fica a cargo do administrador.</div>
+        <div id="vl-banner-form-status" class="vl-form-status" role="status"></div>
+        <button id="vl-banner-submit" class="primary-btn full" type="submit">Enviar banner para revisão</button>
       </form>
       <div class="vl-admin-list"><div class="vl-admin-list-head"><strong>Banners cadastrados</strong><span>${(ads || []).length}</span></div>
         ${(ads || []).length ? ads.map((ad) => `
@@ -136,19 +168,64 @@ async function openAdminModal() {
   modal.querySelector('.vl-admin-close').addEventListener('click', () => closeAdminModal(modal))
   modal.querySelector('.vl-admin-backdrop').addEventListener('click', (event) => { if (event.target.classList.contains('vl-admin-backdrop')) closeAdminModal(modal) })
 
+  const imageInput = modal.querySelector('#vl-banner-image')
+  const preview = modal.querySelector('#vl-banner-preview')
+  const status = modal.querySelector('#vl-banner-form-status')
+  const submit = modal.querySelector('#vl-banner-submit')
+  imageInput.addEventListener('change', () => {
+    const file = imageInput.files?.[0]
+    if (!file) {
+      preview.innerHTML = '<span>Nenhuma imagem selecionada</span>'
+      return
+    }
+    if (!ALLOWED_TYPES.has(file.type)) {
+      preview.innerHTML = '<span>Formato inválido</span>'
+      status.textContent = 'Use JPG, PNG ou WebP.'
+      return
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      preview.innerHTML = '<span>Arquivo acima de 10 MB</span>'
+      status.textContent = 'A imagem precisa ter no máximo 10 MB.'
+      return
+    }
+    status.textContent = ''
+    const objectUrl = URL.createObjectURL(file)
+    preview.innerHTML = `<img src="${objectUrl}" alt="Prévia da arte selecionada"><div class="vl-image-preview-meta"><strong>${escapeHtml(file.name)}</strong><span>${(file.size / 1024 / 1024).toFixed(2)} MB</span></div>`
+  })
+
   modal.querySelector('#vl-banner-form').addEventListener('submit', async (event) => {
     event.preventDefault()
-    const form = new FormData(event.currentTarget)
-    const payload = {
-      business_id: form.get('business_id'), city_id: form.get('city_id'), title: form.get('title'),
-      description: form.get('description') || null, image_url: form.get('image_url'), target_url: form.get('target_url') || null,
-      starts_at: isoOrNull(form.get('starts_at')), ends_at: isoOrNull(form.get('ends_at')),
-      placement: 'home_banner', priority: Number(form.get('priority') || 0), active: false,
+    submit.disabled = true
+    submit.textContent = 'Enviando…'
+    status.textContent = ''
+    let uploadedPath = null
+    try {
+      const form = new FormData(event.currentTarget)
+      const file = form.get('image')
+      const uploaded = await uploadBannerImage(file)
+      uploadedPath = uploaded.path
+      const payload = {
+        business_id: form.get('business_id'), city_id: form.get('city_id'), title: form.get('title'),
+        description: form.get('description') || null, image_url: uploaded.url, image_path: uploaded.path, target_url: form.get('target_url') || null,
+        starts_at: isoOrNull(form.get('starts_at')), ends_at: isoOrNull(form.get('ends_at')),
+        placement: 'home_banner', priority: Number(form.get('priority') || 0), active: false,
+      }
+      const { error } = await supabase.from('advertisements').insert(payload)
+      if (error) throw error
+      window.alert('Banner cadastrado. A arte foi enviada ao Storage e o banner ficou em revisão.')
+      closeAdminModal(modal)
+      setTimeout(openAdminModal, 0)
+    } catch (error) {
+      if (uploadedPath) await removeBannerImage(uploadedPath)
+      const message = error?.message || 'Não foi possível cadastrar o banner.'
+      status.textContent = message
+      window.alert(`Erro ao cadastrar banner: ${message}`)
+    } finally {
+      if (document.body.contains(modal)) {
+        submit.disabled = false
+        submit.textContent = 'Enviar banner para revisão'
+      }
     }
-    const { error } = await supabase.from('advertisements').insert(payload)
-    if (error) return window.alert(`Erro ao cadastrar banner: ${error.message}`)
-    window.alert('Banner cadastrado. Ele ficou em revisão e ainda não está público.')
-    closeAdminModal(modal); setTimeout(openAdminModal, 0)
   })
 
   modal.querySelectorAll('[data-action="toggle"]').forEach((button) => button.addEventListener('click', async () => {
@@ -163,8 +240,10 @@ async function openAdminModal() {
   modal.querySelectorAll('[data-action="delete"]').forEach((button) => button.addEventListener('click', async () => {
     const id = button.closest('[data-id]')?.dataset.id
     if (!id || !window.confirm('Excluir este banner?')) return
+    const row = (ads || []).find((ad) => String(ad.id) === String(id))
     const { error } = await supabase.from('advertisements').delete().eq('id', id)
     if (error) return window.alert(`Erro: ${error.message}`)
+    if (row?.image_path) await removeBannerImage(row.image_path)
     await refreshPublicBanners(); closeAdminModal(modal); setTimeout(openAdminModal, 0)
   }))
 }
