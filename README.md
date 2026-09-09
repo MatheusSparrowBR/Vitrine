@@ -40,7 +40,21 @@ Nunca coloque chaves secretas/service role no frontend.
 - Upload de fotos e vídeos das empresas para `business-media`.
 - Upload privado de fotos e vídeos enviados pela comunidade para `community-submissions`.
 - Mídia da comunidade aprovada é copiada para `community-published` antes da publicação no feed.
+- Seção pública de planos na Home carregada da tabela `plans`.
+- Área do comerciante para atualizar logo, capa e galeria com upload real para o Storage.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
+
+## Planos exibidos na Home
+
+A Home apresenta os planos ativos cadastrados no Supabase:
+
+- **Grátis** — R$ 0,00/mês
+- **Pro** — R$ 29,90/mês
+- **Premium** — R$ 59,90/mês
+
+Os botões iniciam o cadastro da empresa. A cobrança automática será conectada posteriormente.
+
+Banners publicitários Premium da Home são um produto de mídia separado, com cadastro, aprovação e publicação controlados pelo administrador.
 
 ## Banner Premium da Home
 
@@ -59,11 +73,14 @@ Nunca coloque chaves secretas/service role no frontend.
 
 ## Mídia de empresas e comunidade
 
-- Empresa: proprietários autenticados podem enviar múltiplos arquivos de imagem/vídeo para a galeria da empresa.
-- Comunidade: usuário autenticado pode enviar uma foto ou vídeo diretamente pelo formulário; o arquivo fica privado até a moderação.
-- Administração: conteúdos pendentes usam URL assinada para pré-visualização.
-- Aprovação: a mídia privada é transferida para o bucket público `community-published`, o post é criado e o arquivo privado é removido.
-- Rejeição: a submissão é marcada como rejeitada e a mídia privada é removida.
+- **Empresa:** proprietários autenticados podem atualizar logo e capa e enviar múltiplos arquivos de imagem/vídeo para a galeria da empresa.
+- **Galeria:** arquivos são armazenados em `business-media`; cada item mantém URL, caminho do Storage e tipo de mídia em `business_photos`.
+- **Exclusão:** excluir uma mídia remove o registro e tenta remover também o objeto do Storage.
+- **Perfil público:** a galeria diferencia imagens e vídeos e apresenta a logo cadastrada na identidade do perfil.
+- **Comunidade:** usuário autenticado pode enviar foto e/ou vídeo diretamente pelo formulário; a mídia fica privada até a moderação.
+- **Administração:** conteúdos pendentes usam URL assinada para pré-visualização.
+- **Aprovação:** a mídia privada é transferida para `community-published`, o post é criado e o arquivo privado é removido.
+- **Rejeição:** a submissão é marcada como rejeitada e a mídia privada é removida.
 - Buckets, limites de tamanho e políticas RLS são versionados nas migrations do Supabase.
 
 ## Diagnóstico do diretório público
