@@ -5,7 +5,7 @@ const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabase = URL && KEY ? createClient(URL, KEY) : null
 const STORAGE_KEY = 'vitrinelocal:selected-city'
 const DEFAULT_CITY = 'laguna'
-const state = { initialized:false, cities:[], selectedSlug: localStorage.getItem(STORAGE_KEY) || DEFAULT_CITY }
+const state = { initialized:false, cities:[], selectedSlug: localStorage.getItem(STORAGE_KEY) || DEFAULT_CITY, citiesPromise:null }
 
 function esc(v='') { return String(v).replace(/[&<>\"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])) }
 
@@ -16,13 +16,17 @@ async function loadCities() {
   return data || []
 }
 
-function rewriteSelectedCity(input) {
+function rewriteSelectedCity(input, cityId = null) {
   const url = new URL(input, window.location.origin)
-  if (!url.pathname.includes('/rest/v1/cities')) return input
-  const selected = encodeURIComponent(state.selectedSlug || DEFAULT_CITY)
-  for (const key of ['slug']) {
-    const current = url.searchParams.get(key)
-    if (current === 'eq.laguna' || current === 'eq%2Elaguna') url.searchParams.set(key, `eq.${decodeURIComponent(selected)}`)
+  if (url.pathname.includes('/rest/v1/cities')) {
+    const current = url.searchParams.get('slug')
+    if (current === 'eq.laguna' || current === 'eq%2Elaguna') url.searchParams.set('slug', `eq.${state.selectedSlug || DEFAULT_CITY}`)
+    return url.toString()
+  }
+  if (url.pathname.includes('/rest/v1/promotions') && cityId) {
+    const select = url.searchParams.get('select') || ''
+    if (select.includes('businesses(name,slug)')) url.searchParams.set('select', select.replace('businesses(name,slug)', 'businesses!inner(name,slug)'))
+    if (select.includes('businesses!inner(name,slug)') && !url.searchParams.has('businesses.city_id')) url.searchParams.set('businesses.city_id', `eq.${cityId}`)
   }
   return url.toString()
 }
@@ -33,7 +37,12 @@ function installFetchInterceptor() {
   async function wrapped(input, init) {
     try {
       const raw = input instanceof Request ? input.url : String(input)
-      const next = rewriteSelectedCity(raw)
+      let cityId = null
+      if (!raw.includes('/rest/v1/cities') && state.citiesPromise) {
+        await state.citiesPromise
+        cityId = state.cities.find((city) => city.slug === state.selectedSlug)?.id || null
+      }
+      const next = rewriteSelectedCity(raw, cityId)
       if (input instanceof Request) return original.call(this, new Request(next, input), init)
       return original.call(this, next, init)
     } catch (error) {
@@ -84,7 +93,8 @@ async function boot() {
   if (state.initialized) return
   state.initialized = true
   installFetchInterceptor()
-  state.cities = await loadCities()
+  state.citiesPromise = loadCities()
+  state.cities = await state.citiesPromise
   if (!state.cities.length) return
   if (!state.cities.some((city) => city.slug === state.selectedSlug)) {
     state.selectedSlug = state.cities.find((city) => city.slug === DEFAULT_CITY)?.slug || state.cities[0].slug
