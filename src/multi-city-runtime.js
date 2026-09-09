@@ -42,20 +42,19 @@ function rewriteRequest(input, init) {
     return request
   }
 
-  // Public promotions are scoped through the joined business city.
-  if (city && url.pathname.includes('/rest/v1/promotions')) {
+  // Only the public promotions query from main.jsx is city-scoped.
+  // Owner/admin queries are intentionally left global.
+  if (city && url.pathname.includes('/rest/v1/promotions') && !url.searchParams.has('business_id')) {
     const select = url.searchParams.get('select') || ''
-    if (select.includes('businesses(name,slug)')) {
-      url.searchParams.set('select', select.replace('businesses(name,slug)', 'businesses!inner(name,slug)'))
-    }
-    const nextSelect = url.searchParams.get('select') || ''
-    if (nextSelect.includes('businesses!inner(name,slug)') && !url.searchParams.has('businesses.city_id')) {
+    if (select === '*,businesses(name,slug)') {
+      url.searchParams.set('select', '*,businesses!inner(name,slug)')
       url.searchParams.set('businesses.city_id', `eq.${city.id}`)
+      return new Request(url.toString(), request)
     }
-    return new Request(url.toString(), request)
+    return request
   }
 
-  // A public business profile request filtered by slug must also be bound to the selected city.
+  // Public company profile requests by slug are bound to the selected city.
   if (city && url.pathname.endsWith('/rest/v1/businesses')) {
     const hasSlug = url.searchParams.has('slug')
     const hasCityId = url.searchParams.has('city_id')
@@ -125,8 +124,7 @@ function ensureSelector() {
 
   const existing = document.querySelector('[data-vl-city-selector]')
   if (existing) {
-    const selected = state.selectedSlug
-    if ([...existing.options].some((option) => option.value === selected)) existing.value = selected
+    if ([...existing.options].some((option) => option.value === state.selectedSlug)) existing.value = state.selectedSlug
     return
   }
 
@@ -168,8 +166,6 @@ function syncRouteAndTitle() {
 async function boot() {
   if (state.initialized) return
   state.initialized = true
-
-  // Install a synchronous request rewriter first. Never wait for a promise created by fetch itself.
   installFetchInterceptor()
   state.cities = await loadCities()
   if (!state.cities.length) return
@@ -181,10 +177,7 @@ async function boot() {
   localStorage.setItem(STORAGE_KEY, state.selectedSlug)
   syncRouteAndTitle()
 
-  const observer = new MutationObserver(() => {
-    ensureSelector()
-    syncRouteAndTitle()
-  })
+  const observer = new MutationObserver(ensureSelector)
   observer.observe(document.getElementById('root') || document.body, { childList: true, subtree: true })
   ensureSelector()
 }
