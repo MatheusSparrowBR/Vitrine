@@ -1,0 +1,14 @@
+/* O gerenciador principal usa um overlay em z-index muito alto (2147483000).
+   O botão e o modal de eventos precisam ficar acima dele para continuarem acessíveis. */
+.vl-admin-events-trigger{
+  z-index:2147483200!important;
+  right:24px!important;
+  bottom:24px!important;
+}
+.vl-admin-events-backdrop{
+  z-index:2147483300!important;
+}
+.vl-admin-events-modal{
+  position:relative!important;
+  z-index:1!important;
+}
