@@ -2,7 +2,7 @@ const SLOT='data-vl-premium-slot'
 const HOME_RX=/^\/[^/]+\/?$/
 
 function schedule(){window.clearTimeout(window.__vlPremiumSlotTimer);window.__vlPremiumSlotTimer=window.setTimeout(update,120)}
-function isCityHome(){return HOME_RX.test(location.pathname)}
+function isCityHome(){const p=location.pathname;return HOME_RX.test(p)&&!p.startsWith('/admin')&&!p.startsWith('/conta')&&!p.startsWith('/planos')}
 function update(){
   const existing=document.querySelector(`[${SLOT}]`)
   if(!isCityHome()){existing?.remove();return}
