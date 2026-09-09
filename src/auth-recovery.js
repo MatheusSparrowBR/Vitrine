@@ -91,12 +91,12 @@ async function openAdmin() {
   document.body.style.overflow = 'hidden'
   state.adminRoot = createRoot(state.adminHost)
   state.adminRoot.render(
-    <AdminDashboard
-      supabase={supabase}
-      session={{ user }}
-      onBack={closeAdmin}
-      onToast={(message, error = false) => notify(message, error)}
-    />
+    React.createElement(AdminDashboard, {
+      supabase,
+      session: { user },
+      onBack: closeAdmin,
+      onToast: (message, error = false) => notify(message, error),
+    })
   )
 }
 
