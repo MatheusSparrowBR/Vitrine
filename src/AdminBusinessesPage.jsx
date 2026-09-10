@@ -1,7 +1,9 @@
 import React,{useEffect,useMemo,useState} from 'react'
+import {createClient} from '@supabase/supabase-js'
 import AdminShell from './AdminShell.jsx'
 import './admin-v2.css'
 
+const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
 const emptyForm={name:'',slug:'',short_description:'',description:'',city_id:'',category_id:'',address:'',neighborhood:'',phone:'',whatsapp:'',instagram_url:'',website_url:'',cover_url:'',logo_url:'',status:'active',featured:false,verified:false}
 const labels={active:'Ativa',pending:'Pendente',suspended:'Suspensa',rejected:'Rejeitada'}
 export default function AdminBusinessesPage(){
