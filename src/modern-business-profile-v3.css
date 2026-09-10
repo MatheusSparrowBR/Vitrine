@@ -12,6 +12,21 @@
 .mbp-kicker{letter-spacing:1.7px}
 .mbp-company-copy h1{font-size:40px}
 .mbp-badges{margin-bottom:11px}
+/* Os quatro badges da identidade comercial usam a mesma caixa em todos os perfis. */
+.mbp-badges .mbp-rating,.mbp-badges .mbp-verified,.mbp-badges .mbp-category,.mbp-badges .mbp-live-pill,.mbp-badges .mbp-closed-pill{
+  width:112px;
+  min-width:112px;
+  height:34px;
+  min-height:34px;
+  box-sizing:border-box;
+  justify-content:center;
+  padding:0 8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1;
+}
+.mbp-badges .mbp-rating small{font-size:9px}
 .mbp-contact-card.is-open{border-color:#cbead8;background:#fbfffd}
 .mbp-contact-card.is-closed{border-color:#ecd7d7;background:#fffdfd}
 .mbp-section-title{margin-bottom:2px}
@@ -38,4 +53,4 @@
 .mbp-rating-summary{box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
 .mbp-action-row button{appearance:none}
 @media(max-width:1050px){.mbp-promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){.mbp-company-copy h1{font-size:30px}.mbp-section-heading-row{align-items:center}.mbp-section-heading-row h2{font-size:21px}.mbp-promo-grid{grid-template-columns:1fr}.mbp-promo-card img{height:145px}.mbp-gallery-caption{font-size:9px}.mbp-live-pill,.mbp-closed-pill{font-size:10px}.mbp-contact-grid{gap:8px}.mbp-contact-card small{font-size:9px}}
+@media(max-width:760px){.mbp-company-copy h1{font-size:30px}.mbp-section-heading-row{align-items:center}.mbp-section-heading-row h2{font-size:21px}.mbp-promo-grid{grid-template-columns:1fr}.mbp-promo-card img{height:145px}.mbp-gallery-caption{font-size:9px}.mbp-live-pill,.mbp-closed-pill{font-size:10px}.mbp-contact-grid{gap:8px}.mbp-contact-card small{font-size:9px}.mbp-badges .mbp-rating,.mbp-badges .mbp-verified,.mbp-badges .mbp-category,.mbp-badges .mbp-live-pill,.mbp-badges .mbp-closed-pill{width:106px;min-width:106px}}
