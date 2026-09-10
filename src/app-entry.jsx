@@ -6,6 +6,7 @@ import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
 import AdminPlatformPage from './AdminPlatformPage.jsx'
 import AdminHomePage from './AdminHomePage.jsx'
 import AdminBusinessesPage from './AdminBusinessesPage.jsx'
+import BusinessRegistrationPage from './BusinessRegistrationPage.jsx'
 import CityHomePage from './CityHomePage.jsx'
 import AccountPage from './AccountPage.jsx'
 import AuthPage from './AuthPage.jsx'
@@ -26,6 +27,7 @@ import './modern-business-profile.css'
 import './modern-business-list.css'
 import './modern-gallery-lightbox.css'
 import './modern-gallery-lightbox.js'
+import './business-registration.css'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
@@ -60,7 +62,11 @@ function RootRoute(){
  const path=normalizePath(location.pathname)
  if(path==='/login')return <AuthPage/>
  if(path==='/planos')return <BillingPlansPage/>
- if(path==='/conta')return <AccountPage/>
+ if(path==='/conta'){
+  const isNewBusiness=new URLSearchParams(location.search).get('new')==='business'
+  return isNewBusiness?<BusinessRegistrationPage/>:<AccountPage/>
+ }
+ if(path==='/conta/nova')return <BusinessRegistrationPage/>
  if(path==='/atualizar-senha')return <PasswordUpdatePage/>
  if(path==='/privacidade')return <PrivacyPage/>
  if(path==='/termos')return <TermsPage/>
