@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { hasPlanFeature } from './phase2-rules.js'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -27,97 +26,12 @@ async function getSession(){
 async function getCityId(){
   if(!db)return null
   const parts=location.pathname.split('/').filter(Boolean)
-  const slug=parts[0]&&!['admin','planos','conta','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():(localStorage.getItem('vitrinelocal:selected-city')||'laguna')
+  const slug=parts[0]&&!['admin','planos','conta','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():'laguna'
   if(cityIdCache.has(slug))return cityIdCache.get(slug)
   const {data}=await db.from('cities').select('id').eq('slug',slug).maybeSingle()
   const id=data?.id||null
   cityIdCache.set(slug,id)
   return id
-}
-
-async function audit(action,entityId,metadata={}){
-  if(!db||!entityId)return
-  const session=await getSession()
-  if(!session)return
-  await db.from('admin_audit_logs').insert({actor_id:session.user.id,action,entity_type:'business',entity_id:entityId,metadata})
-}
-
-function resolveBusinessSlug(row){
-  return row.querySelector('td:first-child small')?.textContent?.trim()||''
-}
-
-function addReviewActions(row){
-  const cells=row.querySelectorAll('td')
-  if(cells.length<6)return
-  const status=(cells[3].textContent||'').trim().toLowerCase()
-  const actions=cells[5].querySelector('.admin-v2-table-actions')
-  if(!actions||actions.querySelector('[data-phase2-review]')||status!=='pendente')return
-  const slug=resolveBusinessSlug(row)
-  const fallbackName=cells[0].querySelector('strong')?.textContent?.trim()||'empresa'
-  const reviewWrap=document.createElement('div')
-  reviewWrap.className='vl-phase2-admin-review-wrap'
-  reviewWrap.dataset.phase2Review='1'
-  reviewWrap.innerHTML='<button type="button" class="approve">Aprovar</button><button type="button" class="reject">Rejeitar</button>'
-  actions.parentElement.appendChild(reviewWrap)
-
-  const resolveId=async()=>{
-    if(!db)throw new Error('Conexão com o banco indisponível.')
-    if(slug){
-      const {data,error}=await db.from('businesses').select('id').eq('slug',slug).maybeSingle()
-      if(error)throw error
-      if(data?.id)return data.id
-    }
-    const {data,error}=await db.from('businesses').select('id').eq('name',fallbackName).limit(2)
-    if(error)throw error
-    if(data?.length===1)return data[0].id
-    throw new Error('Não foi possível identificar a empresa com segurança.')
-  }
-
-  reviewWrap.querySelector('.approve')?.addEventListener('click',async()=>{
-    const button=reviewWrap.querySelector('.approve');button.disabled=true
-    try{
-      const businessId=await resolveId()
-      const {error}=await db.from('businesses').update({status:'active',rejection_reason:null}).eq('id',businessId)
-      if(error)throw error
-      await audit('business_approved',businessId,{source:'admin_businesses'})
-      window.location.reload()
-    }catch(error){button.disabled=false;window.alert(error?.message||'Não foi possível aprovar a empresa.')}
-  })
-
-  reviewWrap.querySelector('.reject')?.addEventListener('click',async()=>{
-    const reason=window.prompt('Informe o motivo da rejeição:','Dados incompletos ou informações que precisam ser corrigidas.')
-    if(!reason?.trim())return
-    const button=reviewWrap.querySelector('.reject');button.disabled=true
-    try{
-      const businessId=await resolveId()
-      const {error}=await db.from('businesses').update({status:'rejected',rejection_reason:reason.trim()}).eq('id',businessId)
-      if(error)throw error
-      await audit('business_rejected',businessId,{reason:reason.trim(),source:'admin_businesses'})
-      window.location.reload()
-    }catch(error){button.disabled=false;window.alert(error?.message||'Não foi possível rejeitar a empresa.')}
-  })
-}
-
-function ensureAdminQueue(){
-  if(!location.pathname.startsWith('/admin/empresas'))return
-  const table=document.querySelector('.admin-v2-table')
-  if(!table)return
-  const rows=[...table.querySelectorAll('tbody tr')]
-  rows.forEach(addReviewActions)
-  if(table.dataset.phase2Queue==='1')return
-  const pending=rows.filter(row=>row.querySelector('td:nth-child(4)')?.textContent?.trim().toLowerCase()==='pendente')
-  if(!pending.length)return
-  const section=table.closest('.admin-v2-section')
-  const queue=document.createElement('div')
-  queue.className='vl-phase2-admin-queue'
-  queue.dataset.phase2Queue='1'
-  queue.innerHTML=`<div><strong>${pending.length} empresa(s) aguardando análise</strong><span>Revise o cadastro antes de publicar no catálogo.</span></div><button type="button">Ver pendentes</button>`
-  const toolbar=section?.querySelector('.admin-v2-toolbar')
-  if(toolbar)toolbar.before(queue)
-  queue.querySelector('button')?.addEventListener('click',()=>{
-    const select=section?.querySelector('.admin-v2-toolbar select')
-    if(select){select.value='pending';select.dispatchEvent(new Event('change',{bubbles:true}))}
-  })
 }
 
 async function enhanceAccount(){
@@ -138,29 +52,6 @@ async function enhanceAccount(){
   const copy=status==='pending'?['Cadastro em análise','Sua empresa foi enviada para revisão. Enquanto isso, você pode completar seus dados e mídias.','Em análise']:status==='rejected'?['Cadastro precisa de ajustes',reason||'O administrador solicitou correções antes da publicação.','Rejeitada']:['Empresa suspensa','O perfil está temporariamente fora do catálogo público. Consulte o administrador para entender os próximos passos.','Suspensa']
   banner.innerHTML=`<div><strong>${copy[0]}</strong><p>${copy[1]}</p><div class="vl-phase2-review-tools"><a href="/conta">Continuar no painel</a></div></div><span class="vl-phase2-review-badge">${copy[2]}</span>`
   host.prepend(banner)
-}
-
-async function enhanceAnalytics(){
-  if(location.pathname!=='/conta/analytics'||!db)return
-  const host=document.querySelector('.analytics-page .analytics-shell')
-  if(!host||host.dataset.phase2Analytics==='1')return
-  host.dataset.phase2Analytics='1'
-  const session=await getSession()
-  if(!session)return
-  const businessId=host.querySelector('.analytics-head-actions select')?.value
-  if(!businessId)return
-  const {data:planId,error:planError}=await db.rpc('get_effective_plan_id',{p_business_id:businessId})
-  if(planError||!planId)return
-  const {data:plan}=await db.from('plans').select('code,name,features').eq('id',planId).maybeSingle()
-  if(!plan)return
-  if(!hasPlanFeature(plan.features,'analytics',false)){
-    host.innerHTML=`<section class="vl-phase2-analytics-lock"><div class="icon">⌁</div><span class="plan-name">Plano ${plan.name||'Grátis'}</span><h2>Analytics é um recurso Pro</h2><p>Veja visualizações, cliques no WhatsApp, Instagram, promoções e conversões com um plano que inclui métricas comerciais.</p><a href="/planos">Conhecer planos →</a></section>`
-  }else{
-    const headActions=host.querySelector('.analytics-head-actions')
-    if(headActions&&!headActions.querySelector('[data-phase2-plan]')){
-      const badge=document.createElement('span');badge.dataset.phase2Plan='1';badge.className='analytics-plan-badge';badge.textContent=`Plano ${plan.name||plan.code}`;headActions.prepend(badge)
-    }
-  }
 }
 
 async function recordBannerImpression(element){
@@ -184,12 +75,7 @@ function wireBannerAnalytics(){
 
 function runEnhancements(){
   window.clearTimeout(enhancementTimer)
-  enhancementTimer=window.setTimeout(()=>{
-    ensureAdminQueue()
-    enhanceAccount()
-    enhanceAnalytics()
-    wireBannerAnalytics()
-  },60)
+  enhancementTimer=window.setTimeout(()=>{enhanceAccount();wireBannerAnalytics()},60)
 }
 
 function start(){
