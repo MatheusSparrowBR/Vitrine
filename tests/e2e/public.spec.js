@@ -20,10 +20,12 @@ test('header global mantém o mesmo componente em todas as páginas principais',
  const routes=['/laguna','/laguna/empresas','/laguna/promocoes','/laguna/eventos','/planos','/privacidade','/termos','/conta']
  for(const route of routes){
   await page.goto(route)
+  await expect(page.locator('.vl-site-header')).toHaveCount(1)
   await expect(page.locator('.vl-site-header')).toBeVisible()
   await expect(page.locator('.vl-site-brand')).toBeVisible()
   await expect(page.locator('.vl-site-city')).toBeVisible()
   await expect(page.locator('.vl-site-business-cta')).toBeVisible()
+  await expect(page.locator('.topbar,.mbl-topbar,.mbp-topbar')).toHaveCount(0)
  }
 })
 
@@ -125,7 +127,6 @@ test('promocoes publicas carregam sem erro visual',async({page})=>{
 test('login e conta mostram estados válidos',async({page})=>{
  await page.goto('/conta')
  await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
-
  await page.goto('/login')
  await expect(page.getByRole('heading',{name:/Entre na sua conta/i})).toBeVisible()
  await expect(page.getByText('Esqueci minha senha')).toBeVisible()
