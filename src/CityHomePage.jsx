@@ -4,6 +4,7 @@ import './city-home.css'
 import './premium-banner-carousel.css'
 import './home-v2.css'
 import './home-v2-fixes.css'
+import './home-content-layout.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
