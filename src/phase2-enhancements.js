@@ -6,8 +6,9 @@ const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db = URL && KEY ? createClient(URL, KEY) : null
 const seenBanners = new Set()
 let enhancementTimer = null
-let observer = null
-let cityIdCache = new Map()
+let enhancementObserver = null
+let bannerObserver = null
+const cityIdCache = new Map()
 
 function sessionId(){
   try{
@@ -29,8 +30,9 @@ async function getCityId(){
   const slug=parts[0]&&!['admin','planos','conta','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():(localStorage.getItem('vitrinelocal:selected-city')||'laguna')
   if(cityIdCache.has(slug))return cityIdCache.get(slug)
   const {data}=await db.from('cities').select('id').eq('slug',slug).maybeSingle()
-  cityIdCache.set(slug,data?.id||null)
-  return data?.id||null
+  const id=data?.id||null
+  cityIdCache.set(slug,id)
+  return id
 }
 
 async function audit(action,entityId,metadata={}){
@@ -40,26 +42,8 @@ async function audit(action,entityId,metadata={}){
   await db.from('admin_audit_logs').insert({actor_id:session.user.id,action,entity_type:'business',entity_id:entityId,metadata})
 }
 
-function ensureAdminQueue(){
-  if(!location.pathname.startsWith('/admin/empresas'))return
-  const table=document.querySelector('.admin-v2-table')
-  if(!table||table.dataset.phase2Ready==='1')return
-  table.dataset.phase2Ready='1'
-  const rows=[...table.querySelectorAll('tbody tr')]
-  const pending=rows.filter(row=>row.querySelector('td:nth-child(4)')?.textContent?.trim().toLowerCase()==='pendente')
-  if(pending.length){
-    const section=table.closest('.admin-v2-section')
-    const queue=document.createElement('div')
-    queue.className='vl-phase2-admin-queue'
-    queue.innerHTML=`<div><strong>${pending.length} empresa(s) aguardando análise</strong><span>Revise o cadastro antes de publicar no catálogo.</span></div><button type="button">Ver pendentes</button>`
-    const toolbar=section?.querySelector('.admin-v2-toolbar')
-    if(toolbar)toolbar.before(queue)
-    queue.querySelector('button')?.addEventListener('click',()=>{
-      const select=section?.querySelector('.admin-v2-toolbar select')
-      if(select){select.value='pending';select.dispatchEvent(new Event('change',{bubbles:true}))}
-    })
-  }
-  rows.forEach(row=>addReviewActions(row))
+function resolveBusinessSlug(row){
+  return row.querySelector('td:first-child small')?.textContent?.trim()||''
 }
 
 function addReviewActions(row){
@@ -68,12 +52,8 @@ function addReviewActions(row){
   const status=(cells[3].textContent||'').trim().toLowerCase()
   const actions=cells[5].querySelector('.admin-v2-table-actions')
   if(!actions||actions.querySelector('[data-phase2-review]')||status!=='pendente')return
-  const id=row.querySelector('button.primary')?.getAttribute('data-business-id') || row.querySelector('button.primary')?.dataset.businessId
+  const slug=resolveBusinessSlug(row)
   const fallbackName=cells[0].querySelector('strong')?.textContent?.trim()||'empresa'
-  if(!id){
-    const editButton=[...actions.querySelectorAll('button')].find(b=>b.textContent.trim()==='Editar')
-    if(editButton)editButton.dataset.phase2Edit='1'
-  }
   const reviewWrap=document.createElement('div')
   reviewWrap.className='vl-phase2-admin-review-wrap'
   reviewWrap.dataset.phase2Review='1'
@@ -81,32 +61,62 @@ function addReviewActions(row){
   actions.parentElement.appendChild(reviewWrap)
 
   const resolveId=async()=>{
-    if(id)return id
-    const name=fallbackName
-    const {data}=await db.from('businesses').select('id').eq('name',name).limit(2)
-    return data?.[0]?.id||null
+    if(!db)throw new Error('Conexão com o banco indisponível.')
+    if(slug){
+      const {data,error}=await db.from('businesses').select('id').eq('slug',slug).maybeSingle()
+      if(error)throw error
+      if(data?.id)return data.id
+    }
+    const {data,error}=await db.from('businesses').select('id').eq('name',fallbackName).limit(2)
+    if(error)throw error
+    if(data?.length===1)return data[0].id
+    throw new Error('Não foi possível identificar a empresa com segurança.')
   }
+
   reviewWrap.querySelector('.approve')?.addEventListener('click',async()=>{
     const button=reviewWrap.querySelector('.approve');button.disabled=true
     try{
-      const businessId=await resolveId();if(!businessId)throw new Error('Não foi possível identificar a empresa.')
-      const {error}=await db.from('businesses').update({status:'active'}).eq('id',businessId)
+      const businessId=await resolveId()
+      const {error}=await db.from('businesses').update({status:'active',rejection_reason:null}).eq('id',businessId)
       if(error)throw error
       await audit('business_approved',businessId,{source:'admin_businesses'})
       window.location.reload()
     }catch(error){button.disabled=false;window.alert(error?.message||'Não foi possível aprovar a empresa.')}
   })
+
   reviewWrap.querySelector('.reject')?.addEventListener('click',async()=>{
     const reason=window.prompt('Informe o motivo da rejeição:','Dados incompletos ou informações que precisam ser corrigidas.')
     if(!reason?.trim())return
     const button=reviewWrap.querySelector('.reject');button.disabled=true
     try{
-      const businessId=await resolveId();if(!businessId)throw new Error('Não foi possível identificar a empresa.')
+      const businessId=await resolveId()
       const {error}=await db.from('businesses').update({status:'rejected',rejection_reason:reason.trim()}).eq('id',businessId)
       if(error)throw error
       await audit('business_rejected',businessId,{reason:reason.trim(),source:'admin_businesses'})
       window.location.reload()
     }catch(error){button.disabled=false;window.alert(error?.message||'Não foi possível rejeitar a empresa.')}
+  })
+}
+
+function ensureAdminQueue(){
+  if(!location.pathname.startsWith('/admin/empresas'))return
+  const table=document.querySelector('.admin-v2-table')
+  if(!table)return
+  const rows=[...table.querySelectorAll('tbody tr')]
+  rows.forEach(addReviewActions)
+  if(table.dataset.phase2Queue==='1')return
+  const pending=rows.filter(row=>row.querySelector('td:nth-child(4)')?.textContent?.trim().toLowerCase()==='pendente')
+  if(!pending.length)return
+  const section=table.closest('.admin-v2-section')
+  const queue=document.createElement('div')
+  queue.className='vl-phase2-admin-queue'
+  queue.dataset.phase2Queue='1'
+  queue.innerHTML=`<div><strong>${pending.length} empresa(s) aguardando análise</strong><span>Revise o cadastro antes de publicar no catálogo.</span></div><button type="button">Ver pendentes</button>`
+  const toolbar=section?.querySelector('.admin-v2-toolbar')
+  if(toolbar)toolbar.before(queue)
+  queue.querySelector('button')?.addEventListener('click',()=>{
+    const select=section?.querySelector('.admin-v2-toolbar select')
+    if(select){select.value='pending';select.dispatchEvent(new Event('change',{bubbles:true}))}
   })
 }
 
@@ -126,7 +136,7 @@ async function enhanceAccount(){
   const banner=document.createElement('div')
   banner.className=`vl-phase2-review-banner ${status}`
   const copy=status==='pending'?['Cadastro em análise','Sua empresa foi enviada para revisão. Enquanto isso, você pode completar seus dados e mídias.','Em análise']:status==='rejected'?['Cadastro precisa de ajustes',reason||'O administrador solicitou correções antes da publicação.','Rejeitada']:['Empresa suspensa','O perfil está temporariamente fora do catálogo público. Consulte o administrador para entender os próximos passos.','Suspensa']
-  banner.innerHTML=`<div><strong>${copy[0]}</strong><p>${copy[1]}</p><div class="vl-phase2-review-tools"><a href="/conta">Continuar no painel</a>${status==='pending'?'<a href="/conta?new=business">Cadastrar outra empresa</a>':''}</div></div><span class="vl-phase2-review-badge">${copy[2]}</span>`
+  banner.innerHTML=`<div><strong>${copy[0]}</strong><p>${copy[1]}</p><div class="vl-phase2-review-tools"><a href="/conta">Continuar no painel</a></div></div><span class="vl-phase2-review-badge">${copy[2]}</span>`
   host.prepend(banner)
 }
 
@@ -139,8 +149,8 @@ async function enhanceAnalytics(){
   if(!session)return
   const businessId=host.querySelector('.analytics-head-actions select')?.value
   if(!businessId)return
-  const {data:planId}=await db.rpc('get_effective_plan_id',{p_business_id:businessId})
-  if(!planId)return
+  const {data:planId,error:planError}=await db.rpc('get_effective_plan_id',{p_business_id:businessId})
+  if(planError||!planId)return
   const {data:plan}=await db.from('plans').select('code,name,features').eq('id',planId).maybeSingle()
   if(!plan)return
   if(!hasPlanFeature(plan.features,'analytics',false)){
@@ -167,9 +177,9 @@ async function recordBannerImpression(element){
 function wireBannerAnalytics(){
   if(!document.body)return
   document.querySelectorAll('.vl-premium-banner').forEach(recordBannerImpression)
-  if(observer)return
-  observer=new MutationObserver(()=>document.querySelectorAll('.vl-premium-banner').forEach(recordBannerImpression))
-  observer.observe(document.getElementById('root')||document.body,{childList:true,subtree:true})
+  if(bannerObserver)return
+  bannerObserver=new MutationObserver(()=>document.querySelectorAll('.vl-premium-banner').forEach(recordBannerImpression))
+  bannerObserver.observe(document.getElementById('root')||document.body,{childList:true,subtree:true})
 }
 
 function runEnhancements(){
@@ -179,8 +189,15 @@ function runEnhancements(){
     enhanceAccount()
     enhanceAnalytics()
     wireBannerAnalytics()
-  },80)
+  },60)
 }
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',runEnhancements,{once:true});else runEnhancements()
-window.addEventListener('popstate',runEnhancements)
+function start(){
+  runEnhancements()
+  if(enhancementObserver)return
+  enhancementObserver=new MutationObserver(runEnhancements)
+  enhancementObserver.observe(document.getElementById('root')||document.body,{childList:true,subtree:true})
+  window.addEventListener('popstate',runEnhancements)
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start()
