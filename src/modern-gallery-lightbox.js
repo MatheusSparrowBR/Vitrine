@@ -81,8 +81,11 @@ document.addEventListener('click', e => {
   if (more) { e.preventDefault(); open(0); return }
   const thumb = e.target.closest('.mbp-gallery-thumb')
   if (thumb) {
-    const thumbs = [...document.querySelectorAll('.mbp-gallery-thumb')]
-    open(Math.max(0, thumbs.indexOf(thumb) + 1))
+    open(0).then(() => {
+      const src = thumb.querySelector('img')?.currentSrc || thumb.querySelector('img')?.src
+      const found = state.items.findIndex(x => x.url === src)
+      if (found >= 0) { state.index = found; render() }
+    })
     return
   }
   if (e.target.closest('.mbp-gallery-main img')) open(0)
