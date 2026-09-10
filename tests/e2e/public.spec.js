@@ -6,12 +6,11 @@ test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
  await expect(page.getByText('Enviar conteúdo')).toHaveCount(0)
  await expect(page.getByText('O que está acontecendo?')).toHaveCount(0)
  await expect(page.getByRole('heading',{name:'Próximos eventos'})).toBeVisible()
- const navLink=page.locator('.vl-site-nav-link').first()
+ await expect(page.getByRole('link',{name:/Explorar empresas/i})).toBeVisible()
+ await expect(page.getByRole('link',{name:/Cadastre sua empresa/i}).first()).toBeVisible()
+ const navLink=page.locator('.category-card').first()
  await expect(navLink).toBeVisible()
  await expect(navLink).toHaveCSS('text-decoration-line','none')
- const categoryLink=page.locator('.category-card').first()
- await expect(categoryLink).toBeVisible()
- await expect(categoryLink).toHaveCSS('text-decoration-line','none')
  const heroBackground=await page.locator('.hero').evaluate(el=>getComputedStyle(el).backgroundImage)
  expect(heroBackground).toContain('laguna-hero.svg')
 })
@@ -93,12 +92,7 @@ test('catalogo moderno possui filtros e cards visuais',async({page})=>{
 
 test('perfil moderno abre a galeria completa de fotos',async({page})=>{
  await page.goto('/laguna/empresas')
- await page.evaluate(()=>{
-  const gallery=document.createElement('div')
-  gallery.className='mbp-gallery'
-  gallery.innerHTML='<div class="mbp-gallery-main"><img src="/laguna-hero.svg" alt="Capa de teste"></div><div class="mbp-gallery-side"><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 1"></div><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 2"></div><div class="mbp-gallery-more"><strong>+2</strong><span>Ver todas as fotos</span></div></div>'
-  document.body.appendChild(gallery)
- })
+ await page.evaluate(()=>{const gallery=document.createElement('div');gallery.className='mbp-gallery';gallery.innerHTML='<div class="mbp-gallery-main"><img src="/laguna-hero.svg" alt="Capa de teste"></div><div class="mbp-gallery-side"><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 1"></div><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 2"></div><div class="mbp-gallery-more"><strong>+2</strong><span>Ver todas as fotos</span></div></div>';document.body.appendChild(gallery)})
  const galleryMore=page.locator('.mbp-gallery-more').last()
  await expect(galleryMore).toBeVisible()
  await galleryMore.click()
@@ -114,9 +108,13 @@ test('cadastro de empresa exige autenticação',async({page})=>{
  await expect(page.getByRole('heading',{name:/Entre para cadastrar sua empresa/i})).toBeVisible()
 })
 
-test('painel de empresas exige perfil administrador',async({page})=>{
+test('painéis analytics e empresas exigem perfil administrador ou conta',async({page})=>{
  await page.goto('/admin/empresas')
  await expect(page.getByRole('heading',{name:/Acesso restrito/i})).toBeVisible()
+ await page.goto('/admin/analytics')
+ await expect(page.getByRole('heading',{name:/Acesso restrito/i})).toBeVisible()
+ await page.goto('/conta/analytics')
+ await expect(page.getByRole('heading',{name:/Entre para acompanhar seu desempenho/i})).toBeVisible()
 })
 
 test('promocoes publicas carregam sem erro visual',async({page})=>{
