@@ -112,7 +112,7 @@ test('painéis analytics e empresas exigem perfil administrador ou conta',async(
  await page.goto('/admin/empresas')
  await expect(page.getByRole('heading',{name:/Acesso restrito/i})).toBeVisible()
  await page.goto('/admin/analytics')
- await expect(page.getByRole('heading',{name:/Acesso restrito/i})).toBeVisible()
+ await expect(page.getByText('Acesso restrito',{exact:true})).toBeVisible()
  await page.goto('/conta/analytics')
  await expect(page.getByRole('heading',{name:/Entre para acompanhar seu desempenho/i})).toBeVisible()
 })
