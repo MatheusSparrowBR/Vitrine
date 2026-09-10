@@ -22,7 +22,7 @@ create index if not exists business_plan_usage_monthly_business_feature_idx
 
 create or replace function public.get_monthly_plan_usage(p_business_id uuid, p_feature text)
 returns integer
-language sql stable security definer
+language sql stable security invoker
 set search_path = public
 as $$
   select coalesce((select u.used_count from public.business_plan_usage_monthly u
