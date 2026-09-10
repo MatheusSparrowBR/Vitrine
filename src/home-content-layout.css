@@ -1,0 +1,11 @@
+/* Home — cards de conteúdo proporcionais à quantidade de itens */
+.home-v2 .content-grid-1{grid-template-columns:minmax(0,820px)!important;justify-content:center!important}
+.home-v2 .content-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:920px!important;margin:0 auto!important}
+.home-v2 .content-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.home-v2 .content-grid-1 .content-card-v2{width:100%!important}
+.home-v2 .content-grid .content-card-v2>img{height:145px!important;object-fit:cover!important}
+.home-v2 .content-grid-1 .content-card-v2>img{height:190px!important}
+@media(max-width:760px){
+  .home-v2 .content-grid-1,.home-v2 .content-grid-2,.home-v2 .content-grid-3{grid-template-columns:1fr!important;max-width:none!important}
+  .home-v2 .content-grid-1 .content-card-v2>img,.home-v2 .content-grid .content-card-v2>img{height:180px!important}
+}
