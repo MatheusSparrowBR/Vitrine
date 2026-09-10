@@ -46,6 +46,7 @@ import './admin-v2.css'
 import './admin-management.css'
 import './admin-analytics.css'
 import './analytics.css'
+import './modern-business-profile-v4.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
