@@ -1,9 +1,9 @@
-import React,{useEffect,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
-import {DEFAULT_PROMOTION_IMAGE,getActiveBusinessPromotions,getActiveCityPromotions} from './promotion-service.js'
-import {formatHours} from './BusinessHoursEditor.jsx'
-import './core.css'
-import './business-hours.css'
+import React,{useEffect,useState}from'react'
+import{createClient}from'@supabase/supabase-js'
+import{DEFAULT_PROMOTION_IMAGE,getActiveBusinessPromotions,getActiveCityPromotions}from'./promotion-service.js'
+import{formatHours}from'./BusinessHoursEditor.jsx'
+import'./core.css'
+import'./business-hours.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -29,7 +29,7 @@ export function PromotionsPage({citySlug='laguna'}){
  useEffect(()=>{let live=true;(async()=>{if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setLoading(false);return}const{data:c}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(!live)return;setCity(c||null);if(!c){setLoading(false);return}const response=await getActiveCityPromotions(db,c.id,{limit:500});if(!live)return;if(response.error){setError(response.error.message||'Não foi possível carregar as promoções.');setItems([])}else setItems(response.data||[]);setLoading(false)})();return()=>{live=false}},[citySlug])
  if(loading)return <main className="page"><div className="empty"><h3>Carregando promoções…</h3></div></main>
  if(!city)return <main className="page"><div className="empty"><h3>Cidade não encontrada.</h3><a className="btn primary" href="/laguna">Voltar</a></div></main>
- return <div className="app"><PublicHeader city={city}/><main className="page"><div className="page-tools"><a className="back-link" href={`/${city.slug}`}>← Voltar para {city.name}</a></div><span className="section-kicker">OFERTAS LOCAIS</span><h1>Promoções em {city.name}</h1><p>Ofertas publicadas pelas empresas participantes.</p>{error&&<div className="empty" style={{marginTop:22}}><h3>Não foi possível carregar as promoções.</h3><p>{error}</p></div>}{!error&&items.length?<div className="promotion-grid">{items.map(p=><article className="promotion-card" key={p.id}><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title} loading="lazy"/><div className="promotion-body"><span className="business-category">PROMOÇÃO</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><p><strong>{p.businesses?.name}</strong></p><div className="price-row">{p.original_price!=null&&<del>{fmt(p.original_price)}</del>}{p.price!=null&&<strong>{fmt(p.price)}</strong>}</div><a className="link-btn" href={`/${city.slug}/empresa/${encodeURIComponent(p.businesses?.slug||'')}`}>Ver empresa →</a></div></article>)}</div>:!error&&<div className="empty" style={{marginTop:22}}><h3>Nenhuma promoção disponível.</h3><p>Novas ofertas aparecerão aqui quando forem publicadas.</p></div>}</main></div>
+ return <div className="app"><PublicHeader city={city}/><main className="page"><div className="page-tools"><a className="back-link" href={`/${city.slug}`}>← Voltar para {city.name}</a></div><span className="section-kicker">OFERTAS LOCAIS</span><h1>Promoções em {city.name}</h1><p>Ofertas publicadas pelas empresas participantes.</p>{error&&<div className="empty" style={{marginTop:22}}><h3>Não foi possível carregar as promoções.</h3><p>{error}</p></div>}{!error&&items.length?<div className="promotion-grid">{items.map(p=>{const href=`/${city.slug}/empresa/${encodeURIComponent(p.businesses?.slug||'')}`;return <a className="promotion-card promotion-card-clickable" key={p.id} href={href} aria-label={`Ver promoção ${p.title} de ${p.businesses?.name||'empresa local'}`}><div className="promotion-image-wrap"><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title} loading="lazy"/></div><div className="promotion-body"><span className="business-category">PROMOÇÃO</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><p><strong>{p.businesses?.name}</strong></p><div className="price-row">{p.original_price!=null&&<del>{fmt(p.original_price)}</del>}{p.price!=null&&<strong>{fmt(p.price)}</strong>}</div><span className="link-btn">Ver empresa →</span></div></a>})}</div>:!error&&<div className="empty" style={{marginTop:22}}><h3>Nenhuma promoção disponível.</h3><p>Novas ofertas aparecerão aqui quando forem publicadas.</p></div>}</main></div>
 }
 
 export function BusinessProfilePage({citySlug='laguna',businessSlug=''}){
