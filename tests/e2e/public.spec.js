@@ -92,6 +92,8 @@ test('promocoes publicas carregam sem erro visual',async({page})=>{
 
 test('login e conta mostram estados válidos',async({page})=>{
  await page.goto('/conta')
+ console.log('ACCOUNT DEBUG URL:',page.url())
+ console.log('ACCOUNT DEBUG BODY:',(await page.locator('body').innerText()).slice(0,1200))
  await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
 
  await page.goto('/login')
