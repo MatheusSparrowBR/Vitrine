@@ -91,13 +91,12 @@ test('promocoes publicas carregam sem erro visual',async({page})=>{
 })
 
 test('login e conta mostram estados válidos',async({page})=>{
+ await page.goto('/conta')
+ await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
+
  await page.goto('/login')
  await expect(page.getByRole('heading',{name:/Entre na sua conta/i})).toBeVisible()
  await expect(page.getByText('Esqueci minha senha')).toBeVisible()
- await page.context().clearCookies()
- await page.evaluate(()=>{localStorage.clear();sessionStorage.clear()})
- await page.goto('/conta')
- await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
 })
 
 test('planos mostra valores públicos e retorno',async({page})=>{
