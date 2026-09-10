@@ -295,9 +295,11 @@ function createAccountPromotionForm(){
   form.querySelectorAll('[data-vl-promo-close]').forEach(btn=>btn.addEventListener('click',closeAccountPromotionForm))
   startInput.addEventListener('change',()=>{if(startInput.value&&endInput.value&&endInput.value<=startInput.value)endInput.value=''})
   endInput.addEventListener('change',()=>{if(startInput.value&&endInput.value&&endInput.value<=startInput.value){message.textContent='O encerramento deve ser posterior ao início.';message.className='vl-apc-message error'}})
-  form.querySelector('[data-vl-promo-form]').addEventListener('submit',async e=>{
+  const promotionForm=form.querySelector('[data-vl-promo-form]')
+  promotionForm.addEventListener('submit',async e=>{
     e.preventDefault();message.textContent='';message.className='vl-apc-message'
-    const data=new FormData(e.currentTarget)
+    const submittedForm=e.currentTarget
+    const data=new FormData(submittedForm)
     const businessId=String(data.get('business_id')||'')
     const title=String(data.get('title')||'').trim()
     const startsValue=String(data.get('starts_at')||'')
@@ -324,7 +326,7 @@ function createAccountPromotionForm(){
       const insert=await db.from('promotions').insert(payload)
       if(insert.error)throw insert.error
       message.textContent='Promoção enviada para revisão. Ela aparecerá no catálogo após a publicação.';message.className='vl-apc-message success'
-      e.currentTarget.reset();preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='Imagem padrão selecionada.'
+      submittedForm.reset();preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='Imagem padrão selecionada.'
       setTimeout(()=>location.reload(),700)
     }catch(err){
       if(imagePath)await db.storage.from(MEDIA_BUCKET).remove([imagePath]).catch(()=>{})
