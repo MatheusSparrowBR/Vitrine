@@ -1,0 +1,69 @@
+/* Perfil da empresa — acabamento final dos badges de status. */
+.mbp-badges > .mbp-live-pill,
+.mbp-badges > .mbp-open-pill,
+.mbp-badges > .mbp-closed-pill,
+.mbp-badges > .mbp-rating,
+.mbp-badges > .mbp-verified,
+.mbp-badges > .mbp-category{
+  box-sizing:border-box !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 132px !important;
+  width:132px !important;
+  min-width:132px !important;
+  max-width:132px !important;
+  height:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  padding:0 8px !important;
+  border-radius:999px !important;
+  gap:4px !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
+  line-height:1 !important;
+}
+.mbp-badges > .mbp-rating{
+  border:1px solid #e1e8ef !important;
+  background:#f7f9fc !important;
+  color:#172f4d !important;
+}
+.mbp-badges > .mbp-verified{
+  border:1px solid #bfe8d0 !important;
+  background:#eaf8f0 !important;
+  color:#18824f !important;
+}
+.mbp-badges > .mbp-category{
+  border:1px solid #c8dcfb !important;
+  background:#eef5ff !important;
+  color:#216df3 !important;
+}
+.mbp-badges > .mbp-live-pill,
+.mbp-badges > .mbp-open-pill{
+  border:1px solid #bfe8d0 !important;
+  background:#e8f8ef !important;
+  color:#18824f !important;
+}
+.mbp-badges > .mbp-closed-pill{
+  border:1px solid #efcaca !important;
+  background:#fff0f0 !important;
+  color:#b33d3d !important;
+}
+.mbp-badges > * > small{
+  font-size:9px !important;
+  line-height:1 !important;
+}
+@media(max-width:760px){
+  .mbp-badges > .mbp-live-pill,
+  .mbp-badges > .mbp-open-pill,
+  .mbp-badges > .mbp-closed-pill,
+  .mbp-badges > .mbp-rating,
+  .mbp-badges > .mbp-verified,
+  .mbp-badges > .mbp-category{
+    flex-basis:118px !important;
+    width:118px !important;
+    min-width:118px !important;
+    max-width:118px !important;
+  }
+}
