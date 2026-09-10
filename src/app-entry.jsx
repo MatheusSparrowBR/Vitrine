@@ -11,6 +11,7 @@ import AuthPage from './AuthPage.jsx'
 import PasswordUpdatePage from './PasswordUpdatePage.jsx'
 import BillingPlansPage from './BillingPlansPage.jsx'
 import ModernBusinessProfilePage from './ModernBusinessProfilePage.jsx'
+import ModernBusinessesPage from './ModernBusinessesPage.jsx'
 import { BusinessesPage,PromotionsPage,NotFoundPage } from './PublicCatalogPages.jsx'
 import { PrivacyPage,TermsPage } from './LegalPages.jsx'
 import './core.css'
@@ -21,6 +22,9 @@ import './billing-plans.css'
 import './public-polish.css'
 import './vitrine-ux-adjustments.css'
 import './modern-business-profile.css'
+import './modern-business-list.css'
+import './modern-gallery-lightbox.css'
+import './modern-gallery-lightbox.js'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
@@ -66,7 +70,7 @@ function RootRoute(){
  if(!route)return <NotFoundPage/>
  if(route.kind==='home')return <CityHomePage citySlug={route.citySlug}/>
  if(route.kind==='events')return <EventRoute citySlug={route.citySlug}/>
- if(route.kind==='businesses')return <BusinessesPage citySlug={route.citySlug}/>
+ if(route.kind==='businesses')return <ModernBusinessesPage citySlug={route.citySlug}/>
  if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>
  if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>
  return <NotFoundPage/>
