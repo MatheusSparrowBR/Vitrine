@@ -34,7 +34,6 @@ import './modern-business-profile-v2.css'
 import './modern-business-list.css'
 import './modern-gallery-lightbox.css'
 import './modern-gallery-lightbox.js'
-import './business-hours-status-v3.js'
 import './admin-city-actions.js'
 import './business-registration.css'
 import './banner-timezone-fix.js'
@@ -47,6 +46,8 @@ import './admin-management.css'
 import './admin-analytics.css'
 import './analytics.css'
 import './modern-business-profile-v4.css'
+import './phase2-product.css'
+import './phase2-enhancements.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
