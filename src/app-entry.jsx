@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { createClient } from '@supabase/supabase-js'
+import SiteHeader from './SiteHeader.jsx'
 import EventsPage from './EventsPage.jsx'
 import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
 import AdminPlatformPage from './AdminPlatformPage.jsx'
@@ -31,6 +32,7 @@ import './business-registration.css'
 import './banner-timezone-fix.js'
 import './admin-premium-nav.js'
 import './account-modern.css'
+import './site-header.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -57,7 +59,7 @@ function EventRoute({citySlug}){
  React.useEffect(()=>{let live=true;(async()=>{if(!supabase){setLoading(false);return}const {data}=await supabase.from('cities').select('id,name,state,slug,country,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(live){setCity(data||null);setLoading(false)}})();return()=>{live=false}},[citySlug])
  if(loading)return <div className="app"><div className="loader"/></div>
  if(!city)return <div className="app"><main className="page section"><a className="back-link" href="/laguna">← Voltar</a><div className="empty"><h3>Cidade não encontrada.</h3></div></main></div>
- return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href={`/${city.slug}`}><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href={`/${city.slug}/empresas`}>Explorar</a><a href={`/${city.slug}/promocoes`}>Promoções</a><a href={`/${city.slug}/eventos`}>Eventos</a><a href="/planos">Planos</a></nav></div></header><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>
+ return <div className="app"><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>
 }
 
 function AccountRoute(){
@@ -89,4 +91,12 @@ function RootRoute(){
  if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>
  return <NotFoundPage/>
 }
-createRoot(document.getElementById('root')).render(<RootRoute/>)
+
+function App(){
+ return <>
+  <SiteHeader/>
+  <RootRoute/>
+ </>
+}
+
+createRoot(document.getElementById('root')).render(<App/>)
