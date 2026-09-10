@@ -10,7 +10,8 @@ import AccountPage from './AccountPage.jsx'
 import AuthPage from './AuthPage.jsx'
 import PasswordUpdatePage from './PasswordUpdatePage.jsx'
 import BillingPlansPage from './BillingPlansPage.jsx'
-import { BusinessesPage,PromotionsPage,BusinessProfilePage,NotFoundPage } from './PublicCatalogPages.jsx'
+import ModernBusinessProfilePage from './ModernBusinessProfilePage.jsx'
+import { BusinessesPage,PromotionsPage,NotFoundPage } from './PublicCatalogPages.jsx'
 import { PrivacyPage,TermsPage } from './LegalPages.jsx'
 import './core.css'
 import './events.css'
@@ -19,6 +20,7 @@ import './auth-page.css'
 import './billing-plans.css'
 import './public-polish.css'
 import './vitrine-ux-adjustments.css'
+import './modern-business-profile.css'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
@@ -66,7 +68,7 @@ function RootRoute(){
  if(route.kind==='events')return <EventRoute citySlug={route.citySlug}/>
  if(route.kind==='businesses')return <BusinessesPage citySlug={route.citySlug}/>
  if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>
- if(route.kind==='business')return <BusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>
+ if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>
  return <NotFoundPage/>
 }
 createRoot(document.getElementById('root')).render(<RootRoute/>)
