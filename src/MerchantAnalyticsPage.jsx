@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
 import './analytics.css'
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+const U=import.meta.env.VITE_SUPABASE_URL,KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&KEY?createClient(U,KEY):null
 const EMPTY={profile_view:0,whatsapp_click:0,instagram_click:0,website_click:0,business_click:0,promotion_click:0}
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 export default function MerchantAnalyticsPage(){
