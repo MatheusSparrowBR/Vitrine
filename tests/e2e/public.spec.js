@@ -27,6 +27,15 @@ test('home mantém dock de categorias em uma única faixa visual',async({page})=
  expect(['auto','scroll']).toContain(style.overflowX)
 })
 
+test('categoria da home abre somente a categoria selecionada',async({page})=>{
+ await page.goto('/laguna')
+ const restaurant=page.locator('.category-card').filter({hasText:'Restaurantes'}).first()
+ await expect(restaurant).toBeVisible()
+ await restaurant.click()
+ await expect(page).toHaveURL(/\/laguna\/empresas\?categoria=restaurantes/)
+ await expect(page.getByRole('button',{name:/Restaurantes/i})).toHaveClass(/active/)
+})
+
 test('agenda possui URL por cidade e retorno',async({page})=>{
  await page.goto('/laguna/eventos')
  await expect(page).toHaveURL(/\/laguna\/eventos/)
@@ -34,21 +43,29 @@ test('agenda possui URL por cidade e retorno',async({page})=>{
  await expect(page.getByRole('button',{name:'← Voltar'})).toBeVisible()
 })
 
-test('catalogo possui retorno e navegacao sem sublinhado',async({page})=>{
+test('catalogo moderno possui filtros e cards visuais',async({page})=>{
  await page.goto('/laguna/empresas')
  await expect(page.getByRole('heading',{name:'Empresas em Laguna'})).toBeVisible()
  await expect(page.getByRole('link',{name:/Voltar para Laguna/})).toBeVisible()
- await expect(page.locator('.nav-actions a').first()).toHaveCSS('text-decoration-line','none')
+ await expect(page.locator('.mbl-search-large')).toBeVisible()
+ await expect(page.locator('.mbl-chips')).toBeVisible()
+ const cards=page.locator('.mbl-card')
+ if(await cards.count()){
+  await expect(cards.first().locator('.mbl-body h2')).toBeVisible()
+  await expect(cards.first().locator('.mbl-footer')).toBeVisible()
+ }
 })
 
-test('catalogo e perfil usam componentes visuais preparados',async({page})=>{
- await page.goto('/laguna/empresas')
- await expect(page.locator('.toolbar .searchbox')).toBeVisible()
- const cards=page.locator('.business-card')
- if(await cards.count()){
-  await expect(cards.first().locator('.business-rating')).toBeVisible()
-  await expect(cards.first().locator('.business-footer')).toBeVisible()
- }
+test('perfil moderno abre a galeria completa de fotos',async({page})=>{
+ await page.goto('/laguna/empresa/keko-pizza')
+ await expect(page.getByRole('heading',{name:/Keko Pizza/i})).toBeVisible()
+ const galleryMore=page.locator('.mbp-gallery-more')
+ await expect(galleryMore).toBeVisible()
+ await galleryMore.click()
+ await expect(page.locator('#vl-photo-lightbox')).toBeVisible()
+ await expect(page.getByRole('dialog',{name:'Galeria de fotos'})).toBeVisible()
+ await page.keyboard.press('Escape')
+ await expect(page.locator('#vl-photo-lightbox')).toHaveCount(0)
 })
 
 test('promocoes publicas carregam sem erro visual',async({page})=>{
