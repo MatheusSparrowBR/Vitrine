@@ -72,7 +72,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
       {wa&&<ContactCard icon="☎" title="WhatsApp" value={business.phone||business.whatsapp} link={`https://wa.me/${phoneDigits(wa)}`}/>} 
       {business.instagram_url&&<ContactCard icon="◎" title="Instagram" value={business.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//,'@').replace(/\/$/,'')} link={business.instagram_url}/>} 
      </div>
-     {wa&&<a className="mbp-primary-cta" href={`https://wa.me/${phoneDigits(wa)}`} target="_blank" rel="noreferrer">◉ <span>Peça agora no WhatsApp</span></a>}
+     {wa&&<a className="mbp-primary-cta" href={`https://wa.me/${phoneDigits(wa)}`} target="_blank" rel="noreferrer">◉ <span>Entre em contato</span></a>}
      <div className="mbp-action-row"><a href={business.instagram_url||'#'} target={business.instagram_url?'_blank':undefined} rel="noreferrer">◎ Instagram</a><button onClick={share}>♧ Compartilhar</button><button className={saved?'saved':''} onClick={()=>setSaved(v=>!v)}>♡ {saved?'Salvo':'Salvar'}</button></div>
      {items.length>0&&<section className="mbp-section"><div className="mbp-section-title"><div><span>PRODUTOS E SERVIÇOS</span><h2>O que a empresa oferece</h2></div></div><div className="mbp-items">{items.slice(0,6).map(i=><article key={i.id}>{i.image_url&&<img src={i.image_url} alt="" loading="lazy"/>}<div><h3>{i.name}</h3>{i.description&&<p>{i.description}</p>}{i.price!=null&&<strong>{fmt(i.price)}</strong>}</div></article>)}</div></section>}
     </section>
