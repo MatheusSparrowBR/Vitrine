@@ -1,10 +1,35 @@
-/* Overrides finais da Home 2.0 — devem permanecer depois do CSS legado */
+/* Overrides finais da Home — devem permanecer depois do CSS legado */
 .home-v2 .category-dock .category-grid{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}
 .home-v2 .category-dock .category-grid::-webkit-scrollbar{display:none!important;height:0!important}
 .home-v2 .category-dock .category-card{display:flex!important;flex:1 0 100px!important;min-width:100px!important;min-height:106px!important}
+
+/* Empresas em destaque: largura proporcional à quantidade real de cards */
+.home-v2 .business-grid-1{grid-template-columns:minmax(0,560px)!important;justify-content:center!important}
+.home-v2 .business-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.home-v2 .business-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.home-v2 .business-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 .home-v2 .business-image{position:relative!important;overflow:hidden!important}
 .home-v2 .business-image:before,.home-v2 .business-image:after{content:none!important;display:none!important;background:none!important;border:0!important}
 .home-v2 .business-image img{position:relative!important;z-index:1!important;width:100%!important;height:100%!important;object-fit:cover!important}
-.home-v2 .business-image .verified{position:absolute!important;z-index:4!important;top:11px!important;right:11px!important;left:auto!important;bottom:auto!important;width:auto!important;height:auto!important;min-width:0!important;max-width:max-content!important;margin:0!important;padding:5px 9px!important;border-radius:999px!important;background:rgba(237,250,243,.96)!important;border:1px solid #bfe8d0!important;color:#16804b!important;font-size:9px!important;font-weight:900!important;line-height:1!important;display:inline-flex!important;align-items:center!important;white-space:nowrap!important;box-shadow:none!important;transform:none!important}
-.home-v2 .business-image .verified:before,.home-v2 .business-image .verified:after{content:none!important;display:none!important}
-@media(max-width:760px){.home-v2 .category-dock .category-grid{gap:6px!important}.home-v2 .category-dock .category-card{flex:0 0 92px!important;min-width:92px!important;min-height:94px!important}}
+.home-v2 .business-info .business-meta{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;margin-bottom:4px!important}
+.home-v2 .business-info .verified{position:static!important;display:inline-flex!important;align-items:center!important;width:auto!important;height:auto!important;min-width:0!important;max-width:max-content!important;margin:0!important;padding:5px 8px!important;border-radius:999px!important;background:#edf9f2!important;border:1px solid #bfe8d0!important;color:#16804b!important;font-size:9px!important;font-weight:900!important;line-height:1!important;box-shadow:none!important;transform:none!important;white-space:nowrap!important}
+.home-v2 .business-info .category{margin-bottom:0!important}
+
+/* Grids de promoções e eventos se ajustam ao número de cards */
+.home-v2 .content-grid-1{grid-template-columns:minmax(0,1fr)!important}
+.home-v2 .content-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.home-v2 .content-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+
+/* Uma seção com conteúdo variável nunca deve herdar a altura mínima da Home */
+.home-v2 .soft-section{min-height:0!important;height:auto!important}
+
+@media(max-width:1100px){
+  .home-v2 .business-grid-3,.home-v2 .business-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .home-v2 .content-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  .home-v2 .category-dock .category-grid{gap:6px!important}
+  .home-v2 .category-dock .category-card{flex:0 0 92px!important;min-width:92px!important;min-height:94px!important}
+  .home-v2 .business-grid-1,.home-v2 .business-grid-2,.home-v2 .business-grid-3,.home-v2 .business-grid-4{grid-template-columns:1fr!important;justify-content:stretch!important}
+  .home-v2 .content-grid-1,.home-v2 .content-grid-2,.home-v2 .content-grid-3{grid-template-columns:1fr!important}
+}
