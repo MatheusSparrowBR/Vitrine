@@ -34,7 +34,7 @@ export default function AdminPromotionsPage({supabase}){
   setLoading(true)
   const [b,p]=await Promise.all([
    supabase.from('businesses').select('id,name,status,city_id,cities(name,state)').order('name').limit(500),
-   supabase.from('promotions').select('id,business_id,title,description,image_url,price,original_price,starts_at,ends_at,status,created_at,updated_at,businesses(name,cities(name,state))').order('created_at',{ascending:false}).limit(500)
+   supabase.from('promotions').select('id,business_id,title,description,image_url,image_path,price,original_price,starts_at,ends_at,status,created_at,updated_at,businesses(name,cities(name,state))').order('created_at',{ascending:false}).limit(500)
   ])
   if(b.error||p.error)notify((b.error||p.error).message||'Não foi possível carregar as promoções.',true)
   setBusinesses(b.data||[]);setItems(p.data||[]);setLoading(false)
@@ -44,7 +44,7 @@ export default function AdminPromotionsPage({supabase}){
  const activeBusinesses=useMemo(()=>businesses.filter(x=>x.status==='active'),[businesses])
  const filtered=useMemo(()=>items.filter(p=>{const q=search.trim().toLowerCase();const text=[p.title,p.description,p.businesses?.name,p.businesses?.cities?.name].filter(Boolean).join(' ').toLowerCase();return(!q||text.includes(q))&&(statusFilter==='all'||p.status===statusFilter)}),[items,search,statusFilter])
  function startNew(){setEditor({id:null});setForm({...empty});setImageFile(null);setPreview('')}
- function edit(row){setEditor({id:row.id});setForm({business_id:row.business_id||'',title:row.title||'',description:row.description||'',price:row.price??'',original_price:row.original_price??'',starts_at:toProjectInput(row.starts_at),ends_at:toProjectInput(row.ends_at),status:row.status||'pending_review',image_url:row.image_url||'',image_path:''});setImageFile(null);setPreview(row.image_url||'')}
+ function edit(row){setEditor({id:row.id});setForm({business_id:row.business_id||'',title:row.title||'',description:row.description||'',price:row.price??'',original_price:row.original_price??'',starts_at:toProjectInput(row.starts_at),ends_at:toProjectInput(row.ends_at),status:row.status||'pending_review',image_url:row.image_url||'',image_path:row.image_path||''});setImageFile(null);setPreview(row.image_url||'')}
  function close(){setEditor(null);setForm(empty);setImageFile(null);setPreview('')}
  function chooseImage(file){
   if(!file)return
@@ -75,7 +75,7 @@ export default function AdminPromotionsPage({supabase}){
    let imageUrl=form.image_url||null
    let imagePath=form.image_path||null
    if(imageFile){const uploaded=await uploadImage(imageFile,form.business_id);imageUrl=uploaded.url;imagePath=uploaded.path;uploadedPath=uploaded.path}
-   const payload={business_id:form.business_id,title:form.title.trim(),description:form.description.trim()||null,price:form.price===''?null:Number(form.price),original_price:form.original_price===''?null:Number(form.original_price),starts_at:starts,ends_at:ends,status:form.status,image_url:imageUrl,updated_at:new Date().toISOString()}
+   const payload={business_id:form.business_id,title:form.title.trim(),description:form.description.trim()||null,price:form.price===''?null:Number(form.price),original_price:form.original_price===''?null:Number(form.original_price),starts_at:starts,ends_at:ends,status:form.status,image_url:imageUrl,image_path:imagePath,updated_at:new Date().toISOString()}
    const r=editor?.id?await supabase.from('promotions').update(payload).eq('id',editor.id):await supabase.from('promotions').insert(payload)
    if(r.error)throw r.error
    notify(editor?.id?'Promoção atualizada com sucesso.':'Promoção criada com sucesso.')
