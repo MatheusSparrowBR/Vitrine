@@ -1,0 +1,22 @@
+/* Defense-in-depth: only the shared SiteHeader may remain visible. */
+.app > .topbar,
+.app > .account-topbar,
+.vl-public-app > .topbar,
+.vl-plans-app > .topbar,
+.mbl-shell > .mbl-topbar,
+.mbp-shell > .mbp-topbar,
+.legal-page > header,
+.admin-businesses-page ~ .topbar {
+  display:none !important;
+}
+
+/* Legacy headers can also be nested after refactors. */
+.app .topbar,
+.app .account-topbar,
+.vl-public-app .topbar,
+.vl-plans-app .topbar,
+.mbl-shell .mbl-topbar,
+.mbp-shell .mbp-topbar,
+.legal-page > header {
+  display:none !important;
+}
