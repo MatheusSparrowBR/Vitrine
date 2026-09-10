@@ -10,6 +10,7 @@ let enhancementObserver = null
 let bannerObserver = null
 let promotionRefreshTimer = null
 let promotionLoadToken = 0
+let promotionRouteKey = ''
 const cityIdCache = new Map()
 let currentPromotions = []
 
@@ -164,9 +165,18 @@ function applyPromotionVisibility(){
 
 function wirePromotionLifecycle(){
   if(!document.body)return
-  loadCurrentPromotions()
-  window.clearInterval(promotionRefreshTimer)
-  promotionRefreshTimer=window.setInterval(loadCurrentPromotions,30000)
+  const route=publicPromotionRoute()
+  const nextKey=route?`${route.type}|${route.citySlug||''}|${route.businessSlug||''}`:''
+  if(!nextKey)return
+  if(nextKey!==promotionRouteKey){
+    promotionRouteKey=nextKey
+    currentPromotions=[]
+    window.clearInterval(promotionRefreshTimer)
+    loadCurrentPromotions()
+    promotionRefreshTimer=window.setInterval(loadCurrentPromotions,30000)
+  }else{
+    applyPromotionVisibility()
+  }
 }
 
 async function enhanceAccount(){
@@ -226,6 +236,7 @@ function start(){
     enhancementTimer=window.setTimeout(()=>{
       enhanceAccount()
       wireBannerAnalytics()
+      wirePromotionLifecycle()
       applyPromotionVisibility()
     },60)
   })
