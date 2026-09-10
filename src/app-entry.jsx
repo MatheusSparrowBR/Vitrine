@@ -60,14 +60,18 @@ function EventRoute({citySlug}){
  return <div className="app"><header className="topbar"><div className="nav"><a className="brand" href={`/${city.slug}`}><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><div className="nav-spacer"/><nav className="nav-actions"><a href={`/${city.slug}/empresas`}>Explorar</a><a href={`/${city.slug}/promocoes`}>Promoções</a><a href={`/${city.slug}/eventos`}>Eventos</a><a href="/planos">Planos</a></nav></div></header><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>
 }
 
+function AccountRoute(){
+ const isNewBusiness=new URLSearchParams(location.search).get('new')==='business'
+ if(isNewBusiness)return <BusinessRegistrationPage/>
+ if(!supabase)return <div className="app account-logged-out"><main className="account-login-state"><div className="account-login-card"><span className="account-eyebrow">MINHA CONTA</span><div className="account-login-icon">V</div><h1>Entre para acessar sua conta</h1><p>Gerencie suas empresas, mídias, produtos, promoções e plano em um só lugar.</p><a className="account-primary-btn" href="/login?next=%2Fconta">Entrar</a><a className="account-secondary-btn" href="/laguna">Voltar ao site</a></div></main></div>
+ return <AccountPage/>
+}
+
 function RootRoute(){
  const path=normalizePath(location.pathname)
  if(path==='/login')return <AuthPage/>
  if(path==='/planos')return <BillingPlansPage/>
- if(path==='/conta'){
-  const isNewBusiness=new URLSearchParams(location.search).get('new')==='business'
-  return isNewBusiness?<BusinessRegistrationPage/>:<AccountPage/>
- }
+ if(path==='/conta')return <AccountRoute/>
  if(path==='/conta/nova')return <BusinessRegistrationPage/>
  if(path==='/atualizar-senha')return <PasswordUpdatePage/>
  if(path==='/privacidade')return <PrivacyPage/>
