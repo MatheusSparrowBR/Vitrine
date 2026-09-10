@@ -11,36 +11,30 @@ export function isPromotionCurrent(promotion,now=Date.now()){
  return true
 }
 
-function normalizeBusinesses(rows){
- const map=new Map((rows||[]).map(b=>[b.id,b]))
- return map
-}
-
 export async function getActiveCityPromotions(db,cityId,{limit=100}={}){
  if(!db)return{data:[],error:new Error('Supabase não configurado.')}
  if(!cityId)return{data:[],error:new Error('Cidade não informada.')}
+ const businessesResponse=await db.from('businesses')
+  .select('id,name,slug,city_id,status')
+  .eq('city_id',cityId)
+  .eq('status','active')
+  .limit(1000)
+ if(businessesResponse.error)return{data:[],error:businessesResponse.error}
+ const businesses=businessesResponse.data||[]
+ if(!businesses.length)return{data:[],error:null}
+ const ids=businesses.map(b=>b.id)
+ const map=new Map(businesses.map(b=>[b.id,b]))
  const promotionsResponse=await db.from('promotions')
   .select('id,business_id,title,description,image_url,price,original_price,starts_at,ends_at,status,created_at')
+  .in('business_id',ids)
   .eq('status','published')
   .order('created_at',{ascending:false})
   .limit(limit)
  if(promotionsResponse.error)return{data:[],error:promotionsResponse.error}
- const promotions=promotionsResponse.data||[]
- if(!promotions.length)return{data:[],error:null}
- const businessIds=[...new Set(promotions.map(p=>p.business_id).filter(Boolean))]
- if(!businessIds.length)return{data:[],error:null}
- const businessesResponse=await db.from('businesses')
-  .select('id,name,slug,city_id,status')
-  .in('id',businessIds)
-  .eq('city_id',cityId)
-  .eq('status','active')
- if(businessesResponse.error)return{data:[],error:businessesResponse.error}
- const businesses=normalizeBusinesses(businessesResponse.data)
  const now=Date.now()
- const data=promotions
-  .filter(p=>businesses.has(p.business_id))
-  .map(p=>({...p,businesses:businesses.get(p.business_id)}))
-  .filter(p=>isPromotionCurrent(p,now))
+ const data=(promotionsResponse.data||[])
+  .map(p=>({...p,businesses:map.get(p.business_id)}))
+  .filter(p=>p.businesses&&isPromotionCurrent(p,now))
  return{data,error:null}
 }
 
