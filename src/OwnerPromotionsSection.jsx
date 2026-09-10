@@ -28,12 +28,13 @@ function toISO(value){
 }
 function money(v){return v==null||v===''?'':`R$ ${Number(v).toFixed(2).replace('.',',')}`}
 function getLimit(features){const value=features?.promotions_limit??features?.promotions;const n=Number(value);return Number.isFinite(n)&&n>=0?n:0}
+function isSlotActive(p,now=new Date()){return ACTIVE_STATUSES.includes(p.status)&&(!p.ends_at||new Date(p.ends_at)>now)}
 function percent(used,limit){return limit>0?Math.min(100,Math.round((used/limit)*100)):100}
 function statusLabel(status){return status==='published'?'Publicada':status==='pending_review'?'Em análise':status==='draft'?'Rascunho':status==='rejected'?'Rejeitada':status==='archived'?'Arquivada':status}
 
 export default function OwnerPromotionsSection({businessId,businessName,onChanged}){
  const[items,setItems]=useState([]),[plan,setPlan]=useState(null),[planLimit,setPlanLimit]=useState(0),[loading,setLoading]=useState(true),[editor,setEditor]=useState(false),[saving,setSaving]=useState(false),[imageFile,setImageFile]=useState(null),[preview,setPreview]=useState(''),[form,setForm]=useState(EMPTY),[message,setMessage]=useState({text:'',error:false})
- const used=useMemo(()=>items.filter(p=>ACTIVE_STATUSES.includes(p.status)).length,[items])
+ const used=useMemo(()=>items.filter(p=>isSlotActive(p)).length,[items])
  const reached=used>=planLimit
  const usagePercent=percent(used,planLimit)
  const notify=(text,error=false)=>setMessage({text:String(text||''),error})
@@ -88,9 +89,9 @@ export default function OwnerPromotionsSection({businessId,businessName,onChange
   if(original!=null&&(!Number.isFinite(original)||original<0))return notify('Informe um preço original válido.',true)
   setSaving(true);setMessage({text:'',error:false});let uploadedPath=null
   try{
-   const latest=await db.from('promotions').select('id,status').eq('business_id',businessId).in('status',ACTIVE_STATUSES)
+   const latest=await db.from('promotions').select('id,status,ends_at').eq('business_id',businessId).in('status',ACTIVE_STATUSES)
    if(latest.error)throw latest.error
-   if((latest.data||[]).length>=planLimit){setItems(latest.data||[]);throw new Error(`Limite de ${planLimit} promoção${planLimit===1?'':'ões'} em uso atingido no plano ${PLAN_NAMES[plan?.code]||plan?.name||'atual'}.`)}
+   if((latest.data||[]).filter(p=>isSlotActive(p)).length>=planLimit)throw new Error(`Limite de ${planLimit} promoção${planLimit===1?'':'ões'} em uso atingido no plano ${PLAN_NAMES[plan?.code]||plan?.name||'atual'}.`)
    let imageUrl=null,imagePath=null
    if(imageFile){const uploaded=await uploadImage(imageFile);imageUrl=uploaded.url;imagePath=uploaded.path;uploadedPath=uploaded.path}
    const{error}=await db.from('promotions').insert({business_id:businessId,title,description:form.description.trim()||null,price,original_price:original,starts_at:starts,ends_at:ends,status:'pending_review',image_url:imageUrl,image_path:imagePath})
@@ -127,6 +128,6 @@ export default function OwnerPromotionsSection({businessId,businessName,onChange
     <div className="owner-promo-form-footer"><span>Será enviada para aprovação administrativa.</span><div><button type="button" className="account-secondary-btn" onClick={close} disabled={saving}>Cancelar</button><button type="submit" className="account-primary-btn" disabled={saving}>{saving?'Enviando…':'Enviar promoção para análise'}</button></div></div>
    </form>
   </section>}
-  <section className="account-card owner-promo-list-card"><div className="account-card-title"><div><h2>Suas promoções</h2><p>Promoções ativas ocupam seu limite. Arquivadas e rejeitadas não ocupam espaço.</p></div></div>{items.length?<div className="account-list">{items.map(p=><div className="account-list-row" key={p.id}><div className="account-list-avatar promo">{p.image_url?<img src={p.image_url} alt=""/>:<span>✦</span>}</div><div className="account-list-main"><strong>{p.title}</strong><p>{p.price!=null?`Preço promocional: ${money(p.price)}`:'Sem preço informado'}{p.original_price!=null?` · de ${money(p.original_price)}`:''}</p>{(p.starts_at||p.ends_at)&&<small>{p.starts_at?new Intl.DateTimeFormat('pt-BR',{timeZone:PROMOTION_TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(p.starts_at)):'Agora'}{p.ends_at?` → ${new Intl.DateTimeFormat('pt-BR',{timeZone:PROMOTION_TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(p.ends_at))}`:''}</small>}</div><span className={`account-promo-status ${p.status}`}>{statusLabel(p.status)}</span></div>)}</div>:<div className="account-empty-inline owner-promo-empty"><span>✦</span><strong>Nenhuma promoção cadastrada</strong><p>Crie sua primeira oferta para aparecer no catálogo local.</p>{!reached&&<button className="account-secondary-btn small" onClick={startNew}>Criar promoção</button>}</div>}</section>
+  <section className="account-card owner-promo-list-card"><div className="account-card-title"><div><h2>Suas promoções</h2><p>Promoções em uso ocupam seu limite. Expiradas, arquivadas e rejeitadas liberam espaço.</p></div></div>{items.length?<div className="account-list">{items.map(p=><div className="account-list-row" key={p.id}><div className="account-list-avatar promo">{p.image_url?<img src={p.image_url} alt=""/>:<span>✦</span>}</div><div className="account-list-main"><strong>{p.title}</strong><p>{p.price!=null?`Preço promocional: ${money(p.price)}`:'Sem preço informado'}{p.original_price!=null?` · de ${money(p.original_price)}`:''}</p>{(p.starts_at||p.ends_at)&&<small>{p.starts_at?new Intl.DateTimeFormat('pt-BR',{timeZone:PROMOTION_TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(p.starts_at)):'Agora'}{p.ends_at?` → ${new Intl.DateTimeFormat('pt-BR',{timeZone:PROMOTION_TZ,dateStyle:'short',timeStyle:'short'}).format(new Date(p.ends_at))}`:''}</small>}</div><span className={`account-promo-status ${p.status}`}>{statusLabel(p.status)}</span></div>)}</div>:<div className="account-empty-inline owner-promo-empty"><span>✦</span><strong>Nenhuma promoção cadastrada</strong><p>Crie sua primeira oferta para aparecer no catálogo local.</p>{!reached&&<button className="account-secondary-btn small" onClick={startNew}>Criar promoção</button>}</div>}</section>
  </div>
 }
