@@ -30,6 +30,5 @@ test('public promotion surfaces enforce the same active-period rule',()=>{
 
 test('promotion route resolves to the public PromotionsPage component',()=>{
  const app=read('src/app-entry.jsx')
- assert.match(app,/route\.kind==='promotions'\)return <PromotionsPage citySlug=\{route\.citySlug\}/>\s*;
-/)
+ assert.ok(app.includes("if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>") || app.includes("if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>"))
 })
