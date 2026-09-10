@@ -125,7 +125,9 @@ function applyPromotionVisibility(){
   const activeNameSet=new Set(currentPromotions.map(promotionNameKey))
 
   if(route.type==='listing'){
-    document.querySelectorAll('.promotion-card').forEach(card=>{
+    const grid=document.querySelector('.promotion-grid')
+    const cards=[...document.querySelectorAll('.promotion-card')]
+    cards.forEach(card=>{
       const title=card.querySelector('.promotion-body h3')?.textContent?.trim().toLowerCase()||''
       const href=card.querySelector('.link-btn')?.getAttribute('href')||''
       const parts=href.split('/').filter(Boolean)
@@ -137,6 +139,20 @@ function applyPromotionVisibility(){
         ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
     })
+    if(grid&&!grid.querySelector('.promotion-card')){
+      grid.style.display='none'
+      if(!document.querySelector('[data-vl-promotion-empty]')){
+        const empty=document.createElement('div')
+        empty.className='empty'
+        empty.dataset.vlPromotionEmpty='1'
+        empty.style.marginTop='22px'
+        empty.innerHTML='<h3>Nenhuma promoção disponível.</h3><p>Novas ofertas aparecerão aqui quando forem publicadas.</p>'
+        grid.parentElement?.appendChild(empty)
+      }
+    }else if(grid){
+      grid.style.display=''
+      document.querySelector('[data-vl-promotion-empty]')?.remove()
+    }
   }
 
   if(route.type==='home'){
@@ -152,6 +168,10 @@ function applyPromotionVisibility(){
         else ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
     })
+    const promoSection=document.querySelector('.promo-section')
+    if(promoSection&&!promoSection.querySelector('.content-card-v2'))promoSection.remove()
+    const promoCount=document.querySelector('.hero-panel .hero-stat:first-of-type strong')
+    if(promoCount)promoCount.textContent=`${currentPromotions.length} promoções`
   }
 
   if(route.type==='business'){
@@ -167,6 +187,10 @@ function applyPromotionVisibility(){
         const promotion=currentPromotions.find(p=>String(p.businesses?.slug||'').toLowerCase()===String(route.businessSlug||'').toLowerCase()&&String(p.title||'').trim().toLowerCase()===title)
         if(!card.querySelector('img'))ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
+    })
+    document.querySelectorAll('.mbp-promo-card').forEach(card=>{ if(card.dataset.vlPromotionRemoved==='1') return })
+    document.querySelectorAll('.mbp-section').forEach(section=>{
+      if(section.querySelector('.mbp-promo-grid')&&!section.querySelector('.mbp-promo-card'))section.remove()
     })
   }
 }
