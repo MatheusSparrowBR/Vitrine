@@ -34,3 +34,23 @@ test('promotion status changes remain governed by database workflow',()=>{
  assert.match(admin,/quickStatus\(row,status\)/)
  assert.match(admin,/status,updated_at:new Date\(\)\.toISOString\(\)/)
 })
+
+test('merchant promotion creation uses the React form and not browser prompts',()=>{
+ const account=read('src/AccountPage.jsx')
+ const component=read('src/OwnerPromotionsSection.jsx')
+ assert.match(account,/OwnerPromotionsSection/)
+ assert.doesNotMatch(account,/function addPromotion\(/)
+ assert.doesNotMatch(account,/window\.prompt\(['\"]Título da promoção/)
+ assert.match(component,/type="datetime-local"/)
+ assert.match(component,/input type="file"/)
+ assert.match(component,/status:'pending_review'/)
+})
+
+test('merchant promotion creation enforces the plan limit before insert',()=>{
+ const component=read('src/OwnerPromotionsSection.jsx')
+ assert.match(component,/ACTIVE_STATUSES=\['pending_review','published','draft'\]/)
+ assert.match(component,/used>=planLimit/)
+ assert.match(component,/get_effective_plan_id/)
+ assert.match(component,/latest=await db\.from\('promotions'\)/)
+ assert.match(component,/Limite de .* promoção/)
+})
