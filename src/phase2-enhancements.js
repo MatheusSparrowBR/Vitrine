@@ -160,6 +160,14 @@ function applyPromotionVisibility(){
       const title=row.querySelector('strong')?.textContent?.trim().toLowerCase()||''
       if(title&&!activeTitles.has(title))row.remove()
     })
+    document.querySelectorAll('.mbp-promo-card').forEach(card=>{
+      const title=card.querySelector('strong')?.textContent?.trim().toLowerCase()||''
+      if(title&&!activeTitles.has(title))removeExpiredPromotionCard(card)
+      else{
+        const promotion=currentPromotions.find(p=>String(p.businesses?.slug||'').toLowerCase()===String(route.businessSlug||'').toLowerCase()&&String(p.title||'').trim().toLowerCase()===title)
+        if(!card.querySelector('img'))ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
+      }
+    })
   }
 }
 
