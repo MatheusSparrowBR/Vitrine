@@ -24,7 +24,7 @@ test('promotion service guards publication, dates and active business',()=>{
  assert.match(source,/\.eq\('status','published'\)/)
  assert.match(source,/\.eq\('status','active'\)/)
  assert.match(source,/filter\(p=>isPromotionCurrent\(p,now\)\)/)
- assert.match(source,/businesses\.has\(p\.business_id\)/)
+ assert.match(source,/p\.businesses&&isPromotionCurrent/)
 })
 
 test('promotion status changes remain governed by database workflow',()=>{
