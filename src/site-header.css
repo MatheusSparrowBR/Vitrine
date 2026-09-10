@@ -1,4 +1,4 @@
-.vl-site-header{position:sticky;top:0;z-index:9000;background:rgba(255,255,255,.92);border-bottom:1px solid #e8edf4;box-shadow:0 4px 20px rgba(19,43,73,.045);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.vl-site-header{position:sticky;top:0;z-index:3000;background:rgba(255,255,255,.92);border-bottom:1px solid #e8edf4;box-shadow:0 4px 20px rgba(19,43,73,.045);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .vl-site-header *{box-sizing:border-box}
 .vl-site-header-inner{width:min(1320px,100%);height:72px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:14px}
 .vl-site-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#10233d;flex:0 0 auto}
@@ -22,10 +22,9 @@
 .vl-site-menu-toggle{display:none;width:40px;height:40px;border:1px solid #dde5ee;background:#f8fafc;border-radius:10px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer}.vl-site-menu-toggle span{width:16px;height:2px;border-radius:999px;background:#38506c;display:block}
 .vl-site-mobile-panel{display:none}
 
-/* There must be exactly one site-wide navigation bar. Page-specific legacy headers stay in their pages only for compatibility and are visually disabled here. */
+/* Only the shared navigation is visible; legacy page-specific headers remain in place for compatibility. */
 .app>.topbar,.app>.account-topbar,.mbl-shell>.mbl-topbar,.mbp-shell>.mbp-topbar,.legal-page>header{display:none!important}
 
-/* The shared header is taller than the old compact nav, so full-screen utility pages should fill the remaining viewport. */
 .vl-auth-page{min-height:calc(100vh - 72px)!important}
 
 @media (max-width:1120px){
