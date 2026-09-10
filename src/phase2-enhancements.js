@@ -4,6 +4,7 @@ const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db = URL && KEY ? createClient(URL, KEY) : null
 const DEFAULT_PROMOTION_IMAGE = '/promotion-default.svg'
+const MEDIA_BUCKET = 'business-media'
 const seenBanners = new Set()
 let enhancementTimer = null
 let enhancementObserver = null
@@ -11,6 +12,8 @@ let bannerObserver = null
 let promotionRefreshTimer = null
 let promotionLoadToken = 0
 let promotionRouteKey = ''
+let accountPromotionListenerInstalled = false
+let mediaFitInstalled = false
 const cityIdCache = new Map()
 let currentPromotions = []
 
@@ -89,14 +92,13 @@ async function loadCurrentPromotions(){
     if(error){currentPromotions=[];return}
     currentPromotions=(data||[]).filter(p=>isPromotionCurrent(p))
     applyPromotionVisibility()
-  }catch{
-    // Falhas de validação não podem quebrar o catálogo público.
-  }
+  }catch{}
 }
 
 function ensureDefaultPromotionImage(card,src=DEFAULT_PROMOTION_IMAGE){
   if(!card)return
-  if(card.querySelector('img'))return
+  const existing=card.querySelector('img')
+  if(existing){existing.src=existing.getAttribute('src')||src;return}
   const old=card.querySelector('.promotion-cover')
   const img=document.createElement('img')
   img.src=src
@@ -136,7 +138,9 @@ function applyPromotionVisibility(){
       if(!activeKeySet.has(key))removeExpiredPromotionCard(card)
       else{
         const promotion=currentPromotions.find(p=>promotionKey(p)===key)
-        ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
+        const img=card.querySelector('img')
+        if(img){img.src=promotion?.image_url||DEFAULT_PROMOTION_IMAGE;img.style.objectFit='contain'}
+        else ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
     })
     if(grid&&!grid.querySelector('.promotion-card')){
@@ -164,7 +168,7 @@ function applyPromotionVisibility(){
       else{
         const promotion=currentPromotions.find(p=>promotionNameKey(p)===key)
         const existing=card.querySelector('img')
-        if(existing)existing.src=promotion?.image_url||DEFAULT_PROMOTION_IMAGE
+        if(existing){existing.src=promotion?.image_url||DEFAULT_PROMOTION_IMAGE;existing.style.objectFit='contain'}
         else ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
     })
@@ -185,10 +189,11 @@ function applyPromotionVisibility(){
       if(title&&!activeTitles.has(title))removeExpiredPromotionCard(card)
       else{
         const promotion=currentPromotions.find(p=>String(p.businesses?.slug||'').toLowerCase()===String(route.businessSlug||'').toLowerCase()&&String(p.title||'').trim().toLowerCase()===title)
-        if(!card.querySelector('img'))ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
+        const img=card.querySelector('img')
+        if(img){img.src=promotion?.image_url||DEFAULT_PROMOTION_IMAGE;img.style.objectFit='contain'}
+        else ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
       }
     })
-    document.querySelectorAll('.mbp-promo-card').forEach(card=>{ if(card.dataset.vlPromotionRemoved==='1') return })
     document.querySelectorAll('.mbp-section').forEach(section=>{
       if(section.querySelector('.mbp-promo-grid')&&!section.querySelector('.mbp-promo-card'))section.remove()
     })
@@ -209,6 +214,138 @@ function wirePromotionLifecycle(){
   }else{
     applyPromotionVisibility()
   }
+}
+
+function installUniversalMediaFit(){
+  if(mediaFitInstalled||typeof document==='undefined')return
+  mediaFitInstalled=true
+  if(document.getElementById('vl-universal-media-fit'))return
+  const style=document.createElement('style')
+  style.id='vl-universal-media-fit'
+  style.textContent=`
+    .vl-public-app img,.app img,.account-workspace-app img,.admin-promotions-page img,.admin-v2-management img,.business-card img,.business-cover-image,.business-logo,.business-image img,.profile-cover img,.profile-logo img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{object-fit:contain!important;object-position:center!important;background:#f4f7fb!important;}
+    .business-cover-image,.business-image img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{width:100%!important;height:100%!important;}
+    .business-logo,.profile-logo img{max-width:100%!important;max-height:100%!important;}
+    .promotion-default-image{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;background:#f4f7fb!important;display:block!important;}
+  `
+  document.head.appendChild(style)
+}
+
+const pad=n=>String(n).padStart(2,'0')
+function localInputToISO(value){
+  if(!value||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))return null
+  const [date,time]=value.split('T');const [y,m,d]=date.split('-').map(Number);const [hh,mm]=time.split(':').map(Number)
+  const local=new Date(y,m-1,d,hh,mm,0,0)
+  return Number.isNaN(local.getTime())?null:local.toISOString()
+}
+
+function closeAccountPromotionForm(){
+  document.querySelector('.vl-account-promotion-creator')?.remove()
+}
+
+function createAccountPromotionForm(){
+  if(!db||!location.pathname.startsWith('/conta')||location.pathname==='/conta/analytics')return
+  closeAccountPromotionForm()
+  const host=document.querySelector('.account-content')
+  if(!host)return
+  const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'horário local'
+  const form=document.createElement('section')
+  form.className='vl-account-promotion-creator'
+  form.innerHTML=`
+    <div class="vl-apc-head"><div><span class="vl-apc-kicker">NOVA PROMOÇÃO</span><h2>Criar promoção</h2><p>Informe o período no horário local do seu dispositivo: <strong>${timezone}</strong>. O sistema salva o instante correto no banco sem alterar o horário escolhido.</p></div><button type="button" data-vl-promo-close aria-label="Fechar">×</button></div>
+    <form data-vl-promo-form>
+      <div class="vl-apc-grid">
+        <label>Empresa<select name="business_id" required></select></label>
+        <label>Título<input name="title" maxlength="120" required placeholder="Ex.: Pizza grande por R$ 39,90"/></label>
+        <label class="full">Descrição<textarea name="description" rows="4" placeholder="Descreva a promoção, condições e detalhes importantes…"></textarea></label>
+        <label>Preço promocional<input name="price" type="number" min="0" step="0.01" placeholder="39,90"/></label>
+        <label>Preço original<input name="original_price" type="number" min="0" step="0.01" placeholder="59,90"/></label>
+        <label>Início<input name="starts_at" type="datetime-local"/></label>
+        <label>Final<input name="ends_at" type="datetime-local"/><small>No minuto do final, a promoção deixa de ser pública.</small></label>
+      </div>
+      <div class="vl-apc-upload"><div class="vl-apc-preview"><img data-vl-promo-preview src="${DEFAULT_PROMOTION_IMAGE}" alt="Prévia da promoção"/></div><div><span class="vl-apc-kicker">IMAGEM DA OFERTA</span><h3>Imagem personalizada</h3><p>Anexe a arte da própria promoção. Sem imagem, a VitrineLocal usa automaticamente a arte padrão.</p><input name="image" type="file" accept="image/*"/><small data-vl-promo-file>Imagem padrão selecionada.</small></div></div>
+      <div class="vl-apc-actions"><button type="button" data-vl-promo-close class="secondary">Cancelar</button><button type="submit" class="primary">Enviar promoção</button></div>
+      <div data-vl-promo-message class="vl-apc-message"></div>
+    </form>`
+  host.prepend(form)
+
+  const businessSelect=form.querySelector('select[name="business_id"]')
+  const imageInput=form.querySelector('input[name="image"]')
+  const preview=form.querySelector('[data-vl-promo-preview]')
+  const fileLabel=form.querySelector('[data-vl-promo-file]')
+  const message=form.querySelector('[data-vl-promo-message]')
+  const startInput=form.querySelector('input[name="starts_at"]')
+  const endInput=form.querySelector('input[name="ends_at"]')
+
+  getSession().then(async session=>{
+    if(!session){businessSelect.innerHTML='<option value="">Faça login para cadastrar</option>';return}
+    const {data,error}=await db.from('businesses').select('id,name,city_id,cities(name)').eq('owner_id',session.user.id).eq('status','active').order('name')
+    if(error){message.textContent=error.message;message.className='vl-apc-message error';return}
+    businessSelect.innerHTML='<option value="">Selecione a empresa</option>'+(data||[]).map(b=>`<option value="${b.id}">${String(b.name).replace(/"/g,'&quot;')}${b.cities?.name?` · ${String(b.cities.name).replace(/"/g,'&quot;')}`:''}</option>`).join('')
+    const existing=document.querySelector('.account-business-switcher select')?.value
+    if(existing&&(data||[]).some(b=>b.id===existing))businessSelect.value=existing
+  })
+
+  imageInput.addEventListener('change',()=>{
+    const file=imageInput.files?.[0]
+    if(!file){preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='Imagem padrão selecionada.';return}
+    if(!file.type.startsWith('image/')){imageInput.value='';preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='Selecione uma imagem válida.';return}
+    if(file.size>8*1024*1024){imageInput.value='';preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='A imagem deve ter no máximo 8 MB.';return}
+    const url=URL.createObjectURL(file);preview.src=url;fileLabel.textContent=`${file.name} · ${(file.size/1024/1024).toFixed(1)} MB`;
+  })
+  form.querySelectorAll('[data-vl-promo-close]').forEach(btn=>btn.addEventListener('click',closeAccountPromotionForm))
+  startInput.addEventListener('change',()=>{if(startInput.value&&endInput.value&&endInput.value<=startInput.value)endInput.value=''})
+  endInput.addEventListener('change',()=>{if(startInput.value&&endInput.value&&endInput.value<=startInput.value){message.textContent='O encerramento deve ser posterior ao início.';message.className='vl-apc-message error'}})
+  form.querySelector('[data-vl-promo-form]').addEventListener('submit',async e=>{
+    e.preventDefault();message.textContent='';message.className='vl-apc-message'
+    const data=new FormData(e.currentTarget)
+    const businessId=String(data.get('business_id')||'')
+    const title=String(data.get('title')||'').trim()
+    const startsValue=String(data.get('starts_at')||'')
+    const endsValue=String(data.get('ends_at')||'')
+    const starts=localInputToISO(startsValue),ends=localInputToISO(endsValue)
+    if(!businessId||!title)return Object.assign(message,{textContent:'Preencha empresa e título.',className:'vl-apc-message error'})
+    if(startsValue&&!starts||endsValue&&!ends)return Object.assign(message,{textContent:'Verifique as datas e horários.',className:'vl-apc-message error'})
+    if(starts&&ends&&new Date(ends)<=new Date(starts))return Object.assign(message,{textContent:'O encerramento deve ser posterior ao início.',className:'vl-apc-message error'})
+    const session=await getSession();if(!session)return Object.assign(message,{textContent:'Sua sessão expirou. Faça login novamente.',className:'vl-apc-message error'})
+    const owner=await db.from('businesses').select('id').eq('id',businessId).eq('owner_id',session.user.id).eq('status','active').maybeSingle()
+    if(owner.error||!owner.data)return Object.assign(message,{textContent:'Empresa não autorizada para este cadastro.',className:'vl-apc-message error'})
+    let imageUrl=null;let imagePath=null
+    const file=imageInput.files?.[0]
+    try{
+      if(file){
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'
+        imagePath=`${businessId}/promotions/${crypto.randomUUID()}.${ext}`
+        const up=await db.storage.from(MEDIA_BUCKET).upload(imagePath,file,{cacheControl:'31536000',contentType:file.type,upsert:false})
+        if(up.error)throw up.error
+        imageUrl=db.storage.from(MEDIA_BUCKET).getPublicUrl(imagePath).data.publicUrl
+      }
+      const priceRaw=String(data.get('price')||'');const originalRaw=String(data.get('original_price')||'')
+      const payload={business_id:businessId,title,description:String(data.get('description')||'').trim()||null,price:priceRaw===''?null:Number(priceRaw),original_price:originalRaw===''?null:Number(originalRaw),starts_at:starts,ends_at:ends,status:'pending_review',image_url:imageUrl,updated_at:new Date().toISOString()}
+      const insert=await db.from('promotions').insert(payload)
+      if(insert.error)throw insert.error
+      message.textContent='Promoção enviada para revisão. Ela aparecerá no catálogo após a publicação.';message.className='vl-apc-message success'
+      e.currentTarget.reset();preview.src=DEFAULT_PROMOTION_IMAGE;fileLabel.textContent='Imagem padrão selecionada.'
+      setTimeout(()=>location.reload(),700)
+    }catch(err){
+      if(imagePath)await db.storage.from(MEDIA_BUCKET).remove([imagePath]).catch(()=>{})
+      message.textContent=err.message||'Não foi possível cadastrar a promoção.';message.className='vl-apc-message error'
+    }
+  })
+}
+
+function installAccountPromotionCreator(){
+  if(accountPromotionListenerInstalled||typeof document==='undefined')return
+  accountPromotionListenerInstalled=true
+  document.addEventListener('click',e=>{
+    if(!location.pathname.startsWith('/conta')||location.pathname==='/conta/analytics')return
+    const button=e.target.closest('button')
+    if(!button||!button.closest('.account-workspace-app'))return
+    const text=button.textContent?.trim().toLowerCase()||''
+    if(!/(promoção|promoções)/i.test(text)||!/^(adicionar|nova|criar|\+|＋)/i.test(text))return
+    e.preventDefault();e.stopImmediatePropagation()
+    createAccountPromotionForm()
+  },true)
 }
 
 async function enhanceAccount(){
@@ -253,6 +390,8 @@ function wireBannerAnalytics(){
 function runEnhancements(){
   window.clearTimeout(enhancementTimer)
   enhancementTimer=window.setTimeout(()=>{
+    installUniversalMediaFit()
+    installAccountPromotionCreator()
     enhanceAccount()
     wireBannerAnalytics()
     wirePromotionLifecycle()
@@ -266,6 +405,8 @@ function start(){
   enhancementObserver=new MutationObserver(()=>{
     window.clearTimeout(enhancementTimer)
     enhancementTimer=window.setTimeout(()=>{
+      installUniversalMediaFit()
+      installAccountPromotionCreator()
       enhanceAccount()
       wireBannerAnalytics()
       wirePromotionLifecycle()
