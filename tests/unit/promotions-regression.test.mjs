@@ -28,9 +28,9 @@ test('promotion service guards publication, dates and active business',()=>{
 })
 
 test('promotion status changes remain governed by database workflow',()=>{
- const account=read('src/AccountPage.jsx')
+ const component=read('src/OwnerPromotionsSection.jsx')
  const admin=read('src/AdminPromotionsPage.jsx')
- assert.match(account,/status:'pending_review'/)
+ assert.match(component,/status:'pending_review'/)
  assert.match(admin,/quickStatus\(row,status\)/)
  assert.match(admin,/status,updated_at:new Date\(\)\.toISOString\(\)/)
 })
@@ -53,4 +53,28 @@ test('merchant promotion creation enforces the plan limit before insert',()=>{
  assert.match(component,/get_effective_plan_id/)
  assert.match(component,/latest=await db\.from\('promotions'\)/)
  assert.match(component,/Limite de .* promoção/)
+})
+
+test('plan limit hardening is versioned and covers all catalog resources',()=>{
+ const migration=read('supabase/migrations/20260910233000_harden_plan_limits_and_monthly_quotas.sql')
+ assert.match(migration,/business_photos_plan_limit/)
+ assert.match(migration,/business_items_plan_limit/)
+ assert.match(migration,/promotions_plan_limit/)
+ assert.match(migration,/v_limit>=0 and v_used>=v_limit/)
+ assert.match(migration,/ends_at>now\(\)/)
+})
+
+test('monthly AI quota is atomic and calendar-month based',()=>{
+ const migration=read('supabase/migrations/20260910233000_harden_plan_limits_and_monthly_quotas.sql')
+ assert.match(migration,/business_plan_usage_monthly/)
+ assert.match(migration,/consume_monthly_plan_quota/)
+ assert.match(migration,/date_trunc\('month',now\(\) at time zone 'America\/Sao_Paulo'\)/)
+ assert.match(migration,/used_count\+excluded\.used_count<=v_limit/)
+})
+
+test('subscription history does not use a one-row-per-business unique constraint',()=>{
+ const migration=read('supabase/migrations/20260910233000_harden_plan_limits_and_monthly_quotas.sql')
+ assert.match(migration,/drop constraint if exists subscriptions_user_id_business_id_key/)
+ assert.match(migration,/subscriptions_one_current_plan_per_business_idx/)
+ assert.match(migration,/subscriptions_provider_subscription_id_idx/)
 })
