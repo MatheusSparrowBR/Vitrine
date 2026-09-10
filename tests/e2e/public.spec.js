@@ -25,7 +25,8 @@ test('header global mantém o mesmo componente em todas as páginas principais',
   await expect(page.locator('.vl-site-brand')).toBeVisible()
   await expect(page.locator('.vl-site-city')).toBeVisible()
   await expect(page.locator('.vl-site-business-cta')).toBeVisible()
-  await expect(page.locator('.topbar,.mbl-topbar,.mbp-topbar')).toHaveCount(0)
+  const visibleLegacyHeaders=page.locator('.topbar:visible, .account-topbar:visible, .mbl-topbar:visible, .mbp-topbar:visible, .legal-page > header:visible')
+  await expect(visibleLegacyHeaders).toHaveCount(0)
  }
 })
 
