@@ -25,16 +25,17 @@ Nunca coloque chaves secretas/service role no frontend.
 
 ## MVP atual
 
-- Home com busca e categorias.
-- Catálogo de empresas.
+- Home comercial com busca, categorias, empresas em destaque, promoções, eventos e CTA para comerciantes.
+- Catálogo de empresas com filtro por cidade/categoria.
 - Diretório público otimizado via `public_business_directory` para leituras públicas de empresas.
-- Diagnóstico visual no navegador para erros de chamadas ao Supabase.
 - Login e criação de conta.
-- Cadastro de empresa autenticado com status inicial `pending`.
-- Perfis públicos completos.
+- Cadastro de empresa autenticado com status inicial `pending` e encaminhamento para escolha de plano.
+- Perfis públicos completos com galeria e contato.
 - Promoções e área do comerciante.
 - Envio de conteúdo da comunidade com moderação.
-- Painel administrativo.
+- Painel administrativo com UX v2.
+- Gestão administrativa de empresas, promoções, eventos, banners, categorias, cidades e planos.
+- Edição/exclusão de promoções e publicação/pausa de campanhas.
 - Banner Premium da Home cadastrado/publicado somente pelo administrador.
 - Upload das artes Premium para o bucket `premium-banners` do Supabase Storage.
 - Upload de fotos e vídeos das empresas para `business-media`.
@@ -42,34 +43,33 @@ Nunca coloque chaves secretas/service role no frontend.
 - Mídia da comunidade aprovada é copiada para `community-published` antes da publicação no feed.
 - Seção pública de planos na Home carregada da tabela `plans`.
 - Área do comerciante para atualizar logo, capa e galeria com upload real para o Storage.
+- Funil comercial: cadastro da empresa → escolha de plano → checkout Stripe para planos pagos → retorno e gerenciamento da assinatura.
+- Analytics público por eventos (`page_view`, `profile_view`, `whatsapp_click`, `instagram_click`, `website_click`, `business_click`, `promotion_click`, `event_click`, `category_click`, `banner_click`).
+- Dashboard de Analytics para administradores e comerciantes.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
 
-## Planos exibidos na Home
+## Planos
 
 A Home apresenta os planos ativos cadastrados no Supabase:
 
 - **Grátis** — R$ 0,00/mês
-- **Pro** — R$ 29,90/mês
-- **Premium** — R$ 59,90/mês
+- **Pro** — R$ 29,90/mês ou R$ 299/ano
+- **Premium** — R$ 59,90/mês ou R$ 599/ano
 
-Os botões iniciam o cadastro da empresa. A cobrança automática será conectada posteriormente.
-
-Banners publicitários Premium da Home são um produto de mídia separado, com cadastro, aprovação e publicação controlados pelo administrador.
+O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam a Edge Function `create-checkout-session` e o portal de cobrança quando existe uma assinatura ativa. A sincronização de status depende da configuração das credenciais e webhook do Stripe no ambiente Supabase.
 
 ## Banner Premium da Home
 
 - Espaço de destaque logo abaixo do hero da Home.
 - Banner vinculado a uma empresa e cidade.
 - Cadastro e publicação restritos ao administrador.
-- Novo banner entra inativo/em revisão.
 - A arte é validada no navegador e aceita JPG, PNG ou WebP de até 10 MB.
 - A imagem é enviada para o Supabase Storage e o caminho do objeto é salvo em `advertisements.image_path`.
 - Ao excluir um banner, o sistema tenta remover também o objeto correspondente do Storage.
-- Admin pode publicar, pausar ou excluir.
+- Admin pode publicar, pausar, editar ou excluir.
 - Prioridade controla a ordem.
 - Início e fim permitem programação.
-- Múltiplos banners alternam automaticamente na Home.
-- Cobrança automática do Premium ficará conectada posteriormente; até lá, a confirmação é administrativa.
+- Múltiplos banners elegíveis alternam automaticamente na Home.
 
 ## Mídia de empresas e comunidade
 
@@ -82,6 +82,10 @@ Banners publicitários Premium da Home são um produto de mídia separado, com c
 - **Aprovação:** a mídia privada é transferida para `community-published`, o post é criado e o arquivo privado é removido.
 - **Rejeição:** a submissão é marcada como rejeitada e a mídia privada é removida.
 - Buckets, limites de tamanho e políticas RLS são versionados nas migrations do Supabase.
+
+## Analytics
+
+O rastreador global registra eventos anônimos no Supabase quando o backend está configurado. A página `/admin/analytics` consolida os eventos e assinaturas da plataforma. A página `/conta/analytics` mostra o desempenho da empresa selecionada nos últimos 30 dias. Nenhuma chave secreta ou service role é usada no frontend.
 
 ## Diagnóstico do diretório público
 
