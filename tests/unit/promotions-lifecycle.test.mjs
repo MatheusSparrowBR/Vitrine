@@ -2,25 +2,38 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-const source=fs.readFileSync('src/phase2-enhancements.js','utf8')
+const read=path=>fs.readFileSync(path,'utf8')
 
-test('promoções consideram início e término com o relógio atual',()=>{
-  assert.match(source,/function isPromotionCurrent\(promotion, now=Date\.now\(\)\)/)
-  assert.match(source,/if\(start!==null&&start>now\)return false/)
-  assert.match(source,/if\(end!==null&&end<=now\)return false/)
+test('promotion visibility is no longer controlled by phase2 DOM code',()=>{
+ const source=read('src/phase2-enhancements.js')
+ assert.doesNotMatch(source,/applyPromotionVisibility|loadCurrentPromotions|promotionRefreshTimer|currentPromotions|promotionKey|promotionNameKey/)
+ assert.doesNotMatch(source,/\.promotion-card.*remove|querySelectorAll\(.*promotion/)
 })
 
-test('promoções públicas são revalidadas periodicamente',()=>{
-  assert.match(source,/setInterval\(loadCurrentPromotions,30000\)/)
-  assert.match(source,/currentPromotions=\(data\|\|\[\]\)\.filter\(p=>isPromotionCurrent\(p\)\)/)
+test('React owns the public promotion data flow',()=>{
+ const service=read('src/promotion-service.js')
+ const home=read('src/CityHomePage.jsx')
+ const catalog=read('src/PublicCatalogPages.jsx')
+ const profile=read('src/ModernBusinessProfilePage.jsx')
+ assert.match(service,/export async function getActiveCityPromotions/)
+ assert.match(service,/export async function getActiveBusinessPromotions/)
+ assert.match(home,/getActiveCityPromotions\(db,city\.id/)
+ assert.match(home,/DEFAULT_PROMOTION_IMAGE/)
+ assert.match(catalog,/getActiveCityPromotions\(db,c\.id/)
+ assert.match(profile,/getActiveBusinessPromotions\(db,b\.id/)
 })
 
-test('promoções sem arte usam a arte padrão',()=>{
-  assert.match(source,/DEFAULT_PROMOTION_IMAGE = '\/promotion-default\.svg'/)
-  assert.match(source,/ensureDefaultPromotionImage/)
-  assert.match(source,/promotion\?\.image_url\|\|DEFAULT_PROMOTION_IMAGE/)
+test('public promotion service enforces published status and active period',()=>{
+ const source=read('src/promotion-service.js')
+ assert.match(source,/status==='published'/)
+ assert.match(source,/start!==null&&start>now/)
+ assert.match(source,/end!==null&&end<=now/)
+ assert.match(source,/\.eq\('status','published'\)/)
+ assert.match(source,/\.eq\('status','active'\)/)
 })
 
-test('a arte padrão existe no projeto',()=>{
-  assert.equal(fs.existsSync('public/promotion-default.svg'),true)
+test('promotion image fallback exists',()=>{
+ const service=read('src/promotion-service.js')
+ assert.match(service,/DEFAULT_PROMOTION_IMAGE='\/promotion-default\.svg'/)
+ assert.equal(fs.existsSync('public/promotion-default.svg'),true)
 })
