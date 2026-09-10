@@ -18,6 +18,7 @@ let accountPromotionListenerInstalled = false
 let mediaFitInstalled = false
 const cityIdCache = new Map()
 let currentPromotions = []
+let promotionsLoaded = false
 
 function sessionId(){
   try{
@@ -91,8 +92,9 @@ async function loadCurrentPromotions(){
       .order('created_at',{ascending:false})
       .limit(500)
     if(token!==promotionLoadToken)return
-    if(error){currentPromotions=[];return}
+    if(error)return
     currentPromotions=(data||[]).filter(p=>isPromotionCurrent(p))
+    promotionsLoaded=true
     applyPromotionVisibility()
   }catch{}
 }
@@ -123,6 +125,7 @@ function activeByBusinessSlug(slug){
 }
 
 function applyPromotionVisibility(){
+  if(!promotionsLoaded)return
   const route=publicPromotionRoute()
   if(!route)return
   const activeKeySet=new Set(currentPromotions.map(promotionKey))
@@ -210,6 +213,7 @@ function wirePromotionLifecycle(){
   if(nextKey!==promotionRouteKey){
     promotionRouteKey=nextKey
     currentPromotions=[]
+    promotionsLoaded=false
     window.clearInterval(promotionRefreshTimer)
     loadCurrentPromotions()
     promotionRefreshTimer=window.setInterval(loadCurrentPromotions,30000)
@@ -322,7 +326,7 @@ function createAccountPromotionForm(){
         imageUrl=db.storage.from(MEDIA_BUCKET).getPublicUrl(imagePath).data.publicUrl
       }
       const priceRaw=String(data.get('price')||'');const originalRaw=String(data.get('original_price')||'')
-      const payload={business_id:businessId,title,description:String(data.get('description')||'').trim()||null,price:priceRaw===''?null:Number(priceRaw),original_price:originalRaw===''?null:Number(originalRaw),starts_at:starts,ends_at:ends,status:'pending_review',image_url:imageUrl,updated_at:new Date().toISOString()}
+      const payload={business_id:businessId,title,description:String(data.get('description')||'').trim()||null,price:priceRaw===''?null:Number(priceRaw),original_price:originalRaw===''?null:Number(originalRaw),starts_at:starts,ends_at:ends,status:'pending_review',image_url:imageUrl,image_path:imagePath,updated_at:new Date().toISOString()}
       const insert=await db.from('promotions').insert(payload)
       if(insert.error)throw insert.error
       message.textContent='Promoção enviada para revisão. Ela aparecerá no catálogo após a publicação.';message.className='vl-apc-message success'
