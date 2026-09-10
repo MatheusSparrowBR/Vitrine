@@ -18,21 +18,26 @@ function PublicHeader({city,showExplore=true}){
 export function BusinessesPage({citySlug='laguna'}){
  const[city,setCity]=useState(null),[businesses,setBusinesses]=useState([]),[categories,setCategories]=useState([]),[q,setQ]=useState(''),[cat,setCat]=useState(''),[loading,setLoading]=useState(true)
  useEffect(()=>{let live=true;(async()=>{
-  if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setCategories(fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setLoading(false);return}
+  const params=new URLSearchParams(location.search)
+  const initialCategory=params.get('categoria')||params.get('category')||''
+  if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setCategories(fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setCat(initialCategory);setLoading(false);return}
   const{data:c}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(!live)return;setCity(c||null);if(!c){setLoading(false);return}
   const[b,cs]=await Promise.all([
    db.from('businesses').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,categories(name,slug,icon)').eq('city_id',c.id).eq('status','active').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(100),
    db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name')
   ])
-  if(live){setBusinesses(b.data||[]);setCategories(cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setLoading(false)}
+  const loadedCategories=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
+  const validCategory=initialCategory&&loadedCategories.some(c=>c.slug===initialCategory)?initialCategory:''
+  if(live){setBusinesses(b.data||[]);setCategories(loadedCategories);setCat(validCategory);setLoading(false)}
  })();return()=>{live=false}},[citySlug])
  const items=businesses.filter(b=>{const x=q.trim().toLowerCase();return(!x||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(x))&&(!cat||b.categories?.slug===cat)})
+ const changeCategory=e=>{const next=e.target.value;setCat(next);const url=new URL(location.href);if(next)url.searchParams.set('categoria',next);else url.searchParams.delete('categoria');history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))}
  if(loading)return <main className="page"><div className="empty"><h3>Carregando empresas…</h3></div></main>
  if(!city)return <main className="page"><div className="empty"><h3>Cidade não encontrada.</h3><a className="btn primary" href="/laguna">Voltar</a></div></main>
  return <div className="app"><PublicHeader city={city}/><main className="page">
   <div className="page-tools"><a className="back-link" href={`/${city.slug}`}>← Voltar para {city.name}</a></div>
   <div className="page-title"><span className="section-kicker">CATÁLOGO LOCAL</span><h1>Empresas em {city.name}</h1><p>Encontre negócios, serviços e lugares da cidade.</p></div>
-  <div className="toolbar"><div className="searchbox compact"><span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar empresa, serviço ou bairro"/></div><select value={cat} onChange={e=>setCat(e.target.value)}><option value="">Todas as categorias</option>{categories.map(c=><option key={c.id} value={c.slug}>{c.name}</option>)}</select></div>
+  <div className="toolbar"><div className="searchbox compact"><span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar empresa, serviço ou bairro"/></div><select value={cat} onChange={changeCategory}><option value="">Todas as categorias</option>{categories.map(c=><option key={c.id} value={c.slug}>{c.name}</option>)}</select></div>
   {items.length?<div className="business-grid">{items.map(b=><a className="business-card" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`} key={b.id}>
    <div className="business-cover">{b.cover_url?<img className="business-cover-image" src={b.cover_url} alt="" loading="lazy"/>:<div className="cover-placeholder">V</div>}{b.logo_url&&<span className="business-logo-wrap"><img className="business-logo" src={b.logo_url} alt={`${b.name} logo`} loading="lazy"/></span>}{b.verified&&<span className="verified">✓ Verificada</span>}</div>
    <div className="business-body"><span className="business-category">{b.categories?.name||'Empresa'}</span><h3>{b.name}</h3><p>{b.short_description||b.description||'Conheça este negócio local.'}</p><div className="business-footer"><span>{b.neighborhood||b.address||'Laguna - SC'}</span><span className="business-meta"><span className="business-rating">★ Sem avaliações</span>{b.whatsapp&&<span className="business-whatsapp">WhatsApp</span>}</span></div></div>
