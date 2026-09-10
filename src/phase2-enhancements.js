@@ -1,4 +1,4 @@
-import {createClient} from '@supabase/supabase-js'
+import{createClient}from '@supabase/supabase-js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -20,7 +20,7 @@ function sessionId(){
 
 async function getSession(){
  if(!db)return null
- const {data}=await db.auth.getSession()
+ const{data}=await db.auth.getSession()
  return data?.session||null
 }
 
@@ -29,7 +29,7 @@ async function getCityId(){
  const parts=location.pathname.split('/').filter(Boolean)
  const slug=parts[0]&&!['admin','planos','conta','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():'laguna'
  if(cityIdCache.has(slug))return cityIdCache.get(slug)
- const {data}=await db.from('cities').select('id').eq('slug',slug).maybeSingle()
+ const{data}=await db.from('cities').select('id').eq('slug',slug).maybeSingle()
  const id=data?.id||null
  cityIdCache.set(slug,id)
  return id
@@ -43,7 +43,7 @@ function installUniversalMediaFit(){
  style.id='vl-universal-media-fit'
  style.textContent=`
   .vl-public-app img,.app img,.account-workspace-app img,.admin-promotions-page img,.admin-v2-management img,.business-card img,.business-cover-image,.business-logo,.business-image img,.profile-cover img,.profile-logo img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{object-fit:contain!important;object-position:center!important;background:#f4f7fb!important;}
-  .business-cover-image,.business-image img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{width:100%!important;height:100%!important;}
+  .business-cover-image,.business-image img,.profile-gallery img,.item-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{width:100%!important;height:100%!important;}
   .business-logo,.profile-logo img{max-width:100%!important;max-height:100%!important;}
  `
  document.head.appendChild(style)
@@ -60,7 +60,7 @@ async function enhanceAccount(){
  let reason=''
  if(status==='rejected'&&db){
   const session=await getSession()
-  if(session){const {data}=await db.from('businesses').select('rejection_reason').eq('owner_id',session.user.id).eq('status','rejected').order('updated_at',{ascending:false}).limit(1).maybeSingle();reason=data?.rejection_reason||''}
+  if(session){const{data}=await db.from('businesses').select('rejection_reason').eq('owner_id',session.user.id).eq('status','rejected').order('updated_at',{ascending:false}).limit(1).maybeSingle();reason=data?.rejection_reason||''}
  }
  const banner=document.createElement('div')
  banner.className=`vl-phase2-review-banner ${status}`
