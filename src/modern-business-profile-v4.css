@@ -54,6 +54,66 @@
   font-size:9px !important;
   line-height:1 !important;
 }
+
+/* Promoções do perfil: cards compactos e previsíveis, sem a imagem controlar a altura. */
+.mbp-promo-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  align-items:stretch !important;
+}
+.mbp-promo-card{
+  min-width:0 !important;
+  overflow:hidden !important;
+  border:1px solid #e0e8ef !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  box-shadow:0 8px 22px rgba(20,47,78,.045) !important;
+}
+.mbp-promo-card > img{
+  display:block !important;
+  width:100% !important;
+  height:140px !important;
+  min-height:140px !important;
+  max-height:140px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  background:#f4f7fb !important;
+}
+.mbp-promo-card > div{
+  padding:12px !important;
+  min-width:0 !important;
+}
+.mbp-promo-card > div > strong{
+  display:block !important;
+  color:#102943 !important;
+  font-size:13px !important;
+  line-height:1.25 !important;
+}
+.mbp-promo-card > div p{
+  margin:6px 0 8px !important;
+  color:#6c8096 !important;
+  font-size:10px !important;
+  line-height:1.45 !important;
+  display:-webkit-box !important;
+  -webkit-box-orient:vertical !important;
+  -webkit-line-clamp:3 !important;
+  overflow:hidden !important;
+}
+.mbp-promo-card > div > div{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+}
+.mbp-promo-card del{
+  color:#8a98a8 !important;
+  font-size:10px !important;
+}
+.mbp-promo-card b{
+  color:#17814f !important;
+  font-size:13px !important;
+}
+
 @media(max-width:760px){
   .mbp-badges > .mbp-live-pill,
   .mbp-badges > .mbp-open-pill,
@@ -65,5 +125,24 @@
     width:118px !important;
     min-width:118px !important;
     max-width:118px !important;
+  }
+  .mbp-promo-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:10px !important;
+  }
+  .mbp-promo-card > img{
+    height:120px !important;
+    min-height:120px !important;
+    max-height:120px !important;
+  }
+}
+@media(max-width:480px){
+  .mbp-promo-grid{
+    grid-template-columns:1fr !important;
+  }
+  .mbp-promo-card > img{
+    height:140px !important;
+    min-height:140px !important;
+    max-height:140px !important;
   }
 }
