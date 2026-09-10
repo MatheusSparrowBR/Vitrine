@@ -16,7 +16,7 @@ test('merchant workspace has a single React entrypoint',()=>{
 test('merchant workspace writes go through Supabase client and shared storage bucket',()=>{
  const account=read('src/AccountPage.jsx')
  assert.match(account,/const MEDIA_BUCKET='business-media'/)
- assert.match(account,/supabase\.storage\.from\(MEDIA_BUCKET\)\.upload/)
- assert.match(account,/supabase\.from\('business_photos'\)\.insert/)
- assert.match(account,/supabase\.from\('business_items'\)\.insert/)
+ assert.match(account,/(?:supabase|db)\.storage\.from\(MEDIA_BUCKET\)\.upload/)
+ assert.match(account,/db\.from\('business_photos'\)\.insert/)
+ assert.match(account,/db\.from\('business_items'\)\.insert/)
 })
