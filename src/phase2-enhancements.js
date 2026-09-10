@@ -5,6 +5,8 @@ const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db = URL && KEY ? createClient(URL, KEY) : null
 const DEFAULT_PROMOTION_IMAGE = '/promotion-default.svg'
 const MEDIA_BUCKET = 'business-media'
+const PROMOTION_TZ = 'America/Sao_Paulo'
+const PROMOTION_OFFSET = '-03:00'
 const seenBanners = new Set()
 let enhancementTimer = null
 let enhancementObserver = null
@@ -231,12 +233,10 @@ function installUniversalMediaFit(){
   document.head.appendChild(style)
 }
 
-const pad=n=>String(n).padStart(2,'0')
 function localInputToISO(value){
-  if(!value||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))return null
-  const [date,time]=value.split('T');const [y,m,d]=date.split('-').map(Number);const [hh,mm]=time.split(':').map(Number)
-  const local=new Date(y,m-1,d,hh,mm,0,0)
-  return Number.isNaN(local.getTime())?null:local.toISOString()
+  if(!value||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))return null
+  const d=new Date(`${value}:00${PROMOTION_OFFSET}`)
+  return Number.isNaN(d.getTime())?null:d.toISOString()
 }
 
 function closeAccountPromotionForm(){
@@ -248,11 +248,10 @@ function createAccountPromotionForm(){
   closeAccountPromotionForm()
   const host=document.querySelector('.account-content')
   if(!host)return
-  const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'horário local'
   const form=document.createElement('section')
   form.className='vl-account-promotion-creator'
   form.innerHTML=`
-    <div class="vl-apc-head"><div><span class="vl-apc-kicker">NOVA PROMOÇÃO</span><h2>Criar promoção</h2><p>Informe o período no horário local do seu dispositivo: <strong>${timezone}</strong>. O sistema salva o instante correto no banco sem alterar o horário escolhido.</p></div><button type="button" data-vl-promo-close aria-label="Fechar">×</button></div>
+    <div class="vl-apc-head"><div><span class="vl-apc-kicker">NOVA PROMOÇÃO</span><h2>Criar promoção</h2><p>O período usa o fuso oficial do projeto: <strong>${PROMOTION_TZ} (${PROMOTION_OFFSET})</strong>. O horário digitado é gravado sem deslocamento.</p></div><button type="button" data-vl-promo-close aria-label="Fechar">×</button></div>
     <form data-vl-promo-form>
       <div class="vl-apc-grid">
         <label>Empresa<select name="business_id" required></select></label>
