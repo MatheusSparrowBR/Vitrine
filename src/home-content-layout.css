@@ -1,13 +1,19 @@
 /* Layout específico da Home — promoção e agenda não compartilham regras de tamanho */
 .home-v2 .promotion-grid{display:grid!important;gap:18px!important;align-items:stretch!important}
-.home-v2 .promotion-grid-1{grid-template-columns:minmax(0,540px)!important;justify-content:center!important}
-.home-v2 .promotion-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:900px!important;margin:0 auto!important}
+.home-v2 .promotion-grid-1{grid-template-columns:minmax(0,460px)!important;justify-content:center!important}
+.home-v2 .promotion-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:760px!important;margin:0 auto!important}
 .home-v2 .promotion-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .home-v2 .promotion-grid .content-card-v2{min-width:0!important;min-height:0!important}
-.home-v2 .promotion-grid .content-card-body{min-height:150px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:20px!important}
+.home-v2 .promotion-grid .content-card-media{display:block!important;width:100%!important;height:155px!important;min-height:155px!important;overflow:hidden!important;background:#eef4fa!important}
+.home-v2 .promotion-grid .content-card-media img{display:block!important;width:100%!important;height:100%!important;min-height:0!important;max-width:100%!important;object-fit:cover!important;object-position:center!important}
+.home-v2 .promotion-grid .content-card-body{min-height:143px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:17px!important}
 .home-v2 .promotion-grid .content-card-body .tag{display:inline-flex!important;align-self:flex-start!important;padding:5px 8px!important;border-radius:999px!important;background:#eef5ff!important}
 .home-v2 .promotion-grid .content-card-body h3{margin:9px 0 6px!important}
-.home-v2 .promotion-grid .content-card-body p:last-child{margin-top:10px!important;color:#216df3!important}
+.home-v2 .promotion-grid .content-card-body p{margin:0!important}
+.home-v2 .promotion-grid .content-card-body p:last-of-type{margin-top:9px!important;color:#216df3!important}
+.home-v2 .promotion-grid .content-card-body .price-row{display:flex!important;align-items:center!important;gap:9px!important;margin-top:9px!important}
+.home-v2 .promotion-grid .content-card-body .price-row del{color:#94a3b8!important;font-size:10px!important}
+.home-v2 .promotion-grid .content-card-body .price-row strong{color:#17804e!important;font-size:15px!important}
 
 .home-v2 .event-grid{display:grid!important;gap:18px!important;align-items:stretch!important}
 .home-v2 .event-grid-1{grid-template-columns:minmax(0,680px)!important;justify-content:center!important}
@@ -28,6 +34,7 @@
 }
 @media(max-width:760px){
  .home-v2 .promotion-grid-1,.home-v2 .promotion-grid-2,.home-v2 .promotion-grid-3,.home-v2 .event-grid-1,.home-v2 .event-grid-2,.home-v2 .event-grid-3{grid-template-columns:1fr!important;max-width:none!important}
+ .home-v2 .promotion-grid .content-card-media{height:180px!important;min-height:180px!important}
  .home-v2 .promotion-grid .content-card-body{min-height:145px!important}
  .home-v2 .event-grid .content-card-v2>img,.home-v2 .event-grid-1 .content-card-v2>img{height:180px!important}
  .home-v2 .promo-section{padding:38px 0 42px!important;margin-top:40px!important}
