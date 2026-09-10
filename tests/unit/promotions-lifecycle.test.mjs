@@ -25,7 +25,7 @@ test('React owns the public promotion data flow',()=>{
 
 test('public promotion service enforces published status and active period',()=>{
  const source=read('src/promotion-service.js')
- assert.match(source,/status==='published'/)
+ assert.match(source,/promotion\.status!=='published'/)
  assert.match(source,/start!==null&&start>now/)
  assert.match(source,/end!==null&&end<=now/)
  assert.match(source,/\.eq\('status','published'\)/)
