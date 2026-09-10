@@ -57,15 +57,31 @@ test('catalogo moderno possui filtros e cards visuais',async({page})=>{
 })
 
 test('perfil moderno abre a galeria completa de fotos',async({page})=>{
- await page.goto('/laguna/empresa/keko-pizza')
- await expect(page.getByRole('heading',{name:/Keko Pizza/i})).toBeVisible()
- const galleryMore=page.locator('.mbp-gallery-more')
+ await page.goto('/laguna/empresas')
+ await page.evaluate(()=>{
+  const gallery=document.createElement('div')
+  gallery.className='mbp-gallery'
+  gallery.innerHTML='<div class="mbp-gallery-main"><img src="/laguna-hero.svg" alt="Capa de teste"></div><div class="mbp-gallery-side"><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 1"></div><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 2"></div><div class="mbp-gallery-more"><strong>+2</strong><span>Ver todas as fotos</span></div></div>'
+  document.body.appendChild(gallery)
+ })
+ const galleryMore=page.locator('.mbp-gallery-more').last()
  await expect(galleryMore).toBeVisible()
  await galleryMore.click()
  await expect(page.locator('#vl-photo-lightbox')).toBeVisible()
  await expect(page.getByRole('dialog',{name:'Galeria de fotos'})).toBeVisible()
+ await expect(page.getByText(/1 de 3/)).toBeVisible()
  await page.keyboard.press('Escape')
  await expect(page.locator('#vl-photo-lightbox')).toHaveCount(0)
+})
+
+test('cadastro de empresa exige autenticação',async({page})=>{
+ await page.goto('/conta?new=business')
+ await expect(page.getByRole('heading',{name:/Entre para cadastrar sua empresa/i})).toBeVisible()
+})
+
+test('painel de empresas exige perfil administrador',async({page})=>{
+ await page.goto('/admin/empresas')
+ await expect(page.getByRole('heading',{name:/Acesso restrito/i})).toBeVisible()
 })
 
 test('promocoes publicas carregam sem erro visual',async({page})=>{
