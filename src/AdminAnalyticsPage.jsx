@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
 import AdminShell from './AdminShell.jsx'
 import './admin-analytics.css'
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+const U=import.meta.env.VITE_SUPABASE_URL,KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&KEY?createClient(U,KEY):null
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 export default function AdminAnalyticsPage(){
  const [s,setS]=useState({checking:true,allowed:false,session:null,events:[],businesses:[],plans:[],subs:[]})
