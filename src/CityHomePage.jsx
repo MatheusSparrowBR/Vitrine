@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
 import './city-home.css'
+import './premium-banner-carousel.css'
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db=URL&&KEY?createClient(URL,KEY):null
