@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(p,'utf8')
 test('meu plano carrega o CSS e renderiza os indicadores gráficos',()=>{
  const plan=read('src/PlanUsageReact.jsx')
  const css=read('src/plan-usage.css')
- assert.match(plan,/import ['"]\.\/plan-usage\.css['"]+/)
+ assert.match(plan,/import\s*['"]\.\/plan-usage\.css['"]+/)
  assert.match(plan,/function Donut\(/)
  assert.match(plan,/vl-plan-donut/)
  assert.doesNotMatch(plan,/PLAN_USAGE_STYLE/)
