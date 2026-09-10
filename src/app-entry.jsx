@@ -33,6 +33,7 @@ import './banner-timezone-fix.js'
 import './admin-premium-nav.js'
 import './account-modern.css'
 import './site-header.css'
+import './site-header-dedup.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
