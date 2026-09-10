@@ -30,6 +30,7 @@ import './modern-gallery-lightbox.js'
 import './business-registration.css'
 import './banner-timezone-fix.js'
 import './admin-premium-nav.js'
+import './account-modern.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
