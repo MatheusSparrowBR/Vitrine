@@ -28,6 +28,7 @@ import './modern-business-list.css'
 import './modern-gallery-lightbox.css'
 import './modern-gallery-lightbox.js'
 import './business-registration.css'
+import './banner-timezone-fix.js'
 import './admin-premium-nav.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
