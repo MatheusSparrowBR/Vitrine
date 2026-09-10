@@ -91,16 +91,8 @@ test('promocoes publicas carregam sem erro visual',async({page})=>{
 })
 
 test('login e conta mostram estados válidos',async({page})=>{
- const pageErrors=[]
- page.on('pageerror',error=>pageErrors.push(error.message))
- page.on('console',msg=>{if(msg.type()==='error')pageErrors.push(`console:${msg.text()}`)})
  await page.goto('/conta')
- await page.waitForTimeout(500)
- console.log('ACCOUNT DEBUG URL:',page.url())
- console.log('ACCOUNT DEBUG HTML:',(await page.locator('body').innerHTML()).slice(0,2000))
- console.log('ACCOUNT DEBUG ERRORS:',JSON.stringify(pageErrors))
  await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
-
  await page.goto('/login')
  await expect(page.getByRole('heading',{name:/Entre na sua conta/i})).toBeVisible()
  await expect(page.getByText('Esqueci minha senha')).toBeVisible()
