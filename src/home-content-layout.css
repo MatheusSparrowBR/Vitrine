@@ -1,11 +1,34 @@
-/* Home — cards de conteúdo proporcionais à quantidade de itens */
-.home-v2 .content-grid-1{grid-template-columns:minmax(0,820px)!important;justify-content:center!important}
-.home-v2 .content-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:920px!important;margin:0 auto!important}
-.home-v2 .content-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-.home-v2 .content-grid-1 .content-card-v2{width:100%!important}
-.home-v2 .content-grid .content-card-v2>img{height:145px!important;object-fit:cover!important}
-.home-v2 .content-grid-1 .content-card-v2>img{height:190px!important}
+/* Layout específico da Home — promoção e agenda não compartilham regras de tamanho */
+.home-v2 .promotion-grid{display:grid!important;gap:18px!important;align-items:stretch!important}
+.home-v2 .promotion-grid-1{grid-template-columns:minmax(0,540px)!important;justify-content:center!important}
+.home-v2 .promotion-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:900px!important;margin:0 auto!important}
+.home-v2 .promotion-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.home-v2 .promotion-grid .content-card-v2{min-width:0!important;min-height:0!important}
+.home-v2 .promotion-grid .content-card-body{min-height:150px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:20px!important}
+.home-v2 .promotion-grid .content-card-body .tag{display:inline-flex!important;align-self:flex-start!important;padding:5px 8px!important;border-radius:999px!important;background:#eef5ff!important}
+.home-v2 .promotion-grid .content-card-body h3{margin:9px 0 6px!important}
+.home-v2 .promotion-grid .content-card-body p:last-child{margin-top:10px!important;color:#216df3!important}
+
+.home-v2 .event-grid{display:grid!important;gap:18px!important;align-items:stretch!important}
+.home-v2 .event-grid-1{grid-template-columns:minmax(0,680px)!important;justify-content:center!important}
+.home-v2 .event-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:900px!important;margin:0 auto!important}
+.home-v2 .event-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.home-v2 .event-grid .content-card-v2{min-width:0!important}
+.home-v2 .event-grid .content-card-v2>img{width:100%!important;height:145px!important;display:block!important;object-fit:cover!important;object-position:center!important}
+.home-v2 .event-grid-1 .content-card-v2>img{height:155px!important}
+.home-v2 .event-grid .content-card-body{padding:15px 17px 17px!important}
+.home-v2 .event-grid .content-card-body h3{margin:7px 0 5px!important}
+
+/* Evita que o wrapper de uma seção altere o sizing das outras */
+.home-v2 .promo-section{min-height:0!important;height:auto!important;padding:46px 0 50px!important;margin-top:50px!important}
+.home-v2 .promo-section .home-wrap{min-height:0!important}
+
+@media(max-width:1100px){
+ .home-v2 .promotion-grid-3,.home-v2 .event-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
 @media(max-width:760px){
-  .home-v2 .content-grid-1,.home-v2 .content-grid-2,.home-v2 .content-grid-3{grid-template-columns:1fr!important;max-width:none!important}
-  .home-v2 .content-grid-1 .content-card-v2>img,.home-v2 .content-grid .content-card-v2>img{height:180px!important}
+ .home-v2 .promotion-grid-1,.home-v2 .promotion-grid-2,.home-v2 .promotion-grid-3,.home-v2 .event-grid-1,.home-v2 .event-grid-2,.home-v2 .event-grid-3{grid-template-columns:1fr!important;max-width:none!important}
+ .home-v2 .promotion-grid .content-card-body{min-height:145px!important}
+ .home-v2 .event-grid .content-card-v2>img,.home-v2 .event-grid-1 .content-card-v2>img{height:180px!important}
+ .home-v2 .promo-section{padding:38px 0 42px!important;margin-top:40px!important}
 }
