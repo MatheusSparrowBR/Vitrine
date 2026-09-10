@@ -1,13 +1,15 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import './admin-events.css'
 
-const emptyForm={city_id:'',title:'',slug:'',description:'',image_url:'',event_date:'',start_time:'',end_time:'',location:'',address:'',category:'',price:'',external_url:'',active:true,featured:false}
+const emptyForm={city_id:'',title:'',slug:'',description:'',event_date:'',start_time:'',end_time:'',location:'',address:'',category:'',price:'',external_url:'',active:true,featured:false}
 const slugify=value=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
 const money=value=>value==null||value===''?'Gratuito':`R$ ${Number(value).toFixed(2).replace('.',',')}`
+const imageExt=file=>{const type=String(file?.type||'').toLowerCase();if(type==='image/png')return 'png';if(type==='image/webp')return 'webp';if(type==='image/gif')return 'gif';return 'jpg'}
 
 export default function AdminEventsPanel({supabase}){
- const [open,setOpen]=useState(false),[events,setEvents]=useState([]),[cities,setCities]=useState([]),[editing,setEditing]=useState(null),[form,setForm]=useState(emptyForm),[loading,setLoading]=useState(false),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
+ const [open,setOpen]=useState(false),[events,setEvents]=useState([]),[cities,setCities]=useState([]),[editing,setEditing]=useState(null),[form,setForm]=useState(emptyForm),[coverFile,setCoverFile]=useState(null),[loading,setLoading]=useState(false),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
  const activeCities=useMemo(()=>cities.filter(c=>c.active),[cities])
+ const coverPreview=coverFile?URL.createObjectURL(coverFile):editing?.image_url||''
  async function load(){
   if(!supabase)return
   setLoading(true);setError('')
@@ -20,25 +22,57 @@ export default function AdminEventsPanel({supabase}){
   setEvents(eventsRes.data||[]);setCities(citiesRes.data||[]);setLoading(false)
  }
  useEffect(()=>{if(open)load()},[open])
- function reset(){setEditing(null);setForm({...emptyForm,city_id:activeCities[0]?.id||''});setError('')}
+ useEffect(()=>()=>{if(coverFile&&coverPreview.startsWith('blob:'))URL.revokeObjectURL(coverPreview)},[coverFile,coverPreview])
+ function reset(){setEditing(null);setForm({...emptyForm,city_id:activeCities[0]?.id||''});setCoverFile(null);setError('')}
  function edit(row){
   setEditing(row)
-  setForm({city_id:row.city_id||'',title:row.title||'',slug:row.slug||'',description:row.description||'',image_url:row.image_url||'',event_date:row.event_date||'',start_time:row.start_time?String(row.start_time).slice(0,5):'',end_time:row.end_time?String(row.end_time).slice(0,5):'',location:row.location||'',address:row.address||'',category:row.category||'',price:row.price??'',external_url:row.external_url||'',active:Boolean(row.active),featured:Boolean(row.featured)})
+  setCoverFile(null)
+  setForm({city_id:row.city_id||'',title:row.title||'',slug:row.slug||'',description:row.description||'',event_date:row.event_date||'',start_time:row.start_time?String(row.start_time).slice(0,5):'',end_time:row.end_time?String(row.end_time).slice(0,5):'',location:row.location||'',address:row.address||'',category:row.category||'',price:row.price??'',external_url:row.external_url||'',active:Boolean(row.active),featured:Boolean(row.featured)})
+ }
+ function selectCover(file){
+  setError('')
+  if(!file){setCoverFile(null);return}
+  if(!String(file.type||'').startsWith('image/')){setError('Selecione uma imagem válida (JPG, PNG, WEBP ou GIF).');return}
+  if(file.size>10*1024*1024){setError('A capa deve ter no máximo 10 MB.');return}
+  setCoverFile(file)
  }
  const update=(key,value)=>setForm(current=>({...current,[key]:value}))
+ async function uploadCover(eventId){
+  if(!coverFile)return null
+  const path=`${eventId}/cover.${imageExt(coverFile)}`
+  const upload=await supabase.storage.from('events-media').upload(path,coverFile,{cacheControl:'3600',upsert:true,contentType:coverFile.type||undefined})
+  if(upload.error)throw upload.error
+  const {data}=supabase.storage.from('events-media').getPublicUrl(path)
+  return data.publicUrl
+ }
  async function save(event){
   event.preventDefault();setSaving(true);setError('');setNotice('')
+  let createdId=null
   try{
    if(!form.city_id)throw new Error('Selecione a cidade do evento.')
    if(!form.title.trim())throw new Error('Informe o título do evento.')
    if(!form.event_date)throw new Error('Informe a data do evento.')
-   const payload={city_id:form.city_id,title:form.title.trim(),slug:slugify(form.slug||form.title),description:form.description.trim()||null,image_url:form.image_url.trim()||null,event_date:form.event_date,start_time:form.start_time||null,end_time:form.end_time||null,location:form.location.trim()||null,address:form.address.trim()||null,category:form.category.trim()||null,price:form.price===''?null:Number(form.price),external_url:form.external_url.trim()||null,active:Boolean(form.active),featured:Boolean(form.featured),updated_at:new Date().toISOString()}
-   const result=editing?await supabase.from('events').update(payload).eq('id',editing.id):await supabase.from('events').insert(payload)
+   const payload={city_id:form.city_id,title:form.title.trim(),slug:slugify(form.slug||form.title),description:form.description.trim()||null,image_url:editing?.image_url||null,event_date:form.event_date,start_time:form.start_time||null,end_time:form.end_time||null,location:form.location.trim()||null,address:form.address.trim()||null,category:form.category.trim()||null,price:form.price===''?null:Number(form.price),external_url:form.external_url.trim()||null,active:Boolean(form.active),featured:Boolean(form.featured),updated_at:new Date().toISOString()}
+   let result
+   if(editing){
+    result=await supabase.from('events').update(payload).eq('id',editing.id).select('id').single()
+   }else{
+    result=await supabase.from('events').insert(payload).select('id').single()
+    createdId=result.data?.id||null
+   }
    if(result.error)throw result.error
+   const eventId=editing?.id||createdId
+   if(coverFile&&eventId){
+    const publicUrl=await uploadCover(eventId)
+    const updateResult=await supabase.from('events').update({image_url:publicUrl,updated_at:new Date().toISOString()}).eq('id',eventId)
+    if(updateResult.error)throw updateResult.error
+   }
    setNotice(editing?'Evento atualizado com sucesso.':'Evento cadastrado com sucesso.')
    reset();await load()
-  }catch(e){setError(e.message||'Não foi possível salvar o evento.')}
-  finally{setSaving(false)}
+  }catch(e){
+   if(createdId)await supabase.from('events').delete().eq('id',createdId)
+   setError(e.message||'Não foi possível salvar o evento.')
+  }finally{setSaving(false)}
  }
  async function toggle(id,field,value){
   const {error}=await supabase.from('events').update({[field]:!value,updated_at:new Date().toISOString()}).eq('id',id)
@@ -66,7 +100,11 @@ export default function AdminEventsPanel({supabase}){
       <label>Descrição<textarea rows="4" value={form.description} onChange={e=>update('description',e.target.value)} placeholder="Descreva o evento…"/></label>
       <div className="vl-admin-events-two"><label>Local<input value={form.location} onChange={e=>update('location',e.target.value)} placeholder="Praça, casa de eventos…"/></label><label>Preço<input type="number" step="0.01" min="0" value={form.price} onChange={e=>update('price',e.target.value)} placeholder="0,00"/></label></div>
       <label>Endereço<input value={form.address} onChange={e=>update('address',e.target.value)} placeholder="Rua, número, bairro…"/></label>
-      <label>Imagem (URL)<input type="url" value={form.image_url} onChange={e=>update('image_url',e.target.value)} placeholder="https://…"/></label>
+      <div className="vl-admin-events-cover">
+       <div className="vl-admin-events-cover-head"><span>Capa do evento</span><small>JPG, PNG, WEBP ou GIF · até 10 MB</small></div>
+       {coverPreview?<div className="vl-admin-events-cover-preview"><img src={coverPreview} alt="Pré-visualização da capa do evento"/><div><strong>{coverFile?'Nova capa selecionada':'Capa atual'}</strong>{coverFile&&<small>{coverFile.name}</small>}<button type="button" className="vl-admin-events-secondary" onClick={()=>setCoverFile(null)}>{coverFile?'Remover seleção':'Remover capa'}</button></div></div>:<div className="vl-admin-events-upload"><span>🖼️</span><div><strong>Adicione uma imagem de capa</strong><small>A imagem será armazenada com segurança no Supabase.</small></div><label className="vl-admin-events-upload-button">Selecionar imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e=>selectCover(e.target.files?.[0])}/></label></div>}
+       {coverPreview&&<label className="vl-admin-events-upload-button secondary">Trocar imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e=>selectCover(e.target.files?.[0])}/></label>}
+      </div>
       <label>Link externo<input type="url" value={form.external_url} onChange={e=>update('external_url',e.target.value)} placeholder="https://ingressos…"/></label>
       <div className="vl-admin-events-checks"><label><input type="checkbox" checked={form.active} onChange={e=>update('active',e.target.checked)}/> Evento publicado</label><label><input type="checkbox" checked={form.featured} onChange={e=>update('featured',e.target.checked)}/> Destacar na agenda</label></div>
       <button className="vl-admin-events-primary" disabled={saving}>{saving?'Salvando…':editing?'Salvar evento':'Cadastrar evento'}</button>
