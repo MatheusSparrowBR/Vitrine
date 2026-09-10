@@ -3,11 +3,15 @@ import { createClient } from '@supabase/supabase-js'
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db = URL && KEY ? createClient(URL, KEY) : null
+const DEFAULT_PROMOTION_IMAGE = '/promotion-default.svg'
 const seenBanners = new Set()
 let enhancementTimer = null
 let enhancementObserver = null
 let bannerObserver = null
+let promotionRefreshTimer = null
+let promotionLoadToken = 0
 const cityIdCache = new Map()
+let currentPromotions = []
 
 function sessionId(){
   try{
@@ -32,6 +36,137 @@ async function getCityId(){
   const id=data?.id||null
   cityIdCache.set(slug,id)
   return id
+}
+
+function isPromotionCurrent(promotion, now=Date.now()){
+  if(!promotion || promotion.status!=='published')return false
+  const start=promotion.starts_at?new Date(promotion.starts_at).getTime():null
+  const end=promotion.ends_at?new Date(promotion.ends_at).getTime():null
+  if(start!==null&&!Number.isFinite(start))return false
+  if(end!==null&&!Number.isFinite(end))return false
+  if(start!==null&&start>now)return false
+  if(end!==null&&end<=now)return false
+  return true
+}
+
+function promotionKey(promotion){
+  const title=String(promotion?.title||'').trim().toLowerCase()
+  const businessSlug=String(promotion?.businesses?.slug||'').trim().toLowerCase()
+  return `${title}|${businessSlug}`
+}
+
+function promotionNameKey(promotion){
+  const title=String(promotion?.title||'').trim().toLowerCase()
+  const businessName=String(promotion?.businesses?.name||'').trim().toLowerCase()
+  return `${title}|${businessName}`
+}
+
+function publicPromotionRoute(){
+  const parts=location.pathname.split('/').filter(Boolean).map(decodeURIComponent)
+  if(parts.length===2&&parts[1]==='promocoes')return{type:'listing',citySlug:parts[0]}
+  if(parts.length===3&&parts[1]==='empresa')return{type:'business',citySlug:parts[0],businessSlug:parts[2]}
+  if(parts.length===1&&!['admin','planos','conta','login','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase()))return{type:'home',citySlug:parts[0]}
+  if(parts.length===0)return{type:'home',citySlug:'laguna'}
+  return null
+}
+
+async function loadCurrentPromotions(){
+  if(!db)return
+  const route=publicPromotionRoute()
+  if(!route)return
+  const token=++promotionLoadToken
+  const cityId=await getCityId()
+  if(!cityId)return
+  try{
+    const {data,error}=await db.from('promotions')
+      .select('id,title,image_url,starts_at,ends_at,status,businesses!inner(id,name,slug,city_id)')
+      .eq('status','published')
+      .eq('businesses.city_id',cityId)
+      .order('created_at',{ascending:false})
+      .limit(500)
+    if(token!==promotionLoadToken)return
+    if(error){currentPromotions=[];return}
+    currentPromotions=(data||[]).filter(p=>isPromotionCurrent(p))
+    applyPromotionVisibility()
+  }catch{
+    // Falhas de validação não podem quebrar o catálogo público.
+  }
+}
+
+function ensureDefaultPromotionImage(card,src=DEFAULT_PROMOTION_IMAGE){
+  if(!card)return
+  if(card.querySelector('img'))return
+  const old=card.querySelector('.promotion-cover')
+  const img=document.createElement('img')
+  img.src=src
+  img.alt='Imagem padrão de promoção VitrineLocal'
+  img.loading='lazy'
+  img.decoding='async'
+  img.className='promotion-default-image'
+  if(old)old.replaceWith(img);else card.insertAdjacentElement('afterbegin',img)
+}
+
+function removeExpiredPromotionCard(card){
+  if(card&&!card.dataset.vlPromotionRemoved){
+    card.dataset.vlPromotionRemoved='1'
+    card.remove()
+  }
+}
+
+function activeByBusinessSlug(slug){
+  return currentPromotions.filter(p=>String(p.businesses?.slug||'').toLowerCase()===String(slug||'').toLowerCase())
+}
+
+function applyPromotionVisibility(){
+  const route=publicPromotionRoute()
+  if(!route)return
+  const activeKeySet=new Set(currentPromotions.map(promotionKey))
+  const activeNameSet=new Set(currentPromotions.map(promotionNameKey))
+
+  if(route.type==='listing'){
+    document.querySelectorAll('.promotion-card').forEach(card=>{
+      const title=card.querySelector('.promotion-body h3')?.textContent?.trim().toLowerCase()||''
+      const href=card.querySelector('.link-btn')?.getAttribute('href')||''
+      const parts=href.split('/').filter(Boolean)
+      const businessSlug=parts.length>=3&&parts[1]==='empresa'?decodeURIComponent(parts[2]||'').toLowerCase():''
+      const key=`${title}|${businessSlug}`
+      if(!activeKeySet.has(key))removeExpiredPromotionCard(card)
+      else{
+        const promotion=currentPromotions.find(p=>promotionKey(p)===key)
+        ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
+      }
+    })
+  }
+
+  if(route.type==='home'){
+    document.querySelectorAll('.promo-section .content-card-v2').forEach(card=>{
+      const title=card.querySelector('h3')?.textContent?.trim().toLowerCase()||''
+      const businessName=card.querySelector('.content-card-body p strong')?.textContent?.trim().toLowerCase()||''
+      const key=`${title}|${businessName}`
+      if(!activeNameSet.has(key))removeExpiredPromotionCard(card)
+      else{
+        const promotion=currentPromotions.find(p=>promotionNameKey(p)===key)
+        const existing=card.querySelector('img')
+        if(existing)existing.src=promotion?.image_url||DEFAULT_PROMOTION_IMAGE
+        else ensureDefaultPromotionImage(card,promotion?.image_url||DEFAULT_PROMOTION_IMAGE)
+      }
+    })
+  }
+
+  if(route.type==='business'){
+    const activeTitles=new Set(activeByBusinessSlug(route.businessSlug).map(p=>String(p.title||'').trim().toLowerCase()))
+    document.querySelectorAll('.profile-card .mini-row').forEach(row=>{
+      const title=row.querySelector('strong')?.textContent?.trim().toLowerCase()||''
+      if(title&&!activeTitles.has(title))row.remove()
+    })
+  }
+}
+
+function wirePromotionLifecycle(){
+  if(!document.body)return
+  loadCurrentPromotions()
+  window.clearInterval(promotionRefreshTimer)
+  promotionRefreshTimer=window.setInterval(loadCurrentPromotions,30000)
 }
 
 async function enhanceAccount(){
@@ -75,13 +210,25 @@ function wireBannerAnalytics(){
 
 function runEnhancements(){
   window.clearTimeout(enhancementTimer)
-  enhancementTimer=window.setTimeout(()=>{enhanceAccount();wireBannerAnalytics()},60)
+  enhancementTimer=window.setTimeout(()=>{
+    enhanceAccount()
+    wireBannerAnalytics()
+    wirePromotionLifecycle()
+    applyPromotionVisibility()
+  },60)
 }
 
 function start(){
   runEnhancements()
   if(enhancementObserver)return
-  enhancementObserver=new MutationObserver(runEnhancements)
+  enhancementObserver=new MutationObserver(()=>{
+    window.clearTimeout(enhancementTimer)
+    enhancementTimer=window.setTimeout(()=>{
+      enhanceAccount()
+      wireBannerAnalytics()
+      applyPromotionVisibility()
+    },60)
+  })
   enhancementObserver.observe(document.getElementById('root')||document.body,{childList:true,subtree:true})
   window.addEventListener('popstate',runEnhancements)
 }
