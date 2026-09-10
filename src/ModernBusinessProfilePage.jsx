@@ -10,6 +10,7 @@ const fmt=v=>v==null||v===''?'':`R$ ${Number(v).toFixed(2).replace('.',',')}`
 const businessRating=b=>b?.average_rating??b?.avg_rating??b?.rating??null
 const businessReviewCount=b=>b?.review_count??b?.reviews_count??b?.rating_count??0
 const DAY_KEYS=['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
+const isPromotionCurrent=(p,now=Date.now())=>{const start=p?.starts_at?new Date(p.starts_at).getTime():null;const end=p?.ends_at?new Date(p.ends_at).getTime():null;return p?.status==='published'&&(start===null||Number.isFinite(start)&&start<=now)&&(end===null||Number.isFinite(end)&&end>now)}
 
 function minutes(v){const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return null;const h=Number(m[1]),n=Number(m[2]);return h<=23&&n<=59?h*60+n:null}
 function currentDayIndex(date=new Date()){return(date.getDay()+6)%7}
@@ -72,7 +73,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
    db.from('business_items').select('*').eq('business_id',b.id).eq('active',true).order('sort_order'),
    db.from('promotions').select('*').eq('business_id',b.id).eq('status','published').order('created_at',{ascending:false})
   ])
-  if(live){setBusiness(b);setPhotos(p.data||[]);setItems(i.data||[]);setPromotions(pr.data||[]);setLoading(false)}
+  if(live){setBusiness(b);setPhotos(p.data||[]);setItems(i.data||[]);setPromotions((pr.data||[]).filter(isPromotionCurrent));setLoading(false)}
  })();return()=>{live=false}},[citySlug,businessSlug])
  const hours=useMemo(()=>business?formatHours(business.opening_hours):[],[business])
  const status=useMemo(()=>business?getOpenStatus(business.opening_hours):{open:false,label:'Horário',detail:'Consulte os horários'},[business])
