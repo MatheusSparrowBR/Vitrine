@@ -5,6 +5,7 @@ import EventsPage from './EventsPage.jsx'
 import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
 import AdminPlatformPage from './AdminPlatformPage.jsx'
 import AdminHomePage from './AdminHomePage.jsx'
+import AdminBusinessesPage from './AdminBusinessesPage.jsx'
 import CityHomePage from './CityHomePage.jsx'
 import AccountPage from './AccountPage.jsx'
 import AuthPage from './AuthPage.jsx'
@@ -64,6 +65,7 @@ function RootRoute(){
  if(path==='/privacidade')return <PrivacyPage/>
  if(path==='/termos')return <TermsPage/>
  if(path==='/admin')return <AdminHomePage/>
+ if(path==='/admin/empresas')return <AdminBusinessesPage/>
  if(path==='/admin/banners')return <AdminPremiumBannerPage supabase={supabase}/>
  if(path==='/admin/gestao')return <AdminPlatformPage supabase={supabase}/>
  const route=getCityRoute(path)
