@@ -42,8 +42,8 @@ function installUniversalMediaFit(){
  const style=document.createElement('style')
  style.id='vl-universal-media-fit'
  style.textContent=`
-  .vl-public-app img,.app img,.account-workspace-app img,.admin-promotions-page img,.admin-v2-management img,.business-card img,.business-cover-image,.business-logo,.business-image img,.profile-cover img,.profile-logo img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{object-fit:contain!important;object-position:center!important;background:#f4f7fb!important;}
-  .business-cover-image,.business-image img,.profile-gallery img,.item-card img,.mbp-gallery img,.mbp-promo-card img,.mbp-items img,.ad-media img{width:100%!important;height:100%!important;}
+  .vl-public-app img,.app img,.account-workspace-app img,.admin-promotions-page img,.admin-v2-management img,.business-card img,.business-cover-image,.business-logo,.business-image img,.profile-cover img,.profile-logo img,.profile-gallery img,.item-card img,.content-card-v2 img,.promotion-card img,.mbp-gallery img,.mbp-items img,.ad-media img{object-fit:contain!important;object-position:center!important;background:#f4f7fb!important;}
+  .business-cover-image,.business-image img,.profile-gallery img,.item-card img,.mbp-gallery img,.mbp-items img,.ad-media img{width:100%!important;height:100%!important;}
   .business-logo,.profile-logo img{max-width:100%!important;max-height:100%!important;}
  `
  document.head.appendChild(style)
