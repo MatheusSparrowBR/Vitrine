@@ -6,7 +6,7 @@ test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
  await expect(page.getByText('Enviar conteúdo')).toHaveCount(0)
  await expect(page.getByText('O que está acontecendo?')).toHaveCount(0)
  await expect(page.getByRole('heading',{name:'Próximos eventos'})).toBeVisible()
- const navLink=page.locator('.nav-actions a').first()
+ const navLink=page.locator('.vl-site-nav-link').first()
  await expect(navLink).toBeVisible()
  await expect(navLink).toHaveCSS('text-decoration-line','none')
  const categoryLink=page.locator('.category-card').first()
@@ -14,6 +14,38 @@ test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
  await expect(categoryLink).toHaveCSS('text-decoration-line','none')
  const heroBackground=await page.locator('.hero').evaluate(el=>getComputedStyle(el).backgroundImage)
  expect(heroBackground).toContain('laguna-hero.svg')
+})
+
+test('header global mantém o mesmo componente em todas as páginas principais',async({page})=>{
+ const routes=['/laguna','/laguna/empresas','/laguna/promocoes','/laguna/eventos','/planos','/privacidade','/termos','/conta']
+ for(const route of routes){
+  await page.goto(route)
+  await expect(page.locator('.vl-site-header')).toBeVisible()
+  await expect(page.locator('.vl-site-brand')).toBeVisible()
+  await expect(page.locator('.vl-site-city')).toBeVisible()
+  await expect(page.locator('.vl-site-business-cta')).toBeVisible()
+ }
+})
+
+test('header global marca a seção ativa',async({page})=>{
+ await page.goto('/laguna/empresas')
+ await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Explorar')
+ await page.goto('/laguna/promocoes')
+ await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Promoções')
+ await page.goto('/laguna/eventos')
+ await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Eventos')
+ await page.goto('/planos')
+ await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Planos')
+})
+
+test('header global é responsivo e abre o menu mobile',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto('/laguna')
+ await expect(page.locator('.vl-site-menu-toggle')).toBeVisible()
+ await expect(page.locator('.vl-site-nav')).toBeHidden()
+ await page.locator('.vl-site-menu-toggle').click()
+ await expect(page.locator('.vl-site-mobile-panel')).toBeVisible()
+ await expect(page.locator('.vl-site-mobile-panel a').filter({hasText:'Explorar'})).toBeVisible()
 })
 
 test('home mantém dock de categorias em uma única faixa visual',async({page})=>{
@@ -87,12 +119,13 @@ test('painel de empresas exige perfil administrador',async({page})=>{
 test('promocoes publicas carregam sem erro visual',async({page})=>{
  await page.goto('/laguna/promocoes')
  await expect(page.getByRole('heading',{name:/Promoções em Laguna/i})).toBeVisible()
- await expect(page.locator('.topbar')).toBeVisible()
+ await expect(page.locator('.vl-site-header')).toBeVisible()
 })
 
 test('login e conta mostram estados válidos',async({page})=>{
  await page.goto('/conta')
  await expect(page.getByRole('heading',{name:/Entre para acessar sua conta/i})).toBeVisible()
+
  await page.goto('/login')
  await expect(page.getByRole('heading',{name:/Entre na sua conta/i})).toBeVisible()
  await expect(page.getByText('Esqueci minha senha')).toBeVisible()
