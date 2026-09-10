@@ -26,6 +26,7 @@ import './city-home.css'
 import './commercial-home.css'
 import './auth-page.css'
 import './billing-plans.css'
+import './billing-funnel.css'
 import './public-polish.css'
 import './vitrine-ux-adjustments.css'
 import './modern-business-profile.css'
@@ -41,6 +42,7 @@ import './site-header-dedup.css'
 import './admin-v2.css'
 import './admin-management.css'
 import './admin-analytics.css'
+import './analytics.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
