@@ -12,7 +12,7 @@ test('promoções expiradas são arquivadas por manutenção agendada e a tela a
  assert.match(migration,/ends_at <= now\(\)/)
  assert.match(migration,/status in \('published','pending_review'\)/)
  assert.match(migration,/status='archived'/)
- assert.match(migration,/cron\.schedule\()/
+ assert.match(migration,/cron\.schedule\(/)
  assert.match(migration,/'vitrine-local-operational-maintenance'/)
  assert.match(migration,/'0 \* \* \* \*'/)
  assert.match(migration,/revoke all on function public\.run_operational_maintenance\(\) from public, anon, authenticated/)
