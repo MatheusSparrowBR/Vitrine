@@ -28,7 +28,7 @@ test('product service form includes type, image and plan enforcement',()=>{
  assert.match(form,/type:form\.type/)
  assert.match(form,/business_items/)
  assert.match(form,/image_path/)
- assert.match(form,/limit<=0/)
+ assert.match(form,/limit===0/)
  assert.match(form,/usedCount>=limit/)
  assert.match(form,/getPlanCycleFeatureUsage/)
 })
