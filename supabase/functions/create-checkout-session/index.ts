@@ -47,8 +47,9 @@ Deno.serve(async req=>{
  const body=await req.json().catch(()=>null)
  const businessId=String(body?.business_id||'')
  const planCode=String(body?.plan_code||'')
- const interval=body?.interval==='yearly'?'yearly':'monthly'
- if(!businessId||!['pro','premium'].includes(planCode))return response({error:'Empresa, plano e intervalo são obrigatórios.'},400)
+ const requestedInterval=String(body?.interval||'')
+ if(!businessId||!['pro','premium'].includes(planCode)||!['monthly','yearly'].includes(requestedInterval))return response({error:'Empresa, plano e intervalo válidos são obrigatórios.'},400)
+ const interval=requestedInterval==='yearly'?'yearly':'monthly'
  const{data:business}=await supabaseAdmin.from('businesses').select('id,name,owner_id').eq('id',businessId).eq('owner_id',user.id).maybeSingle()
  if(!business)return response({error:'Empresa não encontrada ou sem permissão.'},403)
  const{data:existing}=await supabaseAdmin.from('subscriptions').select('id,provider_subscription_id,status').eq('business_id',business.id).eq('provider','stripe').in('status',['incomplete','active','trialing','past_due','unpaid','paused']).order('created_at',{ascending:false}).limit(1).maybeSingle()
