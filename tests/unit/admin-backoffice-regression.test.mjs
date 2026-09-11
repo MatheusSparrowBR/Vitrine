@@ -44,3 +44,15 @@ test('enterprise moderation writes review metadata through the database trigger'
  assert.match(migration,/new\.status is distinct from old\.status/)
  assert.match(migration,/new\.rejection_reason is distinct from old\.rejection_reason/)
 })
+
+test('operational maintenance is scheduler-owned and not browser-owned',()=>{
+ const migration=read('supabase/migrations/20260911130600_operational_maintenance.sql')
+ const promotions=read('src/AdminPromotionsPage.jsx')
+ assert.ok(migration.includes("cron.schedule("))
+ assert.ok(migration.includes("'vitrine-local-operational-maintenance'"))
+ assert.ok(migration.includes("'0 * * * *'"))
+ assert.ok(migration.includes('revoke all on function public.run_operational_maintenance() from public, anon, authenticated'))
+ assert.ok(!promotions.includes("rpc('archive_expired_promotions')"))
+ assert.ok(!promotions.includes('setInterval(async()=>'))
+ assert.ok(promotions.includes("statusFilter==='current'?(p.status!=='archived'&&!ended)"))
+})
