@@ -9,7 +9,7 @@ test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e 
  const nav=read('src/account-premium-nav.js')
  assert.match(app,/MerchantAdvertisingSalesPage/)
  assert.match(app,/account-premium-nav\.js/)
- assert.doesNotMatch(app,/account-premium-ad-shortcut/)
+ assert.doesNotMatch(app,/AccountPremiumShortcut/)
  assert.match(nav,/href='\/conta\/publicidade'/)
  assert.match(nav,/account-premium-nav-item/)
  assert.match(nav,/insertBefore\(item,media\)/)
