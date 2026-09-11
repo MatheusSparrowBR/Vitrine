@@ -13,6 +13,7 @@ const NAV=[
  ['categories','Categorias','◇','/admin/gestao?tab=categories'],
  ['cities','Cidades','⌖','/admin/gestao?tab=cities'],
  ['plans','Planos','◆','/admin/gestao?tab=plans'],
+ ['plan_assignments','Planos por empresa','↕','/admin/gestao?tab=assignments'],
 ]
 export default function AdminShell({active='dashboard',title,description,email,children}){
  const[mobileOpen,setMobileOpen]=useState(false),[emailState,setEmailState]=useState(email||'')
