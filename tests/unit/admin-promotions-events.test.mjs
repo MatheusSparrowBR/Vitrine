@@ -13,7 +13,7 @@ test('promoções expiradas são arquivadas no banco e a tela administrativa ini
  assert.match(migration,/status='archived'/)
  assert.match(migration,/grant execute on function public\.archive_expired_promotions\(\) to authenticated/)
  assert.match(page,/rpc\('archive_expired_promotions'\)/)
- assert.match(page,/statusFilter,setStatusFilter\)='current'/)
+ assert.match(page,/setStatusFilter\)=useState\('current'\)/)
  assert.match(page,/statusFilter==='current'\?p\.status!==\x27archived\x27/)
  assert.match(page,/setInterval\(async\(\)=>\{const archived=await archiveExpired\(\);if\(archived>0\)await load\(\)\},60000\)/)
 })
