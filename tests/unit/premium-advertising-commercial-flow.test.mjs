@@ -4,11 +4,15 @@ import fs from 'node:fs'
 
 const read=path=>fs.readFileSync(path,'utf8')
 
-test('Minha conta expõe acesso direto à Publicidade Premium e a rota usa o novo fluxo comercial',()=>{
+test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e a rota usa o novo fluxo comercial',()=>{
  const app=read('src/app-entry.jsx')
+ const nav=read('src/account-premium-nav.js')
  assert.match(app,/MerchantAdvertisingSalesPage/)
- assert.match(app,/account-premium-ad-shortcut/)
- assert.match(app,/href="\/conta\/publicidade"/)
+ assert.match(app,/account-premium-nav\.js/)
+ assert.doesNotMatch(app,/account-premium-ad-shortcut/)
+ assert.match(nav,/href='\/conta\/publicidade'/)
+ assert.match(nav,/account-premium-nav-item/)
+ assert.match(nav,/insertBefore\(item,media\)/)
 })
 
 test('fluxo comercial do anunciante exige plano Premium, arte quando aplicável e oferece pagamento Stripe',()=>{
