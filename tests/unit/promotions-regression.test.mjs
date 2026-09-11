@@ -1,6 +1,6 @@
-import {test} from 'node:test'
-import assert from 'node:assert/strict'
-import fs from 'node:fs'
+import {test}from'node:test'
+import assert from'node:assert/strict'
+import fs from'node:fs'
 
 const read=path=>fs.readFileSync(path,'utf8')
 
@@ -36,7 +36,7 @@ test('promotion status changes remain governed by database workflow',()=>{
 })
 
 test('merchant promotion creation uses the React form and not browser prompts',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  const component=read('src/OwnerPromotionsSection.jsx')
  assert.match(account,/OwnerPromotionsSection/)
  assert.doesNotMatch(account,/function addPromotion\(/)
@@ -48,11 +48,11 @@ test('merchant promotion creation uses the React form and not browser prompts',(
 
 test('merchant promotion creation enforces the plan limit before insert',()=>{
  const component=read('src/OwnerPromotionsSection.jsx')
- assert.match(component,/ACTIVE_STATUSES=\['pending_review','published','draft'\]/)
+ assert.match(component,/getPlanCycleFeatureUsage\(businessId,'promotions'\)/)
  assert.match(component,/used>=planLimit/)
  assert.match(component,/get_effective_plan_id/)
- assert.match(component,/latest=await db\.from\('promotions'\)/)
- assert.match(component,/Limite de .* promoção/)
+ assert.match(component,/latest=await getPlanCycleFeatureUsage\(businessId,'promotions'\)/)
+ assert.match(component,/Limite de .* promoções neste ciclo/)
 })
 
 test('plan limit hardening is versioned and covers all catalog resources',()=>{
@@ -77,4 +77,11 @@ test('subscription history does not use a one-row-per-business unique constraint
  assert.match(migration,/drop constraint if exists subscriptions_user_id_business_id_key/)
  assert.match(migration,/subscriptions_one_current_plan_per_business_idx/)
  assert.match(migration,/subscriptions_provider_subscription_id_idx/)
+})
+
+test('promotion usage is cumulative and not tied to expiry status',()=>{
+ const component=read('src/OwnerPromotionsSection.jsx')
+ assert.match(component,/getPlanCycleFeatureUsage\(businessId,'promotions'\)/)
+ assert.match(component,/Exclu(ir|ir ou encerrar)/)
+ assert.match(component,/consumo.*ciclo/)
 })
