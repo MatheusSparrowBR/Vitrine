@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import './admin-events.css'
+import './admin-events-main.css'
 
 const emptyForm={city_id:'',title:'',slug:'',description:'',event_date:'',start_time:'',end_time:'',location:'',address:'',category:'',price:'',external_url:'',active:true,featured:false}
 const slugify=value=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
