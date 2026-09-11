@@ -20,21 +20,21 @@ test('seleção de empresa é compartilhada entre conta, analytics e publicidade
  assert.match(advertising,/persistBusinessId\(id\)/)
 })
 
-test('minha conta mantém os recursos de catálogo, IA e planos governados por entitlements',()=>{
+test('minha conta mantém limites e recursos dos três planos',()=>{
  const panel=read('src/PlanUsageReact.jsx')
  const rules=read('src/phase2-rules.js')
- assert.match(panel,/LABELS=.*photos.*items.*promotions/)
+ assert.match(panel,/LABELS=\{photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'\}/)
  assert.match(panel,/ai_posts/)
- assert.match(panel,/hasPlanFeature\([^)]*'analytics'/)
- assert.match(panel,/hasPlanFeature\([^)]*'featured'/)
- assert.match(panel,/hasPlanFeature\([^)]*'verified'/)
+ assert.match(panel,/plan\.features\?\.analytics/)
+ assert.match(panel,/plan\.features\?\.featured/)
+ assert.match(panel,/plan\.features\?\.verified/)
  assert.match(rules,/PLAN_CODES = \['free','pro','premium'\]/)
 })
 
 test('aprovação administrativa de publicidade gera rascunho de banner antes da publicação',()=>{
  const src=read('src/AdminAdvertisingPage.jsx')
  assert.match(src,/status==='approved'/)
- assert.match(src,/db\.from\('advertisements'\)\.insert/)
+ assert.match(src,/\.from\('advertisements'\)\.insert/)
  assert.match(src,/active:false/)
  assert.match(src,/reviewed_at/)
  assert.match(src,/Abra Banners Premium/)
