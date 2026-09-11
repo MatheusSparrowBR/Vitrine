@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /sitemap.xml
 Disallow: /admin
 Disallow: /conta
 Disallow: /login
+Disallow: /atualizar-senha
+Disallow: /api/
