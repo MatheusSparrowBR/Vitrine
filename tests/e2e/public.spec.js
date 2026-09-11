@@ -114,7 +114,7 @@ test('painéis analytics e empresas exigem perfil administrador ou conta',async(
  await page.goto('/admin/analytics')
  await expect(page.getByText('Acesso restrito',{exact:true})).toBeVisible()
  await page.goto('/conta/analytics')
- await expect(page.getByRole('heading',{name:/Entre para acompanhar seu desempenho/i})).toBeVisible()
+ await expect(page.getByRole('heading',{name:/Acompanhe o desempenho da sua empresa/i})).toBeVisible()
 })
 
 test('promocoes publicas carregam sem erro visual',async({page})=>{
