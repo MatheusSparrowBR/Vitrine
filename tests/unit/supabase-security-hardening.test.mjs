@@ -15,13 +15,15 @@ test('Supabase hardening revokes trigger-only RPC access and protects internal u
  assert.match(migration,/authenticated owners or admins read businesses/)
 })
 
-test('public business access uses a safe directory view instead of the businesses table',()=>{
+test('public business access uses an invoker directory view with column-limited anonymous access',()=>{
  const migration=read('supabase/migrations/20260911123500_security_hardening.sql')
  const home=read('src/CityHomePage.jsx')
  const listing=read('src/ModernBusinessesPage.jsx')
  const profile=read('src/ModernBusinessProfilePage.jsx')
- assert.match(migration,/ALTER VIEW public\.public_business_directory SET \(security_invoker = false\)/)
+ assert.match(migration,/ALTER VIEW public\.public_business_directory SET \(security_invoker = true\)/)
  assert.match(migration,/GRANT SELECT ON public\.public_business_directory TO anon, authenticated/)
+ assert.match(migration,/GRANT SELECT \(id,city_id,category_id,name,slug,short_description,description,logo_url,cover_url,phone,whatsapp,website_url,instagram_url,facebook_url,address,neighborhood,latitude,longitude,opening_hours,status,verified,featured,created_at,updated_at\) ON public\.businesses TO anon/)
+ assert.match(migration,/REVOKE SELECT ON public\.businesses FROM anon/)
  assert.match(home,/from\('public_business_directory'\)/)
  assert.match(listing,/from\('public_business_directory'\)/)
  assert.match(profile,/from\('public_business_directory'\)/)
