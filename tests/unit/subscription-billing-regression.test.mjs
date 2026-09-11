@@ -5,7 +5,9 @@ const read=p=>fs.readFileSync(p,'utf8')
 
 test('planos cobre checkout, troca, cancelamento e retorno da empresa',()=>{
  const page=read('src/BillingPlansPage.jsx')
- for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','checkout=success','checkout=cancelled','cancel_at_period_end','scheduled_change_at'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
+ for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','params.get(\'checkout\')','cancel_at_period_end','scheduled_change_at'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
+ const checkout=read('supabase/functions/create-checkout-session/index.ts')
+ for(const value of ['checkout=success','checkout=cancelled','success_url','cancel_url','business_id'])assert.ok(checkout.includes(value),`checkout precisa conter ${value}`)
 })
 
 test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',()=>{
