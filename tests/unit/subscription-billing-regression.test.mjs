@@ -14,6 +14,7 @@ test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',
  const fn=read('supabase/functions/create-checkout-session/index.ts')
  for(const value of ['stripe_price_monthly_id','stripe_price_yearly_id','stripe.prices.create','SITE_URL','owner_id','user.id'])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
  assert.equal(fn.includes("req.headers.get('origin')"),false)
+ assert.ok(fn.includes("['monthly','yearly'].includes(requestedInterval)"),'checkout deve rejeitar intervalos inválidos')
 })
 
 test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no fim do ciclo',()=>{
@@ -21,9 +22,9 @@ test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no 
  for(const value of ['subscriptionSchedules','cancel_at_period_end:true','current_period_end','scheduled_plan_id',"proration_behavior:'create_prorations'",'owner_id','user.id'])assert.ok(fn.includes(value),`troca de plano precisa conter ${value}`)
 })
 
-test('webhook verifica assinatura Stripe, deduplica evento e identifica plano pelo preço',()=>{
+test('webhook verifica assinatura Stripe, deduplica eventos concorrentes, valida proprietário/cliente e sincroniza estado real',()=>{
  const fn=read('supabase/functions/stripe-webhook/index.ts')
- for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
+ for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events','business.owner_id!==userId','Cliente Stripe não corresponde','stripe.subscriptions.retrieve(String(i.subscription)','rec.code===\'23505\''])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
  assert.equal(fn.includes('detail:String(e'),false)
 })
 
