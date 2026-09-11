@@ -31,3 +31,14 @@ test('uso do catálogo é separado do inventário atual',()=>{
  assert.ok(service.includes("get_business_plan_usage_cycle"))
  assert.ok(migration.includes('business_plan_usage_cycles'))
 })
+
+test('empresas pertencentes a administradores têm recursos ilimitados para testes',()=>{
+ const migration=fs.readdirSync('supabase/migrations').sort().filter(x=>x.includes('admin_owned_businesses_unlimited_test_access')).at(-1)
+ assert.ok(migration,'Migration de empresas admin não encontrada')
+ const sql=read(`supabase/migrations/${migration}`)
+ assert.ok(sql.includes('is_admin_owned_business'))
+ assert.ok(sql.includes('when private.is_admin_owned_business(p_business_id) then -1'))
+ assert.ok(sql.includes("when private.is_admin_owned_business(p_business_id) then true"))
+ const helper=read('src/plan-cycle-usage.js')
+ assert.ok(helper.includes('ADMIN_UNLIMITED_LIMIT=2147483647'))
+})
