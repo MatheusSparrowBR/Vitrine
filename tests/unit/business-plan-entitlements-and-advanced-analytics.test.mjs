@@ -31,7 +31,7 @@ test('desempenho e estatísticas avançadas são recursos separados no painel',(
 
 test('catálogo de planos mantém as regras comerciais esperadas',()=>{
  const plans=read('src/BillingPlansPage.jsx')
- assert.match(plans,/featured.*Destaque nas buscas/)
- assert.match(plans,/verified.*Selo de verificação/)
- assert.match(plans,/advanced_analytics.*Estatísticas avançadas/)
+ assert.match(plans,/featured:'Destaque nas buscas'/)
+ assert.match(plans,/verified:'Selo de verificação'/)
+ assert.match(plans,/advanced_analytics:'Estatísticas avançadas'/)
 })
