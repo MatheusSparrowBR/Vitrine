@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8')
 
 test('meu plano renderiza o mesmo gráfico de utilização para mídias, produtos e promoções',()=>{
  const plan=read('src/PlanUsageReact.jsx')
- for(const value of ["LABELS={photos:'Mídias'","LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'",'function UsageCard(','USO NO CICLO','Math.round(percent)'])assert.ok(plan.includes(value),`Meu plano precisa conter ${value}`)
+ for(const value of ["LABELS={photos:'Mídias'","LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'",'function UsageCard(','USO NO CICLO','Math.round(percent)','const unlimited=limit<0','unlimited?\'∞\'','SEM LIMITE PARA TESTES'])assert.ok(plan.includes(value),`Meu plano precisa conter ${value}`)
 })
 
 test('área administrativa expõe navegação para alterar plano por empresa',()=>{
@@ -41,4 +41,6 @@ test('empresas pertencentes a administradores têm recursos ilimitados para test
  assert.ok(sql.includes("when private.is_admin_owned_business(p_business_id) then true"))
  const helper=read('src/plan-cycle-usage.js')
  assert.ok(helper.includes('ADMIN_UNLIMITED_LIMIT=2147483647'))
+ assert.ok(helper.includes('unlimited:rawLimit<0'))
+ assert.ok(helper.includes('limit:Number.isFinite(rawLimit)?rawLimit:0'))
 })
