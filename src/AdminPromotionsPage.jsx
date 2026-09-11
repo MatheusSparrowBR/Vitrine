@@ -8,7 +8,6 @@ const PROMOTION_TZ='America/Sao_Paulo'
 const PROMOTION_OFFSET='-03:00'
 const empty={business_id:'',title:'',description:'',price:'',original_price:'',starts_at:'',ends_at:'',status:'pending_review',image_url:'',image_path:''}
 
-const pad=n=>String(n).padStart(2,'0')
 function toProjectInput(value){
  if(!value)return ''
  const d=new Date(value)
@@ -30,30 +29,21 @@ export default function AdminPromotionsPage({supabase}){
  const [businesses,setBusinesses]=useState([]),[items,setItems]=useState([]),[loading,setLoading]=useState(true)
  const [editor,setEditor]=useState(null),[form,setForm]=useState(empty),[imageFile,setImageFile]=useState(null),[preview,setPreview]=useState(''),[saving,setSaving]=useState(false),[message,setMessage]=useState({text:'',error:false}),[statusFilter,setStatusFilter]=useState('current'),[search,setSearch]=useState('')
  const notify=(text,error=false)=>{setMessage({text,error});window.clearTimeout(window.__vlPromotionToast);window.__vlPromotionToast=window.setTimeout(()=>setMessage({text:'',error:false}),3500)}
- async function archiveExpired(){
-  const result=await supabase.rpc('archive_expired_promotions')
-  if(result.error){notify(result.error.message||'Não foi possível atualizar as promoções expiradas.',true);return 0}
-  return Number(result.data||0)
- }
  async function load(){
   setLoading(true)
-  const archiveResult=await archiveExpired()
   const [b,p]=await Promise.all([
    supabase.from('businesses').select('id,name,status,city_id,cities(name,state)').order('name').limit(500),
    supabase.from('promotions').select('id,business_id,title,description,image_url,image_path,price,original_price,starts_at,ends_at,status,created_at,updated_at,businesses(name,cities(name,state))').order('created_at',{ascending:false}).limit(500)
   ])
   if(b.error||p.error)notify((b.error||p.error).message||'Não foi possível carregar as promoções.',true)
   setBusinesses(b.data||[]);setItems(p.data||[]);setLoading(false)
-  return archiveResult
  }
  useEffect(()=>{
   load()
-  const timer=window.setInterval(async()=>{const archived=await archiveExpired();if(archived>0)await load()},60000)
-  return()=>window.clearInterval(timer)
  },[])
  useEffect(()=>()=>{if(preview?.startsWith('blob:'))URL.revokeObjectURL(preview)},[preview])
  const activeBusinesses=useMemo(()=>businesses.filter(x=>x.status==='active'),[businesses])
- const filtered=useMemo(()=>items.filter(p=>{const q=search.trim().toLowerCase();const text=[p.title,p.description,p.businesses?.name,p.businesses?.cities?.name].filter(Boolean).join(' ').toLowerCase();const matchesStatus=statusFilter==='current'?p.status!=='archived':statusFilter==='all'?true:p.status===statusFilter;return(!q||text.includes(q))&&matchesStatus}),[items,search,statusFilter])
+ const filtered=useMemo(()=>items.filter(p=>{const q=search.trim().toLowerCase();const text=[p.title,p.description,p.businesses?.name,p.businesses?.cities?.name].filter(Boolean).join(' ').toLowerCase();const now=Date.now();const ended=p.ends_at&&new Date(p.ends_at).getTime()<=now;const matchesStatus=statusFilter==='current'?(p.status!=='archived'&&!ended):statusFilter==='all'?true:p.status===statusFilter;return(!q||text.includes(q))&&matchesStatus}),[items,search,statusFilter])
  function startNew(){setEditor({id:null});setForm({...empty});setImageFile(null);setPreview('')}
  function edit(row){setEditor({id:row.id});setForm({business_id:row.business_id||'',title:row.title||'',description:row.description||'',price:row.price??'',original_price:row.original_price??'',starts_at:toProjectInput(row.starts_at),ends_at:toProjectInput(row.ends_at),status:row.status||'pending_review',image_url:row.image_url||'',image_path:row.image_path||''});setImageFile(null);setPreview(row.image_url||'')}
  function close(){setEditor(null);setForm(empty);setImageFile(null);setPreview('')}
