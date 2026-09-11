@@ -30,7 +30,7 @@ test('admin platform exposes the plan editor and business-plan assignment flows'
  assert.ok(tools.includes("supabase.from('plans').insert(payload)"))
  assert.ok(tools.includes('async function removeSimple(table,row,label)'))
  assert.ok(tools.includes("supabase.from(table).delete().eq('id',row.id)"))
- assert.ok(platform.includes("tab==='plans'"))
+ assert.ok(platform.includes('defaultTab={tab}'))
  assert.ok(assignment.includes('admin_list_business_plans'))
  assert.ok(assignment.includes('admin_set_business_plan'))
  assert.ok(shell.includes('/admin/gestao?tab=plans'))
