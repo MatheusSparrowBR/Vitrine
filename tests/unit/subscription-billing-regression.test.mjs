@@ -24,8 +24,10 @@ test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no 
 
 test('webhook verifica assinatura Stripe, deduplica eventos concorrentes, valida proprietário/cliente e sincroniza estado real',()=>{
  const fn=read('supabase/functions/stripe-webhook/index.ts')
- for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events','business.owner_id!==userId','Cliente Stripe não corresponde','stripe.subscriptions.retrieve(String(i.subscription)','rec.code===\'23505\''])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
+ for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events','business.owner_id!==userId','Cliente Stripe não corresponde','subscriptions.retrieve(String(obj.subscription)','rec.code===\'23505\''])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
  assert.equal(fn.includes('detail:String(e'),false)
+ assert.ok(fn.includes('processed_at'),'webhook deve persistir o processamento do evento')
+ assert.ok(fn.includes('if(existingEvent?.processed_at)'),'webhook deve deduplicar apenas eventos já processados')
 })
 
 test('portal de cobrança valida proprietário e preserva o destino interno',()=>{
