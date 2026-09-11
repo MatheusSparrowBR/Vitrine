@@ -47,10 +47,7 @@ export default function AuthPage(){
   <div className="vl-auth-card">
    <a className="brand" href="/laguna" aria-label="Voltar para VitrineLocal"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a>
    <div className="auth-kicker-row"><span className="section-kicker">ÁREA DO COMERCIANTE</span><span className="auth-secure"><span aria-hidden="true">●</span> acesso seguro</span></div>
-   <header className="auth-heading">
-    <h1>{title}</h1>
-    <p>{subtitle}</p>
-   </header>
+   <header className="auth-heading"><h1>{title}</h1><p>{subtitle}</p></header>
    {error&&<div className="auth-alert error" role="alert"><span className="auth-alert-icon" aria-hidden="true">!</span><span>{error}</span></div>}
    {msg&&<div className="auth-alert" role="status" aria-live="polite"><span className="auth-alert-icon" aria-hidden="true">✓</span><span>{msg}</span></div>}
    {mode==='forgot'?<form onSubmit={e=>{e.preventDefault();recover()}} className="auth-form">
@@ -60,7 +57,7 @@ export default function AuthPage(){
     {mode==='signup'&&<label className="auth-field"><span>Nome</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Seu nome"/></label>}
     <label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email" placeholder="voce@empresa.com" inputMode="email"/></label>
     <label className="auth-field"><span>Senha</span><div className="auth-input-wrap"><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={mode==='signup'?8:1} autoComplete={mode==='login'?'current-password':'new-password'} placeholder={mode==='signup'?'Mínimo de 8 caracteres':'Sua senha'}/><button type="button" className="password-toggle" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar senha':'Mostrar senha'}>{showPassword?'Ocultar':'Mostrar'}</button></div>{mode==='signup'&&<div className="password-help"><span className={passwordRules.length?'ok':''}>{passwordRules.length?'✓':'○'} 8 caracteres ou mais</span><span className={passwordRules.mixed?'ok':''}>{passwordRules.mixed?'✓':'○'} letras e números</span></div>}</label>
-    {mode==='signup'&&<label className="auth-field"><span>Confirmar senha</span><div className="auth-input-wrap"><input type={showConfirm?'text':'password'} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="Digite a senha novamente"/ ><button type="button" className="password-toggle" onClick={()=>setShowConfirm(v=>!v)} aria-label={showConfirm?'Ocultar confirmação':'Mostrar confirmação'}>{showConfirm?'Ocultar':'Mostrar'}</button></div></label>}
+    {mode==='signup'&&<label className="auth-field"><span>Confirmar senha</span><div className="auth-input-wrap"><input type={showConfirm?'text':'password'} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="Digite a senha novamente"/><button type="button" className="password-toggle" onClick={()=>setShowConfirm(v=>!v)} aria-label={showConfirm?'Ocultar confirmação':'Mostrar confirmação'}>{showConfirm?'Ocultar':'Mostrar'}</button></div></label>}
     <div className="auth-actions-row">{mode==='login'?<button type="button" className="text-button inline" onClick={()=>{setMode('forgot');resetState()}}>Esqueci minha senha</button>:<span className="auth-hint">Seus dados ficam protegidos.</span>}</div>
     <button className="primary wide" disabled={busy}>{busy?<><span className="auth-spinner"/>Aguarde…</>:mode==='login'?'Entrar na minha conta':'Criar minha conta'}</button>
    </form>}
