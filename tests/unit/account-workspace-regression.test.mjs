@@ -17,6 +17,6 @@ test('performance navigation lives inside the merchant account workspace',()=>{
  const account=read('src/AccountWorkspacePage.jsx')
  const header=read('src/SiteHeader.jsx')
  assert.match(account,/label="Desempenho"/)
- assert.match(account,/location\.href='\/conta\/analytics'/)
+ assert.match(account,/location\.href=`\/conta\/analytics\?business_id=/)
  assert.doesNotMatch(header,/\['analytics','Desempenho','\/conta\/analytics'\]/)
 })
