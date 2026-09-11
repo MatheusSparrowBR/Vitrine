@@ -18,8 +18,8 @@ test('Pro e Premium recebem verificação e destaque automaticamente e planos gr
 
 test('desempenho e estatísticas avançadas são recursos separados no painel',()=>{
  const page=read('src/CommercialAnalyticsPage.jsx')
- assert.match(page,/hasPlanFeature\(s\.plan\.features,'analytics',false\)/)
- assert.match(page,/hasPlanFeature\(s\.plan\.features,'advanced_analytics',false\)/)
+ assert.match(page,/hasPlanFeature\(plan\.features,'analytics',false\)/)
+ assert.match(page,/hasPlanFeature\(plan\.features,'advanced_analytics',false\)/)
  assert.match(page,/get_business_analytics_summary/)
  assert.match(page,/get_business_advanced_analytics/)
  assert.match(page,/ESTATÍSTICAS AVANÇADAS/)
