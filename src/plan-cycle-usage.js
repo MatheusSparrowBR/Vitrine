@@ -9,7 +9,7 @@ export async function getPlanCycleUsage(businessId){
  if(!db||!businessId)return{rows:[],error:new Error('Banco indisponível.')}
  const{data,error}=await db.rpc('get_business_plan_usage_cycle',{p_business_id:businessId})
  if(error)return{rows:[],error}
- return{rows:data||[],error:null}
+ return{rows:(data||[]).map(row=>{const rawLimit=Number(row.limit_count);return{...row,used_count:Math.max(0,Number(row.used_count)||0),limit_count:Number.isFinite(rawLimit)?rawLimit:0,unlimited:rawLimit<0}}),error:null}
 }
 
 export async function getPlanCycleFeatureUsage(businessId,feature){
@@ -18,8 +18,8 @@ export async function getPlanCycleFeatureUsage(businessId,feature){
  const row=rows.find(item=>item.feature===feature)||null
  if(!row)return{usage:{used:0,limit:0,unlimited:false,cycleStart:null,cycleEnd:null,planCode:'free'},error:null}
  const rawLimit=Number(row.limit_count)
- const unlimited=rawLimit<0
- return{usage:{used:Number(row.used_count)||0,limit:unlimited?ADMIN_UNLIMITED_LIMIT:(Number.isFinite(rawLimit)?rawLimit:0),unlimited,cycleStart:row.cycle_start||null,cycleEnd:row.cycle_end||null,planCode:row.plan_code||'free'},error:null}
+ const unlimited=Boolean(row.unlimited)||rawLimit<0
+ return{usage:{used:Math.max(0,Number(row.used_count)||0),limit:Number.isFinite(rawLimit)?rawLimit:0,unlimited,cycleStart:row.cycle_start||null,cycleEnd:row.cycle_end||null,planCode:row.plan_code||'free'},error:null}
 }
 
 export async function getPlanFeatureLimit(businessId,feature){
