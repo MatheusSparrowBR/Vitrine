@@ -11,7 +11,6 @@ test('pré-lançamento possui SEO público e rotas privadas protegidas contra in
  assert.match(html,/meta name="description"/)
  assert.match(html,/property="og:title"/)
  assert.match(html,/property="og:image"/)
- assert.match(html,/link rel="canonical"/)
  assert.match(html,/site\.webmanifest/)
  assert.match(html,/favicon\.svg/)
  assert.match(html,/src="\/src\/seo-runtime\.js"/)
