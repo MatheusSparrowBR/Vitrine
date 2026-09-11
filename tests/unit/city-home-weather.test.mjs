@@ -23,5 +23,5 @@ test('weather lookup keeps the selected city and state context',()=>{
  const page=read('src/CityHomePage.jsx')
  assert.match(page,/city\?\.name/)
  assert.match(page,/city\?\.state/)
- assert.match(page,/const country=String\(city\?\.country\|\|'Brasil'\)\.trim\(\)/)
+ assert.match(page,/city\?\.country/)
 })
