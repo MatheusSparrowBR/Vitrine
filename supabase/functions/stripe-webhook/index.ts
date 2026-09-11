@@ -27,6 +27,25 @@ async function sync(sub:any){
  const result=existing?.id?await admin.from('subscriptions').update(payload).eq('id',existing.id):await admin.from('subscriptions').insert(payload);if(result.error)throw result.error
  if(existing?.id&&existing.scheduled_plan_id&&plan.id===existing.scheduled_plan_id&&sub.status==='active')await admin.from('subscriptions').update({scheduled_plan_id:null,scheduled_billing_interval:null,scheduled_change_at:null}).eq('id',existing.id)
 }
+async function syncPremiumAdvertisingSubscription(sub:any){
+ const meta=sub.metadata||{},requestId=String(meta.request_id||''),businessId=String(meta.business_id||''),userId=String(meta.user_id||''),customer=typeof sub.customer==='string'?sub.customer:sub.customer?.id
+ if(meta.flow!=='premium_advertising'||!requestId||!businessId||!userId)throw new Error('Assinatura de publicidade sem metadados válidos.')
+ const{data:req}=await admin.from('advertising_requests').select('id,business_id,title,description,target_url,desired_start_at,desired_end_at,final_price,creative_mode,artwork_path,artwork_url').eq('id',requestId).maybeSingle()
+ if(!req||req.business_id!==businessId)throw new Error('Solicitação de publicidade inválida.')
+ const{data:business}=await admin.from('businesses').select('id,owner_id,city_id').eq('id',businessId).maybeSingle()
+ if(!business||business.owner_id!==userId)throw new Error('Solicitação de publicidade não pertence ao proprietário.')
+ const{data:plan}=await admin.from('plans').select('features').eq('code','premium').maybeSingle()
+ if(plan?.features?.premium_ads!==true)throw new Error('Publicidade Premium não está habilitada no catálogo.')
+ const paymentStatus=['active','trialing'].includes(sub.status)?'paid':['past_due','unpaid','incomplete'].includes(sub.status)?'failed':'canceled'
+ const periodEnd=sub.current_period_end?new Date(sub.current_period_end*1000).toISOString():null
+ const{error:reqError}=await admin.from('advertising_requests').update({payment_status:paymentStatus,stripe_subscription_id:sub.id,paid_at:paymentStatus==='paid'?new Date().toISOString():null}).eq('id',requestId)
+ if(reqError)throw reqError
+ const{data:ad,error:adLookupError}=await admin.from('advertisements').select('id').eq('advertising_request_id',requestId).maybeSingle();if(adLookupError)throw adLookupError
+ const payload={advertising_request_id:requestId,business_id:businessId,city_id:business.city_id,title:req.title,description:req.description||null,target_url:req.target_url||null,starts_at:req.desired_start_at||null,ends_at:req.desired_end_at||null,monthly_price:Number(req.final_price||0),billing_status:paymentStatus==='paid'?'paid':paymentStatus==='failed'?'overdue':'canceled',billing_started_at:paymentStatus==='paid'?new Date().toISOString():null,billing_ends_at:periodEnd,image_url:req.artwork_url||null,image_path:req.artwork_path||null,placement:'home_banner',priority:0,active:false}
+ const result=ad?.id?await admin.from('advertisements').update(payload).eq('id',ad.id):await admin.from('advertisements').insert(payload);if(result.error)throw result.error
+ if(paymentStatus==='canceled'||paymentStatus==='failed')await admin.from('advertisements').update({active:false,billing_status:paymentStatus==='failed'?'overdue':'canceled'}).eq('advertising_request_id',requestId)
+ return payload
+}
 Deno.serve(async req=>{
  if(req.method!=='POST')return json({error:'Method not allowed'},405)
  if(!secret||!Deno.env.get('STRIPE_SECRET_KEY'))return json({error:'Webhook Stripe não configurado.'},500)
@@ -35,7 +54,19 @@ Deno.serve(async req=>{
  const{data:dup}=await admin.from('billing_events').select('id').eq('provider','stripe').eq('provider_event_id',event.id).maybeSingle();if(dup)return json({received:true,deduplicated:true})
  const{error:rec}=await admin.from('billing_events').insert({provider:'stripe',provider_event_id:event.id,event_type:event.type,payload:event});if(rec){if(rec.code==='23505')return json({received:true,deduplicated:true});return json({error:'Falha ao registrar evento.'},500)}
  try{
-   if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){const s=event.data.object;if(s.subscription)await sync(await stripe.subscriptions.retrieve(String(s.subscription),{expand:['items.data.price']}))}
+   const obj=event.data.object
+   const meta=obj?.metadata||{}
+   if(meta.flow==='premium_advertising'){
+     if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){
+       if(obj.subscription)await syncPremiumAdvertisingSubscription(await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))
+     }else if(event.type==='invoice.paid'||event.type==='invoice.payment_failed'||event.type==='invoice.payment_action_required'){
+       if(obj.subscription)await syncPremiumAdvertisingSubscription(await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))
+     }else if(['customer.subscription.created','customer.subscription.updated','customer.subscription.resumed','customer.subscription.paused'].includes(event.type)){
+       await syncPremiumAdvertisingSubscription(obj)
+     }else if(event.type==='customer.subscription.deleted'){
+       await syncPremiumAdvertisingSubscription({...obj,status:'canceled'})
+     }
+   }else if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){const s=event.data.object;if(s.subscription)await sync(await stripe.subscriptions.retrieve(String(s.subscription),{expand:['items.data.price']}))}
    else if(event.type==='invoice.paid'){const i=event.data.object;if(i.subscription)await sync(await stripe.subscriptions.retrieve(String(i.subscription),{expand:['items.data.price']}))}
    else if(event.type==='invoice.payment_failed'||event.type==='invoice.payment_action_required'){const i=event.data.object;if(i.subscription)await sync(await stripe.subscriptions.retrieve(String(i.subscription),{expand:['items.data.price']}))}
    else if(event.type==='customer.subscription.updated'||event.type==='customer.subscription.created'||event.type==='customer.subscription.resumed'||event.type==='customer.subscription.paused')await sync(event.data.object)
