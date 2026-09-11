@@ -13,40 +13,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - name: Run unit tests
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test 2>&1 | tee test-output.txt
-      - name: Upload unit test output
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-output
-          path: test-output.txt
-          if-no-files-found: error
-      - name: Run build
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run build 2>&1 | tee build-output.txt
-      - name: Upload build output
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: build-output.txt
-          if-no-files-found: error
+      - run: npm run test
+      - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - name: Run e2e tests
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test:e2e 2>&1 | tee e2e-output.txt
-      - name: Upload e2e output
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-output
-          path: e2e-output.txt
-          if-no-files-found: error
+      - run: npm run test:e2e
