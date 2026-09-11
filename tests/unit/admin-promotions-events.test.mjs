@@ -3,19 +3,24 @@ import assert from'node:assert/strict'
 import fs from'node:fs'
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('promoções expiradas são arquivadas no banco e a tela administrativa inicia sem arquivadas',()=>{
- const migration=read('supabase/migrations/20260911022000_archive_expired_promotions_automatically.sql')
+test('promoções expiradas são arquivadas por manutenção agendada e a tela administrativa não depende do cron do navegador',()=>{
+ const migration=read('supabase/migrations/20260911130600_operational_maintenance.sql')
  const page=read('src/AdminPromotionsPage.jsx')
- assert.match(migration,/create or replace function public\.archive_expired_promotions\(\)/)
+ assert.match(migration,/create table if not exists public\.operational_maintenance_runs/)
+ assert.match(migration,/create or replace function public\.run_operational_maintenance\(\)/)
  assert.match(migration,/ends_at is not null/)
  assert.match(migration,/ends_at <= now\(\)/)
  assert.match(migration,/status in \('published','pending_review'\)/)
  assert.match(migration,/status='archived'/)
- assert.match(migration,/grant execute on function public\.archive_expired_promotions\(\) to authenticated/)
- assert.match(page,/rpc\('archive_expired_promotions'\)/)
+ assert.match(migration,/cron\.schedule\()/
+ assert.match(migration,/'vitrine-local-operational-maintenance'/)
+ assert.match(migration,/'0 \* \* \* \*'/)
+ assert.match(migration,/revoke all on function public\.run_operational_maintenance\(\) from public, anon, authenticated/)
+ assert.doesNotMatch(page,/rpc\('archive_expired_promotions'\)/)
+ assert.doesNotMatch(page,/setInterval\(async\(\)=>\{/)
  assert.match(page,/useState\('current'\)/)
- assert.match(page,/statusFilter==='current'\?p\.status!==\x27archived\x27/)
- assert.match(page,/setInterval\(async\(\)=>\{const archived=await archiveExpired\(\);if\(archived>0\)await load\(\)\},60000\)/)
+ assert.match(page,/const ended=p\.ends_at&&new Date\(p\.ends_at\)\.getTime\(\)<=now/)
+ assert.match(page,/statusFilter==='current'\?\(p\.status!=='archived'&&!ended\)/)
 })
 
 test('admin de promoções oferece filtro separado para visualizar arquivadas',()=>{
