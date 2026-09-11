@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8')
 
 test('meu plano renderiza o mesmo gráfico de utilização para mídias, produtos e promoções',()=>{
  const plan=read('src/PlanUsageReact.jsx')
- for(const value of ["LABELS={photos:'Mídias'","LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'","<Donut percent={percent} state={state} label=\"utilizado\"/>",'USO NO CICLO','Math.round(percent)'])assert.ok(plan.includes(value),`Meu plano precisa conter ${value}`)
+ for(const value of ["LABELS={photos:'Mídias'","LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'",'function UsageCard(','USO NO CICLO','Math.round(percent)'])assert.ok(plan.includes(value),`Meu plano precisa conter ${value}`)
 })
 
 test('área administrativa expõe navegação para alterar plano por empresa',()=>{
