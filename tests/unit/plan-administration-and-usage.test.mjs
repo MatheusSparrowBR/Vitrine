@@ -44,3 +44,29 @@ test('empresas pertencentes a administradores têm recursos ilimitados para test
  assert.ok(helper.includes('unlimited:rawLimit<0'))
  assert.ok(helper.includes('limit:Number.isFinite(rawLimit)?rawLimit:0'))
 })
+
+test('troca de plano no meio do ciclo preserva o ciclo e o consumo já realizado',()=>{
+ const migration=read('supabase/migrations/20260911015810_preserve_catalog_usage_across_midcycle_plan_changes.sql')
+ const refined=read('supabase/migrations/20260911015900_refine_current_catalog_cycle_selection.sql')
+ assert.match(migration,/business_plan_usage_cycles/)
+ assert.match(refined,/cycle_start<=now\(\)/)
+ assert.match(refined,/cycle_end>now\(\)/)
+ assert.match(refined,/order by u\.cycle_start desc/)
+ assert.match(read('src/plan-cycle-usage.js'),/get_business_plan_usage_cycle/)
+ assert.match(read('supabase/migrations/20260911014900_plan_catalog_usage_cycle_bootstrap_fix.sql'),/business_plan_usage_cycles/)
+})
+
+test('upgrade imediato mantém a assinatura existente e só troca o plano/preço',()=>{
+ const fn=read('supabase/functions/change-subscription-plan/index.ts')
+ assert.match(fn,/proration_behavior:'create_prorations'/)
+ assert.match(fn,/update\(payload\)\.eq\('id',record\.id\)/)
+ assert.doesNotMatch(fn,/insert\(payload\)/)
+})
+
+test('downgrade e mudanças agendadas preservam o plano atual até o próximo ciclo',()=>{
+ const fn=read('supabase/functions/change-subscription-plan/index.ts')
+ assert.match(fn,/scheduled_plan_id:target\.id/)
+ assert.match(fn,/scheduled_change_at:effectiveAt/)
+ assert.match(fn,/cancel_at_period_end:false/)
+ assert.match(fn,/const effectiveAt=new Date\(subscription\.current_period_end\*1000\)/)
+})
