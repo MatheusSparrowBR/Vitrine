@@ -27,11 +27,12 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setCategories(fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setCat(initialCat);setLoading(false);return}
   const{data:c}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(!live)return;setCity(c||null);if(!c){setLoading(false);return}
   const[b,cs]=await Promise.all([
-   db.from('businesses').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,categories(name,slug,icon)').eq('city_id',c.id).eq('status','active').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(100),
+   db.from('public_business_directory').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,category_name,category_slug,created_at').eq('city_id',c.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(100),
    db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name')
   ])
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
-  setBusinesses(b.data||[]);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
+  const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
+  setBusinesses(publicBusinesses);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
  })();return()=>{live=false}},[citySlug])
  const items=useMemo(()=>{const term=q.trim().toLowerCase();return businesses.filter(b=>{const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term);const matchesCat=!cat||b.categories?.slug===cat;return matchesText&&matchesCat})},[businesses,q,cat])
  const setCategory=next=>{setCat(next);const url=new URL(location.href);if(next)url.searchParams.set('categoria',next);else url.searchParams.delete('categoria');history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))}
