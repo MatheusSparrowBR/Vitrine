@@ -25,7 +25,7 @@ test('pré-lançamento possui SEO público e rotas privadas protegidas contra in
  assert.match(vercel,/X-Robots-Tag/)
 })
 
-test('sitemap dinâmico cobre cidades, catálogos e perfis públicos sem expor rotas privadas',()=>{
+test('sitemap dinâmico cobre cidades, catálogos e perfis públicos sem expor rotas privadas',async()=>{
  const sitemap=read('api/sitemap.js')
  assert.match(sitemap,/application\/xml/)
  assert.match(sitemap,/public_business_directory/)
@@ -35,6 +35,16 @@ test('sitemap dinâmico cobre cidades, catálogos e perfis públicos sem expor r
  assert.match(sitemap,/\/eventos/)
  assert.doesNotMatch(sitemap,/\/admin/)
  assert.doesNotMatch(sitemap,/\/conta/)
+ const {default:handler}=await import('../../api/sitemap.js')
+ let status=0,body=''
+ const res={setHeader(){},end(value=''){body=String(value);return value}}
+ const oldUrl=process.env.VITE_SUPABASE_URL,oldKey=process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+ delete process.env.VITE_SUPABASE_URL;delete process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+ await handler({method:'GET',headers:{host:'example.test','x-forwarded-proto':'https'}},{...res,set statusCode(v){status=v}})
+ process.env.VITE_SUPABASE_URL=oldUrl;process.env.VITE_SUPABASE_PUBLISHABLE_KEY=oldKey
+ assert.equal(status,200)
+ assert.match(body,/urlset/)
+ assert.match(body,/https:\/\/example\.test\/laguna/)
 })
 
 test('analytics mede passos de conversão do funil comercial',()=>{
