@@ -25,13 +25,19 @@ test('admin de promoções oferece filtro separado para visualizar arquivadas',(
  assert.match(page,/\{Object\.entries\(STATUS\)\.map/)
 })
 
-test('eventos aparecem diretamente na tela administrativa sem modal ou botão intermediário',()=>{
+test('eventos aparecem diretamente na tela administrativa e o destaque tem feedback claro',()=>{
  const page=read('src/AdminEventsMain.jsx')
  const platform=read('src/AdminPlatformPage.jsx')
  assert.match(page,/useEffect\(\(\)=>\{load\(\)\},\[\]\)/)
  assert.match(page,/className="vl-admin-events-main"/)
  assert.match(page,/className="vl-admin-events-list"/)
- assert.match(page,/events\.map\(row=>/)
+ assert.match(page,/orderedEvents\.map\(row=>/)
+ assert.match(page,/setEvents\(current=>current\.map\(row=>row\.id===id\?\{\.\.\.row,\[field\]:next\}:row\)\)/)
+ assert.match(page,/row\.featured\?'Remover destaque':'⭐ Destacar'/)
+ assert.match(page,/Evento destacado na agenda pública\./)
+ assert.match(page,/Destaque removido do evento\./)
+ assert.match(page,/aria-pressed=\{row\.featured\}/)
+ assert.match(page,/action===`featured:\$\{row\.id\}`\?'Atualizando…'/)
  assert.doesNotMatch(page,/vl-admin-events-trigger/)
  assert.doesNotMatch(page,/vl-admin-events-backdrop/)
  assert.doesNotMatch(page,/open&&/)
