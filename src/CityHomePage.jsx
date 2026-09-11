@@ -19,19 +19,31 @@ const weatherLabel=code=>{const map={0:['☀️','Céu limpo'],1:['🌤️','Pre
 async function fetchCityWeather(city){
  const name=String(city?.name||'').trim()
  if(!name)return null
- const state=String(city?.state||'').trim().toUpperCase()
+ const state=String(city?.state||'').trim()
  const country=String(city?.country||'Brasil').trim()
- const geoUrl=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=8&language=pt&format=json`
+ const normalizeLocation=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()
+ const brazilStates={AC:'Acre',AL:'Alagoas',AP:'Amapa',AM:'Amazonas',BA:'Bahia',CE:'Ceara',DF:'Distrito Federal',ES:'Espirito Santo',GO:'Goias',MA:'Maranhao',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Para',PB:'Paraiba',PR:'Parana',PE:'Pernambuco',PI:'Piaui',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondonia',RR:'Roraima',SC:'Santa Catarina',SP:'Sao Paulo',SE:'Sergipe',TO:'Tocantins'}
+ const normalizedCountry=normalizeLocation(country)
+ const isBrazil=!country||normalizedCountry==='brasil'||normalizedCountry==='brazil'||normalizedCountry==='br'
+ const countryCode=isBrazil?'BR':(/^[A-Za-z]{2}$/.test(country)?country.toUpperCase():'')
+ const stateName=isBrazil?brazilStates[state.toUpperCase()]||state:state
+ const geoQuery=stateName?`${name}, ${stateName}`:name
+ const geoUrl=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(geoQuery)}&count=10&language=pt&format=json${countryCode?`&countryCode=${countryCode}`:''}`
  const geoResponse=await fetch(geoUrl)
  if(!geoResponse.ok)throw new Error('Falha ao localizar a cidade para consultar o clima.')
  const geo=await geoResponse.json()
  const candidates=Array.isArray(geo?.results)?geo.results:[]
- const normalizedCountry=country.toLowerCase()
+ const expectedName=normalizeLocation(name)
+ const expectedState=normalizeLocation(stateName)
  const match=candidates.find(item=>{
-  const sameState=state&&(String(item?.admin1_code||'').toUpperCase()===state||String(item?.admin1||'').toUpperCase().includes(state))
-  const sameCountry=!country||normalizedCountry.includes('brasil')||normalizedCountry.includes('brazil')?String(item?.country_code||'').toUpperCase()==='BR':true
-  return sameCountry&&(sameState||!state)
- })||candidates[0]
+  const itemName=normalizeLocation(item?.name)
+  const itemState=normalizeLocation(item?.admin1)
+  const itemCountry=String(item?.country_code||'').toUpperCase()
+  const sameName=itemName===expectedName
+  const sameState=!expectedState||itemState===expectedState||String(item?.admin1_code||'').toUpperCase()===state.toUpperCase()
+  const sameCountry=!countryCode||itemCountry===countryCode
+  return sameName&&sameState&&sameCountry
+ })
  if(!match?.latitude||!match?.longitude)throw new Error('Não foi possível localizar a cidade para o clima.')
  const weatherUrl=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(match.latitude)}&longitude=${encodeURIComponent(match.longitude)}&current=temperature_2m,apparent_temperature,weather_code,is_day&temperature_unit=celsius&timezone=America%2FSao_Paulo`
  const weatherResponse=await fetch(weatherUrl)
