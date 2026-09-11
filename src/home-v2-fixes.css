@@ -1,7 +1,12 @@
 /* Overrides finais da Home — devem permanecer depois do CSS legado */
 .home-v2 .category-dock .category-grid{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}
 .home-v2 .category-dock .category-grid::-webkit-scrollbar{display:none!important;height:0!important}
-.home-v2 .category-dock .category-card{display:flex!important;flex:1 0 100px!important;min-width:100px!important;min-height:106px!important}
+
+/* Categorias: painel branco centralizado, cards maiores e tipografia mais legível */
+.home-v2 .category-dock{width:min(1160px,calc(100% - 8px))!important;max-width:1160px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important;padding:12px!important}
+.home-v2 .category-dock .category-card{display:flex!important;flex:1 1 0!important;min-width:96px!important;min-height:114px!important;padding:13px 8px!important;gap:10px!important;border-radius:18px!important}
+.home-v2 .category-icon{width:54px!important;height:54px!important;border-radius:16px!important;font-size:23px!important}
+.home-v2 .category-dock .category-card strong{font-size:12px!important;line-height:1.25!important;font-weight:900!important}
 
 /* Empresas em destaque: largura proporcional à quantidade real de cards e sempre centrada */
 .home-v2 .business-grid-1{grid-template-columns:minmax(0,720px)!important;max-width:720px!important;margin-left:auto!important;margin-right:auto!important;justify-content:center!important}
@@ -28,8 +33,11 @@
   .home-v2 .content-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:920px!important}
 }
 @media(max-width:760px){
+  .home-v2 .category-dock{width:calc(100% - 16px)!important;max-width:none!important;padding:9px!important}
   .home-v2 .category-dock .category-grid{gap:6px!important}
-  .home-v2 .category-dock .category-card{flex:0 0 92px!important;min-width:92px!important;min-height:94px!important}
+  .home-v2 .category-dock .category-card{flex:0 0 100px!important;min-width:100px!important;min-height:102px!important;padding:11px 7px!important}
+  .home-v2 .category-icon{width:48px!important;height:48px!important;font-size:20px!important}
+  .home-v2 .category-dock .category-card strong{font-size:11px!important}
   .home-v2 .business-grid-1,.home-v2 .business-grid-2,.home-v2 .business-grid-3,.home-v2 .business-grid-4{grid-template-columns:1fr!important;max-width:none!important;justify-content:stretch!important;margin-left:0!important;margin-right:0!important}
   .home-v2 .content-grid-1,.home-v2 .content-grid-2,.home-v2 .content-grid-3{grid-template-columns:1fr!important;max-width:none!important}
 }
