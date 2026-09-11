@@ -1,0 +1,12 @@
+alter table public.plans add column if not exists stripe_product_id text;
+alter table public.subscriptions add column if not exists scheduled_plan_id uuid references public.plans(id) on delete restrict;
+alter table public.subscriptions add column if not exists scheduled_billing_interval text;
+alter table public.subscriptions add column if not exists scheduled_change_at timestamptz;
+alter table public.subscriptions alter column business_id set not null;
+alter table public.subscriptions add constraint subscriptions_billing_interval_check check (billing_interval is null or billing_interval in ('monthly','yearly'));
+alter table public.subscriptions add constraint subscriptions_scheduled_interval_check check (scheduled_billing_interval is null or scheduled_billing_interval in ('monthly','yearly'));
+drop index if exists public.subscriptions_provider_subscription_uidx;
+create unique index if not exists plans_stripe_product_uidx on public.plans(stripe_product_id) where stripe_product_id is not null;
+create unique index if not exists plans_stripe_price_monthly_uidx on public.plans(stripe_price_monthly_id) where stripe_price_monthly_id is not null;
+create unique index if not exists plans_stripe_price_yearly_uidx on public.plans(stripe_price_yearly_id) where stripe_price_yearly_id is not null;
+create index if not exists subscriptions_scheduled_plan_idx on public.subscriptions(scheduled_plan_id) where scheduled_plan_id is not null;
