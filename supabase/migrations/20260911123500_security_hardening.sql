@@ -112,7 +112,7 @@ CREATE POLICY "authenticated owners or admins read businesses"
   FOR SELECT TO authenticated
   USING ((owner_id = auth.uid()) OR private.is_admin());
 REVOKE SELECT ON public.businesses FROM anon;
-GRANT SELECT (id,city_id,category_id,name,slug,short_description,description,logo_url,cover_url,phone,whatsapp,website_url,instagram_url,facebook_url,address,neighborhood,latitude,longitude,opening_hours,verified,featured,created_at,updated_at) ON public.businesses TO anon;
+GRANT SELECT (id,city_id,category_id,name,slug,short_description,description,logo_url,cover_url,phone,whatsapp,website_url,instagram_url,facebook_url,address,neighborhood,latitude,longitude,opening_hours,status,verified,featured,created_at,updated_at) ON public.businesses TO anon;
 GRANT SELECT ON public.businesses TO authenticated;
 
 -- Subscription rows are service-managed; enforce the business -> owner relationship at the database boundary.
