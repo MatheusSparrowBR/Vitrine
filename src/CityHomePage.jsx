@@ -62,14 +62,14 @@ export default function CityHomePage({citySlug='laguna'}){
  useEffect(()=>{if(!db||!city?.id)return;let alive=true;setLoading(true);setPromoError('');const load=async()=>{
   const [c,b,p,e,a]=await Promise.all([
    db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'),
-   db.from('businesses').select('id,name,slug,short_description,cover_url,address,featured,verified,categories(name)').eq('city_id',city.id).eq('status','active').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8),
+   db.from('public_business_directory').select('id,name,slug,short_description,cover_url,address,featured,verified,category_name,created_at').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8),
    getActiveCityPromotions(db,city.id,{limit:100}),
    db.from('events').select('id,title,description,image_url,event_date,start_time,location,featured').eq('city_id',city.id).eq('active',true).gte('event_date',projectTodayISO()).order('featured',{ascending:false}).order('event_date').order('start_time').limit(4),
    db.from('advertisements').select('id,title,description,image_url,target_url,priority,starts_at,ends_at').eq('city_id',city.id).eq('placement','home_banner').eq('active',true).order('priority',{ascending:false}).order('created_at',{ascending:false}).limit(20)
   ])
   if(!alive)return
   setCategories(c.data?.length?c.data:FALLBACK_CATS.map(([name,icon],i)=>({id:i,name,icon,slug:slugify(name)})))
-  setBusinesses(b.data||[])
+  setBusinesses((b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name}:null})))
   if(p.error){setPromoError(p.error.message||'Não foi possível carregar as promoções.');setPromotions([])}else setPromotions(p.data||[])
   setEvents(e.data||[])
   const now=Date.now();const eligible=(a.data||[]).filter(x=>(!x.starts_at||new Date(x.starts_at).getTime()<=now)&&(!x.ends_at||new Date(x.ends_at).getTime()>=now));setBanners(eligible);setBannerIndex(0);setLoading(false)
