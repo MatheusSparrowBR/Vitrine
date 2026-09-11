@@ -12,6 +12,7 @@ const PROMOTION_TZ='America/Sao_Paulo'
 const PROMOTION_OFFSET='-03:00'
 const PLAN_NAMES={free:'Grátis',pro:'Pro',premium:'Premium'}
 const EMPTY={title:'',description:'',price:'',original_price:'',starts_at:'',ends_at:''}
+function getLimit(features){const value=features?.promotions_limit??features?.promotions;const n=Number(value);return Number.isFinite(n)&&n>=0?n:0}
 function toISO(value){if(!value||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))return null;const d=new Date(`${value}:00${PROMOTION_OFFSET}`);return Number.isNaN(d.getTime())?null:d.toISOString()}
 function money(v){return v==null||v===''?'':`R$ ${Number(v).toFixed(2).replace('.',',')}`}
 function percent(used,limit){return limit>0?Math.min(100,Math.round((used/limit)*100)):0}
