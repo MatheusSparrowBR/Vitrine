@@ -15,5 +15,12 @@ export async function getPlanCycleFeatureUsage(businessId,feature){
  const{rows,error}=await getPlanCycleUsage(businessId)
  if(error)return{usage:null,error}
  const row=rows.find(item=>item.feature===feature)||null
- return{usage:row?{used:Number(row.used_count)||0,limit:Number(row.limit_count)||0,cycleStart:row.cycle_start||null,cycleEnd:row.cycle_end||null,planCode:row.plan_code||'free'}:{used:0,limit:0,cycleStart:null,cycleEnd:null,planCode:'free'},error:null}
+ return{usage:row?{used:Number(row.used_count)||0,limit:Number(row.limit_count)??0,cycleStart:row.cycle_start||null,cycleEnd:row.cycle_end||null,planCode:row.plan_code||'free'}:{used:0,limit:0,cycleStart:null,cycleEnd:null,planCode:'free'},error:null}
+}
+
+export async function getPlanFeatureLimit(businessId,feature){
+ if(!db||!businessId||!feature)return{limit:0,error:new Error('Banco indisponível.')}
+ const{data,error}=await db.rpc('get_business_plan_feature_limit',{p_business_id:businessId,p_feature:feature})
+ if(error)return{limit:0,error}
+ return{limit:Number(data)??0,error:null}
 }
