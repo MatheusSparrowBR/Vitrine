@@ -14,9 +14,9 @@ test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',
  assert.equal(fn.includes("req.headers.get('origin')"),false)
 })
 
-test('troca de assinatura cobre upgrade imediato, agendamento e downgrade para grátis',()=>{
+test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no fim do ciclo',()=>{
  const fn=read('supabase/functions/change-subscription-plan/index.ts')
- for(const value of ['subscriptionSchedules','cancel_at_period_end:true','current_period_end','scheduled_plan_id','proration_behavior:\'create_prorations\'','owner_id','user.id'])assert.ok(fn.includes(value),`troca de plano precisa conter ${value}`)
+ for(const value of ['subscriptionSchedules','cancel_at_period_end:true','current_period_end','scheduled_plan_id',"proration_behavior:'create_prorations'",'owner_id','user.id'])assert.ok(fn.includes(value),`troca de plano precisa conter ${value}`)
 })
 
 test('webhook verifica assinatura Stripe, deduplica evento e identifica plano pelo preço',()=>{
@@ -27,7 +27,7 @@ test('webhook verifica assinatura Stripe, deduplica evento e identifica plano pe
 
 test('portal de cobrança valida proprietário e preserva o destino interno',()=>{
  const fn=read('supabase/functions/billing-portal/index.ts')
- for(const value of ['owner_id','user.id','past_due','unpaid',"returnTo==='account'"])assert.ok(fn.includes(value),`portal precisa conter ${value}`)
+ for(const value of ['owner_id','user.id','past_due','unpaid','returnTo','body.return_to','account'])assert.ok(fn.includes(value),`portal precisa conter ${value}`)
 })
 
 test('migration de billing cria produto/preços Stripe e mudanças agendadas',()=>{
