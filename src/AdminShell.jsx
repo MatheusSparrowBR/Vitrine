@@ -8,6 +8,7 @@ const NAV=[
  ['businesses','Empresas','▦','/admin/empresas'],
  ['promotions','Promoções','％','/admin/gestao?tab=promotions'],
  ['events','Eventos','◫','/admin/gestao?tab=events'],
+ ['advertising','Publicidade','▣','/admin/publicidade'],
  ['banners','Banners','▰','/admin/banners'],
  ['analytics','Analytics','◔','/admin/analytics'],
  ['categories','Categorias','◇','/admin/gestao?tab=categories'],
