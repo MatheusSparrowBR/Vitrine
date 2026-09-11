@@ -86,13 +86,14 @@ Deno.serve(async req=>{
     const meta=obj?.metadata||{}
     if(meta.flow==='premium_advertising'){
       if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){if(obj.subscription)await syncPremiumAdvertisingSubscription(admin,await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))}
-      else if(event.type==='invoice.paid'||event.type==='invoice.payment_failed'||event.type==='invoice.payment_action_required'){if(obj.subscription)await syncPremiumAdvertisingSubscription(admin,await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))}
+      else if(event.type==='invoice.paid'||event.type==='invoice.payment_failed'||event.type==='invoice.payment_action_required'){const i=obj;if(i.subscription)await syncPremiumAdvertisingSubscription(admin,await stripe.subscriptions.retrieve(String(i.subscription),{expand:['items.data.price']}))}
       else if(['customer.subscription.created','customer.subscription.updated','customer.subscription.resumed','customer.subscription.paused'].includes(event.type))await syncPremiumAdvertisingSubscription(admin,obj)
       else if(event.type==='customer.subscription.deleted')await syncPremiumAdvertisingSubscription(admin,{...obj,status:'canceled'})
     }else if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){
       if(obj.subscription)await syncSubscription(admin,obj.metadata||{},await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))
     }else if(event.type==='invoice.paid'||event.type==='invoice.payment_failed'||event.type==='invoice.payment_action_required'){
-      if(obj.subscription)await syncSubscription(admin,obj.metadata||{},await stripe.subscriptions.retrieve(String(obj.subscription),{expand:['items.data.price']}))
+      const i=obj
+      if(i.subscription)await syncSubscription(admin,i.metadata||{},await stripe.subscriptions.retrieve(String(i.subscription),{expand:['items.data.price']}))
     }else if(['customer.subscription.updated','customer.subscription.created','customer.subscription.resumed','customer.subscription.paused'].includes(event.type)){
       await syncSubscription(admin,obj.metadata||{},obj)
     }else if(event.type==='customer.subscription.deleted'){
