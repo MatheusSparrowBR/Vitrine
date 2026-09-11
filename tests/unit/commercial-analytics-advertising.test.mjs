@@ -33,6 +33,6 @@ test('premium banner tracking identifies advertisement metadata and no anonymous
 test('app routes performance and advertising workspaces',()=>{
  const entry=read('src/app-entry.jsx')
  assert.match(entry,/if\(path===['"]\/conta\/analytics['"]\)return <CommercialAnalyticsPage/) 
- assert.match(entry,/if\(path===['"]\/conta\/publicidade['"]\)return <MerchantAdvertisingPage/) 
- assert.match(entry,/if\(path===['"]\/admin\/publicidade['"]\)return <AdminAdvertisingPage/) 
+ assert.match(entry,/if\(path===['"]\/conta\/publicidade['"]\)return <MerchantAdvertisingSalesPage/) 
+ assert.match(entry,/if\(path===['"]\/admin\/publicidade['"]\)return <AdminAdvertisingSalesPage/) 
 })
