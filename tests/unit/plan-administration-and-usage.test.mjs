@@ -47,13 +47,18 @@ test('empresas pertencentes a administradores têm recursos ilimitados para test
 
 test('troca de plano no meio do ciclo preserva o ciclo e o consumo já realizado',()=>{
  const migration=read('supabase/migrations/20260911015810_preserve_catalog_usage_across_midcycle_plan_changes.sql')
- const refined=read('supabase/migrations/20260911015900_refine_current_catalog_cycle_selection.sql')
  assert.match(migration,/business_plan_usage_cycles/)
- assert.match(refined,/cycle_start<=now\(\)/)
- assert.match(refined,/cycle_end>now\(\)/)
- assert.match(refined,/order by u\.cycle_start desc/)
- assert.match(read('src/plan-cycle-usage.js'),/get_business_plan_usage_cycle/)
- assert.match(read('supabase/migrations/20260911014900_plan_catalog_usage_cycle_bootstrap_fix.sql'),/business_plan_usage_cycles/)
+ assert.match(migration,/cycle_start<=now\(\)/)
+ assert.match(migration,/cycle_end>now\(\)/)
+ assert.match(migration,/return query[\\s\\S]*v_existing_cycle\.cycle_start/)
+ const service=read('src/plan-cycle-usage.js')
+ assert.match(service,/get_business_plan_usage_cycle/)
+})
+
+test('seleção do ciclo atual prioriza o ciclo vigente mais recente',()=>{
+ const migration=read('supabase/migrations/20260911015810_preserve_catalog_usage_across_midcycle_plan_changes.sql')
+ assert.match(migration,/order by u\.cycle_start desc, u\.cycle_end desc/)
+ assert.doesNotMatch(migration,/where u\.business_id=p_business_id\n    and u\.cycle_end>now\(\)\n  order by u\.cycle_end desc/)
 })
 
 test('upgrade imediato mantém a assinatura existente e só troca o plano/preço',()=>{
