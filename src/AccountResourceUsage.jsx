@@ -1,33 +1,23 @@
 import React,{useEffect,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{getPlanCycleFeatureUsage}from'./plan-cycle-usage.js'
 import'./account-resource-usage.css'
 
-const URL=import.meta.env.VITE_SUPABASE_URL
-const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
 const PLAN_NAMES={free:'Grátis',pro:'Pro',premium:'Premium'}
-const RESOURCE_COPY={photos:{label:'Mídias',icon:'▣',description:'Arquivos da galeria da sua empresa.'},items:{label:'Produtos e serviços',icon:'◇',description:'Itens ativos exibidos no perfil da empresa.'}}
-
-function getLimit(features,key){const value=features?.[`${key}_limit`]??features?.[key];const n=Number(value);return Number.isFinite(n)&&n>=0?n:0}
+const RESOURCE_COPY={photos:{label:'Mídias',icon:'▣',description:'Unidades de mídia consumidas neste ciclo.'},items:{label:'Produtos e serviços',icon:'◇',description:'Novos produtos ou serviços consumidos neste ciclo.'}}
 function usagePercent(used,limit){return limit>0?Math.min(100,Math.round((used/limit)*100)):0}
+function formatDate(value){return value?new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeZone:'America/Sao_Paulo'}).format(new Date(value)):'—'}
 
-export default function AccountResourceUsage({businessId,resource,used,onState,onAction,actionLabel='Adicionar'}){
- const[plan,setPlan]=useState(null),[limit,setLimit]=useState(null),[loading,setLoading]=useState(true)
+export default function AccountResourceUsage({businessId,resource,used:legacyUsed=0,onState,onAction,actionLabel='Adicionar'}){
+ const[usage,setUsage]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState('')
  const copy=RESOURCE_COPY[resource]||RESOURCE_COPY.photos
- useEffect(()=>{let live=true;(async()=>{if(!db||!businessId){setLoading(false);return}const{data:id,error:idError}=await db.rpc('get_effective_plan_id',{p_business_id:businessId});if(idError||!id){if(live){setLimit(0);setLoading(false)}}else{const{data,error}=await db.from('plans').select('code,name,features,active').eq('id',id).maybeSingle();if(live){if(!error&&data){setPlan(data);setLimit(getLimit(data.features,resource))}else setLimit(0);setLoading(false)}}})();return()=>{live=false}},[businessId,resource])
- const safeLimit=limit==null?0:limit
- const reached=safeLimit>0?used>=safeLimit:true
- const percent=safeLimit>0?usagePercent(used,safeLimit):0
- useEffect(()=>{onState?.({limit:safeLimit,reached,percent,planCode:plan?.code||'free',planName:PLAN_NAMES[plan?.code]||plan?.name||'Grátis'})},[safeLimit,reached,percent,plan,onState])
+ useEffect(()=>{let live=true;(async()=>{if(!businessId){setLoading(false);return}const{usage:next,error:nextError}=await getPlanCycleFeatureUsage(businessId,resource);if(!live)return;if(nextError){setError(nextError.message||'Não foi possível carregar o consumo do ciclo.');setUsage({used:Number(legacyUsed)||0,limit:0,cycleStart:null,cycleEnd:null,planCode:'free'})}else setUsage(next);setLoading(false)})();return()=>{live=false}},[businessId,resource,legacyUsed])
  if(loading)return <section className="vl-resource-usage loading"><div className="vl-resource-skeleton"/></section>
- const planName=PLAN_NAMES[plan?.code]||plan?.name||'Grátis'
- const remaining=safeLimit>0?Math.max(0,safeLimit-used):0
+ if(error)return <section className="vl-resource-usage reached"><div className="vl-resource-copy"><span className="account-eyebrow">CONSUMO DO CICLO</span><h2>Não foi possível carregar o consumo</h2><p>{error}</p></div></section>
+ const usedCount=Number(usage?.used)||0,safeLimit=Number(usage?.limit)||0,percent=usagePercent(usedCount,safeLimit),reached=safeLimit<=0||usedCount>=safeLimit,remaining=safeLimit>0?Math.max(0,safeLimit-usedCount):0,planName=PLAN_NAMES[usage?.planCode]||'Plano atual'
+ useEffect(()=>{onState?.({used:usedCount,limit:safeLimit,reached,percent,planCode:usage?.planCode||'free',planName,cycleStart:usage?.cycleStart||null,cycleEnd:usage?.cycleEnd||null})},[usedCount,safeLimit,reached,percent,usage?.planCode,usage?.cycleStart,usage?.cycleEnd,onState,planName])
  return <section className={`vl-resource-usage ${reached?'reached':''}`}>
-  <div className="vl-resource-usage-main">
-   <div className="vl-resource-ring" style={{'--usage':`${percent}%`}}><div><strong>{used}</strong><span>de {safeLimit}</span></div></div>
-   <div className="vl-resource-copy"><span className="account-eyebrow">SEU PLANO · {planName.toUpperCase()}</span><h2>{reached?`Limite de ${copy.label.toLowerCase()} atingido`:`Uso de ${copy.label.toLowerCase()}`}</h2><p>{reached?`Você já utiliza ${used} de ${safeLimit} ${copy.label.toLowerCase()} permitidos pelo seu plano.`:`Você está usando ${used} de ${safeLimit} ${copy.label.toLowerCase()} disponíveis no seu plano.`}</p><div className="vl-resource-progress"><i style={{width:`${percent}%`}}/></div></div>
-  </div>
-  <div className="vl-resource-side"><strong>{percent}%</strong><span>utilizado</span>{safeLimit>0&&<small>{remaining} restante{remaining===1?'':'s'}</small>}{reached&&<b>Limite atingido</b>}</div>
-  {reached?<div className="vl-resource-upgrade"><div><span>🔒</span><div><strong>Quer continuar adicionando?</strong><p>Faça upgrade do plano para aumentar o limite de {copy.label.toLowerCase()}.</p></div></div><a href={`/planos?business_id=${encodeURIComponent(businessId)}`}>Ver planos e aumentar limite →</a></div>:<button type="button" className="vl-resource-create" onClick={onAction}>{copy.icon} {actionLabel}</button>}
+  <div className="vl-resource-usage-main"><div className="vl-resource-ring" style={{'--usage':`${percent}%`}}><div><strong>{usedCount}</strong><span>de {safeLimit}</span></div></div><div className="vl-resource-copy"><span className="account-eyebrow">SEU PLANO · {planName.toUpperCase()}</span><h2>{reached&&safeLimit>0?`Limite de ${copy.label.toLowerCase()} do ciclo atingido`:`Uso de ${copy.label.toLowerCase()} no ciclo`}</h2><p>{safeLimit>0?`${usedCount} de ${safeLimit} ${copy.label.toLowerCase()} já foram consumidos neste ciclo. Excluir, desativar ou encerrar não devolve a unidade.`:'Este recurso não está disponível no plano atual.'}</p><div className="vl-resource-progress"><i style={{width:`${percent}%`}}/></div>{usage?.cycleEnd&&<small>O consumo será renovado em {formatDate(usage.cycleEnd)}.</small>}</div></div>
+  <div className="vl-resource-side"><strong>{percent}%</strong><span>utilizado no ciclo</span>{safeLimit>0&&<small>{remaining} restante{remaining===1?'':'s'}</small>}{reached&&safeLimit>0&&<b>Limite atingido</b>}</div>
+  {reached?<div className="vl-resource-upgrade"><div><span>🔒</span><div><strong>Quer continuar adicionando?</strong><p>Faça upgrade para aumentar o limite do próximo ciclo. O consumo atual não é apagado pela troca de plano.</p></div></div><a href={`/planos?business_id=${encodeURIComponent(businessId)}`}>Ver planos e aumentar limite →</a></div>:<button type="button" className="vl-resource-create" onClick={onAction}>{copy.icon} {actionLabel}</button>}
  </section>
 }
