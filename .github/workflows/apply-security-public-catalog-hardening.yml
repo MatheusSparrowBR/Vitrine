@@ -1,0 +1,74 @@
+name: apply security public catalog hardening
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-remove:
+    if: ${{ !contains(github.event.head_commit.message, 'security: apply public catalog hardening') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Patch public business reads
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = [
+            (
+              'src/CityHomePage.jsx',
+              "db.from('businesses').select('id,name,slug,short_description,cover_url,address,featured,verified,categories(name)').eq('city_id',city.id).eq('status','active').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8)",
+              "db.from('public_business_directory').select('id,name,slug,short_description,cover_url,address,featured,verified,category_name').eq('city_id',city.id).limit(8)"
+            ),
+            (
+              'src/ModernBusinessesPage.jsx',
+              "db.from('businesses').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,categories(name,slug,icon)').eq('city_id',c.id).eq('status','active').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(100)",
+              "db.from('public_business_directory').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,category_name,category_slug').eq('city_id',c.id).limit(100)"
+            ),
+            (
+              'src/ModernBusinessProfilePage.jsx',
+              "db.from('businesses').select('*,categories(name,slug,icon),cities(name,state,slug)').eq('city_id',c.id).eq('slug',businessSlug).eq('status','active').maybeSingle()",
+              "db.from('public_business_directory').select('*').eq('city_id',c.id).eq('slug',businessSlug).maybeSingle()"
+            )
+          ]
+
+          for path, old, new in replacements:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected query not found in {path}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          p = Path('src/CityHomePage.jsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace("setBusinesses(b.data||[])", "setBusinesses((b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name}:null})))")
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('src/ModernBusinessesPage.jsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace("setBusinesses(b.data||[])", "setBusinesses((b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null})))")
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('src/ModernBusinessProfilePage.jsx')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace("setBusiness(b)", "setBusiness({...b,categories:b.category_name?{name:b.category_name,slug:b.category_slug}:null})")
+          p.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit patched public reads and remove helper workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/apply-security-public-catalog-hardening.yml
+          git add src/CityHomePage.jsx src/ModernBusinessesPage.jsx src/ModernBusinessProfilePage.jsx .github/workflows/apply-security-public-catalog-hardening.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "security: apply public catalog hardening"
+          git push
