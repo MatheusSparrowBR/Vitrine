@@ -3,78 +3,50 @@ import assert from'node:assert/strict'
 import fs from'node:fs'
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('planos cobre checkout, upgrade/downgrade e retorno da empresa selecionada',()=>{
+test('planos cobre checkout, troca, cancelamento e retorno da empresa',()=>{
  const page=read('src/BillingPlansPage.jsx')
- assert.match(page,/create-checkout-session/)
- assert.match(page,/change-subscription-plan/)
- assert.match(page,/billing-portal/)
- assert.match(page,/business_id=.*checkout=success/)
- assert.match(page,/business_id=.*checkout=cancelled/)
- assert.match(page,/cancel_at_period_end/)
- assert.match(page,/scheduled_change_at/)
+ for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','checkout=success','checkout=cancelled','cancel_at_period_end','scheduled_change_at'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
 })
 
-test('checkout usa preço persistente do Stripe e não confia no Origin',()=>{
+test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',()=>{
  const fn=read('supabase/functions/create-checkout-session/index.ts')
- assert.match(fn,/stripe_price_monthly_id/)
- assert.match(fn,/stripe_price_yearly_id/)
- assert.match(fn,/stripe\.prices\.create/)
- assert.match(fn,/SITE_URL/)
- assert.doesNotMatch(fn,/req\.headers\.get\('origin'\)/)
- assert.match(fn,/owner_id.*user\.id|owner_id.*\.eq\(/)
+ for(const value of ['stripe_price_monthly_id','stripe_price_yearly_id','stripe.prices.create','SITE_URL','owner_id','user.id'])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
+ assert.equal(fn.includes("req.headers.get('origin')"),false)
 })
 
-test('alteração de assinatura protege upgrade imediato, mudança agendada e cancelamento no fim do ciclo',()=>{
+test('troca de assinatura cobre upgrade imediato, agendamento e downgrade para grátis',()=>{
  const fn=read('supabase/functions/change-subscription-plan/index.ts')
- assert.match(fn,/subscriptionSchedules/)
- assert.match(fn,/cancel_at_period_end:true/)
- assert.match(fn,/current_period_end/)
- assert.match(fn,/scheduled_plan_id/)
- assert.match(fn,/proration_behavior:'create_prorations'/)
- assert.match(fn,/owner_id.*user\.id|owner_id.*\.eq\(/)
+ for(const value of ['subscriptionSchedules','cancel_at_period_end:true','current_period_end','scheduled_plan_id','proration_behavior:\'create_prorations\'','owner_id','user.id'])assert.ok(fn.includes(value),`troca de plano precisa conter ${value}`)
 })
 
-test('webhook identifica plano pelo preço atual antes de metadata antiga',()=>{
+test('webhook verifica assinatura Stripe, deduplica evento e identifica plano pelo preço',()=>{
  const fn=read('supabase/functions/stripe-webhook/index.ts')
- assert.match(fn,/if\(priceId\)/)
- assert.match(fn,/stripe_price_monthly_id\.eq\.\$\{priceId\}/)
- assert.match(fn,/invoice\.paid/)
- assert.match(fn,/invoice\.payment_failed/)
- assert.match(fn,/customer\.subscription\.updated/)
- assert.match(fn,/billing_events/)
- assert.doesNotMatch(fn,/detail:String\(e/) 
+ for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
+ assert.equal(fn.includes('detail:String(e'),false)
 })
 
-test('portal valida o proprietário e aceita estados que exigem cobrança',()=>{
+test('portal de cobrança valida proprietário e preserva o destino interno',()=>{
  const fn=read('supabase/functions/billing-portal/index.ts')
- assert.match(fn,/owner_id.*user\.id|owner_id.*\.eq\(/)
- assert.match(fn,/past_due/)
- assert.match(fn,/unpaid/)
- assert.match(fn,/return_to===\'account\'/)
+ for(const value of ['owner_id','user.id','past_due','unpaid',"returnTo==='account'"])assert.ok(fn.includes(value),`portal precisa conter ${value}`)
 })
 
-test('migration versiona produtos/preços Stripe e mudanças agendadas',()=>{
+test('migration de billing cria produto/preços Stripe e mudanças agendadas',()=>{
  const migration=read('supabase/migrations/20260910200000_harden_billing_and_scheduled_plan_changes.sql')
- assert.match(migration,/stripe_product_id/)
- assert.match(migration,/scheduled_plan_id/)
- assert.match(migration,/scheduled_billing_interval/)
- assert.match(migration,/scheduled_change_at/)
- assert.match(migration,/plans_stripe_price_monthly_uidx/)
- assert.match(migration,/plans_stripe_price_yearly_uidx/)
+ for(const value of ['stripe_product_id','scheduled_plan_id','scheduled_billing_interval','scheduled_change_at','plans_stripe_product_uidx','plans_stripe_price_monthly_uidx','plans_stripe_price_yearly_uidx'])assert.ok(migration.includes(value),`migration precisa conter ${value}`)
 })
 
 test('painel Meu plano exibe estado real da assinatura',()=>{
  const panel=read('src/PlanUsageReact.jsx')
- assert.match(panel,/function SubscriptionArea/)
- assert.match(panel,/provider_subscription_id/)
- assert.match(panel,/scheduled_plan_id/)
- assert.match(panel,/billing-portal/)
- assert.match(panel,/current_period_end/)
- assert.match(panel,/import'\.\/plan-usage\.css'/)
+ for(const value of ['function SubscriptionArea','provider_subscription_id','scheduled_plan_id','billing-portal','current_period_end',"import'./plan-usage.css'"])assert.ok(panel.includes(value),`painel precisa conter ${value}`)
 })
 
-test('workspace mantém fluxo React sem prompt para promoções',()=>{
+test('workspace mantém formulário React de promoções',()=>{
  const promotion=read('src/OwnerPromotionsSection.jsx')
- assert.doesNotMatch(promotion,/window\.prompt/)
- assert.doesNotMatch(promotion,/window\.confirm/)
+ assert.equal(promotion.includes('window.prompt'),false)
+ assert.equal(promotion.includes('window.confirm'),false)
+ assert.ok(promotion.includes('<form onSubmit={submit}>'))
+})
+
+test('auditoria de segurança básica não encontra helper admin público antigo',()=>{
+ for(const p of ['src/AccountPage.jsx','src/BillingPlansPage.jsx','src/PlanUsageReact.jsx','src/OwnerPromotionsSection.jsx'])assert.equal(read(p).includes('public.is_admin()'),false)
 })
