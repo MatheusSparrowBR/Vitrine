@@ -6,7 +6,7 @@ const root=new URL('../../',import.meta.url)
 const read=path=>fs.readFileSync(new URL(path,root),'utf8')
 
 test('catalog resources use reusable usage graphs',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  const usage=read('src/AccountResourceUsage.jsx')
  assert.match(account,/AccountResourceUsage/)
  assert.match(account,/resource="photos"/)
@@ -14,11 +14,11 @@ test('catalog resources use reusable usage graphs',()=>{
  assert.match(usage,/RESOURCE_COPY/)
  assert.match(usage,/photos:/)
  assert.match(usage,/items:/)
- assert.match(usage,/get_effective_plan_id/)
+ assert.match(usage,/getPlanCycleFeatureUsage/)
 })
 
 test('products and services no longer use browser prompts',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  assert.doesNotMatch(account,/function addItem\(/)
  assert.doesNotMatch(account,/window\.prompt\([^)]*(produto|serviço)/i)
 })
@@ -29,11 +29,12 @@ test('product service form includes type, image and plan enforcement',()=>{
  assert.match(form,/business_items/)
  assert.match(form,/image_path/)
  assert.match(form,/limit<=0/)
- assert.match(form,/activeCount>=limit/)
+ assert.match(form,/usedCount>=limit/)
+ assert.match(form,/getPlanCycleFeatureUsage/)
 })
 
 test('media add control is disabled at plan limit',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  assert.match(account,/mediaUsage\.reached/)
- assert.match(account,/disabled=\{mediaUsage\.reached\}/)
+ assert.match(account,/disabled=\{mediaReached\}/)
 })
