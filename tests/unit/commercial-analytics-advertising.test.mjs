@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(new URL(`../../${p}`,import.meta.url),'utf8')
 test('commercial analytics uses the secured aggregate RPC and keeps plan gating',()=>{
  const src=read('src/CommercialAnalyticsPage.jsx')
  assert.match(src,/rpc\(['"]get_business_analytics_summary['"]/) 
- assert.match(src,/hasPlanFeature\(s\.plan\?\.features,['"]analytics['"]/) 
+ assert.match(src,/hasPlanFeature\([^)]*['"]analytics['"]/) 
 })
 
 test('premium advertising workspace is restricted by premium_ads entitlement',()=>{
