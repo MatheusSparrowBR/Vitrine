@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useMemo,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
 import './auth-page.css'
 
@@ -15,8 +15,10 @@ function safeNext(value){
 }
 
 export default function AuthPage(){
- const [mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState(''),[msg,setMsg]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false)
+ const [mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirmPassword,setConfirmPassword]=useState(''),[name,setName]=useState(''),[msg,setMsg]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[showPassword,setShowPassword]=useState(false),[showConfirm,setShowConfirm]=useState(false)
  const next=safeNext(new URLSearchParams(location.search).get('next'))
+ const passwordRules=useMemo(()=>({length:password.length>=8,mixed:/[A-Za-z]/.test(password)&&/\d/.test(password)}),[password])
+ const resetState=()=>{setMsg('');setError('');setConfirmPassword('');setShowPassword(false);setShowConfirm(false)}
  async function sendRecovery(targetEmail=email){if(!db||!targetEmail)return false;const {error:resetError}=await db.auth.resetPasswordForEmail(targetEmail,{redirectTo:`${location.origin}/atualizar-senha`});if(resetError)throw resetError;return true}
  async function submit(e){
   e.preventDefault();setBusy(true);setMsg('');setError('')
@@ -24,6 +26,7 @@ export default function AuthPage(){
   try{
    if(mode==='signup'){
     if(password.length<8)throw new Error('A senha deve ter pelo menos 8 caracteres.')
+    if(password!==confirmPassword)throw new Error('As senhas não conferem.')
     const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name.trim()||null}}})
     if(error)throw error
     if(data.session)location.href=next
@@ -38,5 +41,31 @@ export default function AuthPage(){
   }catch(e){setError(e.message||'Não foi possível concluir.')}finally{setBusy(false)}
  }
  async function recover(){if(!db||!email)return setError('Informe seu e-mail.');setBusy(true);setError('');setMsg('');try{await sendRecovery(email);setMsg('Enviamos o link de recuperação para seu e-mail.')}catch(e){setError(e.message||'Não foi possível enviar o link.')}finally{setBusy(false)}}
- return <div className="vl-auth-page"><div className="vl-auth-card"><a className="brand" href="/laguna"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><span className="section-kicker">ÁREA DO COMERCIANTE</span><h1>{mode==='login'?'Entre na sua conta':mode==='signup'?'Crie sua conta':'Recupere sua senha'}</h1><p>{mode==='login'?'Acesse sua empresa e seus recursos.':mode==='signup'?'Comece gratuitamente no VitrineLocal.':'Receba um link para criar uma nova senha.'}</p>{error&&<div className="auth-alert error">{error}</div>}{msg&&<div className="auth-alert">{msg}</div>}{mode==='forgot'?<form onSubmit={e=>{e.preventDefault();recover()}}><label>E-mail<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email"/></label><button className="primary wide" disabled={busy}>{busy?'Enviando…':'Enviar recuperação'}</button></form>:<form onSubmit={submit}>{mode==='signup'&&<label>Nome<input value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/></label>}<label>E-mail<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email"/></label><label>Senha<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={mode==='signup'?8:1} autoComplete={mode==='login'?'current-password':'new-password'}/>{mode==='signup'&&<small>A senha deve ter pelo menos 8 caracteres.</small>}</label><button className="primary wide" disabled={busy}>{busy?'Aguarde…':mode==='login'?'Entrar':'Criar conta'}</button></form>}{mode==='login'&&<button className="text-button" onClick={()=>{setMode('forgot');setMsg('');setError('')}}>Esqueci minha senha</button>}{mode==='forgot'?<button className="text-button" onClick={()=>{setMode('login');setMsg('');setError('')}}>← Voltar</button>:<button className="text-button" onClick={()=>{setMode(mode==='login'?'signup':'login');setMsg('');setError('')}}>{mode==='login'?'Criar uma conta':'Já tenho conta'}</button>}<a className="auth-back" href={next}>← Voltar ao site</a></div></div>
+ const title=mode==='login'?'Entre na sua conta':mode==='signup'?'Crie sua conta':'Recupere sua senha'
+ const subtitle=mode==='login'?'Gerencie sua empresa, publique conteúdo e acompanhe seus resultados.':mode==='signup'?'Comece gratuitamente e coloque sua empresa na VitrineLocal.':'Informe seu e-mail e enviaremos um link para redefinir sua senha.'
+ return <div className="vl-auth-page">
+  <div className="vl-auth-card">
+   <a className="brand" href="/laguna" aria-label="Voltar para VitrineLocal"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a>
+   <div className="auth-kicker-row"><span className="section-kicker">ÁREA DO COMERCIANTE</span><span className="auth-secure"><span aria-hidden="true">●</span> acesso seguro</span></div>
+   <header className="auth-heading">
+    <h1>{title}</h1>
+    <p>{subtitle}</p>
+   </header>
+   {error&&<div className="auth-alert error" role="alert"><span className="auth-alert-icon" aria-hidden="true">!</span><span>{error}</span></div>}
+   {msg&&<div className="auth-alert" role="status" aria-live="polite"><span className="auth-alert-icon" aria-hidden="true">✓</span><span>{msg}</span></div>}
+   {mode==='forgot'?<form onSubmit={e=>{e.preventDefault();recover()}} className="auth-form">
+    <label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email" placeholder="voce@empresa.com" inputMode="email"/></label>
+    <button className="primary wide" disabled={busy}>{busy?<><span className="auth-spinner"/>Enviando…</>:'Enviar link de recuperação'}</button>
+   </form>:<form onSubmit={submit} className="auth-form">
+    {mode==='signup'&&<label className="auth-field"><span>Nome</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Seu nome"/></label>}
+    <label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email" placeholder="voce@empresa.com" inputMode="email"/></label>
+    <label className="auth-field"><span>Senha</span><div className="auth-input-wrap"><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={mode==='signup'?8:1} autoComplete={mode==='login'?'current-password':'new-password'} placeholder={mode==='signup'?'Mínimo de 8 caracteres':'Sua senha'}/><button type="button" className="password-toggle" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar senha':'Mostrar senha'}>{showPassword?'Ocultar':'Mostrar'}</button></div>{mode==='signup'&&<div className="password-help"><span className={passwordRules.length?'ok':''}>{passwordRules.length?'✓':'○'} 8 caracteres ou mais</span><span className={passwordRules.mixed?'ok':''}>{passwordRules.mixed?'✓':'○'} letras e números</span></div>}</label>
+    {mode==='signup'&&<label className="auth-field"><span>Confirmar senha</span><div className="auth-input-wrap"><input type={showConfirm?'text':'password'} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="Digite a senha novamente"/ ><button type="button" className="password-toggle" onClick={()=>setShowConfirm(v=>!v)} aria-label={showConfirm?'Ocultar confirmação':'Mostrar confirmação'}>{showConfirm?'Ocultar':'Mostrar'}</button></div></label>}
+    <div className="auth-actions-row">{mode==='login'?<button type="button" className="text-button inline" onClick={()=>{setMode('forgot');resetState()}}>Esqueci minha senha</button>:<span className="auth-hint">Seus dados ficam protegidos.</span>}</div>
+    <button className="primary wide" disabled={busy}>{busy?<><span className="auth-spinner"/>Aguarde…</>:mode==='login'?'Entrar na minha conta':'Criar minha conta'}</button>
+   </form>}
+   <div className="auth-switch">{mode==='forgot'?<><span>Lembrou da senha?</span><button className="text-button" onClick={()=>{setMode('login');resetState()}}>Voltar para entrar</button></>:<><span>{mode==='login'?'Ainda não tem uma conta?':'Já possui uma conta?'}</span><button className="text-button" onClick={()=>{setMode(mode==='login'?'signup':'login');resetState()}}>{mode==='login'?'Criar conta grátis':'Entrar na conta'}</button></>}</div>
+   <a className="auth-back" href={next}>← Voltar ao site</a>
+  </div>
+ </div>
 }
