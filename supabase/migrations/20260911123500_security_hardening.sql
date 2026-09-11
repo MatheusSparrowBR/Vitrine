@@ -20,6 +20,7 @@ REVOKE EXECUTE ON FUNCTION public.validate_advertisement_business_city() FROM PU
 REVOKE EXECUTE ON FUNCTION public.sync_business_plan_entitlements(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.sync_business_plan_entitlements_from_subscription() FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.validate_analytics_event_integrity() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.validate_subscription_business_owner() FROM PUBLIC, anon, authenticated;
 
 -- Advanced analytics is a signed-in Premium/admin capability, never anonymous.
 REVOKE EXECUTE ON FUNCTION public.get_business_advanced_analytics(uuid, integer) FROM anon;
@@ -97,18 +98,21 @@ CREATE TRIGGER trg_validate_analytics_event_integrity
   FOR EACH ROW
   EXECUTE FUNCTION public.validate_analytics_event_integrity();
 
--- Public catalog uses the safe directory view instead of exposing internal business columns.
-ALTER VIEW public.public_business_directory SET (security_invoker = false);
+-- Public catalog uses an invoker view plus column-level grants so internal business columns remain private.
+ALTER VIEW public.public_business_directory SET (security_invoker = true);
 GRANT SELECT ON public.public_business_directory TO anon, authenticated;
-
 DROP POLICY IF EXISTS "anon read active businesses" ON public.businesses;
+CREATE POLICY "anon read active businesses"
+  ON public.businesses
+  FOR SELECT TO anon
+  USING (status = 'active');
 DROP POLICY IF EXISTS "authenticated read active or admin businesses" ON public.businesses;
 CREATE POLICY "authenticated owners or admins read businesses"
   ON public.businesses
   FOR SELECT TO authenticated
   USING ((owner_id = auth.uid()) OR private.is_admin());
-
 REVOKE SELECT ON public.businesses FROM anon;
+GRANT SELECT (id,city_id,category_id,name,slug,short_description,description,logo_url,cover_url,phone,whatsapp,website_url,instagram_url,facebook_url,address,neighborhood,latitude,longitude,opening_hours,verified,featured,created_at,updated_at) ON public.businesses TO anon;
 GRANT SELECT ON public.businesses TO authenticated;
 
 -- Subscription rows are service-managed; enforce the business -> owner relationship at the database boundary.
@@ -135,7 +139,6 @@ CREATE TRIGGER trg_validate_subscription_business_owner
   BEFORE INSERT OR UPDATE ON public.subscriptions
   FOR EACH ROW
   EXECUTE FUNCTION public.validate_subscription_business_owner();
-REVOKE EXECUTE ON FUNCTION public.validate_subscription_business_owner() FROM PUBLIC, anon, authenticated;
 
 -- Public event media is available only for active, future events in active cities.
 DROP POLICY IF EXISTS "Public can read event media" ON storage.objects;
