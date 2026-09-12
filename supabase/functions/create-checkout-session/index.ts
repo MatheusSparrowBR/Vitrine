@@ -38,7 +38,7 @@ Deno.serve(async req=>{
   if(plan.payment_provider&&plan.payment_provider!=='mercadopago')return response({error:'Este plano ainda não está configurado para Mercado Pago.'},409)
   const amount=Number(interval==='yearly'?plan.price_yearly:plan.price_monthly)
   if(!Number.isFinite(amount)||amount<=0)return response({error:'Preço do plano inválido.'},500)
-  const origin=siteUrl()
+  const origin=siteUrl(req)
   const backUrl=`${origin}/planos?checkout=success&business_id=${encodeURIComponent(business.id)}&provider=mercadopago`
   const externalReference=[business.id,plan.id,interval,user.id].join('|')
   const subscription=await mpRequest('/preapproval',{method:'POST',body:JSON.stringify({reason:`VitrineLocal ${plan.name}`,external_reference:externalReference,payer_email:user.email||undefined,auto_recurring:{frequency:interval==='yearly'?12:1,frequency_type:'months',transaction_amount:amount,currency_id:'BRL'},back_url:backUrl,status:'pending'})})
