@@ -65,17 +65,17 @@ test('seleção do ciclo atual prioriza o ciclo vigente mais recente',()=>{
 
 test('upgrade de plano usa a assinatura Mercado Pago existente',()=>{
  const fn=read('supabase/functions/change-subscription-plan/index.ts')
- assert.match(fn,/mpRequest\(`/preapproval\//)
- assert.match(fn,/provider','mercadopago/)
- assert.match(fn,/update\(\{plan_id:target\.id/)
+ assert.ok(fn.includes('mpRequest(`\/preapproval\/'))
+ assert.ok(fn.includes("provider','mercadopago"))
+ assert.ok(fn.includes('update({plan_id:target.id'))
  assert.doesNotMatch(fn,/STRIPE_SECRET_KEY/)
 })
 
 test('downgrade e mudanças de ciclo usam o estado da assinatura Mercado Pago',()=>{
  const fn=read('supabase/functions/change-subscription-plan/index.ts')
- assert.match(fn,/provider','mercadopago/)
- assert.match(fn,/auto_recurring/)
- assert.match(fn,/transaction_amount/)
- assert.match(fn,/currency_id:'BRL'/)
+ assert.ok(fn.includes("provider','mercadopago"))
+ assert.ok(fn.includes('auto_recurring'))
+ assert.ok(fn.includes('transaction_amount'))
+ assert.ok(fn.includes("currency_id:'BRL'"))
  assert.doesNotMatch(fn,/subscriptionSchedules/)
 })
