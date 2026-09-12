@@ -11,6 +11,15 @@ function admin(){
  return createClient(url,key)
 }
 
+function mercadopagoPayerEmail(userEmail?:string|null){
+ const testMode=String(Deno.env.get('MERCADOPAGO_TEST_MODE')||'').trim().toLowerCase()==='true'
+ const configuredTestEmail=String(Deno.env.get('MERCADOPAGO_TEST_PAYER_EMAIL')||'').trim()
+ if(testMode){
+  return configuredTestEmail||'test@testuser.com'
+ }
+ return userEmail||undefined
+}
+
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
  if(req.method!=='POST')return response({error:'Method not allowed'},405)
@@ -41,7 +50,8 @@ Deno.serve(async req=>{
   const origin=siteUrl(req)
   const backUrl=`${origin}/planos?checkout=success&business_id=${encodeURIComponent(business.id)}&provider=mercadopago`
   const externalReference=[business.id,plan.id,interval,user.id].join('|')
-  const subscription=await mpRequest('/preapproval',{method:'POST',body:JSON.stringify({reason:`VitrineLocal ${plan.name}`,external_reference:externalReference,payer_email:user.email||undefined,auto_recurring:{frequency:interval==='yearly'?12:1,frequency_type:'months',transaction_amount:amount,currency_id:'BRL'},back_url:backUrl,status:'pending'})})
+  const payerEmail=mercadopagoPayerEmail(user.email)
+  const subscription=await mpRequest('/preapproval',{method:'POST',body:JSON.stringify({reason:`VitrineLocal ${plan.name}`,external_reference:externalReference,payer_email:payerEmail,auto_recurring:{frequency:interval==='yearly'?12:1,frequency_type:'months',transaction_amount:amount,currency_id:'BRL'},back_url:backUrl,status:'pending'})})
   const row={user_id:user.id,business_id:business.id,plan_id:plan.id,status:'incomplete',provider:'mercadopago',billing_interval:interval,provider_subscription_id:String(subscription.id),external_subscription_id:String(subscription.id),provider_price_id:`mp:${plan.code}:${interval}`,provider_customer_id:subscription.payer_id?String(subscription.payer_id):null,mercadopago_payer_id:subscription.payer_id?String(subscription.payer_id):null,current_period_start:subscription.date_created||new Date().toISOString(),current_period_end:subscription.next_payment_date||null,ends_at:null,cancel_at_period_end:false}
   const {error:insertError}=await db.from('subscriptions').insert(row)
   if(insertError){try{await mpRequest(`/preapproval/${encodeURIComponent(String(subscription.id))}`,{method:'PUT',body:JSON.stringify({status:'cancelled'})})}catch{};return response({error:'A assinatura foi criada no Mercado Pago, mas não foi possível registrá-la no VitrineLocal.'},500)}
