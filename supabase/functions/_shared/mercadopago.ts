@@ -23,10 +23,20 @@ export async function mpRequest<T=any>(path:string,init:RequestInit={},token?:st
   return payload as T
 }
 
-export function siteUrl(){
-  const value=(Deno.env.get('SITE_URL')||'').trim().replace(/\/+$/,'')
-  if(!value)throw new MercadoPagoError('SITE_URL não configurada.',500)
-  try{const url=new URL(value);if(!/^https?:$/.test(url.protocol))throw new Error();return url.toString().replace(/\/$/,'')}catch{throw new MercadoPagoError('SITE_URL não configurada corretamente.',500)}
+export function siteUrl(req?:Request){
+  const configured=(Deno.env.get('SITE_URL')||'').trim().replace(/\/+$/,'')
+  if(configured){
+    try{const url=new URL(configured);if(!/^https?:$/.test(url.protocol))throw new Error();return url.toString().replace(/\/$/,'')}catch{throw new MercadoPagoError('SITE_URL não configurada corretamente.',500)}
+  }
+  const origin=(req?.headers.get('origin')||'').trim().replace(/\/+$/,'')
+  if(origin){
+    try{const url=new URL(origin);if(!/^https?:$/.test(url.protocol))throw new Error();return url.toString().replace(/\/$/,'')}catch{throw new MercadoPagoError('A origem da aplicação não é válida.',400)}
+  }
+  const referer=(req?.headers.get('referer')||'').trim()
+  if(referer){
+    try{const url=new URL(referer);if(!/^https?:$/.test(url.protocol))throw new Error();return url.origin}catch{throw new MercadoPagoError('A origem da aplicação não é válida.',400)}
+  }
+  throw new MercadoPagoError('SITE_URL não configurada e a origem da aplicação não foi enviada.',500)
 }
 
 export function centsToReais(value:unknown){
