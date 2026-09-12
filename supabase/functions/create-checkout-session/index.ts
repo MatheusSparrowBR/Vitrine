@@ -3,21 +3,27 @@ import {mpRequest,MercadoPagoError,siteUrl} from '../_shared/mercadopago.ts'
 
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'}
 const response=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}})
-
 function admin(){
  const url=Deno.env.get('SUPABASE_URL')||''
  const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||Deno.env.get('SUPABASE_SECRET_KEY')||''
  if(!url||!key)throw new Error('Supabase administrativo não configurado.')
  return createClient(url,key)
 }
-
 function mercadopagoPayerEmail(userEmail?:string|null){
  const testMode=String(Deno.env.get('MERCADOPAGO_TEST_MODE')||'').trim().toLowerCase()==='true'
  const configuredTestEmail=String(Deno.env.get('MERCADOPAGO_TEST_PAYER_EMAIL')||'').trim()
- if(testMode){
-  return configuredTestEmail||'test_user_3818840928292230566@testuser.com'
- }
+ if(testMode)return configuredTestEmail||'test_user_3818840928292230566@testuser.com'
  return userEmail||undefined
+}
+function jwtClaims(token:string){
+ try{
+  const part=token.split('.')[1]
+  if(!part)return null
+  const normalized=part.replace(/-/g,'+').replace(/_/g,'/')
+  const decoded=atob(normalized.padEnd(Math.ceil(normalized.length/4)*4,'='))
+  const claims=JSON.parse(decoded)
+  return claims&&typeof claims==='object'?claims:null
+ }catch{return null}
 }
 
 Deno.serve(async req=>{
@@ -27,15 +33,17 @@ Deno.serve(async req=>{
   const db=admin()
   const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'')
   if(!token)return response({error:'Não autenticado.'},401)
-  const {data:{user},error:userError}=await db.auth.getUser(token)
-  if(userError||!user)return response({error:'Sessão inválida. Faça login novamente.'},401)
+  const claims=jwtClaims(token)
+  const userId=typeof claims?.sub==='string'&&claims.sub?claims.sub:null
+  const userEmail=typeof claims?.email==='string'&&claims.email?claims.email:null
+  if(!userId)return response({error:'Sessão inválida. Faça login novamente.'},401)
   const body=await req.json().catch(()=>null)
   const businessId=String(body?.business_id||'')
   const planCode=String(body?.plan_code||'')
   const requestedInterval=String(body?.interval||'')
   if(!businessId||!['pro','premium'].includes(planCode)||!['monthly','yearly'].includes(requestedInterval))return response({error:'Empresa, plano e intervalo válidos são obrigatórios.'},400)
   const interval=requestedInterval==='yearly'?'yearly':'monthly'
-  const {data:business,error:businessError}=await db.from('businesses').select('id,name,owner_id').eq('id',businessId).eq('owner_id',user.id).maybeSingle()
+  const {data:business,error:businessError}=await db.from('businesses').select('id,name,owner_id').eq('id',businessId).eq('owner_id',userId).maybeSingle()
   if(businessError)return response({error:'Não foi possível validar a empresa.'},500)
   if(!business)return response({error:'Empresa não encontrada ou sem permissão.'},403)
   const {data:existing,error:existingError}=await db.from('subscriptions').select('id,provider,provider_subscription_id,status').eq('business_id',business.id).in('provider',['mercadopago','stripe']).in('status',['incomplete','active','trialing','past_due','unpaid','paused']).order('created_at',{ascending:false}).limit(1).maybeSingle()
@@ -49,10 +57,10 @@ Deno.serve(async req=>{
   if(!Number.isFinite(amount)||amount<=0)return response({error:'Preço do plano inválido.'},500)
   const origin=siteUrl(req)
   const backUrl=`${origin}/planos?checkout=success&business_id=${encodeURIComponent(business.id)}&provider=mercadopago`
-  const externalReference=[business.id,plan.id,interval,user.id].join('|')
-  const payerEmail=mercadopagoPayerEmail(user.email)
+  const externalReference=[business.id,plan.id,interval,userId].join('|')
+  const payerEmail=mercadopagoPayerEmail(userEmail)
   const subscription=await mpRequest('/preapproval',{method:'POST',body:JSON.stringify({reason:`VitrineLocal ${plan.name}`,external_reference:externalReference,payer_email:payerEmail,auto_recurring:{frequency:interval==='yearly'?12:1,frequency_type:'months',transaction_amount:amount,currency_id:'BRL'},back_url:backUrl,status:'pending'})})
-  const row={user_id:user.id,business_id:business.id,plan_id:plan.id,status:'incomplete',provider:'mercadopago',billing_interval:interval,provider_subscription_id:String(subscription.id),external_subscription_id:String(subscription.id),provider_price_id:`mp:${plan.code}:${interval}`,provider_customer_id:subscription.payer_id?String(subscription.payer_id):null,mercadopago_payer_id:subscription.payer_id?String(subscription.payer_id):null,current_period_start:subscription.date_created||new Date().toISOString(),current_period_end:subscription.next_payment_date||null,ends_at:null,cancel_at_period_end:false}
+  const row={user_id:userId,business_id:business.id,plan_id:plan.id,status:'incomplete',provider:'mercadopago',billing_interval:interval,provider_subscription_id:String(subscription.id),external_subscription_id:String(subscription.id),provider_price_id:`mp:${plan.code}:${interval}`,provider_customer_id:subscription.payer_id?String(subscription.payer_id):null,mercadopago_payer_id:subscription.payer_id?String(subscription.payer_id):null,current_period_start:subscription.date_created||new Date().toISOString(),current_period_end:subscription.next_payment_date||null,ends_at:null,cancel_at_period_end:false}
   const {error:insertError}=await db.from('subscriptions').insert(row)
   if(insertError){try{await mpRequest(`/preapproval/${encodeURIComponent(String(subscription.id))}`,{method:'PUT',body:JSON.stringify({status:'cancelled'})})}catch{};return response({error:'A assinatura foi criada no Mercado Pago, mas não foi possível registrá-la no VitrineLocal.'},500)}
   return response({url:subscription.init_point,id:subscription.id,provider:'mercadopago'})
