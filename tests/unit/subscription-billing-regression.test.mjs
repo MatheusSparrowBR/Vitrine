@@ -34,9 +34,9 @@ test('gestão da assinatura usa Mercado Pago',()=>{
  assert.ok(fn.includes("provider','mercadopago"))
 })
 
-test('webhook Mercado Pago valida assinatura, deduplica e sincroniza assinatura',()=>{
+test('webhook Mercado Pago valida assinatura, deduplica e sincroniza assinatura e pagamentos',()=>{
  const fn=read('supabase/functions/mercadopago-webhook/index.ts')
- for(const value of ['MERCADOPAGO_WEBHOOK_SECRET','x-signature','x-request-id','HMAC','subscription_preapproval','subscription_authorized_payment','billing_events',"provider:'mercadopago'",'provider_subscription_id','23505'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
+ for(const value of ['MERCADOPAGO_WEBHOOK_SECRET','x-signature','x-request-id','HMAC','subscription_preapproval','subscription_authorized_payment','billing_events',"provider:'mercadopago'",'provider_subscription_id','23505','syncPayment','/v1/payments/','authorized_payments/search?payment_id=','mercadopago_payment_id'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
  assert.equal(fn.includes('stripe-signature'),false)
 })
 
