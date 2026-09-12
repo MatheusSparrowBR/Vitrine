@@ -81,7 +81,7 @@ async function syncSubscription(subscription:any,a:any){
  if(existing?.id){const {error}=await db.from('subscriptions').update(payload).eq('id',existing.id);if(error)throw error}else{const {error}=await db.from('subscriptions').insert(payload);if(error)throw error}
 }
 
-async function syncAdvertising(subscription:any){
+async function syncAdvertising(subscription:any,paymentId?:string){
  const meta=String(subscription.external_reference||'')
  if(!meta.startsWith('VL-AD-'))return false
  const requestId=meta.slice(6)
@@ -89,9 +89,27 @@ async function syncAdvertising(subscription:any){
  const {data:req,error:reqError}=await db.from('advertising_requests').select('id,business_id').eq('id',requestId).maybeSingle();if(reqError)throw reqError;if(!req)throw new Error('Solicitação de publicidade não encontrada.')
  const status=String(subscription.status||'').toLowerCase()
  const paymentStatus=['authorized','active'].includes(status)?'paid':['pending'].includes(status)?'awaiting_payment':status==='paused'?'paid':'failed'
- const {error}=await db.from('advertising_requests').update({payment_status:paymentStatus,payment_currency:'BRL',mercadopago_subscription_id:String(subscription.id),paid_at:paymentStatus==='paid'?new Date().toISOString():null}).eq('id',requestId);if(error)throw error
+ const {error}=await db.from('advertising_requests').update({payment_status:paymentStatus,payment_currency:'BRL',mercadopago_subscription_id:String(subscription.id),...(paymentId?{mercadopago_payment_id:String(paymentId)}:{}),paid_at:paymentStatus==='paid'?new Date().toISOString():null}).eq('id',requestId);if(error)throw error
  if(paymentStatus!=='paid')await db.from('advertisements').update({active:false,billing_status:paymentStatus==='failed'?'overdue':'canceled'}).eq('advertising_request_id',requestId)
  return true
+}
+
+async function syncPayment(paymentId:string){
+ const db=admin()
+ const payment=await mpRequest(`/v1/payments/${encodeURIComponent(paymentId)}`)
+ const status=String(payment?.status||'').toLowerCase()
+ const search=await mpRequest(`/authorized_payments/search?payment_id=${encodeURIComponent(paymentId)}`)
+ const invoice=Array.isArray(search?.results)?search.results[0]:null
+ const preapprovalId=String(invoice?.preapproval_id||payment?.metadata?.preapproval_id||'')
+ if(!preapprovalId)return
+ const subscription=await mpRequest(`/preapproval/${encodeURIComponent(preapprovalId)}`)
+ const advertising=await syncAdvertising(subscription,paymentId)
+ if(!advertising)await syncSubscription(subscription,payment)
+ if(advertising){
+  const paymentStatus=['approved','authorized'].includes(status)?'paid':['pending','in_process','in_mediation'].includes(status)?'awaiting_payment':'failed'
+  const {error}=await db.from('advertising_requests').update({payment_status:paymentStatus,payment_currency:'BRL',mercadopago_payment_id:String(paymentId),paid_at:paymentStatus==='paid'?new Date().toISOString():null}).eq('mercadopago_subscription_id',preapprovalId)
+  if(error)throw error
+ }
 }
 
 Deno.serve(async req=>{
@@ -115,9 +133,9 @@ Deno.serve(async req=>{
   }else if(type==='subscription_authorized_payment'){
    const invoice=await mpRequest(`/authorized_payments/${encodeURIComponent(eventId)}`)
    const preapprovalId=String(invoice?.preapproval_id||invoice?.subscription_id||'')
-   if(preapprovalId){const subscription=await mpRequest(`/preapproval/${encodeURIComponent(preapprovalId)}`);if(!(await syncAdvertising(subscription)))await syncSubscription(subscription,body)}
+   if(preapprovalId){const subscription=await mpRequest(`/preapproval/${encodeURIComponent(preapprovalId)}`);if(!(await syncAdvertising(subscription,String(invoice?.payment?.id||''))))await syncSubscription(subscription,body)}
   }else if(type==='payment'){
-   // Registro idempotente do evento; assinatura será sincronizada pelos tópicos de assinatura acima.
+   await syncPayment(eventId)
   }
   const {error}=await db.from('billing_events').update({processed_at:new Date().toISOString()}).eq('provider','mercadopago').eq('provider_event_id',providerEventId);if(error)throw error
  }catch(e){
