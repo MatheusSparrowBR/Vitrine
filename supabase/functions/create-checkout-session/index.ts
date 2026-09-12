@@ -15,7 +15,7 @@ function mercadopagoPayerEmail(userEmail?:string|null){
  const testMode=String(Deno.env.get('MERCADOPAGO_TEST_MODE')||'').trim().toLowerCase()==='true'
  const configuredTestEmail=String(Deno.env.get('MERCADOPAGO_TEST_PAYER_EMAIL')||'').trim()
  if(testMode){
-  return configuredTestEmail||'test_user_641678512814890034@testuser.com'
+  return configuredTestEmail||'test_user_3818840928292230566@testuser.com'
  }
  return userEmail||undefined
 }
@@ -58,6 +58,9 @@ Deno.serve(async req=>{
   return response({url:subscription.init_point,id:subscription.id,provider:'mercadopago'})
  }catch(e){
   const detail=e instanceof MercadoPagoError?e.message:e instanceof Error?e.message:'Erro inesperado ao iniciar a assinatura.'
+  if(e instanceof MercadoPagoError&&String(Deno.env.get('MERCADOPAGO_TEST_MODE')||'').trim().toLowerCase()==='true'){
+   try{const me=await mpRequest('/users/me');return response({error:detail,mercadopago_debug:{user_id:me?.id??null,nickname:me?.nickname??null,site_id:me?.site_id??null,site_status:me?.site_status??null}},e.status)}catch{}
+  }
   return response({error:detail},e instanceof MercadoPagoError?e.status:500)
  }
 })
