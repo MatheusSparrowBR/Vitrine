@@ -1,5 +1,5 @@
-import {createClient} from 'npm:@supabase/supabase-js@2'
-import {mpRequest,MercadoPagoError,siteUrl} from '../_shared/mercadopago.ts'
+import {createClient}from'npm:@supabase/supabase-js@2'
+import{mpRequest,MercadoPagoError,siteUrl}from'../_shared/mercadopago.ts'
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'}
 const response=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}})
 function admin(){const url=Deno.env.get('SUPABASE_URL')||'',key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||Deno.env.get('SUPABASE_SECRET_KEY')||'';if(!url||!key)throw new Error('Supabase administrativo não configurado.');return createClient(url,key)}
@@ -16,7 +16,7 @@ Deno.serve(async req=>{
   const{data:plan}=await db.from('plans').select('features').eq('id',featurePlan).maybeSingle();if(plan?.features?.premium_ads!==true)return response({error:'Publicidade Premium está disponível apenas para o plano Premium.'},403)
   if(request.payment_status!=='awaiting_payment'||Number(request.final_price||0)<=0)return response({error:'Esta solicitação ainda não está liberada para pagamento.'},409)
   if(request.creative_mode==='self'&&(!request.artwork_path||!request.artwork_url))return response({error:'Envie a arte do banner antes de pagar.'},409)
-  const origin=siteUrl(),amount=Number(request.final_price);if(!Number.isFinite(amount)||amount<=0)return response({error:'Valor da campanha inválido.'},409)
+  const origin=siteUrl(req),amount=Number(request.final_price);if(!Number.isFinite(amount)||amount<=0)return response({error:'Valor da campanha inválido.'},409)
   const start=request.desired_start_at?new Date(request.desired_start_at):null,end=request.desired_end_at?new Date(request.desired_end_at):null;if(start&&Number.isNaN(start.getTime()))return response({error:'Data inicial inválida.'},409);if(end&&Number.isNaN(end.getTime()))return response({error:'Data final inválida.'},409);if(end&&end<=new Date())return response({error:'A data final da campanha já passou.'},409);if(start&&end&&end<=start)return response({error:'A data final da campanha precisa ser posterior à inicial.'},409)
   const subscription=await mpRequest('/preapproval',{method:'POST',body:JSON.stringify({reason:`Publicidade Premium · ${request.title}`,external_reference:`VL-AD-${request.id}`,payer_email:user.email||undefined,auto_recurring:{frequency:1,frequency_type:'months',transaction_amount:amount,currency_id:'BRL',...(end?{end_date:end.toISOString()}:{})},back_url:`${origin}/conta/publicidade?business_id=${encodeURIComponent(request.business_id)}&payment=success&provider=mercadopago`,status:'pending'})})
   const{error:saveError}=await db.from('advertising_requests').update({payment_provider:'mercadopago',mercadopago_subscription_id:String(subscription.id),payment_status:'awaiting_payment'}).eq('id',request.id);if(saveError){try{await mpRequest(`/preapproval/${encodeURIComponent(String(subscription.id))}`,{method:'PUT',body:JSON.stringify({status:'cancelled'})})}catch{};return response({error:'Assinatura criada no Mercado Pago, mas não foi possível registrar a solicitação.'},500)}
