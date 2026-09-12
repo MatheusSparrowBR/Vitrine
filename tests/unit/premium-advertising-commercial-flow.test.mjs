@@ -15,14 +15,18 @@ test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e 
  assert.match(nav,/insertBefore\(item,media\)/)
 })
 
-test('fluxo comercial do anunciante exige plano Premium, arte quando aplicável e oferece pagamento Stripe',()=>{
+test('fluxo comercial do anunciante exige plano Premium, arte quando aplicável e usa Mercado Pago',()=>{
  const page=read('src/MerchantAdvertisingSalesPage.jsx')
+ const checkout=read('supabase/functions/create-advertising-checkout-session/index.ts')
  assert.match(page,/premium_ads/)
  assert.match(page,/owner_set_advertising_request_creative/)
  assert.match(page,/Vou enviar minha arte/)
  assert.match(page,/Quero que o VitrineLocal crie a arte/)
  assert.match(page,/create-advertising-checkout-session/)
  assert.match(page,/Pagar e contratar/)
+ assert.match(checkout,/mpRequest\('\/preapproval'/)
+ assert.match(checkout,/payment_provider:'mercadopago'/)
+ assert.doesNotMatch(checkout,/STRIPE_SECRET_KEY/)
  assert.doesNotMatch(page,/active:\s*true.*submit/)
 })
 
@@ -45,16 +49,17 @@ test('migration do fluxo comercial protege upload de arte e vincula campanha à 
  assert.match(migration,/final_price/)
 })
 
-test('Stripe possui checkout dedicado e webhook distingue publicidade de assinatura de plano',()=>{
+test('Mercado Pago usa checkout dedicado e webhook distingue publicidade de assinatura de plano',()=>{
  const checkout=read('supabase/functions/create-advertising-checkout-session/index.ts')
- const webhook=read('supabase/functions/stripe-webhook/index.ts')
- assert.match(checkout,/mode:'subscription'/)
- assert.match(checkout,/flow:'premium_advertising'/)
- assert.match(checkout,/subscription_data/)
- assert.match(webhook,/syncPremiumAdvertisingSubscription/)
- assert.match(webhook,/flow==='premium_advertising'/)
+ const webhook=read('supabase/functions/mercadopago-webhook/index.ts')
+ assert.match(checkout,/mpRequest\('\/preapproval'/)
+ assert.match(checkout,/VL-AD-/)
+ assert.match(checkout,/mercadopago_subscription_id/)
+ assert.match(webhook,/syncAdvertising/)
+ assert.match(webhook,/VL-AD-/)
  assert.match(webhook,/advertising_requests/)
  assert.match(webhook,/advertisements/)
+ assert.doesNotMatch(checkout,/STRIPE_SECRET_KEY/)
 })
 
 test('manutenção agendada ativa anúncios pagos no período e desativa vencidos',()=>{
