@@ -15,7 +15,7 @@ function mercadopagoPayerEmail(userEmail?:string|null){
  const testMode=String(Deno.env.get('MERCADOPAGO_TEST_MODE')||'').trim().toLowerCase()==='true'
  const configuredTestEmail=String(Deno.env.get('MERCADOPAGO_TEST_PAYER_EMAIL')||'').trim()
  if(testMode){
-  return configuredTestEmail||'test@testuser.com'
+  return configuredTestEmail||'test_user_641678512814890034@testuser.com'
  }
  return userEmail||undefined
 }
