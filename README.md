@@ -7,6 +7,7 @@ SaaS de descoberta e divulgação de empresas, promoções e conteúdo local. O 
 - React 19 + Vite 8
 - Supabase Auth + Postgres + RLS + Storage
 - GitHub como repositório
+- Mercado Pago para assinaturas recorrentes
 
 ## Supabase
 
@@ -21,7 +22,7 @@ O banco contém cidades, categorias, empresas, fotos, produtos/serviços, promo�
 3. Rode `npm install`.
 4. Rode `npm run dev`.
 
-Nunca coloque chaves secretas/service role no frontend.
+Nunca coloque chaves secretas/service role ou token do Mercado Pago no frontend.
 
 ## MVP atual
 
@@ -43,7 +44,7 @@ Nunca coloque chaves secretas/service role no frontend.
 - Mídia da comunidade aprovada é copiada para `community-published` antes da publicação no feed.
 - Seção pública de planos na Home carregada da tabela `plans`.
 - Área do comerciante para atualizar logo, capa e galeria com upload real para o Storage.
-- Funil comercial: cadastro da empresa → escolha de plano → checkout Stripe para planos pagos → retorno e gerenciamento da assinatura.
+- Funil comercial: cadastro da empresa → escolha de plano → assinatura Mercado Pago → retorno e gerenciamento da assinatura.
 - Analytics público por eventos (`page_view`, `profile_view`, `whatsapp_click`, `instagram_click`, `website_click`, `business_click`, `promotion_click`, `event_click`, `category_click`, `banner_click`).
 - Dashboard de Analytics para administradores e comerciantes.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
@@ -56,7 +57,25 @@ A Home apresenta os planos ativos cadastrados no Supabase:
 - **Pro** — R$ 29,90/mês ou R$ 299/ano
 - **Premium** — R$ 59,90/mês ou R$ 599/ano
 
-O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam a Edge Function `create-checkout-session` e o portal de cobrança quando existe uma assinatura ativa. A sincronização de status depende da configuração das credenciais e webhook do Stripe no ambiente Supabase.
+O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam a Edge Function `create-checkout-session`, que cria uma assinatura Mercado Pago com pagamento pendente e retorna o `init_point` para o cliente concluir a autorização. A alteração de plano usa `change-subscription-plan` e a gestão da assinatura usa `billing-portal`.
+
+### Secrets do Supabase
+
+O backend de cobrança usa os secrets:
+
+- `MERCADOPAGO_ACCESS_TOKEN`
+- `MERCADOPAGO_WEBHOOK_SECRET`
+- `SITE_URL`
+
+Nunca envie esses valores para o frontend ou para o GitHub.
+
+### Webhook Mercado Pago
+
+Endpoint:
+
+`https://swscqihiqmsyntsmuafm.supabase.co/functions/v1/mercadopago-webhook`
+
+O webhook valida `x-signature`/`x-request-id`, registra eventos em `billing_events` com deduplicação e sincroniza o estado da assinatura na tabela `subscriptions`. Os tópicos principais são `subscription_preapproval` e `subscription_authorized_payment`; eventos de `payment` também podem ser registrados para auditoria.
 
 ## Banner Premium da Home
 
@@ -70,6 +89,7 @@ O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam
 - Prioridade controla a ordem.
 - Início e fim permitem programação.
 - Múltiplos banners elegíveis alternam automaticamente na Home.
+- A cobrança recorrente da publicidade Premium usa Mercado Pago quando o pedido administrativo estiver liberado para pagamento.
 
 ## Mídia de empresas e comunidade
 
