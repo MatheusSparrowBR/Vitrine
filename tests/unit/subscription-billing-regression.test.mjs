@@ -12,9 +12,11 @@ test('planos cobre checkout, troca, cancelamento e retorno da empresa',()=>{
 
 test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',()=>{
  const fn=read('supabase/functions/create-checkout-session/index.ts')
- for(const value of ['stripe_price_monthly_id','stripe_price_yearly_id','stripe.prices.create','SITE_URL','owner_id','user.id'])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
+ for(const value of ['stripe_price_monthly_id','stripe_price_yearly_id','stripe.prices.retrieve','SITE_URL','owner_id','user.id','priceId.startsWith(\'price_\')'])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
  assert.equal(fn.includes("req.headers.get('origin')"),false)
  assert.ok(fn.includes("['monthly','yearly'].includes(requestedInterval)"),'checkout deve rejeitar intervalos inválidos')
+ assert.equal(fn.includes('stripe.prices.create'),false,'checkout não deve criar preços durante uma compra')
+ assert.equal(fn.includes('stripe.products.create'),false,'checkout não deve criar produtos durante uma compra')
 })
 
 test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no fim do ciclo',()=>{
