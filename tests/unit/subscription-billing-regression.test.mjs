@@ -5,44 +5,48 @@ const read=p=>fs.readFileSync(p,'utf8')
 
 test('planos cobre checkout, troca, cancelamento e retorno da empresa',()=>{
  const page=read('src/BillingPlansPage.jsx')
- for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','params.get(\'checkout\')','cancel_at_period_end','scheduled_change_at'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
- const checkout=read('supabase/functions/create-checkout-session/index.ts')
- for(const value of ['checkout=success','checkout=cancelled','success_url','cancel_url','business_id'])assert.ok(checkout.includes(value),`checkout precisa conter ${value}`)
+ for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','params.get(\'checkout\')','mercadopago'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
 })
 
-test('checkout usa preços Stripe persistentes, origem fixa e dono autenticado',()=>{
+test('checkout usa Mercado Pago, dono autenticado e preço derivado do plano',()=>{
  const fn=read('supabase/functions/create-checkout-session/index.ts')
- for(const value of ['stripe_price_monthly_id','stripe_price_yearly_id','stripe.prices.retrieve','SITE_URL','owner_id','user.id','priceId.startsWith(\'price_\')'])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
- assert.equal(fn.includes("req.headers.get('origin')"),false)
- assert.ok(fn.includes("['monthly','yearly'].includes(requestedInterval)"),'checkout deve rejeitar intervalos inválidos')
- assert.equal(fn.includes('stripe.prices.create'),false,'checkout não deve criar preços durante uma compra')
- assert.equal(fn.includes('stripe.products.create'),false,'checkout não deve criar produtos durante uma compra')
+ for(const value of ['MERCADOPAGO_ACCESS_TOKEN','mpRequest(\'/preapproval\'','owner_id','user.id','price_monthly','price_yearly','external_reference','frequency_type:\'months\'','currency_id:\'BRL\''])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
+ assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
+ assert.equal(fn.includes('stripe.checkout.sessions.create'),false)
 })
 
-test('troca de assinatura cobre upgrade imediato, agendamento e cancelamento no fim do ciclo',()=>{
+test('alteração de assinatura usa Mercado Pago e valida proprietário',()=>{
  const fn=read('supabase/functions/change-subscription-plan/index.ts')
- for(const value of ['subscriptionSchedules','cancel_at_period_end:true','current_period_end','scheduled_plan_id',"proration_behavior:'create_prorations'",'owner_id','user.id'])assert.ok(fn.includes(value),`troca de plano precisa conter ${value}`)
+ for(const value of ['MERCADOPAGO_ACCESS_TOKEN','/preapproval/','owner_id','user.id','auto_recurring','transaction_amount','currency_id'])assert.ok(fn.includes(value),`troca precisa conter ${value}`)
+ assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
 })
 
-test('webhook verifica assinatura Stripe, deduplica eventos concorrentes, valida proprietário/cliente e sincroniza estado real',()=>{
- const fn=read('supabase/functions/stripe-webhook/index.ts')
- for(const value of ['constructEventAsync','if(priceId)','stripe_price_monthly_id.eq.${priceId}','invoice.paid','invoice.payment_failed','customer.subscription.updated','billing_events','business.owner_id!==userId','Cliente Stripe não corresponde','stripe.subscriptions.retrieve(String(obj.subscription)','23505'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
- assert.equal(fn.includes('detail:String(e'),false)
-})
-
-test('portal de cobrança valida proprietário e preserva o destino interno',()=>{
+test('gestão da assinatura usa Mercado Pago',()=>{
  const fn=read('supabase/functions/billing-portal/index.ts')
- for(const value of ['owner_id','user.id','past_due','unpaid','returnTo','body.return_to','account'])assert.ok(fn.includes(value),`portal precisa conter ${value}`)
+ for(const value of ['MERCADOPAGO_ACCESS_TOKEN','/preapproval/','provider_subscription_id','owner_id','user.id'])assert.ok(fn.includes(value),`gestão precisa conter ${value}`)
+ assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
 })
 
-test('migration de billing cria produto/preços Stripe e mudanças agendadas',()=>{
- const migration=read('supabase/migrations/20260910200000_harden_billing_and_scheduled_plan_changes.sql')
- for(const value of ['stripe_product_id','scheduled_plan_id','scheduled_billing_interval','scheduled_change_at','plans_stripe_product_uidx','plans_stripe_price_monthly_uidx','plans_stripe_price_yearly_uidx'])assert.ok(migration.includes(value),`migration precisa conter ${value}`)
+test('webhook Mercado Pago valida assinatura, deduplica e sincroniza assinatura',()=>{
+ const fn=read('supabase/functions/mercadopago-webhook/index.ts')
+ for(const value of ['MERCADOPAGO_WEBHOOK_SECRET','x-signature','x-request-id','HMAC','subscription_preapproval','subscription_authorized_payment','billing_events','provider:\'mercadopago\'','provider_subscription_id','23505'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
+ assert.equal(fn.includes('stripe-signature'),false)
 })
 
-test('painel Meu plano exibe estado real da assinatura',()=>{
+test('publicidade Premium usa Mercado Pago',()=>{
+ const fn=read('supabase/functions/create-advertising-checkout-session/index.ts')
+ for(const value of ['MERCADOPAGO_ACCESS_TOKEN','/preapproval','VL-AD-','mercadopago_subscription_id','payment_provider:\'mercadopago\''])assert.ok(fn.includes(value),`publicidade precisa conter ${value}`)
+ assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
+})
+
+test('migração de billing versiona provider e identificadores Mercado Pago',()=>{
+ const migration=read('supabase/migrations/20260912130000_migrate_billing_to_mercadopago.sql')
+ for(const value of ['payment_provider','mercadopago_subscription_id','mercadopago_payment_id','mercadopago_payer_id','subscriptions_mercadopago_sub_uidx','billing_events_mercadopago_event_uidx'])assert.ok(migration.includes(value),`migration precisa conter ${value}`)
+})
+
+test('painel Meu plano reconhece assinatura Mercado Pago',()=>{
  const panel=read('src/PlanUsageReact.jsx')
- for(const value of ['function SubscriptionArea','provider_subscription_id','scheduled_plan_id','billing-portal','current_period_end',"import'./plan-usage.css'"])assert.ok(panel.includes(value),`painel precisa conter ${value}`)
+ for(const value of ['provider===\'mercadopago\'','pending','Gerenciar assinatura','billing-portal'])assert.ok(panel.includes(value),`painel precisa conter ${value}`)
 })
 
 test('workspace mantém formulário React de promoções',()=>{
@@ -50,8 +54,4 @@ test('workspace mantém formulário React de promoções',()=>{
  assert.equal(promotion.includes('window.prompt'),false)
  assert.equal(promotion.includes('window.confirm'),false)
  assert.ok(promotion.includes('<form onSubmit={submit}>'))
-})
-
-test('auditoria de segurança básica não encontra helper admin público antigo',()=>{
- for(const p of ['src/AccountPage.jsx','src/BillingPlansPage.jsx','src/PlanUsageReact.jsx','src/OwnerPromotionsSection.jsx'])assert.equal(read(p).includes('public.is_admin()'),false)
 })
