@@ -1,8 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { db } from './supabase-client.js'
 
-const U=import.meta.env.VITE_SUPABASE_URL
-const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-export const db=U&&K?createClient(U,K):null
+export { db }
 
 export async function getReviewSummary(businessId){
  if(!db||!businessId)return {data:null,error:null}
