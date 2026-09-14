@@ -82,7 +82,7 @@ export default function BusinessReviews({businessId}){
    </div>
   </div>
 
-  {d.session?<div className="vl-review-form">
+  {d.loading?<div className="vl-review-login vl-review-auth-loading"><div><strong>Verificando sua conta…</strong><span>Estamos preparando a área de avaliação.</span></div></div>:d.session?<div className="vl-review-form">
    <span>{d.me?'SUA AVALIAÇÃO':'DEIXE SUA AVALIAÇÃO'}</span>
    <h3>{d.me?'Como foi sua experiência?':'Ajude outras pessoas a escolher.'}</h3>
    <div className="vl-review-stars-input" role="radiogroup" aria-label="Escolha uma nota de 1 a 5">
