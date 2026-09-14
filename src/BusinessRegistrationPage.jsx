@@ -1,34 +1,11 @@
 import React,{useEffect,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import { db } from './review-service.js'
 import BusinessHoursEditor from './BusinessHoursEditor.jsx'
 import './core.css'
 import './business-registration.css'
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
 const empty={name:'',short_description:'',description:'',city_id:'',category_id:'',phone:'',whatsapp:'',website_url:'',instagram_url:'',facebook_url:'',address:'',neighborhood:'',opening_hours:{}}
-
-function slugify(value){
- return String(value||'')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g,'')
-  .toLowerCase()
-  .replace(/&/g,' e ')
-  .replace(/[^a-z0-9]+/g,'-')
-  .replace(/^-+|-+$/g,'')
-  .slice(0,90)
-}
-
-async function uniqueBusinessSlug(name,cityId){
- const base=slugify(name)||`empresa-${Date.now()}`
- if(!db||!cityId)return base
- const {data,error}=await db.from('businesses').select('slug').eq('city_id',cityId).like('slug',`${base}%`)
- if(error)return `${base}-${Date.now().toString(36).slice(-5)}`
- const used=new Set((data||[]).map(row=>row.slug).filter(Boolean))
- if(!used.has(base))return base
- let suffix=2
- while(used.has(`${base}-${suffix}`))suffix+=1
- return `${base}-${suffix}`
-}
-
+function slugify(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' e ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,90)}
+async function uniqueBusinessSlug(name,cityId){const base=slugify(name)||`empresa-${Date.now()}`;if(!db||!cityId)return base;const{data,error}=await db.from('businesses').select('slug').eq('city_id',cityId).like('slug',`${base}%`);if(error)return `${base}-${Date.now().toString(36).slice(-5)}`;const used=new Set((data||[]).map(row=>row.slug).filter(Boolean));if(!used.has(base))return base;let suffix=2;while(used.has(`${base}-${suffix}`))suffix+=1;return `${base}-${suffix}`}
 export default function BusinessRegistrationPage(){
  const[session,setSession]=useState(null),[checking,setChecking]=useState(true),[cities,setCities]=useState([]),[categories,setCategories]=useState([]),[form,setForm]=useState(empty),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
  useEffect(()=>{let live=true;(async()=>{if(!db){setChecking(false);return}const{data:{session:s}}=await db.auth.getSession();if(!live)return;setSession(s||null);if(s){const[c,cat]=await Promise.all([db.from('cities').select('id,name,state').eq('active',true).order('name'),db.from('categories').select('id,name,icon').eq('active',true).order('sort_order').order('name')]);if(!live)return;setCities(c.data||[]);setCategories(cat.data||[]);setForm(f=>({...f,city_id:f.city_id||(c.data?.[0]?.id||''),category_id:f.category_id||(cat.data?.[0]?.id||'')}))}setChecking(false)})();return()=>{live=false}},[])
