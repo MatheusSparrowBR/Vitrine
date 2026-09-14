@@ -1,11 +1,11 @@
-const PRIVATE_PREFIXES=['/admin','/conta','/login','/atualizar-senha']
+const PRIVATE_PREFIXES=['/admin','/conta','/login','/atualizar-senha','/usuario']
 const CITY_NAMES={laguna:'Laguna'}
 const humanize=v=>String(v||'').split('-').filter(Boolean).map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ')
 const firstMeta=(attr,value,content)=>{let el=document.head.querySelector(`meta[${attr}="${value}"]`);if(!el){el=document.createElement('meta');el.setAttribute(attr,value);document.head.appendChild(el)}el.setAttribute('content',content)}
 const linkRel=(rel,href)=>{let el=document.head.querySelector(`link[rel="${rel}"]`);if(!el){el=document.createElement('link');el.rel=rel;document.head.appendChild(el)}el.href=href}
 const path=location.pathname.replace(/\/+$/,'')||'/'
 const parts=path.split('/').filter(Boolean).map(v=>decodeURIComponent(v))
-const citySlug=parts[0]&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():''
+const citySlug=parts[0]&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha','usuario'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():''
 const cityName=CITY_NAMES[citySlug]||humanize(citySlug)||'sua cidade'
 let title='VitrineLocal | Empresas, promoções e eventos locais'
 let description='Encontre empresas, serviços, promoções e eventos perto de você no VitrineLocal.'
@@ -17,7 +17,7 @@ else if(citySlug&&parts[1]==='promocoes'){title=`Promoções em ${cityName} | Vi
 else if(citySlug&&parts[1]==='eventos'){title=`Eventos em ${cityName} | VitrineLocal`;description=`Veja os próximos eventos e o que está acontecendo em ${cityName}.`}
 else if(citySlug&&parts[1]==='empresa'){title=`Empresa em ${cityName} | VitrineLocal`;description=`Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.`}
 else if(path==='/planos'){title='Planos para empresas | VitrineLocal';description='Escolha o plano VitrineLocal que melhor ajuda sua empresa a ganhar presença e destaque.'}
-if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){robots='noindex,nofollow,noarchive';title=path.startsWith('/admin')?'Administração | VitrineLocal':path==='/login'?'Entrar | VitrineLocal':'Minha conta | VitrineLocal'}
+if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){robots='noindex,nofollow,noarchive';title=path.startsWith('/admin')?'Administração | VitrineLocal':path==='/login'?'Entrar | VitrineLocal':path.startsWith('/usuario')?'Conta do usuário | VitrineLocal':'Minha conta | VitrineLocal'}
 document.title=title
 firstMeta('name','description',description)
 firstMeta('name','robots',robots)
