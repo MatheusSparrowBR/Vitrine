@@ -12,6 +12,7 @@ import AdminHomePage from './AdminHomePage.jsx'
 import AdminAnalyticsPage from './AdminAnalyticsPage.jsx'
 import AdminBusinessesPage from './AdminBusinessesPage.jsx'
 import AdminReviewsPage from './AdminReviewsPage.jsx'
+import AdminUsersPage from './AdminUsersPage.jsx'
 import BusinessRegistrationPage from './BusinessRegistrationPage.jsx'
 import CityHomePage from './CityHomePage.jsx'
 import AccountPage from './AccountWorkspacePage.jsx'
@@ -39,6 +40,7 @@ import './modern-business-profile.css'
 import './modern-business-profile-v2.css'
 import './modern-business-list.css'
 import './modern-gallery-lightbox.css'
+import './review-card-rating.css'
 import './modern-gallery-lightbox.js'
 import './admin-city-actions.js'
 import './business-registration.css'
@@ -50,6 +52,7 @@ import './site-header-dedup.css'
 import './admin-v2.css'
 import './admin-management.css'
 import './admin-analytics.css'
+import './admin-users.css'
 import './analytics.css'
 import './commercial-analytics.css'
 import './merchant-advertising.css'
@@ -62,6 +65,7 @@ import './phase2-enhancements.js'
 import './account-premium-ad-shortcut.css'
 import './mobile-responsive-fixes.css'
 import './review-ui-mount.js'
+import './review-card-rating.js'
 
 const normalizePath=p=>p.replace(/\/+$/,'')||'/'
 const partsOf=p=>p.split('/').filter(Boolean).map(decodeURIComponent)
@@ -75,6 +79,7 @@ function getCityRoute(path){
 }
 function EventRoute({citySlug}){const[city,setCity]=React.useState(supabase?null:{id:'fallback',name:'Laguna',state:'SC',slug:citySlug,active:true}),[loading,setLoading]=React.useState(Boolean(supabase));React.useEffect(()=>{let live=true;(async()=>{if(!supabase){setLoading(false);return}const{data}=await supabase.from('cities').select('id,name,state,slug,country,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(live){setCity(data||null);setLoading(false)}})();return()=>{live=false}},[citySlug]);if(loading)return <div className="app"><div className="loader"/></div>;if(!city)return <div className="app"><main className="page section"><a className="back-link" href="/laguna">← Voltar</a><div className="empty"><h3>Cidade não encontrada.</h3></div></main></div>;return <div className="app"><EventsPage supabase={supabase} city={city} onBack={()=>location.href=`/${city.slug}`}/></div>}
 function AccountRoute(){const params=new URLSearchParams(location.search),isNewBusiness=params.get('new')==='business';if(isNewBusiness)return <BusinessRegistrationPage/>;if(!supabase)return <div className="app account-logged-out"><main className="account-login-state"><div className="account-login-card"><span className="account-eyebrow">MINHA CONTA</span><div className="account-login-icon">V</div><h1>Entre para acessar sua conta</h1><p>Gerencie suas empresas, mídias, produtos, promoções e plano em um só lugar.</p><a className="account-primary-btn" href="/login?next=%2Fconta">Entrar</a><a className="account-secondary-btn" href="/laguna">Voltar ao site</a></div></main></div>;return <div className="account-route-shell"><AccountPage/></div>}
-function RootRoute(){const path=normalizePath(location.pathname);if(path==='/login')return <AuthPage/>;if(path==='/usuario/login'||path==='/usuario/cadastro')return <UserAuthPage/>;if(path==='/planos')return <BillingPlansPage/>;if(path==='/conta')return <AccountRoute/>;if(path==='/conta/analytics')return <CommercialAnalyticsPage/>;if(path==='/conta/analytics-comercial')return <CommercialAnalyticsPage/>;if(path==='/conta/publicidade')return <MerchantAdvertisingSalesPage/>;if(path==='/conta/publicidade-legado')return <MerchantAdvertisingPage/>;if(path==='/conta/nova')return <BusinessRegistrationPage/>;if(path==='/atualizar-senha')return <PasswordUpdatePage/>;if(path==='/privacidade')return <PrivacyPage/>;if(path==='/termos')return <TermsPage/>;if(path==='/admin')return <AdminHomePage/>;if(path==='/admin/analytics')return <AdminAnalyticsPage/>;if(path==='/admin/empresas')return <AdminBusinessesPage/>;if(path==='/admin/avaliacoes')return <AdminReviewsPage/>;if(path==='/admin/banners')return <AdminPremiumBannerPage supabase={supabase}/>;if(path==='/admin/publicidade')return <AdminAdvertisingSalesPage/>;if(path==='/admin/publicidade-legado')return <AdminAdvertisingPage/>;if(path==='/admin/gestao')return <AdminPlatformPage supabase={supabase}/>;const route=getCityRoute(path);if(!route)return <NotFoundPage/>;if(route.kind==='home')return <CityHomePage citySlug={route.citySlug}/>;if(route.kind==='events')return <EventRoute citySlug={route.citySlug}/>;if(route.kind==='businesses')return <ModernBusinessesPage citySlug={route.citySlug}/>;if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>;if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>;return <NotFoundPage/>}
-function App(){const isAdmin=location.pathname.startsWith('/admin');return <>{!isAdmin&&<SiteHeader/>}{!isAdmin&&<AnalyticsTracker/>}<RootRoute/></>}
+function AccountModerationGuard({children}){React.useEffect(()=>{if(!supabase)return;let live=true;const check=async()=>{const{data:{session}}=await supabase.auth.getSession();if(!session||!live)return;const{data:profile}=await supabase.from('profiles').select('role,account_status').eq('id',session.user.id).maybeSingle();if(!live)return;if((profile?.role==='user'||profile?.role==='business_owner')&&profile.account_status&&profile.account_status!=='active'){await supabase.auth.signOut();window.location.href=`/usuario/login?blocked=${encodeURIComponent(profile.account_status)}`}};check();const sub=supabase.auth.onAuthStateChange(()=>setTimeout(check,0));return()=>{live=false;sub?.data?.subscription?.unsubscribe?.()}},[]);return children}
+function RootRoute(){const path=normalizePath(location.pathname);if(path==='/login')return <AuthPage/>;if(path==='/usuario/login'||path==='/usuario/cadastro')return <UserAuthPage/>;if(path==='/planos')return <BillingPlansPage/>;if(path==='/conta')return <AccountRoute/>;if(path==='/conta/analytics')return <CommercialAnalyticsPage/>;if(path==='/conta/analytics-comercial')return <CommercialAnalyticsPage/>;if(path==='/conta/publicidade')return <MerchantAdvertisingSalesPage/>;if(path==='/conta/publicidade-legado')return <MerchantAdvertisingPage/>;if(path==='/conta/nova')return <BusinessRegistrationPage/>;if(path==='/atualizar-senha')return <PasswordUpdatePage/>;if(path==='/privacidade')return <PrivacyPage/>;if(path==='/termos')return <TermsPage/>;if(path==='/admin')return <AdminHomePage/>;if(path==='/admin/analytics')return <AdminAnalyticsPage/>;if(path==='/admin/empresas')return <AdminBusinessesPage/>;if(path==='/admin/usuarios')return <AdminUsersPage/>;if(path==='/admin/avaliacoes')return <AdminReviewsPage/>;if(path==='/admin/banners')return <AdminPremiumBannerPage supabase={supabase}/>;if(path==='/admin/publicidade')return <AdminAdvertisingSalesPage/>;if(path==='/admin/publicidade-legado')return <AdminAdvertisingPage/>;if(path==='/admin/gestao')return <AdminPlatformPage supabase={supabase}/>;const route=getCityRoute(path);if(!route)return <NotFoundPage/>;if(route.kind==='home')return <CityHomePage citySlug={route.citySlug}/>;if(route.kind==='events')return <EventRoute citySlug={route.citySlug}/>;if(route.kind==='businesses')return <ModernBusinessesPage citySlug={route.citySlug}/>;if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>;if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>;return <NotFoundPage/>}
+function App(){const isAdmin=location.pathname.startsWith('/admin');return <AccountModerationGuard><>{!isAdmin&&<SiteHeader/>}{!isAdmin&&<AnalyticsTracker/>}<RootRoute/></></AccountModerationGuard>}
 createRoot(document.getElementById('root')).render(<App/>)
