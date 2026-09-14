@@ -20,6 +20,12 @@ export default function AuthPage(){
  const passwordRules=useMemo(()=>({length:password.length>=8,mixed:/[A-Za-z]/.test(password)&&/\d/.test(password)}),[password])
  const resetState=()=>{setMsg('');setError('');setConfirmPassword('');setShowPassword(false);setShowConfirm(false)}
  async function sendRecovery(targetEmail=email){if(!db||!targetEmail)return false;const {error:resetError}=await db.auth.resetPasswordForEmail(targetEmail,{redirectTo:`${location.origin}/atualizar-senha`});if(resetError)throw resetError;return true}
+ async function redirectAfterLogin(){
+  const{data:{session},error:sessionError}=await db.auth.getSession()
+  if(sessionError)throw sessionError
+  if(!session?.user?.id)throw new Error('Login concluído, mas a sessão não foi estabelecida. Tente novamente.')
+  window.location.assign(next)
+ }
  async function submit(e){
   e.preventDefault();setBusy(true);setMsg('');setError('')
   if(!db){setError('Autenticação indisponível.');setBusy(false);return}
@@ -29,14 +35,14 @@ export default function AuthPage(){
     if(password!==confirmPassword)throw new Error('As senhas não conferem.')
     const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name.trim()||null}}})
     if(error)throw error
-    if(data.session)location.href=next
+    if(data.session)await redirectAfterLogin()
     else setMsg('Conta criada. Verifique seu e-mail para confirmar o cadastro.')
    }else{
     const {error}=await db.auth.signInWithPassword({email,password})
     if(error){
      if(isWeakPasswordError(error)){await sendRecovery(email);setMode('forgot');setMsg('Sua senha antiga não atende mais aos requisitos de segurança. Enviamos um link para você criar uma nova senha com pelo menos 8 caracteres.')}
      else throw error
-    }else location.href=next
+    }else await redirectAfterLogin()
    }
   }catch(e){setError(e.message||'Não foi possível concluir.')}finally{setBusy(false)}
  }
