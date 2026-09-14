@@ -1,0 +1,78 @@
+/* Mobile polish: prevent horizontal page drift and tighten public/company layouts. */
+html,body,#root{width:100%;max-width:100%;overflow-x:clip}
+img,video,iframe,svg{max-width:100%}
+
+@media (max-width:700px){
+  .vl-site-header,.vl-site-header-inner,.vl-site-header-inner>*{max-width:100%}
+  .vl-site-header-inner{width:100%;min-width:0}
+  .vl-site-city{flex:1 1 auto;min-width:0}
+  .vl-site-city select{min-width:0;max-width:100%}
+
+  .vl-public-app,.vl-public-app main,.vl-public-app .hero,.vl-public-app .hero-inner,.vl-public-app .section{width:100%;max-width:100%;min-width:0}
+  .vl-public-app .hero-inner{overflow:hidden}
+  .vl-public-app .hero-inner>*{min-width:0;max-width:100%}
+  .vl-public-app .hero h1{max-width:100%;overflow-wrap:anywhere}
+  .vl-public-app .searchbox{width:100%;max-width:100%;min-width:0}
+  .vl-public-app .searchbox>*{min-width:0;max-width:100%}
+  .vl-public-app .hero-actions{width:100%;max-width:100%}
+  .vl-public-app .hero-actions a{min-width:0}
+  .vl-public-app .hero-card{width:100%;min-width:0;max-width:100%;overflow:hidden}
+  .vl-public-app .mini-header,.vl-public-app .pulse-row{min-width:0}
+  .vl-public-app .pulse-row>div{min-width:0}
+  .vl-public-app .pulse-row p{overflow-wrap:anywhere}
+  .vl-premium-slot,.vl-category-slot{width:100%;max-width:100%;min-width:0}
+  .vl-premium-card,.vl-premium-real,.vl-premium-copy{min-width:0;max-width:100%}
+  .vl-category-slot>.category-grid{max-width:100%;}
+
+  .section,.page{max-width:100%;}
+  .section-head{min-width:0}
+  .section-head>*{min-width:0;max-width:100%}
+  .vl-commercial-cta{width:100%;max-width:100%;min-width:0}
+  .vl-commercial-cta>div{min-width:0;max-width:100%}
+  .vl-commercial-actions a{min-width:0;max-width:100%}
+}
+
+@media (max-width:600px){
+  .mbp-page,.mbp-layout,.mbp-main-card,.mbp-company-head,.mbp-company-copy{min-width:0;max-width:100%}
+  .mbp-gallery,.mbp-gallery-main,.mbp-gallery-side{min-width:0;max-width:100%}
+  .mbp-gallery-main img,.mbp-gallery-thumb img{max-width:100%}
+
+  .mbp-company-head{align-items:flex-start}
+  .mbp-company-copy{flex:1 1 auto;width:auto}
+  .mbp-company-copy h1{max-width:100%;overflow-wrap:anywhere}
+  .mbp-badges{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+    width:100% !important;
+    align-items:stretch !important;
+  }
+  .mbp-badges > .mbp-live-pill,
+  .mbp-badges > .mbp-open-pill,
+  .mbp-badges > .mbp-closed-pill,
+  .mbp-badges > .mbp-rating,
+  .mbp-badges > .mbp-verified,
+  .mbp-badges > .mbp-category{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    flex:0 0 auto !important;
+    height:38px !important;
+    min-height:38px !important;
+    max-height:38px !important;
+    padding:0 10px !important;
+    font-size:11px !important;
+  }
+  .mbp-badges > .mbp-rating{font-size:11px !important}
+  .mbp-badges > * > small{font-size:9px !important}
+}
+
+@media (max-width:430px){
+  .mbp-badges{grid-template-columns:1fr !important;max-width:240px !important}
+  .mbp-badges > .mbp-live-pill,
+  .mbp-badges > .mbp-open-pill,
+  .mbp-badges > .mbp-closed-pill,
+  .mbp-badges > .mbp-rating,
+  .mbp-badges > .mbp-verified,
+  .mbp-badges > .mbp-category{height:36px !important;min-height:36px !important;max-height:36px !important}
+}
