@@ -2,39 +2,14 @@ import React,{useEffect,useMemo,useState}from'react'
 import{db}from'./supabase-client.js'
 import AdminShell from'./AdminShell.jsx'
 import'./admin-users.css'
-
 const dateFormat=new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium'})
-
 export default function AdminUsersPage(){
  const[s,setS]=useState({loading:true,users:[],filter:'all',search:'',error:'',notice:'',busyId:null})
- const load=async()=>{
-  if(!db){setS(x=>({...x,loading:false,error:'Banco indisponível.'}));return}
-  const{data:{session}}=await db.auth.getSession()
-  if(!session){setS(x=>({...x,loading:false}));return}
-  const{data:me}=await db.from('profiles').select('role').eq('id',session.user.id).maybeSingle()
-  if(me?.role!=='admin'){setS(x=>({...x,loading:false}));return}
-  const{data,error}=await db.from('profiles').select('id,full_name,role,account_status,status_reason,status_updated_at,created_at').neq('role','admin').order('created_at',{ascending:false})
-  setS(x=>({...x,loading:false,users:data||[],error:error?.message||''}))
- }
+ const load=async()=>{if(!db){setS(x=>({...x,loading:false,error:'Banco indisponível.'}));return}const{data:{session}}=await db.auth.getSession();if(!session){setS(x=>({...x,loading:false}));return}const{data:me}=await db.from('profiles').select('role').eq('id',session.user.id).maybeSingle();if(me?.role!=='admin'){setS(x=>({...x,loading:false}));return}const{data,error}=await db.from('profiles').select('id,full_name,username,avatar_url,bio,role,account_status,status_reason,status_updated_at,created_at').neq('role','admin').order('created_at',{ascending:false});setS(x=>({...x,loading:false,users:data||[],error:error?.message||''}))}
  useEffect(()=>{load()},[])
- const filtered=useMemo(()=>{const term=s.search.trim().toLowerCase();return s.users.filter(u=>(s.filter==='all'||u.account_status===s.filter)&&(!term||[u.full_name,u.id,u.role].filter(Boolean).join(' ').toLowerCase().includes(term)))},[s.users,s.filter,s.search])
- const setStatus=async(user,status)=>{
-  let reason=''
-  if(status!=='active'){reason=window.prompt(status==='banned'?'Informe o motivo do banimento:':'Informe o motivo da suspensão:','Violação das regras da plataforma.')||'';if(!reason.trim())return}
-  setS(x=>({...x,busyId:user.id,error:'',notice:''}))
-  const{error}=await db.rpc('admin_set_user_status',{p_user_id:user.id,p_status:status,p_reason:reason.trim()||null})
-  if(error){setS(x=>({...x,busyId:null,error:error.message}));return}
-  setS(x=>({...x,busyId:null,notice:status==='active'?'Usuário reativado.':status==='suspended'?'Usuário suspenso.':'Usuário banido.'}))
-  await load()
- }
- const statusLabel={active:'Ativo',suspended:'Suspenso',banned:'Banido'}
- const roleLabel={user:'Usuário',business_owner:'Proprietário de empresa'}
+ const filtered=useMemo(()=>{const term=s.search.trim().toLowerCase();return s.users.filter(u=>(s.filter==='all'||u.account_status===s.filter)&&(!term||[u.full_name,u.username,u.id,u.role].filter(Boolean).join(' ').toLowerCase().includes(term)))},[s.users,s.filter,s.search])
+ const setStatus=async(user,status)=>{let reason='';if(status!=='active'){reason=window.prompt(status==='banned'?'Informe o motivo do banimento:':'Informe o motivo da suspensão:','Violação das regras da plataforma.')||'';if(!reason.trim())return}setS(x=>({...x,busyId:user.id,error:'',notice:''}));const{error}=await db.rpc('admin_set_user_status',{p_user_id:user.id,p_status:status,p_reason:reason.trim()||null});if(error){setS(x=>({...x,busyId:null,error:error.message}));return}setS(x=>({...x,busyId:null,notice:status==='active'?'Usuário reativado.':status==='suspended'?'Usuário suspenso.':'Usuário banido.'}));await load()}
+ const statusLabel={active:'Ativo',suspended:'Suspenso',banned:'Banido'},roleLabel={user:'Usuário',business_owner:'Proprietário de empresa'}
  if(s.loading)return <div className="admin-v2-shell"><div className="admin-v2-empty">Carregando usuários…</div></div>
- return <AdminShell active="users" title="Usuários" description="Gerencie contas cadastradas e modere usuários que violarem as regras da plataforma.">
-  <section className="au-overview"><div><span className="au-kicker">GESTÃO DE CONTAS</span><h2>Usuários cadastrados</h2><p>Consulte os perfis e suspenda ou bana contas quando necessário.</p></div><div className="au-count"><strong>{filtered.length}</strong><span>usuários na lista</span></div></section>
-  {s.notice&&<div className="au-notice success">{s.notice}</div>}
-  {s.error&&<div className="au-notice error">{s.error}</div>}
-  <section className="au-toolbar"><label><span>Buscar usuário</span><input value={s.search} onChange={e=>setS(x=>({...x,search:e.target.value}))} placeholder="Nome ou identificador do usuário…"/></label><div className="au-tabs">{['all','active','suspended','banned'].map(f=><button key={f} className={s.filter===f?'active':''} onClick={()=>setS(x=>({...x,filter:f}))}>{f==='all'?'Todos':statusLabel[f]}</button>)}</div></section>
-  {filtered.length===0?<div className="au-empty"><strong>Nenhum usuário encontrado.</strong><span>Ajuste a busca ou o filtro de status.</span></div>:<section className="au-table-wrap"><table className="au-table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>{filtered.map(u=><tr key={u.id}><td><strong>{u.full_name||'Usuário sem nome'}</strong><small>{u.id}</small>{u.status_reason&&<em>Motivo: {u.status_reason}</em>}</td><td>{roleLabel[u.role]||u.role}</td><td><span className={`au-status ${u.account_status}`}>{statusLabel[u.account_status]||u.account_status}</span>{u.status_updated_at&&<small>Atualizado em {dateFormat.format(new Date(u.status_updated_at))}</small>}</td><td>{dateFormat.format(new Date(u.created_at))}</td><td><div className="au-actions">{u.account_status!=='active'&&<button className="primary" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'active')}>Reativar</button>}{u.account_status==='active'&&<button className="warn" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'suspended')}>Suspender</button>}{u.account_status!=='banned'&&<button className="danger" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'banned')}>Banir</button>}</div></td></tr>)}</tbody></table></section>}
- </AdminShell>
+ return <AdminShell active="users" title="Usuários" description="Gerencie contas cadastradas e modere usuários que violarem as regras da plataforma."><section className="au-overview"><div><span className="au-kicker">GESTÃO DE CONTAS</span><h2>Usuários cadastrados</h2><p>Consulte os perfis e suspenda ou bana contas quando necessário.</p></div><div className="au-count"><strong>{filtered.length}</strong><span>usuários na lista</span></div></section>{s.notice&&<div className="au-notice success">{s.notice}</div>}{s.error&&<div className="au-notice error">{s.error}</div>}<section className="au-toolbar"><label><span>Buscar usuário</span><input value={s.search} onChange={e=>setS(x=>({...x,search:e.target.value}))} placeholder="Nome ou usuário…"/></label><div className="au-tabs">{['all','active','suspended','banned'].map(f=><button key={f} className={s.filter===f?'active':''} onClick={()=>setS(x=>({...x,filter:f}))}>{f==='all'?'Todos':statusLabel[f]}</button>)}</div></section>{filtered.length===0?<div className="au-empty"><strong>Nenhum usuário encontrado.</strong><span>Ajuste a busca ou o filtro de status.</span></div>:<section className="au-table-wrap"><table className="au-table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>{filtered.map(u=><tr key={u.id}><td><div style={{display:'flex',gap:10,alignItems:'center'}}><div className="au-user-avatar">{u.avatar_url?<img src={u.avatar_url} alt=""/>:<span>{String(u.full_name||u.username||'U').trim().charAt(0).toUpperCase()}</span>}</div><div><strong>{u.full_name||'Usuário sem nome'}</strong>{u.username&&<small>@{u.username}</small>}{u.bio&&<small>{u.bio}</small>}{u.status_reason&&<em>Motivo: {u.status_reason}</em>}</div></div></td><td>{roleLabel[u.role]||u.role}</td><td><span className={`au-status ${u.account_status}`}>{statusLabel[u.account_status]||u.account_status}</span>{u.status_updated_at&&<small>Atualizado em {dateFormat.format(new Date(u.status_updated_at))}</small>}</td><td>{dateFormat.format(new Date(u.created_at))}</td><td><div className="au-actions">{u.account_status!=='active'&&<button className="primary" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'active')}>Reativar</button>}{u.account_status==='active'&&<button className="warn" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'suspended')}>Suspender</button>}{u.account_status!=='banned'&&<button className="danger" disabled={s.busyId===u.id} onClick={()=>setStatus(u,'banned')}>Banir</button>}</div></td></tr>)}</tbody></table></section>}</AdminShell>
 }
