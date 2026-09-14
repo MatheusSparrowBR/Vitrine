@@ -6,13 +6,13 @@ const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db=U&&K?createClient(U,K):null
 const FALLBACK=[
- {id:'free',code:'free',name:'Grátis',price_monthly:0,price_yearly:0,description:'Presença básica e recursos essenciais.',features:{photos:5,items:10,promotions:1,ai_posts:3}},
- {id:'pro',code:'pro',name:'Pro',price_monthly:29.9,price_yearly:299,description:'Mais destaque e recursos para crescer.',features:{photos:30,items:50,promotions:5,ai_posts:30,analytics:true,featured:true,verified:true}},
- {id:'premium',code:'premium',name:'Premium',price_monthly:59.9,price_yearly:599,description:'Máxima presença e recursos avançados.',features:{photos:100,items:200,promotions:20,ai_posts:100,analytics:true,featured:true,verified:true,city_instagram:true,advanced_analytics:true}}
+ {id:'free',code:'free',name:'Grátis',price_monthly:0,price_yearly:0,description:'Presença básica e recursos essenciais para começar no VitrineLocal.',features:{photos:5,items:10,promotions:1}},
+ {id:'pro',code:'pro',name:'Pro',price_monthly:29.9,price_yearly:299,description:'Mais destaque e recursos para crescer com sua empresa.',features:{photos:30,items:50,promotions:5,analytics:true,featured:true,verified:true}},
+ {id:'premium',code:'premium',name:'Premium',price_monthly:59.9,price_yearly:599,description:'Máxima presença, reputação avançada e recursos exclusivos, incluindo resposta às avaliações e estatísticas avançadas.',features:{photos:100,items:200,promotions:20,analytics:true,featured:true,verified:true,city_instagram:true,advanced_analytics:true,review_management:true}}
 ]
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-const label=(k,n)=>({photos:`Até ${n} fotos/mídias`,items:`Até ${n} produtos/serviços`,promotions:`Até ${n} promoções`,ai_posts:`${n} usos de IA por mês`,analytics:'Analytics completo',featured:'Destaque nas buscas',verified:'Selo de verificação',city_instagram:'Presença no Instagram da cidade',advanced_analytics:'Estatísticas avançadas'})[k]||k
-function featureList(f={}){return['photos','items','promotions','ai_posts','analytics','featured','verified','advanced_analytics','city_instagram'].map(k=>['photos','items','promotions','ai_posts'].includes(k)?Number(f[`${k}_limit`]??f[k])>0?label(k,Number(f[`${k}_limit`]??f[k])):null:f[k]===true?label(k):null).filter(Boolean).slice(0,9)}
+const label=(k,n)=>({photos:`Até ${n} fotos/mídias`,items:`Até ${n} produtos/serviços`,promotions:`Até ${n} promoções`,analytics:'Analytics comercial',featured:'Destaque nas buscas',verified:'Selo de verificação',city_instagram:'Presença no Instagram da cidade',advanced_analytics:'Estatísticas avançadas',review_management:'Reputação + respostas às avaliações'})[k]||k
+function featureList(f={}){return['photos','items','promotions','analytics','featured','verified','advanced_analytics','city_instagram','review_management'].map(k=>['photos','items','promotions'].includes(k)?Number(f[`${k}_limit`]??f[k])>0?label(k,Number(f[`${k}_limit`]??f[k])):null:f[k]===true?label(k):null).filter(Boolean).slice(0,10)}
 
 export default function BillingPlansPage(){
  const[plans,setPlans]=useState(FALLBACK),[session,setSession]=useState(null),[businesses,setBusinesses]=useState([]),[businessId,setBusinessId]=useState(''),[current,setCurrent]=useState(null),[interval,setIntervalValue]=useState('monthly'),[msg,setMsg]=useState(''),[loading,setLoading]=useState(true)
