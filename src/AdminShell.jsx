@@ -10,6 +10,7 @@ const NAV=[
  ['events','Eventos','◫','/admin/gestao?tab=events'],
  ['advertising','Publicidade','▣','/admin/publicidade'],
  ['banners','Banners','▰','/admin/banners'],
+ ['reviews','Avaliações','★','/admin/avaliacoes'],
  ['analytics','Analytics','◔','/admin/analytics'],
  ['categories','Categorias','◇','/admin/gestao?tab=categories'],
  ['cities','Cidades','⌖','/admin/gestao?tab=cities'],
