@@ -13,11 +13,20 @@ test('helper do Mercado Pago centraliza token e API',()=>{
  for(const value of ['MERCADOPAGO_ACCESS_TOKEN','https://api.mercadopago.com','Authorization','Bearer','MercadoPagoError'])assert.ok(helper.includes(value),`helper precisa conter ${value}`)
 })
 
-test('checkout usa Mercado Pago, dono autenticado e preço derivado do plano',()=>{
+test('checkout usa o novo fluxo autorizado do Mercado Pago',()=>{
  const fn=read('supabase/functions/create-checkout-session/index.ts')
- for(const value of ["mpRequest('/preapproval'",'owner_id','user.id','price_monthly','price_yearly','external_reference',"frequency_type:'months'","currency_id:'BRL'"])assert.ok(fn.includes(value),`checkout precisa conter ${value}`)
+ assert.ok(fn.includes('MERCADOPAGO_TEST_PAYER_EMAIL'))
+ assert.ok(fn.includes('authorized_card'))
+ assert.ok(fn.includes('mercadopago-card-checkout'))
  assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
- assert.equal(fn.includes('stripe.checkout.sessions.create'),false)
+
+ const page=read('src/MercadoPagoCheckoutPage.jsx')
+ assert.ok(page.includes('card_token_id'))
+ assert.ok(page.includes('mercadopago-authorize-subscription'))
+
+ const auth=read('supabase/functions/mercadopago-authorize-subscription/index.ts')
+ assert.ok(auth.includes('card_token_id'))
+ assert.ok(auth.includes("status:'authorized'"))
 })
 
 test('alteração de assinatura usa Mercado Pago e valida proprietário',()=>{
