@@ -1,0 +1,104 @@
+/* VitrineLocal — Home UX refinement */
+.home-v2{font-size:16px;color:#102a47}
+.home-v2 .home-hero-inner{max-width:1320px;padding:82px 34px 108px;grid-template-columns:minmax(0,1.18fr) minmax(360px,.58fr);gap:72px}
+.home-v2 .hero-copy{max-width:800px}
+.home-v2 .hero-kicker{font-size:12px;letter-spacing:.12em;padding:9px 14px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+.home-v2 .hero-copy h1{font-size:clamp(52px,6.2vw,82px);line-height:.98;letter-spacing:-.06em;margin:22px 0 18px;max-width:830px}
+.home-v2 .hero-copy>p{font-size:19px;line-height:1.6;max-width:730px;color:#e1edf7}
+.home-v2 .hero-search{max-width:760px;margin-top:30px;padding:8px;border-radius:20px}
+.home-v2 .hero-search-icon{width:48px;font-size:24px}
+.home-v2 .hero-search input{height:50px;font-size:16px}
+.home-v2 .hero-search button{min-height:50px;padding:0 27px;border-radius:14px;font-size:14px}
+.home-v2 .hero-buttons a{min-height:46px;padding:0 18px;font-size:13px;border-radius:14px}
+.home-v2 .hero-note{font-size:11px;margin-top:18px}
+.home-v2 .hero-panel{padding:25px;border-radius:28px}
+.home-v2 .hero-panel-top{font-size:12px;padding-bottom:16px}
+.home-v2 .hero-stat{padding:20px 0;gap:15px}
+.home-v2 .hero-stat strong{font-size:16px}
+.home-v2 .hero-stat small{font-size:12px}
+.home-v2 .hero-panel-action{min-height:48px;font-size:13px;border-radius:14px}
+.home-v2 .home-wrap{width:min(1240px,100%);padding:0 28px}
+.home-v2 .category-dock{margin-top:-48px;padding:13px;border-radius:26px;box-shadow:0 25px 70px rgba(13,45,78,.15)}
+.home-v2 .category-dock .category-grid{gap:10px;padding:0 5px}
+.home-v2 .category-dock .category-card{flex-basis:114px;min-width:114px;min-height:118px;gap:10px;border-radius:18px}
+.home-v2 .category-icon{width:53px;height:53px;border-radius:16px;font-size:23px;background:#eef5ff}
+.home-v2 .category-dock .category-card strong{font-size:13px}
+.home-v2 .home-section{padding-top:68px}
+.home-v2 .section-heading{margin-bottom:24px}
+.home-v2 .section-heading .eyebrow{font-size:11px;letter-spacing:.14em;margin-bottom:8px}
+.home-v2 .section-heading h2{font-size:34px}
+.home-v2 .section-heading p{font-size:14px;line-height:1.55}
+.home-v2 .section-heading>a{font-size:14px}
+.home-v2 .ad-card{grid-template-columns:390px minmax(0,1fr);height:210px;border-radius:25px}
+.home-v2 .ad-media{height:210px}
+.home-v2 .ad-content{padding:30px 34px}
+.home-v2 .ad-content>.eyebrow{font-size:11px}
+.home-v2 .ad-content h2{font-size:29px}
+.home-v2 .ad-content p{font-size:13px}
+.home-v2 .ad-content>a{font-size:13px}
+.home-v2 .business-grid{gap:20px}
+.home-v2 .business-card-v2{border-radius:22px;box-shadow:0 12px 32px rgba(16,48,81,.065)}
+.home-v2 .business-image{height:208px}
+.home-v2 .business-info{padding:18px 18px 19px;min-height:154px}
+.home-v2 .business-info .category{font-size:10px}
+.home-v2 .business-info h3{font-size:20px}
+.home-v2 .business-info p{font-size:13px}
+.home-v2 .business-info small{font-size:11px;padding-top:12px}
+.home-v2 .soft-section{margin-top:74px;padding:62px 0}
+.home-v2 .content-grid{gap:20px}
+.home-v2 .content-card-v2{border-radius:22px}
+.home-v2 .content-card-v2>img{height:170px}
+.home-v2 .content-card-body{padding:19px}
+.home-v2 .content-card-body .tag{font-size:10px}
+.home-v2 .content-card-body h3{font-size:19px}
+.home-v2 .content-card-body p{font-size:13px}
+.home-v2 .commercial{margin:64px 0 82px;padding:42px 46px;border-radius:28px}
+.home-v2 .commercial-copy .eyebrow{font-size:10px}
+.home-v2 .commercial h2{font-size:34px}
+.home-v2 .commercial p{font-size:14px}
+.home-v2 .commercial-actions a{min-height:47px;padding:0 18px;font-size:13px;border-radius:13px}
+.home-v2 .empty-v2{padding:36px;border-radius:20px}
+.home-v2 .empty-v2 h3{font-size:18px}
+.home-v2 .empty-v2 p{font-size:13px}
+/* Typography and focus polish across the public home */
+.home-v2 a,.home-v2 button,.home-v2 input{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease,color .18s ease}
+.home-v2 :focus-visible{outline:3px solid rgba(33,109,243,.24);outline-offset:3px}
+@media(max-width:760px){
+ .home-v2 .home-hero-inner{padding:54px 18px 80px;gap:28px}
+ .home-v2 .hero-copy h1{font-size:48px;line-height:.98}
+ .home-v2 .hero-copy>p{font-size:16px}
+ .home-v2 .hero-search input{font-size:15px}
+ .home-v2 .hero-search button{font-size:13px}
+ .home-v2 .home-wrap{padding:0 16px}
+ .home-v2 .category-dock{margin-top:-38px;border-radius:22px}
+ .home-v2 .category-dock .category-card{flex-basis:104px;min-width:104px;min-height:105px}
+ .home-v2 .category-dock .category-card strong{font-size:12px}
+ .home-v2 .home-section{padding-top:52px}
+ .home-v2 .section-heading h2{font-size:29px}
+ .home-v2 .section-heading p{font-size:13px}
+ .home-v2 .ad-card{grid-template-columns:1fr;height:auto}
+ .home-v2 .ad-media{height:190px}
+ .home-v2 .ad-content{min-height:175px;padding:24px}
+ .home-v2 .ad-content h2{font-size:25px}
+ .home-v2 .business-grid{gap:14px}
+ .home-v2 .business-image{height:170px}
+ .home-v2 .business-info{padding:15px;min-height:144px}
+ .home-v2 .business-info h3{font-size:18px}
+ .home-v2 .business-info p{font-size:12px}
+ .home-v2 .content-grid{gap:14px}
+ .home-v2 .content-card-v2>img{height:150px}
+ .home-v2 .content-card-body h3{font-size:17px}
+ .home-v2 .commercial{margin:52px 0 66px;padding:30px 24px;display:block}
+ .home-v2 .commercial-actions{margin-top:20px;flex-wrap:wrap}
+}
+@media(max-width:520px){
+ .home-v2 .hero-copy h1{font-size:40px}
+ .home-v2 .hero-copy>p{font-size:15px}
+ .home-v2 .hero-search{display:grid;grid-template-columns:auto 1fr;gap:6px}
+ .home-v2 .hero-search button{grid-column:1/-1;width:100%}
+ .home-v2 .business-grid{grid-template-columns:1fr}
+ .home-v2 .business-image{height:200px}
+ .home-v2 .content-grid{grid-template-columns:1fr}
+ .home-v2 .section-heading{display:block}
+ .home-v2 .section-heading>a{display:inline-flex;margin-top:10px}
+}
