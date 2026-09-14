@@ -2,7 +2,8 @@ import {test,expect} from '@playwright/test'
 
 test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
  await page.goto('/laguna')
- await expect(page.getByText('VitrineLocal').first()).toBeVisible()
+ await expect(page.locator('.vl-site-brand-logo')).toBeVisible()
+ await expect(page.locator('.vl-site-brand-logo')).toHaveAttribute('alt',/VitrineLocal/i)
  await expect(page.getByText('Enviar conteúdo')).toHaveCount(0)
  await expect(page.getByText('O que está acontecendo?')).toHaveCount(0)
  await expect(page.getByRole('heading',{name:'Próximos eventos'})).toBeVisible()
