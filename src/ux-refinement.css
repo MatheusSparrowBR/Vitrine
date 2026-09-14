@@ -1,0 +1,175 @@
+:root{
+  --vl-blue:#216df3;--vl-blue-dark:#123a67;--vl-ink:#102943;--vl-muted:#6f8197;--vl-line:#dfe7ef;--vl-soft:#f5f8fc;--vl-card:#fff;--vl-radius:18px;--vl-shadow:0 14px 38px rgba(18,42,70,.07)
+}
+html{scroll-behavior:smooth}
+body{font-size:15px;line-height:1.5;background:#f5f8fc;color:var(--vl-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font-size:1em}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(33,109,243,.2);outline-offset:3px}
+
+/* Public shell and common pages */
+.page{max-width:1320px;padding:46px 24px 82px}
+.section{padding-top:52px}
+.section h2{font-size:32px;letter-spacing:-.9px}
+.section p,.page p{font-size:14px;line-height:1.65}
+.eyebrow,.section-kicker{font-size:11px;letter-spacing:1.55px}
+.link,.back-link{font-size:13px}
+.btn,.small-btn,.profile-actions a,.form-actions .btn{min-height:42px;font-size:13px;border-radius:11px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center}
+.field span{font-size:10px;letter-spacing:.85px}
+.field input,.field select,.field textarea{min-height:44px;font-size:14px;border-radius:12px}
+
+/* Header: more breathing room, clearer hierarchy, bigger touch targets. */
+.vl-site-header-inner{height:78px;width:min(1400px,100%);padding:0 26px;gap:18px}
+.vl-site-brand-word{font-size:21px}
+.vl-site-brand-mark{width:42px;height:42px;border-radius:13px}
+.vl-site-city{height:46px;min-width:168px;border-radius:14px}
+.vl-site-city select{font-size:13px}
+.vl-site-nav{gap:4px}
+.vl-site-nav-link{height:44px;padding:0 13px;font-size:13px;border-radius:11px}
+.vl-site-login,.vl-site-account,.vl-site-logout,.vl-site-business-cta{height:44px;font-size:13px}
+.vl-site-business-cta{padding:0 17px;border-radius:12px}
+.vl-site-account{padding:0 11px}
+.vl-site-avatar{width:29px;height:29px}
+.vl-site-categories{position:relative;display:block}
+.vl-site-categories>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 13px;border-radius:11px;color:#486078;font-size:13px;font-weight:800;white-space:nowrap}
+.vl-site-categories>summary::-webkit-details-marker{display:none}
+.vl-site-categories[open]>summary,.vl-site-categories>summary:hover{background:#f2f6fb;color:#173b63}
+.vl-site-category-menu{position:absolute;top:52px;left:50%;transform:translateX(-50%);width:420px;padding:14px;border:1px solid var(--vl-line);border-radius:18px;background:rgba(255,255,255,.98);box-shadow:0 22px 58px rgba(15,39,66,.16);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;z-index:3100}
+.vl-site-category-menu a{display:flex;align-items:center;gap:10px;min-height:48px;padding:9px 10px;border-radius:11px;color:#334b67;text-decoration:none;font-size:13px;font-weight:750}
+.vl-site-category-menu a:hover{background:#eef5ff;color:#1764dd}
+.vl-site-category-menu a span:first-child{width:30px;height:30px;border-radius:9px;background:#eef5ff;display:grid;place-items:center;font-size:16px;flex:none}
+
+/* Public business listing/profile cards */
+.mbl-page,.mbp-page{font-size:15px}
+.mbl-hero h1,.mbp-company-copy h1{font-size:44px;letter-spacing:-1.7px}
+.mbl-toolbar{border-radius:20px;box-shadow:var(--vl-shadow);padding:16px}
+.mbl-search-large{height:50px;border-radius:14px}
+.mbl-search-large input{font-size:14px}
+.mbl-chips button{padding:10px 14px;font-size:12px}
+.mbl-grid{gap:20px}
+.mbl-card{border-radius:20px;box-shadow:var(--vl-shadow)}
+.mbl-cover{height:224px}
+.mbl-body{padding:44px 18px 18px}
+.mbl-body h2{font-size:22px}
+.mbl-body p{font-size:13px;line-height:1.55}
+.mbl-footer{font-size:11px}
+.mbp-page{padding-top:30px}
+.mbp-company-copy h1{line-height:1.02}
+.mbp-section-card,.mbp-main-card,.mbp-side-card{border-radius:20px;box-shadow:var(--vl-shadow)}
+
+/* Analytics and dashboards */
+.analytics-page{padding:112px 22px 76px}
+.analytics-head h1{font-size:38px;letter-spacing:-1.35px}
+.analytics-head p{font-size:14px}
+.analytics-kpis{gap:16px}
+.analytics-kpi{border-radius:20px;padding:20px;box-shadow:var(--vl-shadow)}
+.analytics-kpi strong{font-size:31px}
+.analytics-card{border-radius:20px;box-shadow:var(--vl-shadow);padding:20px}
+.analytics-card-head h2{font-size:18px}
+.analytics-card-head p{font-size:11px}
+.analytics-row{padding:14px;border-radius:13px}
+
+/* Merchant workspace: stronger hierarchy without changing interactions. */
+.app:has(.owner-layout) main.page{max-width:1360px;padding:46px 28px 88px}
+.app:has(.owner-layout) .dashboard-header h1{font-size:clamp(36px,4.2vw,50px)}
+.app:has(.owner-layout) .dashboard-header p{font-size:15px}
+.app:has(.owner-layout) .stats{gap:16px}
+.app:has(.owner-layout) .stat{border-radius:20px;padding:21px;box-shadow:var(--vl-shadow)}
+.app:has(.owner-layout) .stat strong{font-size:34px}
+.app:has(.owner-layout) .owner-layout{grid-template-columns:286px minmax(0,1fr);gap:20px}
+.app:has(.owner-layout) .owner-layout>section>.panel{border-radius:20px;padding:22px}
+
+/* Forms, dialogs and generic surfaces. */
+.modal{border-radius:22px;padding:28px;box-shadow:0 34px 100px rgba(7,22,40,.28)}
+.modal h2{font-size:28px}
+.close{width:38px;height:38px}
+.form-grid{gap:14px}
+.form-actions{gap:10px;margin-top:18px}
+
+/* Administrative console */
+.admin-v2-content{max-width:1480px;padding:32px 36px 72px}
+.admin-v2-heading{margin-bottom:24px}
+.admin-v2-heading h1{font-size:35px;letter-spacing:-1.4px}
+.admin-v2-heading p{font-size:13px}
+.admin-v2-stats{gap:16px}
+.admin-v2-card{border-radius:20px;box-shadow:var(--vl-shadow)}
+.admin-v2-stat{padding:20px}
+.admin-v2-stat strong{font-size:33px}
+.admin-v2-section{padding:20px}
+.admin-v2-section-head h2{font-size:17px}
+.admin-v2-section-head p{font-size:11px}
+.admin-v2-btn{min-height:42px;padding:0 13px;font-size:12px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center}
+.admin-v2-toolbar{margin-bottom:14px}
+.admin-v2-search{border-radius:13px}
+.admin-v2-search input,.admin-v2-toolbar select{font-size:12px}
+.admin-v2-table th{font-size:9px;padding:12px}
+.admin-v2-table td{font-size:11px;padding:13px}
+.admin-v2-table-actions button{min-height:36px;font-size:10px;border-radius:9px}
+.admin-v2-form-panel input,.admin-v2-form-panel select,.admin-v2-form-panel textarea{min-height:44px;font-size:12px;border-radius:11px}
+.admin-v2-quick{padding:15px;border-radius:14px}
+.admin-v2-quick strong{font-size:13px}
+.admin-v2-quick small{font-size:10px}
+.admin-v2-list-row{padding:13px;border-radius:13px}
+.admin-v2-list-row strong{font-size:12px}
+.admin-v2-list-row small{font-size:10px}
+.admin-plans-grid{gap:14px}
+.admin-plan-card{border-radius:20px;padding:20px}
+.admin-plan-card h3{font-size:19px}
+.admin-plan-card p{font-size:11px;line-height:1.55}
+
+/* Legal pages */
+.legal-content{max-width:940px;padding-top:56px}
+.legal-content h1{font-size:54px;letter-spacing:-1.8px}
+.legal-content h2{font-size:25px;margin-top:34px}
+.legal-content p{font-size:15px;line-height:1.8}
+.legal-content .outline{min-height:44px;align-items:center;font-size:13px}
+
+/* Shared loading/empty/error states */
+.empty{padding:46px 24px;border-radius:18px}
+.empty h3{font-size:20px}
+.empty p{font-size:14px}
+
+@media(max-width:1100px){
+ .vl-site-categories{display:none}
+ .admin-v2-content{padding:28px 24px 60px}
+ .mbl-hero h1,.mbp-company-copy h1{font-size:38px}
+}
+@media(max-width:760px){
+ body{font-size:14px}
+ .page{padding:34px 16px 60px}
+ .section{padding-top:40px}
+ .section h2{font-size:28px}
+ .vl-site-header-inner{height:68px;padding:0 14px}
+ .vl-site-brand-word{font-size:18px}
+ .vl-site-city{height:40px;min-width:0;max-width:160px}
+ .vl-site-nav-link{font-size:12px}
+ .analytics-page{padding:92px 13px 48px}
+ .analytics-head h1{font-size:32px}
+ .app:has(.owner-layout) main.page{padding:32px 16px 60px}
+ .app:has(.owner-layout) .dashboard-header h1{font-size:33px}
+ .app:has(.owner-layout) .stats{grid-template-columns:1fr 1fr}
+ .admin-v2-content{padding:22px 14px 52px}
+ .admin-v2-heading h1{font-size:30px}
+ .admin-v2-heading{display:block}
+ .admin-v2-heading-meta{display:none}
+ .admin-v2-form-grid{grid-template-columns:1fr}
+ .admin-v2-form-grid .full{grid-column:auto}
+ .mbl-hero h1,.mbp-company-copy h1{font-size:32px}
+ .mbl-grid{grid-template-columns:1fr}
+ .legal-content{padding-top:38px}
+ .legal-content h1{font-size:38px}
+ .legal-content h2{font-size:22px}
+ .legal-content p{font-size:14px}
+}
+@media(max-width:520px){
+ .vl-site-brand-word{display:none}
+ .vl-site-city{flex:1;max-width:none}
+ .vl-site-business-cta{display:none}
+ .admin-v2-stats{grid-template-columns:1fr 1fr}
+ .admin-v2-stats .admin-v2-stat strong{font-size:27px}
+ .analytics-kpis{grid-template-columns:1fr}
+ .mbl-hero h1,.mbp-company-copy h1{font-size:29px}
+ .form-grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .form-actions{flex-direction:column-reverse;align-items:stretch}
+ .form-actions .btn{width:100%}
+}
