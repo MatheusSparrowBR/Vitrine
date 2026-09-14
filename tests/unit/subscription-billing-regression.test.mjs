@@ -17,7 +17,7 @@ test('checkout usa o novo fluxo autorizado do Mercado Pago',()=>{
  const fn=read('supabase/functions/create-checkout-session/index.ts')
  assert.ok(fn.includes('MERCADOPAGO_TEST_PAYER_EMAIL'))
  assert.ok(fn.includes('authorized_card'))
- assert.ok(fn.includes('mercadopago-card-checkout'))
+ assert.ok(fn.includes('checkout/mercadopago.html'))
  assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
 
  const page=read('src/MercadoPagoCheckoutPage.jsx')
