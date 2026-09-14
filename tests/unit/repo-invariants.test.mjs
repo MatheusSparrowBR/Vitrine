@@ -27,6 +27,18 @@ test('arquivos legados de comunidade não existem',()=>{
 
 test('migração de senha usa recovery para senha antiga',()=>{const src=read('src/AuthPage.jsx');assert.match(src,/weak_password/);assert.match(src,/resetPasswordForEmail/);assert.match(src,/atualizar-senha/);assert.match(src,/password\.length<8/)})
 test('página de atualização exige nova senha',()=>{const src=read('src/PasswordUpdatePage.jsx');assert.match(src,/updateUser\(\{password\}\)/);assert.match(src,/password\.length<8/);assert.match(src,/password!==confirm/)})
-test('billing webhook usa assinatura e idempotencia',()=>{const src=read('supabase/functions/stripe-webhook/index.ts');assert.match(src,/constructEventAsync/);assert.match(src,/billing_events/);assert.match(src,/provider_event_id/)})
+test('billing webhook Mercado Pago usa assinatura e idempotencia',()=>{
+ const src=read('supabase/functions/mercadopago-webhook/index.ts')
+ for(const value of [
+   'MERCADOPAGO_WEBHOOK_SECRET',
+   'x-signature',
+   'x-request-id',
+   'HMAC',
+   'billing_events',
+   'provider_event_id',
+   'processed_at'
+ ]) assert.ok(src.includes(value),`webhook precisa conter ${value}`)
+ assert.equal(src.includes('stripe-signature'),false)
+})
 test('fluxos administrativos e migrations críticas estão versionados',()=>{assert.ok(fs.existsSync(path.join(srcDir,'AdminBusinessesPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'BusinessRegistrationPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'AdminEventsPanel.jsx')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909131445_enforce_promotion_review_workflow.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909174253_create_city_events.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011000_harden_business_insert_moderation.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011100_harden_billing_event_privileges.sql')));})
 test('segredos de servidor nao aparecem no frontend',()=>{for(const file of sourceFiles()){const src=read(`src/${file}`);assert.doesNotMatch(src,/STRIPE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY/)}})
