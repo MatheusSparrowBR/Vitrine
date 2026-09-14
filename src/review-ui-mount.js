@@ -1,13 +1,9 @@
 import './review-interactions.js';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { createClient } from '@supabase/supabase-js';
+import { db } from './review-service.js';
 import BusinessReviews from './BusinessReviews.jsx';
 import ReviewsPerformanceCard from './ReviewsPerformanceCard.jsx';
-
-const U = import.meta.env.VITE_SUPABASE_URL;
-const K = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const db = U && K ? createClient(U, K) : null;
 
 async function businessId() {
   const p = location.pathname.split('/').filter(Boolean);
