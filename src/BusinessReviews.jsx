@@ -7,53 +7,25 @@ const signupPath=()=>'/usuario/cadastro?next='+encodeURIComponent(location.pathn
 
 export default function BusinessReviews({businessId}){
  const[d,setD]=useState({avg:0,count:0,rows:[],me:null,session:null,distribution:{1:0,2:0,3:0,4:0,5:0},loading:true,error:''})
- const[r,setR]=useState(5),[c,setC]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState('')
-
+ const[r,setR]=useState(5),[c,setC]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[sort,setSort]=useState('recent')
  const load=async()=>{
   const session=await getSession()
   const[summaryResult,reviewsResult,myResult]=await Promise.all([getReviewSummary(businessId),getBusinessReviews(businessId,50),session?getMyBusinessReview(businessId):Promise.resolve({data:null,error:null})])
-  const summary=summaryResult?.data?.[0]||{}
-  const rows=reviewsResult?.data||[]
-  const me=myResult?.data||null
+  const summary=summaryResult?.data?.[0]||{},rows=reviewsResult?.data||[],me=myResult?.data||null
   if(me){setR(Number(me.rating)||5);setC(me.comment||'')}
   setD({avg:Number(summary.avg_rating||0),count:Number(summary.review_count||0),rows,me,session,distribution:{1:Number(summary.one_star||0),2:Number(summary.two_stars||0),3:Number(summary.three_stars||0),4:Number(summary.four_stars||0),5:Number(summary.five_stars||0)},loading:false,error:reviewsResult?.error?.message||summaryResult?.error?.message||myResult?.error?.message||''})
  }
-
  useEffect(()=>{let live=true;const start=async()=>{try{await load()}catch(e){if(live)setD(x=>({...x,loading:false,error:e?.message||'Não foi possível carregar as avaliações.'}))}};start();const auth=onAuthStateChange(()=>{if(live)setTimeout(()=>{if(live)load().catch(()=>{})},0)});return()=>{live=false;auth?.data?.subscription?.unsubscribe?.()}},[businessId])
-
- async function save(){
-  setNotice('')
-  if(!d.session){location.href=loginPath();return}
-  setBusy(true)
-  const{error}=await submitReview(businessId,r,c)
-  setBusy(false)
-  if(error){setNotice(error.message||'Não foi possível salvar sua avaliação.');return}
-  setNotice('Sua avaliação foi publicada com sucesso.')
-  await load()
- }
-
+ async function save(){setNotice('');if(!d.session){location.href=loginPath();return}setBusy(true);const{error}=await submitReview(businessId,r,c);setBusy(false);if(error){setNotice(error.message||'Não foi possível salvar sua avaliação.');return}setNotice('Sua avaliação foi publicada com sucesso.');await load()}
  const bars=useMemo(()=>[5,4,3,2,1].map(n=>({n,count:d.distribution[n]||0,pct:d.count?Math.round((d.distribution[n]||0)/d.count*100):0})),[d.distribution,d.count])
+ const rows=useMemo(()=>[...d.rows].sort((a,b)=>sort==='highest'?(b.rating||0)-(a.rating||0):sort==='lowest'?(a.rating||0)-(b.rating||0):new Date(b.created_at)-new Date(a.created_at)),[d.rows,sort])
  const scoreLabel=d.count?`${d.count} ${d.count===1?'avaliação':'avaliações'}`:'Ainda não há avaliações'
-
  return <section className="vl-reviews" aria-label="Avaliações dos clientes">
   <div className="vl-reviews-head"><div><span>REPUTAÇÃO</span><h2>Avaliações dos clientes</h2><p>Veja a experiência de quem já conheceu esta empresa.</p></div><div className="vl-reviews-score"><strong>{d.avg.toFixed(1)}</strong><span aria-label={`${d.avg.toFixed(1)} de 5 estrelas`}>★★★★★</span><small>{scoreLabel}</small></div></div>
   <div className="vl-reviews-summary"><div className="vl-review-breakdown">{bars.map(x=><div className="vl-review-bar" key={x.n}><span>{x.n} <b>★</b></span><i><b style={{width:`${x.pct}%`}}/></i><em>{x.count}</em></div>)}</div><div className="vl-review-meta"><div><strong>{d.count}</strong><span>Avaliações</span></div><div><strong>{d.avg?d.avg.toFixed(1):'—'}</strong><span>Nota média</span></div></div></div>
-
-  {d.loading?<div className="vl-review-login vl-review-auth-loading"><div><strong>Verificando sua conta…</strong><span>Estamos preparando a área de avaliação.</span></div></div>:d.session&&!d.me?<div className="vl-review-form">
-   <span>DEIXE SUA AVALIAÇÃO</span><h3>Ajude outras pessoas a escolher.</h3>
-   <div className="vl-review-stars-input" role="radiogroup" aria-label="Escolha uma nota de 1 a 5"><small>{r}/5</small>{[1,2,3,4,5].map(n=><button key={n} type="button" className={n<=r?'active':''} onClick={()=>setR(n)} aria-label={`${n} estrelas`} aria-pressed={n<=r}>★</button>)}</div>
-   <textarea value={c} maxLength={1000} onChange={e=>setC(e.target.value)} placeholder="Conte sua experiência (opcional)." aria-label="Comentário da avaliação"/>
-   <div className="vl-review-form-foot"><small>{c.length}/1000</small><button onClick={save} disabled={busy}>{busy?'Salvando…':'Publicar avaliação'}</button></div>
-   {notice&&<div className={`vl-reviews-alert ${notice.includes('sucesso')?'success':''}`}>{notice}</div>}
-  </div>:d.session&&d.me?<div className="vl-review-login vl-review-existing">
-   <div><strong>Você já avaliou esta empresa.</strong><span>Uma conta pode publicar apenas uma avaliação por empresa. Para manter a reputação íntegra, uma nova avaliação não será criada.</span></div>
-   <div className="vl-review-login-actions"><span className="vl-review-existing-badge">✓ Avaliação registrada</span></div>
-  </div>:<div className="vl-review-login">
-   <div><strong>Quer avaliar esta empresa?</strong><span>Crie sua conta gratuita ou entre para compartilhar sua experiência.</span></div>
-   <div className="vl-review-login-actions"><a href={loginPath()}>Entrar</a><a className="primary" href={signupPath()}>Criar conta</a></div>
-  </div>}
-
+  {d.count>1&&<div className="vl-review-sort"><span>Ordenar</span><select value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">Mais recentes</option><option value="highest">Maior nota</option><option value="lowest">Menor nota</option></select></div>}
+  {d.loading?<div className="vl-review-login vl-review-auth-loading"><div><strong>Verificando sua conta…</strong><span>Estamos preparando a área de avaliação.</span></div></div>:d.session&&!d.me?<div className="vl-review-form"><span>DEIXE SUA AVALIAÇÃO</span><h3>Ajude outras pessoas a escolher.</h3><div className="vl-review-stars-input" role="radiogroup" aria-label="Escolha uma nota de 1 a 5"><small>{r}/5</small>{[1,2,3,4,5].map(n=><button key={n} type="button" className={n<=r?'active':''} onClick={()=>setR(n)} aria-label={`${n} estrelas`} aria-pressed={n<=r}>★</button>)}</div><textarea value={c} maxLength={1000} onChange={e=>setC(e.target.value)} placeholder="Conte sua experiência (opcional)." aria-label="Comentário da avaliação"/><div className="vl-review-form-foot"><small>{c.length}/1000</small><button onClick={save} disabled={busy}>{busy?'Salvando…':'Publicar avaliação'}</button></div>{notice&&<div className={`vl-reviews-alert ${notice.includes('sucesso')?'success':''}`}>{notice}</div>}</div>:d.session&&d.me?<div className="vl-review-login vl-review-existing"><div><strong>Você já avaliou esta empresa.</strong><span>Uma conta pode publicar apenas uma avaliação por empresa. Você pode manter seu perfil personalizado e editar sua própria avaliação.</span></div><div className="vl-review-login-actions"><span className="vl-review-existing-badge">✓ Avaliação registrada</span></div></div>:<div className="vl-review-login"><div><strong>Quer avaliar esta empresa?</strong><span>Crie sua conta gratuita ou entre para compartilhar sua experiência.</span></div><div className="vl-review-login-actions"><a href={loginPath()}>Entrar</a><a className="primary" href={signupPath()}>Criar conta</a></div></div>}
   {d.error&&<div className="vl-reviews-alert">Não foi possível carregar todas as informações das avaliações.</div>}
-  <div className="vl-review-list">{d.loading?<div className="vl-review-empty">Carregando avaliações…</div>:d.rows.length===0?<div className="vl-review-empty"><strong>Seja a primeira pessoa a avaliar.</strong><span> Sua experiência pode ajudar outros clientes.</span></div>:d.rows.map(x=><article key={x.id}><div className="vl-review-item-head"><div className="vl-review-avatar" aria-hidden="true">{String(x.reviewer_name||'U').trim().charAt(0).toUpperCase()}</div><div><strong>{x.reviewer_name}</strong><span>{new Date(x.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}</span></div><b>{'★'.repeat(x.rating)}</b></div>{x.edited_at&&<div className="vl-review-edited" title="Esta avaliação foi editada pela administração">✎ Editado por administrador</div>}{x.comment&&<p>{x.comment}</p>}{x.owner_response&&<aside className="vl-review-response"><strong>Resposta da empresa</strong><p>{x.owner_response}</p></aside>}</article>)}</div>
+  <div className="vl-review-list">{d.loading?<div className="vl-review-empty">Carregando avaliações…</div>:rows.length===0?<div className="vl-review-empty"><strong>Seja a primeira pessoa a avaliar.</strong><span> Sua experiência pode ajudar outros clientes.</span></div>:rows.map(x=><article key={x.id}><div className="vl-review-item-head"><div className="vl-review-avatar">{x.reviewer_avatar_url?<img src={x.reviewer_avatar_url} alt=""/>:<span>{String(x.reviewer_name||'U').trim().charAt(0).toUpperCase()}</span>}</div><div><strong>{x.reviewer_name}</strong>{x.reviewer_username&&<small>@{x.reviewer_username}</small>}<span>{new Date(x.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}</span></div><b>{'★'.repeat(x.rating)}</b></div>{x.edited_at&&<div className="vl-review-edited" title="Esta avaliação foi editada pela administração">✎ Editado por administrador</div>}{x.comment&&<p>{x.comment}</p>}{x.owner_response&&<aside className="vl-review-response"><strong>Resposta da empresa</strong><p>{x.owner_response}</p></aside>}</article>)}</div>
  </section>
 }
