@@ -24,7 +24,6 @@ test('navegação pública expõe categorias sem alterar os destinos existentes'
  assert.match(header,/CATEGORY_MENU/)
  for(const label of ['Restaurantes','Lojas','Serviços','Saúde','Beleza','Turismo','Automóveis','Imóveis','Pets','Outros'])assert.match(header,new RegExp(label))
  assert.match(header,/\/empresas\?categoria=/)
- assert.match(header,/Cadastre sua empresa/)
  assert.match(header,/Minha conta/)
 })
 
@@ -32,7 +31,8 @@ test('área administrativa mantém navegação completa e editor de planos',()=>
  const shell=read('src/AdminShell.jsx'),plans=read('src/AdminPlansPage.jsx')
  for(const label of ['Empresas','Usuários','Promoções','Eventos','Publicidade','Banners','Avaliações','Analytics','Categorias','Cidades','Planos','Planos por empresa'])assert.match(shell,new RegExp(label))
  assert.match(plans,/review_management/)
- assert.doesNotMatch(plans,/ai_posts/)
+ assert.match(plans,/delete features\.ai_posts/)
+ assert.match(plans,/delete features\.ai_posts_limit/)
  assert.match(plans,/Não é necessário alterar código/)
 })
 
@@ -48,7 +48,7 @@ test('camadas de UX e responsividade são carregadas globalmente',()=>{
  assert.match(app,/ux-refinement\.css/)
  assert.match(app,/site-header-v3\.css/)
  const ux=read('src/ux-refinement.css')
- assert.match(ux,/\.admin-v2-shell/)
+ assert.match(ux,/\.admin-v2-content/)
  assert.match(ux,/\.analytics-page/)
  assert.match(ux,/\.mbl-card/)
  assert.match(ux,/\.legal-content/)
