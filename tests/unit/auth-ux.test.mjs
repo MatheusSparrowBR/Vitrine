@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8')
 
 test('login e cadastro do comerciante mantêm fluxo seguro e UX enxuta',()=>{
  const page=read('src/AuthPage.jsx'),css=read('src/auth-page.css')
- assert.match(page,/safeNext\()/)
+ assert.match(page,/safeNext\(/)
  assert.match(page,/signInWithPassword/)
  assert.match(page,/auth\.signUp/)
  assert.match(page,/full_name:name\.trim\(\)/)
