@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from './supabase-client.js'
 import SiteHeader from './SiteHeader.jsx'
 import AnalyticsTracker from './analytics-tracker.jsx'
 import EventsPage from './EventsPage.jsx'
@@ -63,9 +63,6 @@ import './account-premium-ad-shortcut.css'
 import './mobile-responsive-fixes.css'
 import './review-ui-mount.js'
 
-const URL=import.meta.env.VITE_SUPABASE_URL
-const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const supabase=URL&&KEY?createClient(URL,KEY):null
 const normalizePath=p=>p.replace(/\/+$/,'')||'/'
 const partsOf=p=>p.split('/').filter(Boolean).map(decodeURIComponent)
 function getCityRoute(path){
