@@ -3,66 +3,53 @@ import assert from'node:assert/strict'
 import fs from'node:fs'
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('planos cobre checkout, troca, cancelamento e retorno da empresa',()=>{
+ test('planos permanecem disponíveis sem checkout online',()=>{
  const page=read('src/BillingPlansPage.jsx')
- for(const value of ['create-checkout-session','change-subscription-plan','billing-portal','params.get(\'checkout\')','mercadopago'])assert.ok(page.includes(value),`BillingPlansPage precisa conter ${value}`)
+ assert.ok(page.includes('Disponível em breve'))
+ assert.ok(page.includes('Começar grátis'))
+ assert.equal(page.includes('create-checkout-session'),false)
+ assert.equal(page.includes('billing-portal'),false)
+ assert.equal(page.includes('mercadopago'),false)
+ assert.equal(page.includes('stripe'),false)
 })
 
-test('helper do Mercado Pago centraliza token e API',()=>{
- const helper=read('supabase/functions/_shared/mercadopago.ts')
- for(const value of ['MERCADOPAGO_ACCESS_TOKEN','https://api.mercadopago.com','Authorization','Bearer','MercadoPagoError'])assert.ok(helper.includes(value),`helper precisa conter ${value}`)
-})
-
-test('checkout usa o novo fluxo autorizado do Mercado Pago',()=>{
- const fn=read('supabase/functions/create-checkout-session/index.ts')
- assert.ok(fn.includes('MERCADOPAGO_TEST_PAYER_EMAIL'))
- assert.ok(fn.includes('authorized_card'))
- assert.ok(fn.includes('checkout/mercadopago.html'))
- assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
-
- const page=read('src/MercadoPagoCheckoutPage.jsx')
- assert.ok(page.includes('card_token_id'))
- assert.ok(page.includes('mercadopago-authorize-subscription'))
-
- const auth=read('supabase/functions/mercadopago-authorize-subscription/index.ts')
- assert.ok(auth.includes('card_token_id'))
- assert.ok(auth.includes("status:'authorized'"))
-})
-
-test('alteração de assinatura usa Mercado Pago e valida proprietário',()=>{
- const fn=read('supabase/functions/change-subscription-plan/index.ts')
- for(const value of ['/preapproval/','owner_id','user.id','auto_recurring','transaction_amount','currency_id'])assert.ok(fn.includes(value),`troca precisa conter ${value}`)
- assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
- assert.ok(fn.includes("provider','mercadopago"))
-})
-
-test('gestão da assinatura usa Mercado Pago',()=>{
- const fn=read('supabase/functions/billing-portal/index.ts')
- for(const value of ['/preapproval/','provider_subscription_id','owner_id','user.id'])assert.ok(fn.includes(value),`gestão precisa conter ${value}`)
- assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
- assert.ok(fn.includes("provider','mercadopago"))
-})
-
-test('webhook Mercado Pago valida assinatura, deduplica e sincroniza assinatura e pagamentos',()=>{
- const fn=read('supabase/functions/mercadopago-webhook/index.ts')
- for(const value of ['MERCADOPAGO_WEBHOOK_SECRET','x-signature','x-request-id','HMAC','subscription_preapproval','subscription_authorized_payment','billing_events',"provider:'mercadopago'",'provider_subscription_id','23505','syncPayment','/v1/payments/','authorized_payments/search?payment_id=','mercadopago_payment_id'])assert.ok(fn.includes(value),`webhook precisa conter ${value}`)
- assert.equal(fn.includes('stripe-signature'),false)
-})
-
-test('publicidade Premium usa Mercado Pago',()=>{
- const fn=read('supabase/functions/create-advertising-checkout-session/index.ts')
- for(const value of ['/preapproval','VL-AD-','mercadopago_subscription_id',"payment_provider:'mercadopago'"])assert.ok(fn.includes(value),`publicidade precisa conter ${value}`)
- assert.equal(fn.includes('STRIPE_SECRET_KEY'),false)
-})
-
-test('migração de billing versiona provider e identificadores Mercado Pago',()=>{
- const migration=read('supabase/migrations/20260912130000_migrate_billing_to_mercadopago.sql')
- for(const value of ['payment_provider','mercadopago_subscription_id','mercadopago_payment_id','mercadopago_payer_id','subscriptions_mercadopago_sub_uidx','billing_events_mercadopago_event_uidx'])assert.ok(migration.includes(value),`migration precisa conter ${value}`)
-})
-
-test('painel Meu plano reconhece assinatura Mercado Pago',()=>{
+test('painel Meu plano usa apenas atribuição administrativa',()=>{
  const panel=read('src/PlanUsageReact.jsx')
- for(const value of ["x.provider==='mercadopago'",'pending','Gerenciar assinatura','billing-portal'])assert.ok(panel.includes(value),`painel precisa conter ${value}`)
+ assert.ok(panel.includes('Gerenciado pela administração'))
+ assert.equal(panel.includes('provider_subscription_id'),false)
+ assert.equal(panel.includes('billing-portal'),false)
+ assert.equal(panel.includes('mercadopago'),false)
+ assert.equal(panel.includes('stripe'),false)
+})
+
+test('publicidade Premium permanece em fluxo manual sem cobrança automática',()=>{
+ const merchant=read('src/MerchantAdvertisingSalesPage.jsx')
+ const admin=read('src/AdminAdvertisingSalesPage.jsx')
+ assert.ok(merchant.includes('Nenhuma cobrança é criada'))
+ assert.ok(admin.includes('ativação manual'))
+ assert.equal(merchant.includes('create-advertising-checkout-session'),false)
+ assert.equal(admin.includes('payment_status'),false)
+ assert.equal(merchant.includes('mercadopago'),false)
+ assert.equal(admin.includes('stripe'),false)
+})
+
+test('fontes antigas de checkout não fazem parte do repositório',()=>{
+ for(const path of [
+  'public/checkout/mercadopago.html',
+  'src/MercadoPagoCheckoutPage.jsx',
+  'supabase/functions/_shared/mercadopago.ts',
+  'supabase/functions/create-checkout-session/index.ts',
+  'supabase/functions/change-subscription-plan/index.ts',
+  'supabase/functions/billing-portal/index.ts',
+  'supabase/functions/create-advertising-checkout-session/index.ts',
+  'supabase/functions/mercadopago-authorize-subscription/index.ts',
+  'supabase/functions/mercadopago-webhook/index.ts'
+ ])assert.equal(fs.existsSync(path),false,`${path} não deveria existir`)
+})
+
+test('schema de assinaturas usado pela aplicação não referencia provedores',()=>{
+ const migration=read('supabase/migrations/20260914150000_reset_payments_and_fix_public_catalog.sql')
+ for(const value of ['drop column if exists external_customer_id','drop column if exists provider_subscription_id','drop column if exists provider','drop column if exists mercadopago_payer_id'])assert.ok(migration.includes(value),`migration precisa limpar ${value}`)
 })
 
 test('workspace mantém formulário React de promoções',()=>{
