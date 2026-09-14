@@ -58,7 +58,7 @@ export default function AdminPlanAssignments({supabase,onToast}){
     <td><input type="date" value={ends[row.business_id]||''} onChange={e=>setEnds(x=>({...x,[row.business_id]:e.target.value}))} title={`Opcional: ao chegar nesta data a empresa perde o plano manual. Fuso ${PLAN_TZ}.`}/></td>
     <td><select value={row.plan_code||'free'} onChange={e=>changePlan(row,e.target.value)} disabled={saving===row.business_id}>{plans.map(p=><option key={p.code} value={p.code}>{p.name} — {money(p.price_monthly)}/mês</option>)}</select>{saving===row.business_id&&<small className="muted">Salvando…</small>}</td>
    </tr>)}</tbody></table></div>}
-   <div className="admin-v2-note"><strong>Plano manual:</strong> {planCopy.pro} ou {planCopy.premium} podem ser concedidos pelo administrador sem cobrança Stripe, com validade opcional. Para evitar divergência de cobrança, o banco bloqueia a concessão manual quando existe uma assinatura Stripe ativa; primeiro é necessário encerrar a cobrança Stripe.</div>
+   <div className="admin-v2-note"><strong>Plano manual:</strong> {planCopy.pro} ou {planCopy.premium} podem ser concedidos pelo administrador sem cobrança recorrente, com validade opcional. O plano concedido fica independente do módulo de pagamentos online.</div>
   </div>
  </section>
 }
