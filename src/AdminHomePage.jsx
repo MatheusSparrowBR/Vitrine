@@ -1,9 +1,8 @@
 import React,{useEffect,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import{supabase as db}from'./supabase-client.js'
 import AdminShell from './AdminShell.jsx'
 import './admin-v2.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
 const actions=[
  ['businesses','Empresas','Revise cadastros, status, destaque e verificação.','/admin/empresas'],
  ['promotions','Promoções','Edite ofertas, altere status e remova campanhas.','/admin/gestao?tab=promotions'],
