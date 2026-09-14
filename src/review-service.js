@@ -13,6 +13,12 @@ export async function getBusinessReviews(businessId,limit=100){
  return {data:data||[],error}
 }
 
+export async function getMyBusinessReview(businessId){
+ if(!db||!businessId)return {data:null,error:null}
+ const {data,error}=await db.rpc('get_my_business_review',{p_business_id:businessId})
+ return {data:data?.[0]||null,error}
+}
+
 export async function submitReview(businessId,rating,comment){
  if(!db)return {data:null,error:new Error('Banco indisponível.')}
  return db.rpc('submit_business_review',{p_business_id:businessId,p_rating:Number(rating),p_comment:String(comment||'')})
