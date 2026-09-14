@@ -27,18 +27,21 @@ test('arquivos legados de comunidade não existem',()=>{
 
 test('migração de senha usa recovery para senha antiga',()=>{const src=read('src/AuthPage.jsx');assert.match(src,/weak_password/);assert.match(src,/resetPasswordForEmail/);assert.match(src,/atualizar-senha/);assert.match(src,/password\.length<8/)})
 test('página de atualização exige nova senha',()=>{const src=read('src/PasswordUpdatePage.jsx');assert.match(src,/updateUser\(\{password\}\)/);assert.match(src,/password\.length<8/);assert.match(src,/password!==confirm/)})
-test('billing webhook Mercado Pago usa assinatura e idempotencia',()=>{
- const src=read('supabase/functions/mercadopago-webhook/index.ts')
- for(const value of [
-   'MERCADOPAGO_WEBHOOK_SECRET',
-   'x-signature',
-   'x-request-id',
-   'HMAC',
-   'billing_events',
-   'provider_event_id',
-   'processed_at'
- ]) assert.ok(src.includes(value),`webhook precisa conter ${value}`)
- assert.equal(src.includes('stripe-signature'),false)
+test('integrações de pagamento não existem no código ativo',()=>{
+ const forbidden=/mercadopago|stripe/i
+ const paymentPaths=[
+  'public/checkout/mercadopago.html',
+  'src/MercadoPagoCheckoutPage.jsx',
+  'supabase/functions/_shared/mercadopago.ts',
+  'supabase/functions/create-checkout-session/index.ts',
+  'supabase/functions/change-subscription-plan/index.ts',
+  'supabase/functions/billing-portal/index.ts',
+  'supabase/functions/create-advertising-checkout-session/index.ts',
+  'supabase/functions/mercadopago-authorize-subscription/index.ts',
+  'supabase/functions/mercadopago-webhook/index.ts'
+ ]
+ for(const file of paymentPaths)assert.equal(fs.existsSync(path.join(root,file)),false,`payment source still exists: ${file}`)
+ for(const file of sourceFiles())assert.doesNotMatch(read(`src/${file}`),forbidden,`payment provider reference found in ${file}`)
 })
-test('fluxos administrativos e migrations críticas estão versionados',()=>{assert.ok(fs.existsSync(path.join(srcDir,'AdminBusinessesPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'BusinessRegistrationPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'AdminEventsPanel.jsx')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909131445_enforce_promotion_review_workflow.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909174253_create_city_events.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011000_harden_business_insert_moderation.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011100_harden_billing_event_privileges.sql')));})
-test('segredos de servidor nao aparecem no frontend',()=>{for(const file of sourceFiles()){const src=read(`src/${file}`);assert.doesNotMatch(src,/STRIPE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY/)}})
+test('fluxos administrativos e migrations críticas estão versionados',()=>{assert.ok(fs.existsSync(path.join(srcDir,'AdminBusinessesPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'BusinessRegistrationPage.jsx')));assert.ok(fs.existsSync(path.join(srcDir,'AdminEventsPanel.jsx')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909131445_enforce_promotion_review_workflow.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260909174253_create_city_events.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011000_harden_business_insert_moderation.sql')));assert.ok(fs.existsSync(path.join(migrationDir,'20260910011100_harden_billing_event_privileges.sql'));})
+test('segredos de servidor nao aparecem no frontend',()=>{for(const file of sourceFiles()){const src=read(`src/${file}`);assert.doesNotMatch(src,/STRIPE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|MERCADOPAGO_ACCESS_TOKEN|MERCADOPAGO_WEBHOOK_SECRET/)}})
