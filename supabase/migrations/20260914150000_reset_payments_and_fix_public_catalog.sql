@@ -4,6 +4,7 @@
 begin;
 
 drop policy if exists "Authenticated users can read own or admin businesses" on public.businesses;
+drop policy if exists "authenticated owners or admins read businesses" on public.businesses;
 create policy "Authenticated users can read active businesses" on public.businesses
 for select to authenticated
 using (status='active' or owner_id=auth.uid() or private.is_admin());
