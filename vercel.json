@@ -1,8 +1,10 @@
 {
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/checkout/mercadopago.html", "destination": "/checkout/mercadopago.html" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
+  ]
+},
   "headers": [
     {
       "source": "/(.*)",
