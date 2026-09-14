@@ -4,7 +4,7 @@ import fs from 'node:fs'
 
 const read=path=>fs.readFileSync(path,'utf8')
 
-test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e a rota usa o novo fluxo comercial',()=>{
+test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e a rota usa o fluxo comercial',()=>{
  const app=read('src/app-entry.jsx')
  const nav=read('src/account-premium-nav.js')
  assert.match(app,/MerchantAdvertisingSalesPage/)
@@ -15,29 +15,30 @@ test('Minha conta expõe acesso direto à Publicidade Premium no menu lateral e 
  assert.match(nav,/insertBefore\(item,media\)/)
 })
 
-test('fluxo comercial do anunciante exige plano Premium, arte quando aplicável e usa Mercado Pago',()=>{
+test('fluxo comercial do anunciante exige plano Premium, arte quando aplicável e não cria cobrança',()=>{
  const page=read('src/MerchantAdvertisingSalesPage.jsx')
- const checkout=read('supabase/functions/create-advertising-checkout-session/index.ts')
  assert.match(page,/premium_ads/)
  assert.match(page,/owner_set_advertising_request_creative/)
  assert.match(page,/Vou enviar minha arte/)
  assert.match(page,/Quero que o VitrineLocal crie a arte/)
- assert.match(page,/create-advertising-checkout-session/)
- assert.match(page,/Pagar e contratar/)
- assert.match(checkout,/mpRequest\('\/preapproval'/)
- assert.match(checkout,/payment_provider:'mercadopago'/)
- assert.doesNotMatch(checkout,/STRIPE_SECRET_KEY/)
- assert.doesNotMatch(page,/active:\s*true.*submit/)
+ assert.match(page,/Nenhuma cobrança é criada/)
+ assert.match(page,/ativação manual/)
+ assert.doesNotMatch(page,/create-advertising-checkout-session/)
+ assert.doesNotMatch(page,/Pagar e contratar/)
+ assert.doesNotMatch(page,/mercadopago/i)
+ assert.doesNotMatch(page,/stripe/i)
 })
 
-test('admin define preço final e libera pagamento em vez de publicar diretamente',()=>{
+test('admin define preço final e mantém a ativação manual',()=>{
  const page=read('src/AdminAdvertisingSalesPage.jsx')
  assert.match(page,/Valor final mensal/)
- assert.match(page,/Aprovar e liberar pagamento/)
+ assert.match(page,/>Aprovar</)
  assert.match(page,/final_price/)
- assert.match(page,/payment_status/)
- assert.match(page,/Aguardando pagamento/)
- assert.doesNotMatch(page,/Campanha marcada como cancelada/)
+ assert.match(page,/ativação será feita pelo fluxo operacional/)
+ assert.doesNotMatch(page,/payment_status/)
+ assert.doesNotMatch(page,/Aguardando pagamento/)
+ assert.doesNotMatch(page,/mercadopago/i)
+ assert.doesNotMatch(page,/stripe/i)
 })
 
 test('migration do fluxo comercial protege upload de arte e vincula campanha à solicitação',()=>{
@@ -45,24 +46,18 @@ test('migration do fluxo comercial protege upload de arte e vincula campanha à 
  assert.match(migration,/advertising-request-art/)
  assert.match(migration,/owner_set_advertising_request_creative/)
  assert.match(migration,/advertising_request_id uuid/)
- assert.match(migration,/payment_status/)
  assert.match(migration,/final_price/)
 })
 
-test('Mercado Pago usa checkout dedicado e webhook distingue publicidade de assinatura de plano',()=>{
- const checkout=read('supabase/functions/create-advertising-checkout-session/index.ts')
- const webhook=read('supabase/functions/mercadopago-webhook/index.ts')
- assert.match(checkout,/mpRequest\('\/preapproval'/)
- assert.match(checkout,/VL-AD-/)
- assert.match(checkout,/mercadopago_subscription_id/)
- assert.match(webhook,/syncAdvertising/)
- assert.match(webhook,/VL-AD-/)
- assert.match(webhook,/advertising_requests/)
- assert.match(webhook,/advertisements/)
- assert.doesNotMatch(checkout,/STRIPE_SECRET_KEY/)
+test('fontes de cobrança da publicidade foram removidas do repositório',()=>{
+ for(const file of [
+  'supabase/functions/create-advertising-checkout-session/index.ts',
+  'supabase/functions/mercadopago-webhook/index.ts',
+  'supabase/functions/mercadopago-authorize-subscription/index.ts'
+ ])assert.equal(fs.existsSync(file),false,`${file} não deveria existir`)
 })
 
-test('manutenção agendada ativa anúncios pagos no período e desativa vencidos',()=>{
+test('manutenção agendada continua cuidando apenas do estado operacional dos anúncios',()=>{
  const migration=read('supabase/migrations/20260911152100_activate_paid_advertising_automatically.sql')
  assert.match(migration,/billing_status='paid'/)
  assert.match(migration,/ads_activated=/)
