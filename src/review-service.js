@@ -32,6 +32,12 @@ export async function reportReview(reviewId,reason,details){
 
 export async function getSession(){
  if(!db)return null
- const {data}=await db.auth.getSession()
+ const {data,error}=await db.auth.getSession()
+ if(error)return null
  return data.session||null
+}
+
+export function onAuthStateChange(callback){
+ if(!db)return {data:{subscription:{unsubscribe(){}}}}
+ return db.auth.onAuthStateChange(callback)
 }
