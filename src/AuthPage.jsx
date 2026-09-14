@@ -16,7 +16,8 @@ function safeNext(value){const fallback='/laguna',candidate=String(value||'').tr
 export default function AuthPage(){
  const[m,setM]=useState('login'),[email,setE]=useState(''),[pw,setP]=useState(''),[name,setN]=useState(''),[msg,setMsg]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[show,setShow]=useState(false)
  const isSignup=m==='signup',isForgot=m==='forgot',next=safeNext(new URLSearchParams(location.search).get('next'))
- const rules=useMemo(()=>({length:pw.length>=8,mixed:/[A-Za-z]/.test(pw)&&/\d/.test(pw)}),[pw])
+ const password=pw
+ const rules=useMemo(()=>({length:password.length>=8,mixed:/[A-Za-z]/.test(password)&&/\d/.test(password)}),[password])
  const signupReady=Boolean(name.trim().length>=2&&email.trim()&&rules.length&&rules.mixed)
  const reset=()=>{setMsg('');setError('');setShow(false)}
  const switchMode=mode=>{setM(mode);reset()}
@@ -25,11 +26,11 @@ export default function AuthPage(){
  const submit=async e=>{e.preventDefault();if(busy)return;setBusy(true);setMsg('');setError('');if(!db){setError('Autenticação indisponível.');setBusy(false);return}try{
    if(isSignup){
     if(name.trim().length<2)throw new Error('Informe seu nome para continuar.')
-    if(!rules.length||!rules.mixed)throw new Error('Crie uma senha com pelo menos 8 caracteres, usando letras e números.')
-    const{data,error:e}=await db.auth.signUp({email:email.trim(),password:pw,options:{data:{full_name:name.trim()}}});if(e)throw e
+    if(password.length<8||!rules.mixed)throw new Error('Crie uma senha com pelo menos 8 caracteres, usando letras e números.')
+    const{data,error:e}=await db.auth.signUp({email:email.trim(),password,options:{data:{full_name:name.trim()}}});if(e)throw e
     if(data.session)await redirect();else setMsg('Conta criada. Enviamos um link para confirmar seu e-mail antes do primeiro acesso.')
    }else{
-    const{error:e}=await db.auth.signInWithPassword({email:email.trim(),password:pw});if(e){if(isWeakPasswordError(e)){await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:`${location.origin}/atualizar-senha`});setM('forgot');setMsg('Sua senha precisa ser atualizada. Enviamos um link para criar uma nova senha segura.')}else throw e}else await redirect()
+    const{error:e}=await db.auth.signInWithPassword({email:email.trim(),password});if(e){if(isWeakPasswordError(e)){await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:`${location.origin}/atualizar-senha`});setM('forgot');setMsg('Sua senha precisa ser atualizada. Enviamos um link para criar uma nova senha segura.')}else throw e}else await redirect()
    }
   }catch(e){setError(friendlyAuthError(e,isSignup?'signup':'login'))}finally{setBusy(false)}}
  const title=isForgot?'Recupere seu acesso':isSignup?'Crie sua conta':'Entre na sua conta'
@@ -44,7 +45,7 @@ export default function AuthPage(){
   {isForgot?<form onSubmit={e=>{e.preventDefault();recover()}} className="auth-form"><label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setE(e.target.value)} placeholder="voce@empresa.com" required autoComplete="email" autoFocus/></label><button className="primary wide" disabled={busy}>{busy?<><i className="auth-spinner"/>Enviando link…</>:'Enviar link de recuperação'}</button></form>:<form onSubmit={submit} className="auth-form">
    {isSignup&&<label className="auth-field"><span>Seu nome</span><input value={name} onChange={e=>setN(e.target.value)} placeholder="Como podemos chamar você?" autoComplete="name" required minLength={2} autoFocus/></label>}
    <label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setE(e.target.value)} placeholder="voce@empresa.com" required autoComplete="email" autoFocus={!isSignup}/></label>
-   <label className="auth-field"><span>Senha</span><div className="auth-input-wrap"><input type={show?'text':'password'} value={pw} onChange={e=>setP(e.target.value)} placeholder={isSignup?'Crie uma senha segura':'Digite sua senha'} required minLength={isSignup?8:1} autoComplete={isSignup?'new-password':'current-password'} aria-describedby={isSignup?'password-help':undefined}/><button type="button" className="password-toggle" onClick={()=>setShow(v=>!v)} aria-label={show?'Ocultar senha':'Mostrar senha'}>{show?'Ocultar':'Mostrar'}</button></div>{isSignup&&<div id="password-help" className="password-rules"><span className={rules.length?'is-valid':''}>{rules.length?'✓':'○'} 8 caracteres ou mais</span><span className={rules.mixed?'is-valid':''}>{rules.mixed?'✓':'○'} letras e números</span></div>}</label>
+   <label className="auth-field"><span>Senha</span><div className="auth-input-wrap"><input type={show?'text':'password'} value={password} onChange={e=>setP(e.target.value)} placeholder={isSignup?'Crie uma senha segura':'Digite sua senha'} required minLength={isSignup?8:1} autoComplete={isSignup?'new-password':'current-password'} aria-describedby={isSignup?'password-help':undefined}/><button type="button" className="password-toggle" onClick={()=>setShow(v=>!v)} aria-label={show?'Ocultar senha':'Mostrar senha'}>{show?'Ocultar':'Mostrar'}</button></div>{isSignup&&<div id="password-help" className="password-rules"><span className={rules.length?'is-valid':''}>{rules.length?'✓':'○'} 8 caracteres ou mais</span><span className={rules.mixed?'is-valid':''}>{rules.mixed?'✓':'○'} letras e números</span></div>}</label>
    {!isSignup&&<div className="auth-actions-row"><button type="button" className="text-button inline" onClick={()=>switchMode('forgot')}>Esqueci minha senha</button></div>}
    <button className="primary wide" disabled={busy||(isSignup&&!signupReady)}>{busy?<><i className="auth-spinner"/>Aguarde…</>:isSignup?'Criar minha conta':'Entrar na minha conta'}</button>
    {isSignup?<p className="auth-under-note">Você poderá cadastrar sua empresa depois. Primeiro criamos seu acesso seguro.</p>:<p className="auth-under-note">Acesso protegido com autenticação segura.</p>}
