@@ -70,6 +70,7 @@ import './mobile-responsive-fixes.css'
 import './review-ui-mount.js'
 import './review-card-rating.js'
 import './user-profile.css'
+import './ux-refinement.css'
 
 const normalizePath=p=>p.replace(/\/+$/,'')||'/'
 const partsOf=p=>p.split('/').filter(Boolean).map(decodeURIComponent)
