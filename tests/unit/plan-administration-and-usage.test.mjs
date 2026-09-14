@@ -18,11 +18,9 @@ test('área administrativa expõe navegação para alterar plano por empresa',()
  assert.ok(assignment.includes('window.confirm'))
 })
 
-test('concessão manual não pode mascarar assinatura Stripe ativa',()=>{
- const migration=read('supabase/migrations/20260911002500_harden_manual_plan_assignment_against_stripe.sql')
- assert.ok(migration.includes("provider='stripe'"))
- assert.ok(migration.includes("raise exception 'A empresa possui uma assinatura Stripe ativa."))
- assert.ok(migration.includes('provider_subscription_id is not null'))
+test('concessão manual permanece independente de provedores de pagamento',()=>{
+ const migration=read('supabase/migrations/20260914150000_reset_payments_and_fix_public_catalog.sql')
+ for(const value of ['drop column if exists provider','drop column if exists provider_subscription_id','drop column if exists external_subscription_id','drop column if exists mercadopago_payer_id'])assert.ok(migration.includes(value),`reset de pagamentos precisa conter ${value}`)
 })
 
 test('uso do catálogo é separado do inventário atual',()=>{
@@ -63,19 +61,19 @@ test('seleção do ciclo atual prioriza o ciclo vigente mais recente',()=>{
  assert.doesNotMatch(migration,/where u\.business_id=p_business_id\n    and u\.cycle_end>now\(\)\n  order by u\.cycle_end desc/)
 })
 
-test('upgrade de plano usa a assinatura Mercado Pago existente',()=>{
- const fn=read('supabase/functions/change-subscription-plan/index.ts')
- assert.ok(fn.includes('mpRequest(`\/preapproval\/'))
- assert.ok(fn.includes("provider','mercadopago"))
- assert.ok(fn.includes('update({plan_id:target.id'))
- assert.doesNotMatch(fn,/STRIPE_SECRET_KEY/)
+test('upgrade de plano fica desativado até a nova configuração de pagamentos',()=>{
+ const page=read('src/BillingPlansPage.jsx')
+ assert.ok(page.includes('Disponível em breve'))
+ assert.equal(page.includes('create-checkout-session'),false)
+ assert.equal(page.includes('mercadopago'),false)
+ assert.equal(page.includes('stripe'),false)
 })
 
-test('downgrade e mudanças de ciclo usam o estado da assinatura Mercado Pago',()=>{
- const fn=read('supabase/functions/change-subscription-plan/index.ts')
- assert.ok(fn.includes("provider','mercadopago"))
- assert.ok(fn.includes('auto_recurring'))
- assert.ok(fn.includes('transaction_amount'))
- assert.ok(fn.includes("currency_id:'BRL'"))
- assert.doesNotMatch(fn,/subscriptionSchedules/)
+test('conta não depende de estado de assinatura de provedor externo',()=>{
+ const plan=read('src/PlanUsageReact.jsx')
+ assert.ok(plan.includes('Gerenciado pela administração'))
+ assert.equal(plan.includes('provider_subscription_id'),false)
+ assert.equal(plan.includes('billing-portal'),false)
+ assert.equal(plan.includes('mercadopago'),false)
+ assert.equal(plan.includes('stripe'),false)
 })
