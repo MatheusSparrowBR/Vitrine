@@ -34,13 +34,14 @@ async function isPremiumBusiness(id) {
 }
 
 function mountProfile() {
-  const host = document.querySelector('.mbp-main-card');
-  if (!host || host.querySelector('[data-vl-reviews]')) return;
+  const layout = document.querySelector('.mbp-layout');
+  if (!layout || layout.querySelector('[data-vl-reviews]')) return;
   businessId().then(id => {
-    if (!id) return;
+    if (!id || !layout.isConnected || layout.querySelector('[data-vl-reviews]')) return;
     const el = document.createElement('div');
     el.dataset.vlReviews = '1';
-    host.appendChild(el);
+    el.className = 'vl-profile-reviews-host';
+    layout.appendChild(el);
     createRoot(el).render(React.createElement(BusinessReviews, { businessId: id }));
   });
 }
