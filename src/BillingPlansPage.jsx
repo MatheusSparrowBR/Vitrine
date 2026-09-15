@@ -35,7 +35,17 @@ export default function BillingPlansPage(){
   if(!db||!session?.user?.id||!businessId){setMsg('Entre na sua conta e selecione uma empresa para contratar um plano.');return}
   setCheckoutLoading(code);setMsg('Preparando o checkout seguro do Mercado Pago…')
   const{data,error}=await db.functions.invoke('mercadopago-authorize-subscription',{body:{business_id:businessId,plan_code:code,interval}})
-  if(error||!data?.checkout_url){setCheckoutLoading('');setMsg(data?.error||error?.message||'Não foi possível iniciar o checkout do Mercado Pago.');return}
+  if(error||!data?.checkout_url){
+    let detailed=''
+    try{
+      const response=error?.context
+      if(response?.clone){
+        const payload=await response.clone().json().catch(()=>null)
+        if(payload?.error)detailed=`${payload.error}${payload.details?` — ${payload.details}`:''}`
+      }
+    }catch{}
+    setCheckoutLoading('');setMsg(detailed||data?.error||error?.message||'Não foi possível iniciar o checkout do Mercado Pago.');return
+  }
   window.location.href=data.checkout_url
  }
  const paymentReturn=params.get('checkout')==='return'
