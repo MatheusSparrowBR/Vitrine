@@ -3,6 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN') || ''
+const MP_ENVIRONMENT = (Deno.env.get('MP_ENVIRONMENT') || 'production').toLowerCase()
+const MP_TEST_PAYER_EMAIL = Deno.env.get('MP_TEST_PAYER_EMAIL') || ''
 const APP_URL = 'https://vitrinelocal.net'
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
@@ -50,10 +52,13 @@ Deno.serve(async (req) => {
 
   const externalReference = `vitrinelocal:${businessId}:${planCode}:${interval}:${crypto.randomUUID()}`
   const returnUrl = `${APP_URL}/planos?business_id=${encodeURIComponent(businessId)}&checkout=return`
+  const payerEmail = MP_ENVIRONMENT === 'test' ? MP_TEST_PAYER_EMAIL : user.email
+  if (MP_ENVIRONMENT === 'test' && !payerEmail) return json({ error: 'Ambiente de teste sem MP_TEST_PAYER_EMAIL configurado.' }, 503)
+
   const mpPayload = {
     reason: `VitrineLocal ${plan.name} — ${interval === 'yearly' ? 'anual' : 'mensal'}`,
     external_reference: externalReference,
-    payer_email: user.email,
+    payer_email: payerEmail,
     auto_recurring: { frequency: interval === 'yearly' ? 12 : 1, frequency_type: 'months', transaction_amount: amount, currency_id: 'BRL' },
     back_url: returnUrl,
     status: 'pending',
