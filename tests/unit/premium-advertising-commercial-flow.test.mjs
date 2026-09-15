@@ -49,12 +49,10 @@ test('migration do fluxo comercial protege upload de arte e vincula campanha à 
  assert.match(migration,/final_price/)
 })
 
-test('fontes de cobrança da publicidade foram removidas do repositório',()=>{
- for(const file of [
-  'supabase/functions/create-advertising-checkout-session/index.ts',
-  'supabase/functions/mercadopago-webhook/index.ts',
-  'supabase/functions/mercadopago-authorize-subscription/index.ts'
- ])assert.equal(fs.existsSync(file),false,`${file} não deveria existir`)
+test('fontes de cobrança da publicidade continuam desativadas separadas do billing de assinaturas',()=>{
+ assert.equal(fs.existsSync('supabase/functions/create-advertising-checkout-session/index.ts'),false)
+ assert.equal(fs.existsSync('supabase/functions/mercadopago-webhook/index.ts'),true)
+ assert.equal(fs.existsSync('supabase/functions/mercadopago-authorize-subscription/index.ts'),true)
 })
 
 test('manutenção agendada continua cuidando apenas do estado operacional dos anúncios',()=>{
