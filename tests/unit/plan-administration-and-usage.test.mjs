@@ -72,11 +72,11 @@ test('checkout Mercado Pago está habilitado para Pro e Premium',()=>{
  assert.equal(page.includes('stripe'),false)
 })
 
-test('conta não depende de estado de assinatura de provedor externo',()=>{
+test('conta integra o status do Mercado Pago sem expor detalhes sensíveis do provedor',()=>{
  const plan=read('src/PlanUsageReact.jsx')
- assert.ok(plan.includes('Gerenciado pela administração'))
+ assert.ok(plan.includes('Gerenciado pelo Mercado Pago'))
+ assert.ok(plan.includes('provider_status'))
  assert.equal(plan.includes('provider_subscription_id'),false)
  assert.equal(plan.includes('billing-portal'),false)
- assert.equal(plan.includes('mercadopago'),false)
  assert.equal(plan.includes('stripe'),false)
 })
