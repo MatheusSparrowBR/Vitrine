@@ -1,189 +1,42 @@
 /* Final mobile launch fixes: keep the public home fluid and keep account actions discoverable. */
 @media (max-width:760px){
-  .home-v2 .home-hero-inner{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr)!important;
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
-  .home-v2 .home-hero-inner .hero-copy{
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
-  .home-v2 .hero-copy h1{
-    display:block!important;
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-    white-space:normal!important;
-    overflow-wrap:normal!important;
-    word-break:normal!important;
-    hyphens:none!important;
-  }
-  .home-v2 .hero-copy>p,
-  .home-v2 .hero-search,
-  .home-v2 .hero-buttons,
-  .home-v2 .hero-note{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
+  .home-v2 .home-hero-inner{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .home-v2 .home-hero-inner .hero-copy{width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}
+  .home-v2 .hero-copy h1{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important}
+  .home-v2 .hero-copy>p,.home-v2 .hero-search,.home-v2 .hero-buttons,.home-v2 .hero-note{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .home-v2 .hero-search{display:grid!important;grid-template-columns:40px minmax(0,1fr)!important;grid-template-rows:54px 50px!important;gap:7px!important;align-items:center!important;padding:7px!important}
+  .home-v2 .hero-search-icon{width:40px!important;min-width:40px!important;text-align:center!important;font-size:20px!important}
+  .home-v2 .hero-search input{display:block!important;width:100%!important;min-width:0!important;max-width:none!important;height:54px!important;padding:0 8px!important;box-sizing:border-box!important;font-size:14px!important}
+  .home-v2 .hero-search button{grid-column:1/-1!important;width:100%!important;min-width:0!important;min-height:50px!important;height:50px!important;margin:0!important}
+  .vl-profile-reviews-host{grid-column:1!important;grid-row:2!important;min-width:0!important;width:100%!important}
+  .vl-profile-reviews-host .vl-reviews{margin-top:0!important}
+  .vl-site-mobile-panel{max-height:calc(100vh - 64px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+  .vl-site-mobile-actions{margin:4px 0 2px!important;padding:12px 0!important;border-top:1px solid #edf1f6!important;border-bottom:1px solid #edf1f6!important}
 
-  /* Search on small screens: reserve a real input area and put the button on its own row. */
-  .home-v2 .hero-search{
-    display:grid!important;
-    grid-template-columns:40px minmax(0,1fr)!important;
-    grid-template-rows:54px 50px!important;
-    gap:7px!important;
-    align-items:center!important;
-    padding:7px!important;
-  }
-  .home-v2 .hero-search-icon{
-    width:40px!important;
-    min-width:40px!important;
-    text-align:center!important;
-    font-size:20px!important;
-  }
-  .home-v2 .hero-search input{
-    display:block!important;
-    width:100%!important;
-    min-width:0!important;
-    max-width:none!important;
-    height:54px!important;
-    padding:0 8px!important;
-    box-sizing:border-box!important;
-    font-size:14px!important;
-  }
-  .home-v2 .hero-search button{
-    grid-column:1/-1!important;
-    width:100%!important;
-    min-width:0!important;
-    min-height:50px!important;
-    height:50px!important;
-    margin:0!important;
-  }
-
-  /* Business profile reviews: desktop stays under the main profile card; mobile/tablet follows the sidebar tabs/info. */
-  .vl-profile-reviews-host{
-    grid-column:1!important;
-    grid-row:2!important;
-    min-width:0!important;
-    width:100%!important;
-  }
-  .vl-profile-reviews-host .vl-reviews{
-    margin-top:0!important;
-  }
-
-  .vl-site-mobile-panel{
-    max-height:calc(100vh - 64px)!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain!important;
-    -webkit-overflow-scrolling:touch!important;
-  }
-  .vl-site-mobile-actions{
-    margin:4px 0 2px!important;
-    padding:12px 0!important;
-    border-top:1px solid #edf1f6!important;
-    border-bottom:1px solid #edf1f6!important;
-  }
-
-  /* Account workspace: the desktop sidebar must remain discoverable on phones. */
-  .account-workspace-app .account-workspace{
-    display:flex!important;
-    flex-direction:column!important;
-    width:100%!important;
-    max-width:100%!important;
-    box-sizing:border-box!important;
-    padding:14px 14px 42px!important;
-    gap:14px!important;
-  }
-  .account-workspace-app .account-sidebar{
-    display:block!important;
-    position:relative!important;
-    top:auto!important;
-    left:auto!important;
-    width:100%!important;
-    max-width:none!important;
-    box-sizing:border-box!important;
-    padding:12px!important;
-    border-radius:18px!important;
-    z-index:20!important;
-  }
-  .account-workspace-app .account-sidebar-head{
-    padding:2px 3px 10px!important;
-  }
-  .account-workspace-app .account-sidebar-head>button{
-    display:none!important;
-  }
-  .account-workspace-app .account-business-switcher{
-    padding:10px!important;
-  }
-  .account-workspace-app .account-sidebar-nav{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:6px!important;
-    margin:10px 0!important;
-  }
-  .account-workspace-app .account-nav-item{
-    min-height:48px!important;
-    padding:8px!important;
-    font-size:11px!important;
-  }
-  .account-workspace-app .account-nav-item .nav-icon{
-    width:24px!important;
-    height:24px!important;
-  }
-  .account-workspace-app .account-sidebar-footer{
-    margin-top:10px!important;
-    padding-top:10px!important;
-  }
-  .account-workspace-app .account-content{
-    width:100%!important;
-    min-width:0!important;
-  }
-  .account-workspace-app .account-section-header{
-    align-items:flex-start!important;
-  }
-  .account-workspace-app .account-section-header h1{
-    font-size:31px!important;
-  }
+  /* Account workspace: compact navigation above the account content, without inheriting desktop sizing. */
+  .account-workspace-app{min-height:0!important}
+  .account-workspace-app .account-workspace{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;box-sizing:border-box!important;padding:14px 14px 42px!important;margin:0!important;gap:14px!important;align-items:stretch!important}
+  .account-workspace-app .account-sidebar{display:block!important;position:relative!important;top:auto!important;left:auto!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important;padding:12px!important;margin:0!important;border-radius:18px!important;z-index:20!important;overflow:visible!important;float:none!important;transform:none!important}
+  .account-workspace-app .account-sidebar-head{padding:2px 3px 10px!important}
+  .account-workspace-app .account-sidebar-head>button{display:none!important}
+  .account-workspace-app .account-business-switcher{padding:10px!important}
+  .account-workspace-app .account-sidebar-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin:10px 0!important;height:auto!important;min-height:0!important;max-height:none!important}
+  .account-workspace-app .account-nav-item{min-height:48px!important;height:auto!important;padding:8px!important;font-size:11px!important}
+  .account-workspace-app .account-nav-item .nav-icon{width:24px!important;height:24px!important}
+  .account-workspace-app .account-sidebar-footer{margin-top:10px!important;padding-top:10px!important}
+  .account-workspace-app .account-content{display:block!important;width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important}
+  .account-workspace-app .account-section{display:block!important;width:100%!important;min-height:0!important;height:auto!important;margin:0!important}
+  .account-workspace-app .account-section-header{align-items:flex-start!important}
+  .account-workspace-app .account-section-header h1{font-size:31px!important}
 }
 
-@media (max-width:1120px){
-  .vl-profile-reviews-host{
-    grid-row:3!important;
-  }
-}
+@media (max-width:1120px){.vl-profile-reviews-host{grid-row:3!important}}
 
 @media (max-width:430px){
-  .home-v2 .home-hero-inner{
-    padding-left:16px!important;
-    padding-right:16px!important;
-  }
-  .home-v2 .hero-copy h1{
-    font-size:40px!important;
-    line-height:.98!important;
-    letter-spacing:-.045em!important;
-  }
-  .home-v2 .hero-search{
-    grid-template-columns:36px minmax(0,1fr)!important;
-    grid-template-rows:52px 49px!important;
-  }
-  .home-v2 .hero-search-icon{
-    width:36px!important;
-    min-width:36px!important;
-  }
-  .home-v2 .hero-search input{
-    height:52px!important;
-    font-size:14px!important;
-  }
-  .home-v2 .hero-search button{
-    min-height:49px!important;
-    height:49px!important;
-  }
+  .home-v2 .home-hero-inner{padding-left:16px!important;padding-right:16px!important}
+  .home-v2 .hero-copy h1{font-size:40px!important;line-height:.98!important;letter-spacing:-.045em!important}
+  .home-v2 .hero-search{grid-template-columns:36px minmax(0,1fr)!important;grid-template-rows:52px 49px!important}
+  .home-v2 .hero-search-icon{width:36px!important;min-width:36px!important}
+  .home-v2 .hero-search input{height:52px!important;font-size:14px!important}
+  .home-v2 .hero-search button{min-height:49px!important;height:49px!important}
 }
