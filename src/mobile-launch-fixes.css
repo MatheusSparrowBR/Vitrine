@@ -92,6 +92,66 @@
     border-top:1px solid #edf1f6!important;
     border-bottom:1px solid #edf1f6!important;
   }
+
+  /* Account workspace: the desktop sidebar must remain discoverable on phones. */
+  .account-workspace-app .account-workspace{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+    padding:14px 14px 42px!important;
+    gap:14px!important;
+  }
+  .account-workspace-app .account-sidebar{
+    display:block!important;
+    position:relative!important;
+    top:auto!important;
+    left:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+    padding:12px!important;
+    border-radius:18px!important;
+    z-index:20!important;
+  }
+  .account-workspace-app .account-sidebar-head{
+    padding:2px 3px 10px!important;
+  }
+  .account-workspace-app .account-sidebar-head>button{
+    display:none!important;
+  }
+  .account-workspace-app .account-business-switcher{
+    padding:10px!important;
+  }
+  .account-workspace-app .account-sidebar-nav{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+    margin:10px 0!important;
+  }
+  .account-workspace-app .account-nav-item{
+    min-height:48px!important;
+    padding:8px!important;
+    font-size:11px!important;
+  }
+  .account-workspace-app .account-nav-item .nav-icon{
+    width:24px!important;
+    height:24px!important;
+  }
+  .account-workspace-app .account-sidebar-footer{
+    margin-top:10px!important;
+    padding-top:10px!important;
+  }
+  .account-workspace-app .account-content{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .account-workspace-app .account-section-header{
+    align-items:flex-start!important;
+  }
+  .account-workspace-app .account-section-header h1{
+    font-size:31px!important;
+  }
 }
 
 @media (max-width:1120px){
