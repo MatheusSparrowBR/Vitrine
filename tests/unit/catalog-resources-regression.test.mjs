@@ -23,14 +23,32 @@ test('products and services no longer use browser prompts',()=>{
  assert.doesNotMatch(account,/window\.prompt\([^)]*(produto|serviço)/i)
 })
 
-test('product service form includes type, image and plan enforcement',()=>{
+test('product and service form validates type, image, price and plan enforcement',()=>{
  const form=read('src/OwnerItemForm.jsx')
  assert.match(form,/type:form\.type/)
  assert.match(form,/business_items/)
  assert.match(form,/image_path/)
+ assert.match(form,/price,active/)
  assert.match(form,/limit===0/)
  assert.match(form,/usedCount>=limit/)
  assert.match(form,/getPlanCycleFeatureUsage/)
+ assert.match(form,/editing\?await db\.from\('business_items'\)\.update/)
+ assert.match(form,/Alterações não consomem nova unidade do ciclo/)
+})
+
+test('public business profile keeps products and services in separate sections',()=>{
+ const profile=read('src/ModernBusinessProfilePage.jsx')
+ assert.match(profile,/normalizeItemType/)
+ assert.match(profile,/data-offer-type="products"/)
+ assert.match(profile,/data-offer-type="services"/)
+ assert.match(profile,/products\.filter|normalized\.filter\(i=>i\.__normalizedType==='product'\)/)
+ assert.match(profile,/services\.filter|normalized\.filter\(i=>i\.__normalizedType==='service'\)/)
+ assert.doesNotMatch(profile,/PRODUTOS E SERVIÇOS.*O que a empresa oferece/s)
+})
+
+test('media adaptation does not double-adapt catalog item uploads',()=>{
+ const adapter=read('src/media-adapter.js')
+ assert.match(adapter,/input\.closest\('\.vl-item-file'\)\)return/)
 })
 
 test('media add control is disabled at plan limit',()=>{
