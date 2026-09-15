@@ -35,15 +35,18 @@ test('webhook valida assinatura secreta e mantém idempotência dos eventos',()=
  assert.match(fn,/HMAC/)
  assert.match(fn,/billing_events/)
  assert.match(fn,/provider_event_id/)
+ assert.match(fn,/processing_status/)
  assert.match(fn,/subscription_preapproval/)
  assert.match(fn,/subscription_authorized_payment/)
 })
 
 test('schema de billing possui dados do provedor sem depender de Stripe',()=>{
  const migration=read('supabase/migrations/20260915070000_restore_mercadopago_subscription_runtime.sql')
+ const retryMigration=read('supabase/migrations/20260915073000_harden_mercadopago_webhook_idempotency.sql')
  assert.match(migration,/provider_subscription_id/)
  assert.match(migration,/provider_checkout_url/)
  assert.match(migration,/last_payment_status/)
  assert.match(migration,/billing_events/)
+ assert.match(retryMigration,/processing_status/)
  assert.doesNotMatch(migration,/stripe_price_monthly_id/)
 })
