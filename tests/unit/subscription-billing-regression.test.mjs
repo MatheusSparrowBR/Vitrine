@@ -23,6 +23,17 @@ test('painel Meu plano integra o status do Mercado Pago sem expor detalhes sens�
  assert.equal(panel.includes('stripe'),false)
 })
 
+test('cancelamento preserva o plano pago até o fim do período atual',()=>{
+ const panel=read('src/PlanUsageReact.jsx')
+ const migration=read('supabase/migrations/20260915160000_keep_canceled_subscription_until_period_end.sql')
+ assert.ok(panel.includes(".in('status',['active','trialing','pending','paused','canceled'])"))
+ assert.ok(panel.includes("sub.status==='canceled'"))
+ assert.ok(panel.includes('O plano permanece liberado até'))
+ assert.ok(migration.includes("s.status = 'canceled'"))
+ assert.ok(migration.includes('coalesce(s.current_period_end, s.ends_at) >= now()'))
+ assert.ok(migration.includes("s.status in ('active','trialing')"))
+})
+
 test('webhook sincroniza a assinatura também em pagamentos autorizados',()=>{
  const webhook=read('supabase/functions/mercadopago-webhook/index.ts')
  const block=webhook.split("if (eventType === 'subscription_authorized_payment' && dataId)")[1]||''
