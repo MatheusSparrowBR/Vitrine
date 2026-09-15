@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     user_id: user.id, business_id: businessId, plan_id: plan.id, status: 'pending', provider: 'mercadopago', billing_interval: interval,
     provider_subscription_id: providerSubscriptionId, provider_customer_id: mpData?.payer_id ? String(mpData.payer_id) : null,
     provider_checkout_url: checkoutUrl, external_reference: externalReference, provider_status: mpData?.status || 'pending',
-    started_at: null, ends_at: null, cancel_at_period_end: false,
+    cancel_at_period_end: false,
   }).select('id,business_id,plan_id,status,provider,provider_subscription_id,provider_checkout_url,billing_interval').single()
 
   if (insertError || !subscription) {
