@@ -69,6 +69,17 @@
     margin:0!important;
   }
 
+  /* Business profile reviews: desktop stays under the main profile card; mobile/tablet follows the sidebar tabs/info. */
+  .vl-profile-reviews-host{
+    grid-column:1!important;
+    grid-row:2!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+  .vl-profile-reviews-host .vl-reviews{
+    margin-top:0!important;
+  }
+
   .vl-site-mobile-panel{
     max-height:calc(100vh - 64px)!important;
     overflow-y:auto!important;
@@ -80,6 +91,12 @@
     padding:12px 0!important;
     border-top:1px solid #edf1f6!important;
     border-bottom:1px solid #edf1f6!important;
+  }
+}
+
+@media (max-width:1120px){
+  .vl-profile-reviews-host{
+    grid-row:3!important;
   }
 }
 
