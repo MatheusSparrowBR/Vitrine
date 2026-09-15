@@ -29,8 +29,19 @@ export default function BillingPlansPage(){
  const currentCode=current?.plan_id?(plans.find(p=>p.id===current.plan_id)?.code||'free'):'free'
  const currentPlan=plans.find(p=>p.code===currentCode)||plans[0]
  if(loading)return <div className="vl-plans-app"><main className="page section"><div className="plan-message">Carregando planos…</div></main></div>
+ const continuePendingCheckout=()=>{
+  if(current?.status==='pending'&&current?.provider_checkout_url){
+    window.location.href=current.provider_checkout_url
+    return true
+  }
+  return false
+ }
  const selectPlan=async code=>{
   if(code==='free')return
+  if(code===currentCode&&current?.status==='pending'){
+    if(!continuePendingCheckout())setMsg('O pagamento está pendente, mas o checkout não está disponível. Inicie uma nova tentativa de pagamento.')
+    return
+  }
   if(code===currentCode&&current?.status!=='pending'){setMsg('Este já é o plano atual da empresa.');return}
   if(!db||!session?.user?.id||!businessId){setMsg('Entre na sua conta e selecione uma empresa para contratar um plano.');return}
   setCheckoutLoading(code);setMsg('Preparando o checkout seguro do Mercado Pago…')
@@ -56,7 +67,7 @@ export default function BillingPlansPage(){
   {businesses.length>0&&<div className="billing-bar"><label>Empresa<select value={businessId} onChange={e=>setBusinessId(e.target.value)}>{businesses.map(b=><option key={b.id} value={b.id}>{b.name}{b.status==='pending'?' · em análise':''}</option>)}</select></label><div className="billing-toggle"><button type="button" className={interval==='monthly'?'active':''} onClick={()=>setIntervalValue('monthly')}>Mensal</button><button type="button" className={interval==='yearly'?'active':''} onClick={()=>setIntervalValue('yearly')}>Anual</button></div></div>}
   {current&&<div className="billing-current"><div><span>ASSINATURA ATUAL</span><strong>{currentPlan?.name||'Plano ativo'}</strong><small>{current.provider==='mercadopago'?'Cobrança e status gerenciados pelo Mercado Pago.':'Gerenciado pela administração da plataforma.'}</small></div><div><b>{currentStatusLabel}</b><span>{current.ends_at?'Válido até '+new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeZone:'America/Sao_Paulo'}).format(new Date(current.ends_at)):current.provider_checkout_url&&current.status==='pending'?'Finalize o cadastro de pagamento para ativar o plano.':'Vigente conforme o status da assinatura.'}</span></div></div>}
   {msg&&<div className="plan-message info">{msg}</div>}
-  <div className="plans-grid">{plans.map(p=>{const price=interval==='yearly'?p.price_yearly:p.price_monthly,isCurrent=currentCode===p.code&&current?.status!=='canceled',features=featureList(p.features),paid=p.code!=='free',busy=checkoutLoading===p.code;return <article className={`plan-card ${p.code==='premium'?'featured':''} ${isCurrent?'current':''}`} key={p.id}><span className="section-kicker">{p.code==='premium'?'MAIS COMPLETO':p.code==='pro'?'RECOMENDADO':'COMECE AQUI'}</span><h2>{p.name}</h2><p>{p.description}</p><div className="plan-price">{money(price)}<small>/{interval==='yearly'?'ano':'mês'}</small></div>{interval==='yearly'&&annualSaving[p.code]>0&&<span className="billing-saving">Economize {annualSaving[p.code]}%</span>}<ul>{features.map(item=><li key={item}>{item}</li>)}</ul><button type="button" className={isCurrent?'outline':'primary'} disabled={isCurrent||busy} onClick={()=>paid&&selectPlan(p.code)}>{isCurrent?(current?.status==='pending'?'Pagamento em andamento':'Plano atual'):busy?'Abrindo checkout…':paid?'Assinar com Mercado Pago':'Começar grátis'}</button></article>})}</div>
+  <div className="plans-grid">{plans.map(p=>{const price=interval==='yearly'?p.price_yearly:p.price_monthly,isPendingCurrent=currentCode===p.code&&current?.status==='pending',isCurrent=currentCode===p.code&&current?.status!=='canceled'&&current?.status!=='pending',features=featureList(p.features),paid=p.code!=='free',busy=checkoutLoading===p.code;return <article className={`plan-card ${p.code==='premium'?'featured':''} ${(isCurrent||isPendingCurrent)?'current':''}`} key={p.id}><span className="section-kicker">{p.code==='premium'?'MAIS COMPLETO':p.code==='pro'?'RECOMENDADO':'COMECE AQUI'}</span><h2>{p.name}</h2><p>{p.description}</p><div className="plan-price">{money(price)}<small>/{interval==='yearly'?'ano':'mês'}</small></div>{interval==='yearly'&&annualSaving[p.code]>0&&<span className="billing-saving">Economize {annualSaving[p.code]}%</span>}<ul>{features.map(item=><li key={item}>{item}</li>)}</ul><button type="button" className={isCurrent?'outline':'primary'} disabled={isCurrent||busy} onClick={()=>paid&&selectPlan(p.code)}>{isCurrent?'Plano atual':isPendingCurrent?(busy?'Abrindo checkout…':'Continuar pagamento'):busy?'Abrindo checkout…':paid?'Assinar com Mercado Pago':'Começar grátis'}</button></article>})}</div>
   {session&&businessId&&<div className="billing-after-grid"><div><strong>Gestão de assinatura</strong><span>O VitrineLocal confirma os eventos do Mercado Pago antes de liberar ou suspender os recursos pagos.</span></div><a href={`/conta?business_id=${encodeURIComponent(businessId)}`}>Abrir minha conta →</a><a href={`/conta/analytics?business_id=${encodeURIComponent(businessId)}`}>Ver desempenho →</a></div>}
  </main></div>
 }
