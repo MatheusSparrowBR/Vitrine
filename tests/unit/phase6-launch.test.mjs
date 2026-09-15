@@ -7,7 +7,8 @@ const read = path => fs.readFileSync(path,'utf8')
 test('pré-lançamento possui SEO público e rotas privadas protegidas contra indexação',()=>{
  const html=read('index.html')
  const seo=read('src/seo-runtime.js')
- const vercel=read('vercel.json')
+ const robots=read('public/robots.txt')
+ const htaccess=read('public/.htaccess')
  assert.match(html,/meta name="description"/)
  assert.match(html,/property="og:title"/)
  assert.match(html,/property="og:image"/)
@@ -19,31 +20,26 @@ test('pré-lançamento possui SEO público e rotas privadas protegidas contra in
  assert.match(seo,/linkRel\('canonical'/)
  assert.match(seo,/application\/ld\+json/)
  assert.match(seo,/noindex,nofollow,noarchive/)
- assert.match(vercel,/\/sitemap\.xml/)
- assert.match(vercel,/Strict-Transport-Security/)
- assert.match(vercel,/X-Robots-Tag/)
+ assert.match(robots,/Allow: \/sitemap\.xml/)
+ assert.match(robots,/Disallow: \/admin/)
+ assert.match(robots,/Disallow: \/api\//)
+ assert.match(htaccess,/RewriteEngine On/)
+ assert.doesNotMatch(htaccess,/vercel/i)
 })
 
-test('sitemap dinâmico cobre cidades, catálogos e perfis públicos sem expor rotas privadas',async()=>{
- const sitemap=read('api/sitemap.js')
- assert.match(sitemap,/application\/xml/)
- assert.match(sitemap,/public_business_directory/)
- assert.match(sitemap,/active=eq\.true/)
- assert.match(sitemap,/\/empresas/)
- assert.match(sitemap,/\/promocoes/)
- assert.match(sitemap,/\/eventos/)
- assert.doesNotMatch(sitemap,/\/admin/)
- assert.doesNotMatch(sitemap,/\/conta/)
- const {default:handler}=await import('../../api/sitemap.js')
- let status=0,body=''
- const res={setHeader(){},end(value=''){body=String(value);return value}}
- const oldUrl=process.env.VITE_SUPABASE_URL,oldKey=process.env.VITE_SUPABASE_PUBLISHABLE_KEY
- delete process.env.VITE_SUPABASE_URL;delete process.env.VITE_SUPABASE_PUBLISHABLE_KEY
- await handler({method:'GET',headers:{host:'example.test','x-forwarded-proto':'https'}},{...res,set statusCode(v){status=v}})
- process.env.VITE_SUPABASE_URL=oldUrl;process.env.VITE_SUPABASE_PUBLISHABLE_KEY=oldKey
- assert.equal(status,200)
- assert.match(body,/urlset/)
- assert.match(body,/https:\/\/example\.test\/laguna/)
+test('sitemap é gerado no build e cobre cidades, catálogos e perfis públicos sem expor rotas privadas',()=>{
+ const pkg=JSON.parse(read('package.json'))
+ const generator=read('scripts/generate-sitemap.mjs')
+ assert.match(pkg.scripts.build,/generate-sitemap\.mjs/)
+ assert.match(generator,/public\/sitemap\.xml/)
+ assert.match(generator,/public_business_directory/)
+ assert.match(generator,/active=eq\.true/)
+ assert.match(generator,/\/empresas/)
+ assert.match(generator,/\/promocoes/)
+ assert.match(generator,/\/eventos/)
+ assert.doesNotMatch(generator,/\/admin/)
+ assert.doesNotMatch(generator,/\/conta/)
+ assert.doesNotMatch(generator,/vercel/i)
 })
 
 test('analytics mede passos de conversão do funil comercial',()=>{
