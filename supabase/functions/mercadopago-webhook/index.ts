@@ -17,6 +17,8 @@ async function mpGet(path: string) { if (!MP_ACCESS_TOKEN) throw new Error('MP_A
 async function rest(path: string, init: RequestInit = {}) { return fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...init, headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json', Prefer: init.method === 'POST' ? 'return=minimal' : 'return=representation', ...(init.headers || {}), } }) }
 async function findSubscription(providerSubscriptionId: string) { const res = await rest(`subscriptions?provider=eq.mercadopago&provider_subscription_id=eq.${encodeURIComponent(providerSubscriptionId)}&select=*`); const rows = await res.json().catch(() => []); return rows?.[0] || null }
 async function updateSubscription(id: string, patch: Record<string, unknown>) { await rest(`subscriptions?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
+async function getBillingEvent(providerEventId: string) { const res = await rest(`billing_events?provider=eq.mercadopago&provider_event_id=eq.${encodeURIComponent(providerEventId)}&select=*`); const rows = await res.json().catch(() => []); return rows?.[0] || null }
+async function markEvent(providerEventId: string, patch: Record<string, unknown>) { await rest(`billing_events?provider=eq.mercadopago&provider_event_id=eq.${encodeURIComponent(providerEventId)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405)
@@ -37,19 +39,27 @@ Deno.serve(async (req) => {
 
   const providerEventId = String(body?.id || `${type}:${dataId}:${body?.action || 'update'}`)
   const eventType = body?.type || type || 'unknown'
-  const eventInsert = await rest('billing_events', { method: 'POST', body: JSON.stringify({ provider: 'mercadopago', provider_event_id: providerEventId, event_type: eventType, payload: body }) })
-  if (eventInsert.status === 409) return json({ ok: true, duplicate: true })
-  if (!eventInsert.ok && eventInsert.status !== 201) return json({ error: 'Não foi possível registrar o evento de billing.' }, 500)
+  const eventInsert = await rest('billing_events', { method: 'POST', body: JSON.stringify({ provider: 'mercadopago', provider_event_id: providerEventId, event_type: eventType, payload: body, processing_status: 'received', processed_at: null }) })
+  if (eventInsert.status === 409) {
+    const existing = await getBillingEvent(providerEventId)
+    if (existing?.processing_status === 'processed') return json({ ok: true, duplicate: true })
+  } else if (!eventInsert.ok && eventInsert.status !== 201) {
+    return json({ error: 'Não foi possível registrar o evento de billing.' }, 500)
+  }
 
   try {
     if (eventType === 'subscription_preapproval' && dataId) {
       const sub = await mpGet(`/preapproval/${encodeURIComponent(dataId)}`)
       const local = await findSubscription(dataId)
-      if (!local) return json({ ok: true, ignored: true })
+      if (!local) {
+        await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
+        return json({ ok: true, ignored: true })
+      }
       const rawStatus = String(sub?.status || '').toLowerCase()
       const mapped = rawStatus === 'authorized' || rawStatus === 'active' ? 'active' : rawStatus === 'paused' ? 'paused' : rawStatus === 'cancelled' || rawStatus === 'canceled' ? 'canceled' : 'pending'
       const auto = sub?.auto_recurring || {}
       await updateSubscription(local.id, { status: mapped, provider_status: rawStatus || null, provider_customer_id: sub?.payer_id ? String(sub.payer_id) : local.provider_customer_id, provider_checkout_url: sub?.init_point || local.provider_checkout_url, current_period_start: auto?.start_date || null, current_period_end: sub?.next_payment_date || null, ends_at: auto?.end_date || null, cancel_at_period_end: mapped === 'paused' || mapped === 'canceled', started_at: local.started_at || (mapped === 'active' ? new Date().toISOString() : null) })
+      await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'subscription_preapproval', status: mapped })
     }
 
@@ -58,6 +68,7 @@ Deno.serve(async (req) => {
       const providerSubscriptionId = String(invoice?.preapproval_id || invoice?.subscription_id || '')
       const local = providerSubscriptionId ? await findSubscription(providerSubscriptionId) : null
       if (local) await updateSubscription(local.id, { last_payment_id: dataId, last_payment_status: invoice?.status || invoice?.payment?.status || 'unknown', last_payment_at: invoice?.date_created || new Date().toISOString() })
+      await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'subscription_authorized_payment' })
     }
 
@@ -66,11 +77,16 @@ Deno.serve(async (req) => {
       const providerSubscriptionId = String(payment?.metadata?.preapproval_id || payment?.metadata?.subscription_id || '')
       const local = providerSubscriptionId ? await findSubscription(providerSubscriptionId) : null
       if (local) await updateSubscription(local.id, { last_payment_id: dataId, last_payment_status: payment?.status || 'unknown', last_payment_at: payment?.date_approved || payment?.date_created || new Date().toISOString() })
+      await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'payment' })
     }
+
+    await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
     return json({ ok: true, ignored: true })
   } catch (error) {
-    console.error('Mercado Pago webhook processing error', error)
+    const message = error instanceof Error ? error.message : 'Falha interna no processamento.'
+    console.error('Mercado Pago webhook processing error', message)
+    await markEvent(providerEventId, { processing_status: 'failed', processed_at: null, error_message: message })
     return json({ error: 'Evento recebido, mas o processamento interno falhou.' }, 500)
   }
 })
