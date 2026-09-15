@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState}from'react'
 import{createClient}from'@supabase/supabase-js'
 import{getActiveBusinessPromotions}from'./promotion-service.js'
 import{formatHours}from'./BusinessHoursEditor.jsx'
+import'./item-cards-compact.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
