@@ -35,6 +35,40 @@
     box-sizing:border-box!important;
   }
 
+  /* Search on small screens: reserve a real input area and put the button on its own row. */
+  .home-v2 .hero-search{
+    display:grid!important;
+    grid-template-columns:40px minmax(0,1fr)!important;
+    grid-template-rows:54px 50px!important;
+    gap:7px!important;
+    align-items:center!important;
+    padding:7px!important;
+  }
+  .home-v2 .hero-search-icon{
+    width:40px!important;
+    min-width:40px!important;
+    text-align:center!important;
+    font-size:20px!important;
+  }
+  .home-v2 .hero-search input{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:54px!important;
+    padding:0 8px!important;
+    box-sizing:border-box!important;
+    font-size:14px!important;
+  }
+  .home-v2 .hero-search button{
+    grid-column:1/-1!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:50px!important;
+    height:50px!important;
+    margin:0!important;
+  }
+
   .vl-site-mobile-panel{
     max-height:calc(100vh - 64px)!important;
     overflow-y:auto!important;
@@ -58,5 +92,21 @@
     font-size:40px!important;
     line-height:.98!important;
     letter-spacing:-.045em!important;
+  }
+  .home-v2 .hero-search{
+    grid-template-columns:36px minmax(0,1fr)!important;
+    grid-template-rows:52px 49px!important;
+  }
+  .home-v2 .hero-search-icon{
+    width:36px!important;
+    min-width:36px!important;
+  }
+  .home-v2 .hero-search input{
+    height:52px!important;
+    font-size:14px!important;
+  }
+  .home-v2 .hero-search button{
+    min-height:49px!important;
+    height:49px!important;
   }
 }
