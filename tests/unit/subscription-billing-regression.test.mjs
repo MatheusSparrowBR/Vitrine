@@ -14,12 +14,12 @@ test('planos oferecem checkout Mercado Pago sem checkout legado',()=>{
  assert.equal(page.includes('stripe'),false)
 })
 
-test('painel Meu plano usa apenas atribuição administrativa',()=>{
+test('painel Meu plano integra o status do Mercado Pago sem expor detalhes sensíveis do provedor',()=>{
  const panel=read('src/PlanUsageReact.jsx')
- assert.ok(panel.includes('Gerenciado pela administração'))
+ assert.ok(panel.includes('Gerenciado pelo Mercado Pago'))
+ assert.ok(panel.includes('provider_status'))
  assert.equal(panel.includes('provider_subscription_id'),false)
  assert.equal(panel.includes('billing-portal'),false)
- assert.equal(panel.includes('mercadopago'),false)
  assert.equal(panel.includes('stripe'),false)
 })
 
