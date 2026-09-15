@@ -3,13 +3,14 @@ import assert from'node:assert/strict'
 import fs from'node:fs'
 const read=p=>fs.readFileSync(p,'utf8')
 
- test('planos permanecem disponíveis sem checkout online',()=>{
+test('planos oferecem checkout Mercado Pago sem checkout legado',()=>{
  const page=read('src/BillingPlansPage.jsx')
- assert.ok(page.includes('Disponível em breve'))
+ assert.ok(page.includes('Assinar com Mercado Pago'))
+ assert.ok(page.includes('mercadopago-authorize-subscription'))
+ assert.ok(page.includes('checkout_url'))
  assert.ok(page.includes('Começar grátis'))
  assert.equal(page.includes('create-checkout-session'),false)
  assert.equal(page.includes('billing-portal'),false)
- assert.equal(page.includes('mercadopago'),false)
  assert.equal(page.includes('stripe'),false)
 })
 
@@ -33,7 +34,7 @@ test('publicidade Premium permanece em fluxo manual sem cobrança automática',(
  assert.equal(admin.includes('stripe'),false)
 })
 
-test('fontes antigas de checkout não fazem parte do repositório',()=>{
+test('fontes legadas de checkout não fazem parte do repositório',()=>{
  for(const path of [
   'public/checkout/mercadopago.html',
   'src/MercadoPagoCheckoutPage.jsx',
@@ -41,13 +42,13 @@ test('fontes antigas de checkout não fazem parte do repositório',()=>{
   'supabase/functions/create-checkout-session/index.ts',
   'supabase/functions/change-subscription-plan/index.ts',
   'supabase/functions/billing-portal/index.ts',
-  'supabase/functions/create-advertising-checkout-session/index.ts',
-  'supabase/functions/mercadopago-authorize-subscription/index.ts',
-  'supabase/functions/mercadopago-webhook/index.ts'
+  'supabase/functions/create-advertising-checkout-session/index.ts'
  ])assert.equal(fs.existsSync(path),false,`${path} não deveria existir`)
+ assert.equal(fs.existsSync('supabase/functions/mercadopago-authorize-subscription/index.ts'),true)
+ assert.equal(fs.existsSync('supabase/functions/mercadopago-webhook/index.ts'),true)
 })
 
-test('schema de assinaturas usado pela aplicação não referencia provedores',()=>{
+test('schema de assinaturas usado pela aplicação não depende do legado de Stripe',()=>{
  const migration=read('supabase/migrations/20260914150000_reset_payments_and_fix_public_catalog.sql')
  for(const value of ['drop column if exists external_customer_id','drop column if exists provider_subscription_id','drop column if exists provider','drop column if exists mercadopago_payer_id'])assert.ok(migration.includes(value),`migration precisa limpar ${value}`)
 })
