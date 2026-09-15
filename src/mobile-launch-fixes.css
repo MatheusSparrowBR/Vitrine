@@ -1,0 +1,62 @@
+/* Final mobile launch fixes: keep the public home fluid and keep account actions discoverable. */
+@media (max-width:760px){
+  .home-v2 .home-hero-inner{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .home-v2 .home-hero-inner .hero-copy{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .home-v2 .hero-copy h1{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    white-space:normal!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    hyphens:none!important;
+  }
+  .home-v2 .hero-copy>p,
+  .home-v2 .hero-search,
+  .home-v2 .hero-buttons,
+  .home-v2 .hero-note{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+
+  .vl-site-mobile-panel{
+    max-height:calc(100vh - 64px)!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .vl-site-mobile-actions{
+    margin:4px 0 2px!important;
+    padding:12px 0!important;
+    border-top:1px solid #edf1f6!important;
+    border-bottom:1px solid #edf1f6!important;
+  }
+}
+
+@media (max-width:430px){
+  .home-v2 .home-hero-inner{
+    padding-left:16px!important;
+    padding-right:16px!important;
+  }
+  .home-v2 .hero-copy h1{
+    font-size:40px!important;
+    line-height:.98!important;
+    letter-spacing:-.045em!important;
+  }
+}
