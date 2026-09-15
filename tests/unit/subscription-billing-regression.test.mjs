@@ -23,6 +23,16 @@ test('painel Meu plano integra o status do Mercado Pago sem expor detalhes sens�
  assert.equal(panel.includes('stripe'),false)
 })
 
+test('webhook sincroniza a assinatura também em pagamentos autorizados',()=>{
+ const webhook=read('supabase/functions/mercadopago-webhook/index.ts')
+ const block=webhook.split("if (eventType === 'subscription_authorized_payment' && dataId)")[1]||''
+ assert.ok(block.includes("/authorized_payments/"))
+ assert.ok(block.includes("/preapproval/"))
+ assert.ok(block.includes('provider_status'))
+ assert.ok(block.includes('current_period_end'))
+ assert.ok(block.includes('status: mapped'))
+})
+
 test('publicidade Premium permanece em fluxo manual sem cobrança automática',()=>{
  const merchant=read('src/MerchantAdvertisingSalesPage.jsx')
  const admin=read('src/AdminAdvertisingSalesPage.jsx')
