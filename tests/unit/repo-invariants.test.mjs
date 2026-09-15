@@ -27,21 +27,21 @@ test('arquivos legados de comunidade não existem',()=>{
 
 test('migração de senha usa recovery para senha antiga',()=>{const src=read('src/AuthPage.jsx');assert.match(src,/weak_password/);assert.match(src,/resetPasswordForEmail/);assert.match(src,/atualizar-senha/);assert.match(src,/password\.length<8/)})
 test('página de atualização exige nova senha',()=>{const src=read('src/PasswordUpdatePage.jsx');assert.match(src,/updateUser\(\{password\}\)/);assert.match(src,/password\.length<8/);assert.match(src,/password!==confirm/)})
-test('integrações de pagamento não existem no código ativo',()=>{
- const forbidden=/mercadopago|stripe/i
- const paymentPaths=[
+test('integrações legadas de pagamento não existem no código ativo',()=>{
+ const forbidden=/stripe/i
+ const legacyPaths=[
   'public/checkout/mercadopago.html',
   'src/MercadoPagoCheckoutPage.jsx',
   'supabase/functions/_shared/mercadopago.ts',
   'supabase/functions/create-checkout-session/index.ts',
   'supabase/functions/change-subscription-plan/index.ts',
   'supabase/functions/billing-portal/index.ts',
-  'supabase/functions/create-advertising-checkout-session/index.ts',
-  'supabase/functions/mercadopago-authorize-subscription/index.ts',
-  'supabase/functions/mercadopago-webhook/index.ts'
+  'supabase/functions/create-advertising-checkout-session/index.ts'
  ]
- for(const file of paymentPaths)assert.equal(fs.existsSync(path.join(root,file)),false,`payment source still exists: ${file}`)
- for(const file of sourceFiles())assert.doesNotMatch(read(`src/${file}`),forbidden,`payment provider reference found in ${file}`)
+ for(const file of legacyPaths)assert.equal(fs.existsSync(path.join(root,file)),false,`legacy payment source still exists: ${file}`)
+ assert.equal(fs.existsSync(path.join(root,'supabase/functions/mercadopago-authorize-subscription/index.ts')),true)
+ assert.equal(fs.existsSync(path.join(root,'supabase/functions/mercadopago-webhook/index.ts')),true)
+ for(const file of sourceFiles())assert.doesNotMatch(read(`src/${file}`),forbidden,`legacy payment provider reference found in ${file}`)
 })
 test('fluxos administrativos e migrations críticas estão versionados',()=>{
  assert.ok(fs.existsSync(path.join(srcDir,'AdminBusinessesPage.jsx')))
