@@ -85,14 +85,20 @@ Deno.serve(async (req) => {
       const providerSubscriptionId = String(invoice?.preapproval_id || invoice?.subscription_id || '')
       const local = providerSubscriptionId ? await findSubscription(providerSubscriptionId) : null
       if (local) {
+        const payment = invoice?.payment || {}
+        const paymentStatus = String(payment?.status || invoice?.status || 'unknown').toLowerCase()
+        const paymentStatusDetail = String(payment?.status_detail || invoice?.status_detail || '') || null
+        const retryAt = invoice?.next_retry_date || invoice?.next_payment_date || invoice?.debit_date || null
         await updateSubscription(local.id, {
           last_payment_id: dataId,
-          last_payment_status: invoice?.status || invoice?.payment?.status || 'unknown',
-          last_payment_at: invoice?.date_created || new Date().toISOString(),
+          last_payment_status: paymentStatus,
+          last_payment_status_detail: paymentStatusDetail,
+          last_payment_retry_at: retryAt,
+          last_payment_at: invoice?.last_modified || invoice?.date_created || new Date().toISOString(),
         })
         const status = await syncSubscriptionFromPreapproval(providerSubscriptionId, local)
         await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
-        return json({ ok: true, processed: 'subscription_authorized_payment', status })
+        return json({ ok: true, processed: 'subscription_authorized_payment', status, payment_status: paymentStatus, payment_status_detail: paymentStatusDetail, retry_at: retryAt })
       }
       await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'subscription_authorized_payment', ignored: true })
@@ -102,7 +108,7 @@ Deno.serve(async (req) => {
       const payment = await mpGet(`/v1/payments/${encodeURIComponent(dataId)}`)
       const providerSubscriptionId = String(payment?.metadata?.preapproval_id || payment?.metadata?.subscription_id || '')
       const local = providerSubscriptionId ? await findSubscription(providerSubscriptionId) : null
-      if (local) await updateSubscription(local.id, { last_payment_id: dataId, last_payment_status: payment?.status || 'unknown', last_payment_at: payment?.date_approved || payment?.date_created || new Date().toISOString() })
+      if (local) await updateSubscription(local.id, { last_payment_id: dataId, last_payment_status: payment?.status || 'unknown', last_payment_status_detail: payment?.status_detail || null, last_payment_at: payment?.date_approved || payment?.date_created || new Date().toISOString() })
       await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'payment' })
     }
