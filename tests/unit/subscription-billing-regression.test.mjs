@@ -18,6 +18,9 @@ test('painel Meu plano integra o status do Mercado Pago sem expor detalhes sens�
  const panel=read('src/PlanUsageReact.jsx')
  assert.ok(panel.includes('Gerenciado pelo Mercado Pago'))
  assert.ok(panel.includes('provider_status'))
+ assert.ok(panel.includes('last_payment_status'))
+ assert.ok(panel.includes('last_payment_status_detail'))
+ assert.ok(panel.includes('Regularizar no Mercado Pago'))
  assert.equal(panel.includes('provider_subscription_id'),false)
  assert.equal(panel.includes('billing-portal'),false)
  assert.equal(panel.includes('stripe'),false)
@@ -44,6 +47,26 @@ test('webhook sincroniza a assinatura também em pagamentos autorizados',()=>{
  assert.ok(helper.includes('provider_status'))
  assert.ok(helper.includes('current_period_end'))
  assert.ok(helper.includes('status: mapped'))
+ assert.ok(block.includes('last_payment_status_detail'))
+ assert.ok(block.includes('last_payment_retry_at'))
+ assert.ok(block.includes('retry_at'))
+})
+
+test('recuperação de cobrança informa recycling, processamento ou recusa',()=>{
+ const panel=read('src/PlanUsageReact.jsx')
+ assert.ok(panel.includes("status==='recycling'"))
+ assert.ok(panel.includes("status==='waiting for gateway'"))
+ assert.ok(panel.includes("status==='rejected'"))
+ assert.ok(panel.includes('Pagamento não aprovado'))
+ assert.ok(panel.includes('nova tentativa em andamento'))
+ assert.ok(panel.includes('Regularizar no Mercado Pago'))
+})
+
+test('schema de recuperação de pagamento possui os campos necessários',()=>{
+ const migration=read('supabase/migrations/20260915170000_add_payment_recovery_fields.sql')
+ assert.ok(migration.includes('last_payment_status_detail'))
+ assert.ok(migration.includes('last_payment_retry_at'))
+ assert.ok(migration.includes('add column if not exists'))
 })
 
 test('publicidade Premium permanece em fluxo manual sem cobrança automática',()=>{
