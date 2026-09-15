@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Preserve real files and directories (JS, CSS, images, sitemap assets, etc.).
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# React/Vite SPA fallback: let the client-side router resolve all app routes.
+RewriteRule ^ index.html [L]
