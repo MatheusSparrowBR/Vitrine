@@ -61,11 +61,14 @@ test('seleção do ciclo atual prioriza o ciclo vigente mais recente',()=>{
  assert.doesNotMatch(migration,/where u\.business_id=p_business_id\n    and u\.cycle_end>now\(\)\n  order by u\.cycle_end desc/)
 })
 
-test('upgrade de plano fica desativado até a nova configuração de pagamentos',()=>{
+test('checkout Mercado Pago está habilitado para Pro e Premium',()=>{
  const page=read('src/BillingPlansPage.jsx')
- assert.ok(page.includes('Disponível em breve'))
+ assert.ok(page.includes('Assinar com Mercado Pago'))
+ assert.ok(page.includes('mercadopago-authorize-subscription'))
+ assert.ok(page.includes('checkout_url'))
+ assert.ok(page.includes('price_monthly'))
+ assert.ok(page.includes('price_yearly'))
  assert.equal(page.includes('create-checkout-session'),false)
- assert.equal(page.includes('mercadopago'),false)
  assert.equal(page.includes('stripe'),false)
 })
 
