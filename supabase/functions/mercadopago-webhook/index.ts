@@ -19,6 +19,26 @@ async function findSubscription(providerSubscriptionId: string) { const res = aw
 async function updateSubscription(id: string, patch: Record<string, unknown>) { await rest(`subscriptions?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
 async function getBillingEvent(providerEventId: string) { const res = await rest(`billing_events?provider=eq.mercadopago&provider_event_id=eq.${encodeURIComponent(providerEventId)}&select=*`); const rows = await res.json().catch(() => []); return rows?.[0] || null }
 async function markEvent(providerEventId: string, patch: Record<string, unknown>) { await rest(`billing_events?provider=eq.mercadopago&provider_event_id=eq.${encodeURIComponent(providerEventId)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
+async function syncSubscriptionFromPreapproval(providerSubscriptionId: string, local: any = null, sub: any = null) {
+  const providerSub = sub || await mpGet(`/preapproval/${encodeURIComponent(providerSubscriptionId)}`)
+  const currentLocal = local || await findSubscription(providerSubscriptionId)
+  if (!currentLocal) return null
+  const rawStatus = String(providerSub?.status || '').toLowerCase()
+  const mapped = rawStatus === 'authorized' || rawStatus === 'active' ? 'active' : rawStatus === 'paused' ? 'paused' : rawStatus === 'cancelled' || rawStatus === 'canceled' ? 'canceled' : 'pending'
+  const auto = providerSub?.auto_recurring || {}
+  await updateSubscription(currentLocal.id, {
+    status: mapped,
+    provider_status: rawStatus || null,
+    provider_customer_id: providerSub?.payer_id ? String(providerSub.payer_id) : currentLocal.provider_customer_id,
+    provider_checkout_url: providerSub?.init_point || currentLocal.provider_checkout_url,
+    current_period_start: auto?.start_date || null,
+    current_period_end: providerSub?.next_payment_date || null,
+    ends_at: auto?.end_date || null,
+    cancel_at_period_end: mapped === 'paused' || mapped === 'canceled',
+    started_at: currentLocal.started_at || (mapped === 'active' ? new Date().toISOString() : null),
+  })
+  return mapped
+}
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405)
@@ -51,14 +71,11 @@ Deno.serve(async (req) => {
     if (eventType === 'subscription_preapproval' && dataId) {
       const sub = await mpGet(`/preapproval/${encodeURIComponent(dataId)}`)
       const local = await findSubscription(dataId)
+      const mapped = await syncSubscriptionFromPreapproval(dataId, local, sub)
       if (!local) {
         await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
         return json({ ok: true, ignored: true })
       }
-      const rawStatus = String(sub?.status || '').toLowerCase()
-      const mapped = rawStatus === 'authorized' || rawStatus === 'active' ? 'active' : rawStatus === 'paused' ? 'paused' : rawStatus === 'cancelled' || rawStatus === 'canceled' ? 'canceled' : 'pending'
-      const auto = sub?.auto_recurring || {}
-      await updateSubscription(local.id, { status: mapped, provider_status: rawStatus || null, provider_customer_id: sub?.payer_id ? String(sub.payer_id) : local.provider_customer_id, provider_checkout_url: sub?.init_point || local.provider_checkout_url, current_period_start: auto?.start_date || null, current_period_end: sub?.next_payment_date || null, ends_at: auto?.end_date || null, cancel_at_period_end: mapped === 'paused' || mapped === 'canceled', started_at: local.started_at || (mapped === 'active' ? new Date().toISOString() : null) })
       await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
       return json({ ok: true, processed: 'subscription_preapproval', status: mapped })
     }
@@ -67,9 +84,18 @@ Deno.serve(async (req) => {
       const invoice = await mpGet(`/authorized_payments/${encodeURIComponent(dataId)}`)
       const providerSubscriptionId = String(invoice?.preapproval_id || invoice?.subscription_id || '')
       const local = providerSubscriptionId ? await findSubscription(providerSubscriptionId) : null
-      if (local) await updateSubscription(local.id, { last_payment_id: dataId, last_payment_status: invoice?.status || invoice?.payment?.status || 'unknown', last_payment_at: invoice?.date_created || new Date().toISOString() })
+      if (local) {
+        await updateSubscription(local.id, {
+          last_payment_id: dataId,
+          last_payment_status: invoice?.status || invoice?.payment?.status || 'unknown',
+          last_payment_at: invoice?.date_created || new Date().toISOString(),
+        })
+        const status = await syncSubscriptionFromPreapproval(providerSubscriptionId, local)
+        await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
+        return json({ ok: true, processed: 'subscription_authorized_payment', status })
+      }
       await markEvent(providerEventId, { processing_status: 'processed', processed_at: new Date().toISOString(), error_message: null })
-      return json({ ok: true, processed: 'subscription_authorized_payment' })
+      return json({ ok: true, processed: 'subscription_authorized_payment', ignored: true })
     }
 
     if (eventType === 'payment' && dataId) {
