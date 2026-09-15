@@ -69,8 +69,17 @@ Deno.serve(async (req) => {
   if (!mpResponse.ok) return json({ error: 'O Mercado Pago recusou a criação da assinatura.', details: mpData?.message || mpData?.error || null }, mpResponse.status >= 500 ? 502 : 400)
 
   const providerSubscriptionId = String(mpData?.id || '')
-  const checkoutUrl = String(mpData?.init_point || '')
-  if (!providerSubscriptionId || !checkoutUrl) return json({ error: 'O Mercado Pago não retornou um link de checkout válido.' }, 502)
+  const rawCheckoutUrl = String(mpData?.init_point || '')
+  if (!providerSubscriptionId || !rawCheckoutUrl) return json({ error: 'O Mercado Pago não retornou um link de checkout válido.' }, 502)
+
+  let checkoutUrl = rawCheckoutUrl
+  try {
+    const normalized = new URL(rawCheckoutUrl)
+    normalized.searchParams.delete('activation')
+    checkoutUrl = normalized.toString()
+  } catch {
+    return json({ error: 'O Mercado Pago retornou um link de checkout inválido.' }, 502)
+  }
 
   const { data: subscription, error: insertError } = await supabase.from('subscriptions').insert({
     user_id: user.id, business_id: businessId, plan_id: plan.id, status: 'pending', provider: 'mercadopago', billing_interval: interval,
