@@ -8,6 +8,7 @@ const routes=[
  '/planos',
  '/login',
  '/conta',
+ '/conta/onboarding',
  '/conta/analytics',
  '/conta/analytics-comercial',
  '/conta/publicidade',
@@ -39,7 +40,7 @@ test('rotas principais não exibem tela branca nem erro de runtime',async({page}
   await expect(page.locator('#root')).toBeVisible()
   await expect(page.locator('.vl-app-error')).toHaveCount(0)
   const text=(await page.locator('body').innerText()).trim()
-  expect(text.length,`rota ${route} ficou sem conteúdo visível`).toBeGreaterThan(20)
+  expect(text,`rota ${route} ficou sem conteúdo visível`).toMatch(/.{21,}/s)
   expect(errors,`erro JavaScript na rota ${route}: ${errors.join(' | ')}`).toEqual([])
  }
 })
@@ -61,4 +62,14 @@ test('home não depende de script externo para o placeholder Premium',async({pag
  await expect(page.locator('.vl-category-slot')).toBeVisible()
  const scripts=await page.locator('script[src]').evaluateAll(items=>items.map(item=>item.getAttribute('src')||''))
  expect(scripts).not.toContain('/premium-empty-slot.js')
+})
+
+test('onboarding comercial apresenta os quatro momentos do fluxo da empresa',async({page})=>{
+ await page.goto('/conta/onboarding',{waitUntil:'domcontentloaded'})
+ await expect(page.locator('h1')).toContainText('Transforme sua empresa em uma vitrine local')
+ await expect(page.getByText('O QUE É',{exact:true})).toBeVisible()
+ await expect(page.getByText('COMO SUA EMPRESA APARECE',{exact:true})).toBeVisible()
+ await expect(page.getByText('COMO CONSEGUIR MAIS EXPOSIÇÃO',{exact:true})).toBeVisible()
+ await expect(page.getByText('COMO FAZER UPGRADE',{exact:true})).toBeVisible()
+ await expect(page.locator('a[href="/planos"]').first()).toBeVisible()
 })
