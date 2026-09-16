@@ -1,13 +1,14 @@
 (() => {
   const PLACEHOLDER_SRC = '/premium-ad-placeholder-clean.svg?rev=20260916-1428'
   const TARGET_HREF = '/conta/publicidade'
+  const SELECTOR = '.home-wrap > .vl-category-slot + .home-section > .empty-v2'
 
   const render = (root = document) => {
-    root.querySelectorAll?.('.empty-v2:not([data-vl-premium-placeholder])').forEach((slot) => {
+    root.querySelectorAll?.(`${SELECTOR}:not([data-vl-premium-placeholder])`).forEach((slot) => {
       slot.dataset.vlPremiumPlaceholder = 'true'
       slot.classList.add('vl-premium-empty-slot')
       slot.setAttribute('aria-label', 'Espaço Premium disponível para publicidade')
-      slot.innerHTML = `<a class="vl-premium-placeholder-link" href="${TARGET_HREF}" aria-label="Anuncie sua empresa na VitrineLocal"><img src="${PLACEHOLDER_SRC}" alt="Espaço Premium disponível na VitrineLocal" loading="eager" decoding="async"></a>`
+      slot.innerHTML = `<a class="vl-premium-placeholder-link" href="${TARGET_HREF}" aria-label="Espaço Premium disponível na VitrineLocal"><img src="${PLACEHOLDER_SRC}" alt="Espaço Premium disponível na VitrineLocal" loading="eager" decoding="async"></a>`
     })
   }
 
