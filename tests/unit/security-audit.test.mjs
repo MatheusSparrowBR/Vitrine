@@ -37,3 +37,12 @@ test('phase2 enhancements has no promotion ownership or lifecycle code',()=>{
  const source=read('src/phase2-enhancements.js')
  assert.doesNotMatch(source,/promotion-service|promotionRefreshTimer|currentPromotions|applyPromotionVisibility|loadCurrentPromotions|createAccountPromotionForm|installAccountPromotionCreator/)
 })
+
+test('profile moderation status is protected by a database migration',()=>{
+ const source=read('supabase/migrations/20260915180000_protect_profile_moderation_status.sql')
+ assert.match(source,/protect_profile_moderation_fields/)
+ assert.match(source,/new\.account_status := old\.account_status/)
+ assert.match(source,/new\.status_reason := old\.status_reason/)
+ assert.match(source,/new\.status_updated_by := old\.status_updated_by/)
+ assert.match(source,/trg_protect_profile_moderation_status/)
+})
