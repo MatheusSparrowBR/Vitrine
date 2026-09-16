@@ -2,7 +2,7 @@
 -- The previous policies incorrectly derived the request id from business.name,
 -- which prevented owners from uploading/reading/updating/deleting their own art.
 
-drop policy if exists "Owners upload advertising request art" on storage.objects;
+ drop policy if exists "Owners upload advertising request art" on storage.objects;
 drop policy if exists "Owners read advertising request art" on storage.objects;
 drop policy if exists "Owners update advertising request art" on storage.objects;
 drop policy if exists "Owners delete advertising request art" on storage.objects;
@@ -15,7 +15,7 @@ with check (
     select 1
     from public.advertising_requests r
     join public.businesses b on b.id = r.business_id
-    where r.id::text = (storage.foldername(name))[1]
+    where r.id::text = (storage.foldername(storage.objects.name))[1]
       and b.owner_id = auth.uid()
   )
 );
@@ -28,7 +28,7 @@ using (
     select 1
     from public.advertising_requests r
     join public.businesses b on b.id = r.business_id
-    where r.id::text = (storage.foldername(name))[1]
+    where r.id::text = (storage.foldername(storage.objects.name))[1]
       and b.owner_id = auth.uid()
   )
 );
@@ -41,7 +41,7 @@ using (
     select 1
     from public.advertising_requests r
     join public.businesses b on b.id = r.business_id
-    where r.id::text = (storage.foldername(name))[1]
+    where r.id::text = (storage.foldername(storage.objects.name))[1]
       and b.owner_id = auth.uid()
   )
 )
@@ -51,7 +51,7 @@ with check (
     select 1
     from public.advertising_requests r
     join public.businesses b on b.id = r.business_id
-    where r.id::text = (storage.foldername(name))[1]
+    where r.id::text = (storage.foldername(storage.objects.name))[1]
       and b.owner_id = auth.uid()
   )
 );
@@ -64,7 +64,7 @@ using (
     select 1
     from public.advertising_requests r
     join public.businesses b on b.id = r.business_id
-    where r.id::text = (storage.foldername(name))[1]
+    where r.id::text = (storage.foldername(storage.objects.name))[1]
       and b.owner_id = auth.uid()
   )
 );
