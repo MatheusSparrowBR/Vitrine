@@ -56,7 +56,7 @@ test('logo do header é realmente carregada pelo navegador',async({page})=>{
 })
 
 test('placeholder Premium usa o asset versionado correto e não contém CTA legado',async({page})=>{
- await page.goto('/laguna',{waitUntil:'networkidle'})
+ await page.goto('/laguna',{waitUntil:'domcontentloaded'})
  const css=await page.request.get('/premium-empty-slot.css?v=20260916-1428')
  expect(css.ok()).toBeTruthy()
  const cssText=await css.text()
