@@ -40,7 +40,7 @@ test('rotas principais não exibem tela branca nem erro de runtime',async({page}
   await expect(page.locator('#root')).toBeVisible()
   await expect(page.locator('.vl-app-error')).toHaveCount(0)
   const text=(await page.locator('body').innerText()).trim()
-  expect(text,`rota ${route} ficou sem conteúdo visível`).toMatch(/.{21,}/s)
+  expect(text.length,`rota ${route} ficou sem conteúdo visível`).toBeGreaterThan(20)
   expect(errors,`erro JavaScript na rota ${route}: ${errors.join(' | ')}`).toEqual([])
  }
 })
@@ -67,9 +67,9 @@ test('home não depende de script externo para o placeholder Premium',async({pag
 test('onboarding comercial apresenta os quatro momentos do fluxo da empresa',async({page})=>{
  await page.goto('/conta/onboarding',{waitUntil:'domcontentloaded'})
  await expect(page.locator('h1')).toContainText('Transforme sua empresa em uma vitrine local')
- await expect(page.getByText('O QUE É',{exact:true})).toBeVisible()
- await expect(page.getByText('COMO SUA EMPRESA APARECE',{exact:true})).toBeVisible()
- await expect(page.getByText('COMO CONSEGUIR MAIS EXPOSIÇÃO',{exact:true})).toBeVisible()
- await expect(page.getByText('COMO FAZER UPGRADE',{exact:true})).toBeVisible()
+ await expect(page.getByText(/01 \| O QUE É/)).toBeVisible()
+ await expect(page.getByText(/02 \| COMO SUA EMPRESA APARECE/)).toBeVisible()
+ await expect(page.getByText(/03 \| COMO CONSEGUIR MAIS EXPOSIÇÃO/)).toBeVisible()
+ await expect(page.getByText(/04 \| COMO FAZER UPGRADE/)).toBeVisible()
  await expect(page.locator('a[href="/planos"]').first()).toBeVisible()
 })
