@@ -4,6 +4,7 @@ import'./item-cards-compact.css'
 import'./account-workspace.css'
 import'./site-header.css'
 import'./commercial-demo.css'
+import'./commercial-demo-real.css'
 
 const products=[
  {name:'Burger Laguna',description:'Blend artesanal, queijo e molho da casa.',price:'34,90',kind:'PRODUTO'},
