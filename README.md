@@ -2,6 +2,8 @@
 
 SaaS de descoberta e divulgação de empresas, promoções e conteúdo local. O MVP começa em Laguna/SC e usa uma arquitetura multi-cidade desde o início.
 
+**Release atual: 1.0.0**
+
 ## Stack
 
 - React 19 + Vite 8
@@ -13,7 +15,7 @@ SaaS de descoberta e divulgação de empresas, promoções e conteúdo local. O 
 
 Projeto: `Vitrine` (`sa-east-1`).
 
-O banco contém cidades, categorias, empresas, fotos, produtos/serviços, promoções, posts, envios da comunidade, planos, assinaturas, anúncios e eventos de analytics. Laguna/SC, categorias e os planos Free/Pro/Premium já estão semeados.
+O banco contém cidades, categorias, empresas, fotos, produtos/serviços, promoções, posts, envios da comunidade, planos, assinaturas, anúncios e eventos de analytics. Laguna/SC, categorias e os planos Grátis/Pro/Premium já estão semeados.
 
 ## Configuração local
 
@@ -38,15 +40,12 @@ Nunca coloque chaves secretas/service role ou token do Mercado Pago no frontend.
 - Gestão administrativa de empresas, promoções, eventos, banners, categorias, cidades e planos.
 - Edição/exclusão de promoções e publicação/pausa de campanhas.
 - Banner Premium da Home cadastrado/publicado somente pelo administrador.
-- Upload das artes Premium para o bucket `premium-banners` do Supabase Storage.
-- Upload de fotos e vídeos das empresas para `business-media`.
-- Upload privado de fotos e vídeos enviados pela comunidade para `community-submissions`.
-- Mídia da comunidade aprovada é copiada para `community-published` antes da publicação no feed.
-- Seção pública de planos na Home carregada da tabela `plans`.
+- Upload de artes e mídias nos buckets do Supabase Storage conforme cada fluxo.
 - Área do comerciante para atualizar logo, capa e galeria com upload real para o Storage.
-- Funil comercial: cadastro da empresa → escolha de plano → assinatura Mercado Pago → retorno e gerenciamento da assinatura.
+- Funil comercial: cadastro da empresa -> escolha de plano -> assinatura Mercado Pago -> retorno e gerenciamento da assinatura.
 - Analytics público por eventos (`page_view`, `profile_view`, `whatsapp_click`, `instagram_click`, `website_click`, `business_click`, `promotion_click`, `event_click`, `category_click`, `banner_click`).
 - Dashboard de Analytics para administradores e comerciantes.
+- Onboarding comercial para empresas com guia sobre presença, exposição e upgrade em `/conta/onboarding`.
 - Arquitetura preparada para adicionar novas cidades sem duplicar o produto.
 
 ## Planos
@@ -57,15 +56,18 @@ A Home apresenta os planos ativos cadastrados no Supabase:
 - **Pro** — R$ 29,90/mês ou R$ 299/ano
 - **Premium** — R$ 59,90/mês ou R$ 599/ano
 
-O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam a Edge Function `create-checkout-session`, que cria uma assinatura Mercado Pago com pagamento pendente e retorna o `init_point` para o cliente concluir a autorização. A alteração de plano usa `change-subscription-plan` e a gestão da assinatura usa `billing-portal`.
+O comerciante pode começar no plano Grátis sem pagamento. Os planos pagos usam o fluxo de assinatura Mercado Pago para iniciar a autorização e sincronizar a assinatura após os eventos do provedor.
 
 ### Secrets do Supabase
 
-O backend de cobrança usa os secrets:
+O backend de cobrança usa os secrets server-side configurados para o ambiente, incluindo:
 
-- `MERCADOPAGO_ACCESS_TOKEN`
-- `MERCADOPAGO_WEBHOOK_SECRET`
-- `SITE_URL`
+- `MP_ACCESS_TOKEN`
+- `MP_WEBHOOK_SECRET`
+- `MP_ENVIRONMENT`
+- `MP_TEST_PAYER_EMAIL` em ambiente de teste
+
+URLs e demais parâmetros de produção também devem ser configurados como secrets/variáveis server-side quando utilizados por Edge Functions.
 
 Nunca envie esses valores para o frontend ou para o GitHub.
 
@@ -89,7 +91,7 @@ O webhook valida `x-signature`/`x-request-id`, registra eventos em `billing_even
 - Prioridade controla a ordem.
 - Início e fim permitem programação.
 - Múltiplos banners elegíveis alternam automaticamente na Home.
-- A cobrança recorrente da publicidade Premium usa Mercado Pago quando o pedido administrativo estiver liberado para pagamento.
+- A publicidade Premium possui fluxo comercial separado e pode usar Mercado Pago quando liberada para cobrança.
 
 ## Mídia de empresas e comunidade
 
@@ -110,3 +112,7 @@ O rastreador global registra eventos anônimos no Supabase quando o backend est�
 ## Diagnóstico do diretório público
 
 As leituras públicas de `businesses` feitas pelo frontend são redirecionadas para `public_business_directory`, preservando o formato esperado pelos componentes React (`categories` e `cities`). O runtime também cria um painel de diagnóstico fixo quando uma requisição ao Supabase retorna erro HTTP ou falha de rede, mostrando operação, status e mensagem sem expor chaves ou cabeçalhos.
+
+## Produção
+
+O checklist operacional completo para o release está em `docs/PRODUCAO.md`.
