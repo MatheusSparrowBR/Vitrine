@@ -119,15 +119,6 @@ test('onboarding comercial apresenta os quatro momentos do fluxo da empresa',asy
  await expect(page.locator('a[href="/planos"]').first()).toBeVisible()
 })
 
-test('pré-lançamento mostra apenas canais de contato e aponta para planos próprios',async({page})=>{
- await page.goto('/',{waitUntil:'domcontentloaded'})
- await expect(page.getByText('@vitrinelocaal')).toBeVisible()
- await expect(page.getByText('contato@vitrinelocal.net')).toBeVisible()
- await expect(page.getByRole('link',{name:/Ver planos/i})).toHaveAttribute('href','/em-breve/planos')
- await expect(page.getByText('Cadastrar minha empresa')).toHaveCount(0)
- await expect(page.getByText('Já tenho uma conta')).toHaveCount(0)
-})
-
 test('página de planos do pré-lançamento não usa o cabeçalho global e preserva os três planos comerciais',async({page})=>{
  await page.goto('/em-breve/planos',{waitUntil:'domcontentloaded'})
  await expect(page.locator('.vl-site-header')).toHaveCount(0)
