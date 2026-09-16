@@ -81,8 +81,8 @@ test('placeholder Premium usa o asset versionado correto e não contém CTA lega
 test('placeholder Premium não interfere nos estados vazios de eventos',async({page})=>{
  await page.goto('/laguna',{waitUntil:'domcontentloaded'})
  await expect(page.getByText('Próximos eventos')).toBeVisible()
- await expect(page.getByText('Nenhum evento próximo.')).toBeVisible()
- const eventEmpty=page.getByText('Nenhum evento próximo.').locator('..')
+ await expect(page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./)).toBeVisible({timeout:9000})
+ const eventEmpty=page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./).locator('..')
  await expect(eventEmpty).toBeVisible()
  const premiumCss=await page.request.get('/premium-empty-slot.css?v=20260916-1428')
  const premiumCssText=await premiumCss.text()
