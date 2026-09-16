@@ -1,3 +1,18 @@
+.empty-v2 {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent url('/premium-ad-placeholder.svg') center / cover no-repeat !important;
+  overflow: hidden;
+  min-height: 0 !important;
+  aspect-ratio: 1200 / 360;
+  border-radius: 24px !important;
+  box-shadow: 0 12px 36px rgba(24, 42, 112, 0.08);
+}
+
+.empty-v2 > * {
+  display: none !important;
+}
+
 .vl-premium-empty-slot {
   padding: 0 !important;
   border: 0 !important;
@@ -34,6 +49,10 @@
 }
 
 @media (max-width: 720px) {
+  .empty-v2 {
+    border-radius: 18px !important;
+  }
+
   .vl-premium-placeholder-link {
     border-radius: 18px;
   }
