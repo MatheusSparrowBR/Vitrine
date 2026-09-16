@@ -55,7 +55,22 @@ test('logo do header é realmente carregada pelo navegador',async({page})=>{
  expect(naturalWidth).toBeGreaterThan(0)
 })
 
-test('home não depende de script externo para o placeholder Premium',async({page})=>{
+test('placeholder Premium usa o asset versionado correto e não contém CTA legado',async({page})=>{
+ await page.goto('/laguna',{waitUntil:'networkidle'})
+ const css=await page.request.get('/premium-empty-slot.css?v=20260916-1428')
+ expect(css.ok()).toBeTruthy()
+ const cssText=await css.text()
+ expect(cssText).toContain('premium-ad-placeholder-clean.svg?rev=20260916-1428')
+ expect(cssText).not.toContain('premium-ad-placeholder.svg')
+ const asset=await page.request.get('/premium-ad-placeholder-clean.svg?rev=20260916-1428')
+ expect(asset.ok()).toBeTruthy()
+ const assetText=await asset.text()
+ expect(assetText).not.toContain('Quero anunciar')
+ expect(assetText).not.toContain('Conhecer anúncio')
+ await expect(page.locator('body')).not.toContainText('Quero anunciar')
+})
+
+test('home não carrega mecanismo legado do placeholder Premium',async({page})=>{
  await page.goto('/laguna')
  await expect(page.locator('.vl-site-header')).toBeVisible()
  await expect(page.locator('.home-hero')).toBeVisible()
