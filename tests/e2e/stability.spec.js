@@ -61,13 +61,32 @@ test('placeholder Premium usa o asset versionado correto e não contém CTA lega
  expect(css.ok()).toBeTruthy()
  const cssText=await css.text()
  expect(cssText).toContain('premium-ad-placeholder-clean.svg?rev=20260916-1428')
- expect(cssText).not.toContain('premium-ad-placeholder.svg')
- const asset=await page.request.get('/premium-ad-placeholder-clean.svg?rev=20260916-1428')
- expect(asset.ok()).toBeTruthy()
- const assetText=await asset.text()
- expect(assetText).not.toContain('Quero anunciar')
- expect(assetText).not.toContain('Conhecer anúncio')
+ expect(cssText).not.toContain('url(\'/premium-ad-placeholder.svg')
+ const assetPaths=[
+  '/premium-ad-placeholder-clean.svg?rev=20260916-1428',
+  '/premium-ad-placeholder-v2.svg',
+  '/premium-ad-placeholder-v3.svg',
+  '/premium-ad-placeholder-v6.svg'
+ ]
+ for(const path of assetPaths){
+  const response=await page.request.get(path)
+  expect(response.ok(),`asset ${path} não respondeu`).toBeTruthy()
+  const text=await response.text()
+  expect(text,`asset ${path} voltou a conter CTA legado`).not.toContain('Quero anunciar')
+  expect(text,`asset ${path} voltou a conter CTA legado`).not.toContain('Conhecer anúncio')
+ }
  await expect(page.locator('body')).not.toContainText('Quero anunciar')
+})
+
+test('placeholder Premium não interfere nos estados vazios de eventos',async({page})=>{
+ await page.goto('/laguna',{waitUntil:'domcontentloaded'})
+ await expect(page.getByText('Próximos eventos')).toBeVisible()
+ await expect(page.getByText('Nenhum evento próximo.')).toBeVisible()
+ const eventEmpty=page.getByText('Nenhum evento próximo.').locator('..')
+ await expect(eventEmpty).toBeVisible()
+ const premiumCss=await page.request.get('/premium-empty-slot.css?v=20260916-1428')
+ const premiumCssText=await premiumCss.text()
+ expect(premiumCssText).toContain('.vl-category-slot + .home-section > .empty-v2')
 })
 
 test('home não carrega mecanismo legado do placeholder Premium',async({page})=>{
