@@ -1,152 +1,32 @@
-import React from 'react'
+import React,{useState}from'react'
+import'./modern-business-profile.css'
+import'./item-cards-compact.css'
+import'./account-workspace.css'
+import'./site-header.css'
+import'./commercial-demo.css'
 
-const products = [
-  { name: 'Burger Laguna', category: 'Mais pedido', price: 'R$ 34,90', icon: '🍔', note: 'Blend artesanal, queijo e molho da casa' },
-  { name: 'Risoto do Mar', category: 'Especial da casa', price: 'R$ 46,90', icon: '🦐', note: 'Camarão, limão siciliano e parmesão' },
-  { name: 'Drink Sunset', category: 'Bebida', price: 'R$ 24,90', icon: '🍹', note: 'Frutas cítricas e toque tropical' },
-  { name: 'Cheesecake Local', category: 'Sobremesa', price: 'R$ 19,90', icon: '🍰', note: 'Cheesecake artesanal com frutas vermelhas' },
+const products=[
+ {name:'Burger Laguna',description:'Blend artesanal, queijo e molho da casa.',price:'34,90',kind:'PRODUTO'},
+ {name:'Risoto do Mar',description:'Camarão, limão siciliano e parmesão.',price:'46,90',kind:'PRODUTO'},
+ {name:'Drink Sunset',description:'Frutas cítricas e toque tropical.',price:'24,90',kind:'PRODUTO'},
 ]
-
-const services = [
-  { name: 'Reservas para grupos', note: 'Mesas para aniversários e encontros' },
-  { name: 'Eventos corporativos', note: 'Estrutura personalizada para empresas' },
-  { name: 'Delivery', note: 'Pedidos e atendimento pelos canais da casa' },
+const services=[
+ {name:'Reservas para grupos',description:'Mesas para aniversários e encontros.'},
+ {name:'Eventos corporativos',description:'Estrutura personalizada para empresas.'},
+ {name:'Delivery',description:'Pedidos e atendimento pelos canais da casa.'},
 ]
-
-const reviews = [
-  { author: 'Mariana A.', rating: 5, text: 'Ambiente lindo, atendimento atencioso e comida excelente.' },
-  { author: 'Rafael M.', rating: 5, text: 'A promoção apareceu para mim e foi uma ótima descoberta.' },
-  { author: 'Camila S.', rating: 4, text: 'Experiência muito boa. Já indiquei para amigos.' },
+const reviews=[
+ {author:'Mariana A.',text:'Ambiente lindo, atendimento atencioso e comida excelente.',rating:5},
+ {author:'Rafael M.',text:'A promoção apareceu para mim e foi uma ótima descoberta.',rating:5},
+ {author:'Camila S.',text:'Experiência muito boa. Já indiquei para amigos.',rating:4},
 ]
-
-const accountSections = [
-  { id: 'overview', label: 'Visão geral', icon: '⌂' },
-  { id: 'business', label: 'Meu negócio', icon: '▣' },
-  { id: 'catalog', label: 'Produtos e serviços', icon: '◈' },
-  { id: 'marketing', label: 'Promoções e eventos', icon: '✦' },
-  { id: 'reviews', label: 'Avaliações', icon: '★' },
-  { id: 'advertising', label: 'Publicidade Premium', icon: '◆' },
+const navItems=[
+ ['overview','⌂','Visão geral'],['company','◈','Minha empresa'],['media','▣','Mídias'],['items','◇','Produtos e serviços'],['promotions','✦','Promoções'],['analytics','◉','Desempenho'],['plan','◉','Meu plano']
 ]
-
-function Stars({ count = 5 }) {
-  return <span className="vld-stars" aria-label={`${count} estrelas`}>{'★'.repeat(count)}</span>
-}
-
-function Metric({ value, label, detail }) {
-  return (
-    <div className="vld-metric">
-      <strong>{value}</strong>
-      <span>{label}</span>
-      {detail && <small>{detail}</small>}
-    </div>
-  )
-}
-
-function DemoHeader({ view, setView }) {
-  return (
-    <header className="vld-demo-header">
-      <div className="vld-demo-header-inner">
-        <a className="vld-demo-brand" href="/demo" aria-label="VitrineLocal Demo">
-          <span className="vld-demo-brand-mark">VL</span>
-          <span><strong>VitrineLocal</strong><small>DEMO COMERCIAL</small></span>
-        </a>
-        <nav className="vld-demo-view-switch" aria-label="Modo da demonstração">
-          <button className={view === 'public' ? 'active' : ''} onClick={() => setView('public')}>Experiência do consumidor</button>
-          <button className={view === 'account' ? 'active' : ''} onClick={() => setView('account')}>Minha Conta Premium</button>
-        </nav>
-        <a className="vld-demo-exit" href="/laguna">Voltar ao VitrineLocal</a>
-      </div>
-    </header>
-  )
-}
-
-function DemoPublicView({ setView }) {
-  return (
-    <main className="vld-demo-public">
-      <section className="vld-demo-hero">
-        <div className="vld-demo-hero-copy">
-          <div className="vld-demo-kicker"><span>●</span> Empresa demonstrativa · Premium</div>
-          <h1>Bistrô Laguna</h1>
-          <p className="vld-demo-hero-subtitle">Gastronomia artesanal, experiências locais e aquele lugar que você quer voltar.</p>
-          <div className="vld-demo-rating-row"><Stars/> <strong>4,9</strong> <span>· 127 avaliações</span></div>
-          <div className="vld-demo-pills"><span>🍴 Restaurante</span><span>📍 Laguna · SC</span><span>Aberto hoje</span></div>
-          <div className="vld-demo-hero-actions"><button className="vld-demo-primary">Ver promoção</button><button className="vld-demo-secondary">Entrar em contato</button></div>
-          <div className="vld-demo-hero-links"><span>Instagram</span><span>WhatsApp</span><span>Como chegar</span></div>
-        </div>
-        <div className="vld-demo-hero-art" aria-label="Imagem demonstrativa do Bistrô Laguna">
-          <div className="vld-demo-glow vld-demo-glow-one"/><div className="vld-demo-glow vld-demo-glow-two"/>
-          <div className="vld-demo-restaurant-card"><span>BL</span><strong>Bistrô<br/>Laguna</strong><small>Sabores locais · desde 2018</small></div>
-          <div className="vld-demo-floating-card"><strong>Hoje</strong><span>18:30 — 23:30</span></div>
-        </div>
-      </section>
-
-      <section className="vld-demo-section vld-demo-premium-banner">
-        <div><span className="vld-demo-mini-label">OFERTA EM DESTAQUE</span><h2>Festival de Sabores</h2><p>20% OFF de segunda a quinta em pratos selecionados.</p></div>
-        <div className="vld-demo-banner-side"><span>Ative sua vontade de experimentar.</span><button>Quero conhecer</button></div>
-      </section>
-
-      <section className="vld-demo-section">
-        <div className="vld-demo-section-heading"><div><span className="vld-demo-mini-label">CATÁLOGO</span><h2>Produtos que vendem a experiência</h2></div><span>Ver catálogo completo →</span></div>
-        <div className="vld-demo-product-grid">{products.map(item => <article className="vld-demo-product" key={item.name}><div className="vld-demo-product-art"><span>{item.icon}</span><small>{item.category}</small></div><div className="vld-demo-product-body"><h3>{item.name}</h3><p>{item.note}</p><strong>{item.price}</strong></div></article>)}</div>
-      </section>
-
-      <section className="vld-demo-section vld-demo-two-col">
-        <div className="vld-demo-panel">
-          <div className="vld-demo-section-heading"><div><span className="vld-demo-mini-label">SERVIÇOS</span><h2>Mais do que um produto</h2></div></div>
-          <div className="vld-demo-service-list">{services.map(item => <div className="vld-demo-service" key={item.name}><span>✓</span><div><strong>{item.name}</strong><p>{item.note}</p></div></div>)}</div>
-        </div>
-        <div className="vld-demo-panel vld-demo-event-panel"><span className="vld-demo-mini-label">EVENTO</span><div className="vld-demo-event-date"><strong>24</strong><span>SET</span></div><h2>Noite de Música ao Vivo</h2><p>Sexta-feira · 20h · entrada gratuita</p><button>Ver detalhes do evento →</button></div>
-      </section>
-
-      <section className="vld-demo-section vld-demo-review-section">
-        <div className="vld-demo-section-heading"><div><span className="vld-demo-mini-label">REPUTAÇÃO</span><h2>O cliente também fala da sua marca</h2></div><div className="vld-demo-review-summary"><strong>4,9</strong><Stars/><span>127 avaliações</span></div></div>
-        <div className="vld-demo-review-grid">{reviews.map(review => <article className="vld-demo-review" key={review.author}><div><strong>{review.author}</strong><Stars count={review.rating}/></div><p>“{review.text}”</p><span>Cliente verificado</span></article>)}</div>
-      </section>
-
-      <section className="vld-demo-section vld-demo-business-info">
-        <div><span className="vld-demo-mini-label">INFORMAÇÕES DA EMPRESA</span><h2>Horários, contato e presença local</h2><p>Uma apresentação completa facilita a decisão de compra e reduz a distância entre descobrir e entrar em contato.</p></div>
-        <div className="vld-demo-info-cards"><div><span>🕒</span><strong>Horários</strong><p>Seg–Qui 18:30–23:30<br/>Sex–Sáb 18:30–00:00</p></div><div><span>📍</span><strong>Localização</strong><p>Centro Histórico<br/>Laguna · Santa Catarina</p></div><div><span>💬</span><strong>Contato</strong><p>WhatsApp e Instagram<br/>Resposta em horário comercial</p></div></div>
-      </section>
-
-      <section className="vld-demo-cta"><div><span className="vld-demo-mini-label">VITRINELOCAL PARA EMPRESAS</span><h2>Essa pode ser a experiência da sua empresa.</h2><p>Agora veja o que uma empresa Premium consegue administrar dentro da plataforma.</p></div><button onClick={() => setView('account')}>Abrir Minha Conta Demo →</button></section>
-    </main>
-  )
-}
-
-function OverviewAccount({ setActive }) {
-  return <>
-    <div className="vld-account-welcome"><div><span className="vld-demo-mini-label">CONTA PREMIUM</span><h2>Olá, Bistrô Laguna 👋</h2><p>Veja como sua empresa está sendo apresentada e acompanhe sua presença no VitrineLocal.</p></div><button className="vld-demo-primary">Editar empresa</button></div>
-    <div className="vld-account-metrics"><Metric value="2.843" label="visualizações" detail="últimos 30 dias"/><Metric value="286" label="interações" detail="+18% no período"/><Metric value="4,9" label="avaliação média" detail="127 avaliações"/><Metric value="17" label="ações de contato" detail="WhatsApp + Instagram"/></div>
-    <div className="vld-account-grid">
-      <section className="vld-account-card vld-account-performance"><div className="vld-account-card-heading"><div><span className="vld-demo-mini-label">DESEMPENHO</span><h3>Sua presença está ativa</h3></div><span className="vld-status-pill">● Premium ativo</span></div><div className="vld-sparkline"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><div className="vld-chart-labels"><span>01 set</span><span>07</span><span>14</span><span>21</span><span>30 set</span></div></section>
-      <section className="vld-account-card"><div className="vld-account-card-heading"><div><span className="vld-demo-mini-label">CHECKLIST</span><h3>Perfil completo</h3></div><strong>92%</strong></div><div className="vld-progress"><span style={{width:'92%'}}/></div><ul className="vld-checklist"><li>✓ Informações principais</li><li>✓ Horários</li><li>✓ Produtos e serviços</li><li>✓ Fotos e redes sociais</li><li>○ Adicionar mais fotos</li></ul></section>
-    </div>
-    <div className="vld-account-quick-actions">{[['catalog','◈','Atualizar catálogo','Produtos e serviços'],['marketing','✦','Criar promoção','Atraia novas visitas'],['reviews','★','Responder avaliações','Fortaleça sua reputação'],['advertising','◆','Impulsionar marca','Publicidade Premium']].map(([id,icon,title,note]) => <button key={id} onClick={() => setActive(id)}><span>{icon}</span><strong>{title}</strong><small>{note}</small><b>→</b></button>)}</div>
-  </>
-}
-
-function AccountPanel({ active, setActive }) {
-  const data = {
-    business: { label:'Meu negócio', title:'Sua vitrine, sempre atualizada', text:'Edite apresentação, horários, contatos, fotos e posicionamento da empresa sem depender de terceiros.', rows:['Descrição da empresa','Horário de funcionamento','Endereço e canais de contato','Fotos, capa e redes sociais'] },
-    catalog: { label:'Produtos e serviços', title:'Mostre o que sua empresa vende', text:'Cadastre produtos e serviços com nome, descrição, preço, imagem e informações relevantes.', rows:['Produtos em destaque','Serviços oferecidos','Categorias e preços','Itens disponíveis para descoberta'] },
-    marketing: { label:'Promoções e eventos', title:'Crie motivos para o cliente voltar', text:'Divulgue ofertas e eventos com período, chamada e informações que ajudam a gerar interesse.', rows:['Promoção ativa: Festival de Sabores','Próximo evento: Noite de Música ao Vivo','Calendário de campanhas','Atalhos para divulgação'] },
-    reviews: { label:'Avaliações', title:'Acompanhe o que os clientes dizem', text:'Monitore avaliações, entenda a percepção sobre a empresa e responda diretamente quando necessário.', rows:['4,9 de média','127 avaliações','Respostas recentes','Sinais de reputação'] },
-    advertising: { label:'Publicidade Premium', title:'Dê mais presença para sua marca', text:'Solicite campanhas e espaços de publicidade para divulgar seu negócio dentro da plataforma.', rows:['Banner Premium ativo','Campanha de destaque local','Solicitação de mídia','Acompanhamento comercial'] },
-  }[active]
-  return <section className="vld-account-card vld-account-detail"><div className="vld-account-detail-icon">{active === 'business' ? '▣' : active === 'catalog' ? '◈' : active === 'marketing' ? '✦' : active === 'reviews' ? '★' : '◆'}</div><span className="vld-demo-mini-label">{data.label}</span><h2>{data.title}</h2><p>{data.text}</p><div className="vld-detail-row-list">{data.rows.map(row => <div key={row}><span>✓</span>{row}</div>)}</div><button className="vld-demo-primary" onClick={() => setActive('overview')}>Voltar para a visão geral</button></section>
-}
-
-function DemoAccountView() {
-  const [active, setActive] = React.useState('overview')
-  return <main className="vld-demo-account"><section className="vld-account-shell"><aside className="vld-account-sidebar"><div className="vld-account-business"><div className="vld-demo-brand-mark">BL</div><div><strong>Bistrô Laguna</strong><span>Plano Premium</span></div></div><nav aria-label="Navegação da conta demo">{accountSections.map(item => <button key={item.id} className={active === item.id ? 'active' : ''} onClick={() => setActive(item.id)}><span>{item.icon}</span>{item.label}</button>)}</nav><div className="vld-account-sidebar-footer"><span className="vld-status-dot"/> Conta demonstrativa<br/><small>nenhuma ação é enviada ou cobrada</small></div></aside><div className="vld-account-content">{active === 'overview' ? <OverviewAccount setActive={setActive}/> : <AccountPanel active={active} setActive={setActive}/>}</div></section></main>
-}
-
-export default function CommercialDemoPage() {
-  const [view, setView] = React.useState('public')
-  React.useEffect(() => {
-    const query = new URLSearchParams(window.location.search)
-    const requested = query.get('view')
-    if (requested === 'account') setView('account')
-  }, [])
-  return <div className="vld-demo-app"><DemoHeader view={view} setView={setView}/>{view === 'public' ? <DemoPublicView setView={setView}/> : <DemoAccountView/>}<footer className="vld-demo-footer"><span>VitrineLocal · Demo Comercial</span><span>Dados fictícios para apresentação empresarial</span></footer></div>
-}
+function Stars({count=5}){return <span className="vld-demo-stars" aria-label={`${count} estrelas`}>{'★'.repeat(count)}</span>}
+function DemoHeader({view,setView}){return <header className="vl-site-header vl-demo-real-header"><div className="vl-site-header-inner"><a className="vl-site-brand" href="/demo" aria-label="VitrineLocal início"><img className="vl-site-brand-logo" src="/vitrine-local-header-logo.svg" alt="VitrineLocal — A cidade em um só lugar"/></a><label className="vl-site-city"><span className="vl-site-city-pin">⌖</span><select value="laguna" readOnly aria-label="Cidade da demonstração"><option>Laguna - SC</option></select><span className="vl-site-city-chevron">⌄</span></label><nav className="vl-site-nav" aria-label="Navegação da demonstração"><a className="vl-site-nav-link active" href="/demo">Explorar</a><a className="vl-site-nav-link" href="#promocoes">Promoções</a><a className="vl-site-nav-link" href="#eventos">Eventos</a><a className="vl-site-nav-link" href="#produtos">Produtos</a></nav><div className="vl-site-actions"><button className={`vl-site-business-cta vl-demo-account-toggle ${view==='account'?'is-active':''}`} type="button" onClick={()=>setView(view==='public'?'account':'public')}>{view==='public'?'Minha conta Premium':'Ver empresa'}</button><a className="vl-site-login" href="/laguna">Voltar ao VitrineLocal</a></div></div></header>}
+function PublicDemo({setView}){return <main className="mbp-shell vld-real-demo-shell"><div className="mbp-page"><div className="mbp-breadcrumbs"><a href="/demo">← Voltar</a><span>⌖ Laguna</span><span>›</span><span>Restaurantes</span><span>›</span><strong>Bistrô Laguna</strong></div><div className="mbp-layout"><section className="mbp-main-card"><div className="mbp-gallery"><button className="mbp-gallery-main" type="button"><div className="vld-demo-photo-main"><span>BL</span><strong>Bistrô Laguna</strong><small>Sabores locais · desde 2018</small></div><span className="mbp-gallery-caption">▣ Gastronomia artesanal e experiências locais.</span></button><div className="mbp-gallery-side"><div className="mbp-gallery-thumb vld-demo-photo-thumb">🍽️</div><div className="mbp-gallery-thumb vld-demo-photo-thumb vld-demo-photo-thumb-2">🍹</div><div className="mbp-gallery-more"><strong>+8</strong><span>Ver todas as fotos</span></div></div></div><div className="mbp-company-head"><div className="mbp-logo"><div className="vld-demo-logo-mark">BL</div></div><div className="mbp-company-copy"><div className="mbp-kicker">EMPRESA LOCAL · PREMIUM</div><h1>Bistrô Laguna</h1><div className="mbp-badges"><span className="mbp-verified">✓ Verificada</span><span className="mbp-category">▤ Restaurantes</span><span className="mbp-open-pill">● Aberto</span></div><p>Gastronomia artesanal, experiências locais e aquele lugar que você quer voltar.</p><div className="vld-demo-rating-line"><Stars/><strong>4,9</strong><span>127 avaliações</span></div></div></div><div className="mbp-contact-grid"><div className="mbp-contact-card"><span className="mbp-contact-icon">⌖</span><span><strong>Localização</strong><small>Centro Histórico, Laguna - SC</small></span></div><div className="mbp-contact-card"><span className="mbp-contact-icon">◷</span><span><strong>Horário</strong><small>Abre às 18:30</small></span></div><div className="mbp-contact-card"><span className="mbp-contact-icon">☎</span><span><strong>WhatsApp</strong><small>(48) 99999-0000</small></span></div><div className="mbp-contact-card"><span className="mbp-contact-icon">◎</span><span><strong>Instagram</strong><small>@bistrolaguna</small></span></div></div><div className="vld-demo-promo-highlight"><div><span>OFERTA EM DESTAQUE</span><h2>Festival de Sabores</h2><p>20% OFF de segunda a quinta em pratos selecionados.</p></div><button>Ver promoção →</button></div><div id="produtos"><section className="mbp-section"><div className="mbp-section-title"><span>PRODUTOS</span><div className="mbp-section-heading-row"><h2>Produtos disponíveis</h2><small>{products.length} produtos</small></div></div><div className="mbp-items">{products.map((item,index)=><article className="mbp-item-card" key={item.name}><div className={`mbp-item-image vld-demo-item-image vld-demo-item-${index}`}>{index===0?'🍔':index===1?'🦐':'🍹'}</div><div className="mbp-item-body"><span className="mbp-item-type">{item.kind}</span><h3>{item.name}</h3><p>{item.description}</p><div className="mbp-item-price"><small>Por</small><strong>R$ {item.price}</strong></div></div></article>)}</div></section><section className="mbp-section"><div className="mbp-section-title"><span>SERVIÇOS</span><div className="mbp-section-heading-row"><h2>Serviços oferecidos</h2><small>{services.length} serviços</small></div></div><div className="mbp-items">{services.map(item=><article className="mbp-item-card vld-demo-service-card" key={item.name}><div className="vld-demo-service-icon">✓</div><div className="mbp-item-body"><span className="mbp-item-type">SERVIÇO</span><h3>{item.name}</h3><p>{item.description}</p><span className="mbp-item-no-price">Consulte</span></div></article>)}</div></section></div><section id="eventos" className="mbp-section"><div className="mbp-section-title"><span>EVENTO</span><div className="mbp-section-heading-row"><h2>Noite de Música ao Vivo</h2><small>24 set · 20h</small></div></div><div className="vld-demo-event-real"><div className="vld-demo-event-date-real"><strong>24</strong><span>SET</span></div><div><h3>Noite de Música ao Vivo</h3><p>Sexta-feira · 20h · entrada gratuita · Bistrô Laguna</p><button>Ver detalhes do evento →</button></div></div></section><section className="mbp-section" id="promocoes"><div className="mbp-section-title"><span>AVALIAÇÕES</span><div className="mbp-section-heading-row"><h2>O que os clientes dizem</h2><small>127 avaliações</small></div></div><div className="vld-demo-review-grid">{reviews.map(review=><article className="vld-demo-review-real" key={review.author}><div><strong>{review.author}</strong><Stars count={review.rating}/></div><p>“{review.text}”</p><span>Cliente verificado</span></article>)}</div></section></section><aside className="mbp-sidebar"><div className="mbp-tabs" role="tablist"><button className="active" type="button">Sobre</button><button type="button">Horário</button><button type="button">Localização</button></div><section className="mbp-side-card"><div className="mbp-side-icon">▤</div><span className="mbp-side-kicker">VISÃO GERAL</span><h2>Sobre a empresa</h2><p>O Bistrô Laguna reúne gastronomia artesanal, atendimento próximo e experiências para moradores e visitantes.</p><h3>Categorias</h3><div className="mbp-pills"><span>Restaurantes</span><span>Gastronomia</span><span>Eventos</span><span>Atendimento pelo WhatsApp</span></div></section><section className="mbp-side-card mbp-hours-card"><div className="mbp-side-icon">◷</div><span className="mbp-side-kicker">ATENDIMENTO</span><h2>Horário de funcionamento</h2><p><span className="mbp-open-pill">● Aberto agora</span> · Fecha às 23:30</p><div className="mbp-hours-list"><div><span>Segunda</span><strong>18:30–23:30</strong></div><div><span>Terça</span><strong>18:30–23:30</strong></div><div><span>Quarta</span><strong>18:30–23:30</strong></div><div><span>Quinta</span><strong>18:30–23:30</strong></div><div><span>Sexta</span><strong>18:30–00:00</strong></div><div><span>Sábado</span><strong>18:30–00:00</strong></div><div><span>Domingo</span><strong>Fechado</strong></div></div></section><section className="vld-demo-side-premium"><span>PLANO PREMIUM</span><strong>Mais presença para sua marca</strong><p>Esta demonstração mostra como uma empresa pode combinar perfil, catálogo, promoções, eventos, reputação e publicidade.</p><button onClick={()=>setView('account')}>Conhecer Minha Conta →</button></section></aside></div></div></main>}
+function AccountDemo({setView}){const[section,setSection]=useState('overview');const title={overview:'Visão geral',company:'Minha empresa',media:'Mídias',items:'Produtos e serviços',promotions:'Promoções',analytics:'Desempenho',plan:'Meu plano'}[section];return <div className="account-workspace-app vld-real-account-demo"><div className="account-workspace"><aside className="account-sidebar"><div className="account-sidebar-head"><div><span className="account-eyebrow">ESPAÇO DO EMPREENDEDOR</span><h2>Minha conta</h2></div></div><div className="account-business-switcher"><span className="account-nav-label">EMPRESA ATIVA</span><select value="demo" readOnly><option>Bistrô Laguna</option></select></div><nav className="account-sidebar-nav">{navItems.map(([id,icon,label])=><button key={id} className={`account-nav-item ${section===id?'active':''}`} type="button" onClick={()=>setSection(id)}><span className="nav-icon">{icon}</span><span>{label}</span>{id==='items'&&<b>6</b>}{id==='promotions'&&<b>2</b>}</button>)}</nav><div className="account-sidebar-footer"><div className="account-user-chip"><div className="account-avatar">B</div><div><strong>Bistrô Laguna</strong><small>Empresa demonstrativa · Premium</small></div></div><button className="vld-demo-side-link" onClick={()=>setView('public')} type="button">← Ver perfil público</button></div></aside><section className="account-content"><div className="account-section-header"><div><span className="account-eyebrow">{section==='overview'?'CONTA PREMIUM':'MINHA CONTA'}</span><h1>{title}</h1><p>Ambiente demonstrativo com o mesmo padrão visual da área real do VitrineLocal.</p></div><span className="account-status-badge"><i className="dot"/>Premium ativa</span></div>{section==='overview'?<OverviewDemo setSection={setSection}/>:<AccountSectionDemo section={section}/>}</section></div></div>}
+function OverviewDemo({setSection}){return <><div className="account-overview-card"><div className="account-overview-cover"><div className="vld-demo-account-cover"><span>BL</span><strong>Bistrô Laguna</strong><small>Gastronomia artesanal · Laguna - SC</small></div><div className="account-overview-brand"><div className="vld-demo-logo-mark">BL</div></div></div><div className="account-overview-info"><div><span className="account-chip">Premium</span><h2>Bistrô Laguna</h2><p>Perfil completo, catálogo atualizado, promoções e presença local em destaque.</p><span className="account-muted">📍 Centro Histórico · Laguna - SC</span></div><div className="account-overview-actions"><button onClick={()=>setSection('company')}>Editar empresa</button><button onClick={()=>setSection('media')}>Gerenciar mídias</button></div></div></div><div className="account-stats-grid"><div className="account-stat-card"><span>Visualizações</span><strong>2.843</strong><small>últimos 30 dias</small></div><div className="account-stat-card"><span>WhatsApp</span><strong>172</strong><small>cliques para contato</small></div><div className="account-stat-card"><span>Instagram</span><strong>96</strong><small>acessos ao perfil</small></div><div className="account-stat-card"><span>Avaliação</span><strong>4,9</strong><small>127 avaliações</small></div></div><div className="account-quick-grid"><button onClick={()=>setSection('company')}><span>◈</span><div><strong>Manter empresa atualizada</strong><small>Dados, contatos e horários</small></div><b>→</b></button><button onClick={()=>setSection('items')}><span>◇</span><div><strong>Mostrar seus produtos</strong><small>Cadastre produtos e serviços</small></div><b>→</b></button><button onClick={()=>setSection('promotions')}><span>✦</span><div><strong>Criar uma promoção</strong><small>Divulgue ofertas e campanhas</small></div><b>→</b></button></div><div className="account-card"><div className="account-card-title"><div><h2>Recursos Premium</h2><p>O que a empresa pode acompanhar e administrar.</p></div></div><div className="vld-demo-premium-grid"><button onClick={()=>setSection('media')}>Mídias e apresentação</button><button onClick={()=>setSection('promotions')}>Promoções e eventos</button><button onClick={()=>setSection('analytics')}>Desempenho</button><button onClick={()=>setSection('plan')}>Meu plano</button></div></div></>}
+function AccountSectionDemo({section}){const data={company:['MINHA EMPRESA','Sua empresa em um só lugar','Nome, descrição, categoria, contatos, endereço e horários podem ser mantidos atualizados.',['Nome: Bistrô Laguna','Categoria: Restaurantes','Horário: 18:30–23:30','WhatsApp: (48) 99999-0000']],media:['MÍDIAS','Mostre a identidade do negócio','Gerencie capa, logo e fotos que aparecem no perfil público.',['Capa da empresa: cadastrada','Logo: cadastrada','8 fotos na galeria','Perfil visual completo']],items:['PRODUTOS E SERVIÇOS','Mostre o que sua empresa oferece','Cadastre produtos e serviços com descrição, preço e imagem.',['3 produtos em destaque','3 serviços cadastrados','Catálogo atualizado','Itens disponíveis para descoberta']],promotions:['PROMOÇÕES','Crie motivos para o cliente voltar','Divulgue ofertas com período e chamada comercial dentro da plataforma.',['Festival de Sabores — ativo','20% OFF de segunda a quinta','2 campanhas cadastradas','Próximo evento: 24 de setembro']],analytics:['DESEMPENHO','Acompanhe sua presença','Consulte indicadores demonstrativos sobre visualizações e interações da empresa.',['2.843 visualizações','172 cliques em WhatsApp','96 acessos ao Instagram','+18% de interações no período']],plan:['MEU PLANO','Plano Premium','Visão demonstrativa dos recursos associados ao plano da empresa.',['Status: Ativo','Publicidade Premium: disponível','Catálogo e promoções: disponíveis','Próxima renovação: 15/10/2026']]}[section];return <div className="account-card vld-demo-section-card"><div className="account-card-title"><div><span className="account-eyebrow">{data[0]}</span><h2>{data[1]}</h2><p>{data[2]}</p></div></div><div className="vld-demo-detail-list">{data[3].map(item=><div key={item}><span>✓</span><strong>{item}</strong></div>)}</div><div className="vld-demo-fake-actions"><button>Editar</button><button>Ver no perfil público</button></div></div>}
+export default function CommercialDemoPage(){const[view,setView]=useState('public');React.useEffect(()=>{if(new URLSearchParams(location.search).get('view')==='account')setView('account')},[]);return <div className="vld-demo-app"><DemoHeader view={view} setView={setView}/>{view==='public'?<PublicDemo setView={setView}/>:<AccountDemo setView={setView}/>}<footer className="vld-demo-footer">VitrineLocal · Demonstração comercial · Dados fictícios, nenhuma ação é enviada ou cobrada.</footer></div>}
