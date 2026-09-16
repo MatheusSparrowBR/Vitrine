@@ -89,6 +89,16 @@ test('placeholder Premium não interfere nos estados vazios de eventos',async({p
  expect(premiumCssText).toContain('.vl-category-slot + .home-section > .empty-v2')
 })
 
+test('home não bloqueia categorias e agenda quando uma fonte de dados falha',async({page})=>{
+ await page.goto('/laguna',{waitUntil:'domcontentloaded'})
+ const categories=page.locator('.vl-category-slot .category-card')
+ await expect(categories).not.toHaveCount(0,{timeout:9000})
+ await expect(page.getByText('Carregando eventos…')).toHaveCount(0,{timeout:9000})
+ const eventCards=await page.locator('.event-grid .content-card-v2').count()
+ const emptyState=await page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./).count()
+ expect(eventCards+emptyState).toBeGreaterThan(0)
+})
+
 test('home não carrega mecanismo legado do placeholder Premium',async({page})=>{
  await page.goto('/laguna')
  await expect(page.locator('.vl-site-header')).toBeVisible()
