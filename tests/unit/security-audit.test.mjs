@@ -51,3 +51,11 @@ test('billing events admin read has both RLS and authenticated table grant',()=>
  const migration=read('supabase/migrations/20260916122000_grant_admin_select_billing_events.sql')
  assert.match(migration,/grant select on table public\.billing_events to authenticated;/)
 })
+
+test('private helper functions revoke direct client execution',()=>{
+ const migration=read('supabase/migrations/20260916150000_revoke_private_helper_execute_access.sql')
+ assert.match(migration,/revoke execute on function private\.is_admin\(\) from anon, authenticated;/)
+ assert.match(migration,/revoke execute on function private\.is_business_owner\(uuid\) from anon, authenticated;/)
+ assert.match(migration,/revoke execute on function private\.business_has_feature\(uuid, text\) from anon, authenticated;/)
+ assert.match(migration,/revoke execute on function private\.get_business_plan_cycle\(uuid\) from anon, authenticated;/)
+})
