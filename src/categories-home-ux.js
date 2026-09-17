@@ -91,13 +91,21 @@ function enhance(nav){
     next.disabled=!overflow||atEnd
     count.textContent=`${grid.children.length} disponíveis`
   }
+
+  const refresh=()=>requestAnimationFrame(update)
+
   prev.onclick=()=>grid.scrollBy({left:-step(),behavior:'smooth'})
   next.onclick=()=>grid.scrollBy({left:step(),behavior:'smooth'})
   all.onclick=()=>openModal(nav)
   grid.addEventListener('scroll',update,{passive:true})
   window.addEventListener('resize',update,{passive:true})
   if(window.ResizeObserver)new ResizeObserver(update).observe(grid)
-  update()
+
+  // React repopulates this same grid after the first render. Observe child changes
+  // so the count, overflow state and navigation buttons always reflect the real set.
+  const childObserver=new MutationObserver(refresh)
+  childObserver.observe(grid,{childList:true})
+  refresh()
 }
 
 function boot(){
