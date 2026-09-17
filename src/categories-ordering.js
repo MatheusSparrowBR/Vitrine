@@ -4,7 +4,7 @@ const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabase = URL && KEY ? createClient(URL, KEY) : null
 
-const state = { initialized: false, busy: false }
+const state = { initialized: false, busy: false, escapeHandler: null }
 
 function injectStyles() {
   if (document.getElementById('vlcat-ordering-css')) return
@@ -69,7 +69,9 @@ async function setCreateOrder() {
   const input = [...(section?.querySelectorAll('input') || [])].find(el => el.type === 'number')
   if (!input) return
 
-  const editing = Boolean(section.querySelector('h2')?.textContent?.toLowerCase().includes('editar categoria'))
+  const editorTitle = section.querySelector('.admin-v2-side-editor h2')?.textContent?.trim().toLowerCase() || ''
+  const editing = editorTitle.includes('editar categoria')
+
   input.readOnly = true
   input.title = editing
     ? 'A ordem é controlada pelo recurso Reordenar categorias.'
@@ -92,13 +94,11 @@ async function setCreateOrder() {
 
 function closeOrderModal() {
   document.getElementById('vlcat-order-root')?.remove()
+  if (state.escapeHandler) {
+    document.removeEventListener('keydown', state.escapeHandler)
+    state.escapeHandler = null
+  }
   state.busy = false
-}
-
-function refreshCategoriesSection() {
-  const section = findCategoriesSection()
-  const trigger = section?.querySelector('.vlcat-order-trigger')
-  trigger?.click()
 }
 
 async function openOrdering() {
@@ -129,26 +129,28 @@ async function openOrdering() {
   let draft = [...rows]
   const list = root.querySelector('#vlcat-order-list')
 
-  const move = (from, to) => {
-    if (from < 0 || to < 0 || from === to || to >= draft.length) return
-    const [moved] = draft.splice(from, 1)
-    draft.splice(to, 0, moved)
-    renderList()
-  }
-
   const renderList = () => {
     list.innerHTML = draft.map((row, index) => `<div class="vlcat-order-item" draggable="true" data-id="${escapeHtml(row.id)}"><div class="vlcat-order-number">${index + 1}</div><div class="vlcat-order-info"><strong>${escapeHtml(row.name)}</strong><small>${row.active ? 'Ativa' : 'Desativada'} · posição ${index + 1}</small></div><div class="vlcat-order-controls"><button type="button" data-up="${escapeHtml(row.id)}" ${index===0?'disabled':''} aria-label="Mover para cima">↑</button><button type="button" data-down="${escapeHtml(row.id)}" ${index===draft.length-1?'disabled':''} aria-label="Mover para baixo">↓</button></div></div>`).join('')
 
     list.querySelectorAll('[data-up]').forEach(button => {
       button.onclick = () => {
         const index = draft.findIndex(row => row.id === button.dataset.up)
-        move(index, index - 1)
+        if (index > 0) {
+          const [moved] = draft.splice(index, 1)
+          draft.splice(index - 1, 0, moved)
+          renderList()
+        }
       }
     })
+
     list.querySelectorAll('[data-down]').forEach(button => {
       button.onclick = () => {
         const index = draft.findIndex(row => row.id === button.dataset.down)
-        move(index, index + 1)
+        if (index >= 0 && index < draft.length - 1) {
+          const [moved] = draft.splice(index, 1)
+          draft.splice(index + 1, 0, moved)
+          renderList()
+        }
       }
     })
 
@@ -173,7 +175,10 @@ async function openOrdering() {
         item.classList.remove('drop-target')
         const from = draft.findIndex(row => row.id === event.dataTransfer.getData('text/plain'))
         const to = draft.findIndex(row => row.id === item.dataset.id)
-        move(from, to)
+        if (from < 0 || to < 0 || from === to) return
+        const [moved] = draft.splice(from, 1)
+        draft.splice(to, 0, moved)
+        renderList()
       }
     })
   }
@@ -184,7 +189,11 @@ async function openOrdering() {
   root.querySelector('.vlcat-order-backdrop').onclick = event => {
     if (event.target === event.currentTarget) closeOrderModal()
   }
-  document.addEventListener('keydown', handleEscape, { once: true })
+
+  state.escapeHandler = event => {
+    if (event.key === 'Escape') closeOrderModal()
+  }
+  document.addEventListener('keydown', state.escapeHandler)
 
   root.querySelector('#vlcat-order-save').onclick = async () => {
     if (!draft.length) return closeOrderModal()
@@ -196,7 +205,7 @@ async function openOrdering() {
       const { error } = await supabase.rpc('reorder_categories', { p_category_ids: draft.map(row => row.id) })
       if (error) throw error
       closeOrderModal()
-      window.setTimeout(() => refreshCategoriesSection(), 100)
+      window.location.reload()
     } catch (error) {
       errorBox.textContent = error?.message || 'Não foi possível salvar a nova ordem.'
       save.disabled = false
@@ -204,18 +213,12 @@ async function openOrdering() {
   }
 }
 
-function handleEscape(event) {
-  if (event.key === 'Escape') closeOrderModal()
-}
-
 function enhanceCategories() {
   const section = findCategoriesSection()
-  if (!section || section.dataset.orderEnhanced === '1') {
-    if (section) setCreateOrder()
-    return
-  }
+  if (!section) return
 
-  section.dataset.orderEnhanced = '1'
+  injectStyles()
+
   const head = section.querySelector('.admin-v2-section-head')
   if (head && !head.querySelector('.vlcat-order-trigger')) {
     const button = document.createElement('button')
@@ -225,6 +228,7 @@ function enhanceCategories() {
     button.onclick = openOrdering
     head.appendChild(button)
   }
+
   setCreateOrder()
 }
 
