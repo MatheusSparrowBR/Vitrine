@@ -80,6 +80,7 @@ import './user-profile.css'
 import './ux-refinement.css'
 import './mobile-launch-fixes.css'
 import './media-adapter.js'
+import './categories-ordering.js'
 import './prelaunch.css'
 import './prelaunch-plans.css'
 
