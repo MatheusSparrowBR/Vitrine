@@ -155,3 +155,13 @@ test('politica e termos sao acessiveis',async({page})=>{
  await page.goto('/termos')
  await expect(page.getByRole('heading',{name:'Termos de Uso'})).toBeVisible()
 })
+
+
+test('home traz o fluxo de necessidades da UX de lançamento com links funcionais',async({page})=>{
+ await page.goto('/laguna')
+ await expect(page.getByRole('heading',{name:'O que você precisa hoje?'})).toBeVisible()
+ const needs=page.locator('.lvp-need-grid a')
+ await expect(needs).toHaveCount(4)
+ await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
+ await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)
+})
