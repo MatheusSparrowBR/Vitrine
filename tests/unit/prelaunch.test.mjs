@@ -4,10 +4,10 @@ import fs from 'node:fs'
 
 const read=path=>fs.readFileSync(path,'utf8')
 
-test('prelaunch is on by default but administrators bypass it',()=>{
+test('prelaunch stays disabled by default and administrators still bypass it',()=>{
  const gate=read('src/PrelaunchGate.jsx')
  const page=read('src/PrelaunchPage.jsx')
- assert.match(gate,/import\.meta\.env\.VITE_PRELAUNCH_MODE \?\? 'true'/)
+ assert.match(gate,/import\.meta\.env\.VITE_PRELAUNCH_MODE \?\? 'false'/)
  assert.match(gate,/profile\?\.role==='admin'/)
  assert.match(gate,/startsWith\('\/admin'\)/)
  assert.match(gate,/\/em-breve\/planos/)
