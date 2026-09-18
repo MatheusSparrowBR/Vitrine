@@ -39,7 +39,7 @@ for(const token of ['npm run audit:static','npm run test','npm run build','npm r
 if(workflow.includes('npm audit --omit=dev --audit-level=high'))ok.push('CI includes dependency security audit')
 else fail.push('CI missing dependency security audit')
 
-const forbidden=/(^|[\\/'"\\s])(vercel\\.json|vercel\\.app|\\.vercel\\/|Vercel)([\\/'"\\s]|$)/i
+const forbidden=['vercel.json','vercel.app','.vercel/','Vercel']
 const scanRoots=['src','public','index.html','package.json','vite.config.js','.github/workflows/ci.yml']
 const skip=new Set(['node_modules','.git','dist'])
 
@@ -47,7 +47,7 @@ function scanFile(p){
  const rel=relative(root,p)
  if(rel==='scripts/audit.mjs'||rel.startsWith('tests/')||rel.startsWith('docs/'))return
  const content=readFileSync(p,'utf8')
- if(forbidden.test(content))fail.push('Forbidden Vercel reference in '+rel)
+ if(forbidden.some(token=>content.includes(token)))fail.push('Forbidden Vercel reference in '+rel)
  if(/SUPABASE_SERVICE_ROLE_KEY\\s*=\\s*['"][^'"]+['"]|service_role\\s*[:=]\\s*['"][^'"]{10,}/i.test(content))
   warn.push('Review possible secret-like service-role reference in '+rel)
 }
