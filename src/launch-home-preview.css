@@ -139,3 +139,12 @@
  .lvp-sponsored-copy h2{font-size:20px}
  .lvp-sponsored-badge{position:absolute;top:12px;left:12px;margin:0}
 }
+
+.lvp-business-placeholder{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(145deg,#edf4ff,#dfeaf7);color:#216df3;font:900 42px/1 "Manrope",sans-serif}
+.lvp-card-address{display:block;margin-top:7px;color:#8293a4;font-size:9px;line-height:1.4}
+.lvp-empty-panel{padding:30px;border:1px dashed #cfdce9;border-radius:20px;background:#fff;text-align:center}
+.lvp-empty-panel h3{margin:0;font:900 17px/1.2 "Manrope",sans-serif;color:#173653}
+.lvp-empty-panel p{max-width:620px;margin:8px auto 0;color:#74879a;font-size:11px;line-height:1.55}
+.lvp-empty-panel a{display:inline-flex;margin-top:14px;color:#216df3;font-size:10px;font-weight:900}
+.lvp-empty-sponsored{display:block;min-height:152px}
+.lvp-empty-sponsored .lvp-sponsored-copy{padding:28px}
