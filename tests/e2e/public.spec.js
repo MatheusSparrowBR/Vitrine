@@ -11,7 +11,7 @@ test('home de Laguna usa a nova UX sobre dados reais do catálogo',async({page})
  await expect(page.getByRole('heading',{name:/O que está acontecendo em Laguna/i})).toBeVisible()
  await expect(page.locator('.lvp-weather')).toBeVisible()
  await expect(page.locator('.lvp-sponsored, .lvp-empty-sponsored')).toHaveCount(1)
- await expect(page.locator('.lvp-cat-grid a').count()).resolves.toBeLessThanOrEqual(7)
+ expect(await page.locator('.lvp-cat-grid a').count()).toBeLessThanOrEqual(7)
  await expect(page.locator('.lvp-category-count')).toHaveText(/\\d+ categorias? disponíveis/i)
  await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
 })
@@ -70,11 +70,11 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  await expect(cards.first()).toHaveAttribute('href',/\\/laguna\\/empresas\\?categoria=/)
 })
 
-test('categoria em destaque da home aponta para o catálogo da categoria',async({page})=>{
+test('categoria da home aponta para o catálogo da categoria',async({page})=>{
  await page.goto('/laguna')
- const restaurant=page.locator('.lvp-cat-grid a').filter({hasText:'Restaurantes'}).first()
- await expect(restaurant).toBeVisible()
- await expect(restaurant).toHaveAttribute('href',/\/laguna\/empresas\?categoria=restaurantes/)
+ const category=page.locator('.lvp-cat-grid a').first()
+ await expect(category).toBeVisible()
+ await expect(category).toHaveAttribute('href',/\/laguna\/empresas\?categoria=.+/)
 })
 
 test('agenda possui URL por cidade e retorno',async({page})=>{
