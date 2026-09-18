@@ -41,6 +41,20 @@ test('header global marca a seção ativa',async({page})=>{
  await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Planos')
 })
 
+test('home mobile abre o menu real do site e não cria overflow horizontal',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto('/laguna')
+ const toggle=page.locator('.vl-site-menu-toggle')
+ await expect(toggle).toBeVisible()
+ await expect(toggle).toHaveAttribute('aria-expanded','false')
+ await toggle.click()
+ await expect(toggle).toHaveAttribute('aria-expanded','true')
+ await expect(page.locator('.vl-site-mobile-panel')).toBeVisible()
+ await expect(page.getByRole('link',{name:'Explorar',exact:true}).last()).toBeVisible()
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1)
+ expect(overflow).toBe(false)
+})
+ 
 test('home de Laguna é responsiva no mobile',async({page})=>{
  await page.setViewportSize({width:390,height:844})
  await page.goto('/laguna')
