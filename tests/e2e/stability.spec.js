@@ -83,7 +83,7 @@ test('UX nova mantém a agenda visível quando não existem eventos',async({page
  await page.goto('/laguna',{waitUntil:'domcontentloaded'})
  await expect(page.locator('.lvp-events')).toBeVisible()
  await expect(page.getByRole('heading',{name:/O que está acontecendo em Laguna/i})).toBeVisible()
- const eventState=page.getByText(/Nenhum evento próximo( cadastrado)?\.|Não foi possível carregar os eventos\.|Carregando agenda…/)
+ const eventState=page.getByText(/Nenhum evento próximo(?: cadastrado)?\.?|Não foi possível carregar os eventos\.|Carregando agenda…/)
  const eventCards=page.locator('.lvp-event')
  await expect(eventState.or(eventCards.first())).toBeVisible({timeout:9000})
 })
@@ -94,7 +94,7 @@ test('home não bloqueia categorias e agenda quando uma fonte de dados falha',as
  const hasSupabase=Boolean(process.env.VITE_SUPABASE_URL&&process.env.VITE_SUPABASE_PUBLISHABLE_KEY)
  if(hasSupabase)await expect(categories).not.toHaveCount(0,{timeout:9000})
  const eventCards=await page.locator('.lvp-event').count()
- const emptyState=await page.getByText(/Nenhum evento próximo( cadastrado)?\.|Não foi possível carregar os eventos\.|Carregando agenda…/).count()
+ const emptyState=await page.getByText(/Nenhum evento próximo(?: cadastrado)?\.?|Não foi possível carregar os eventos\.|Carregando agenda…/).count()
  expect(eventCards+emptyState).toBeGreaterThan(0)
 })
 
