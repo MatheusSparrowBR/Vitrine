@@ -85,7 +85,8 @@ function LaunchHomePreview(){
      setPromotions(mapped)
      setSponsored(mapped[0])
     }
-    const{data:es}=await db.from('events').select('title,event_date,start_time,location,address').eq('city_id',city.id).eq('active',true).gte('event_date',new Date().toISOString().slice(0,10)).order('event_date').order('start_time').limit(3)
+    const todayKey=new Date().toISOString().slice(0,10)
+    const{data:es}=await db.from('events').select('title,event_date,start_time,location,address').eq('city_id',city.id).eq('active',true).gte('event_date',todayKey).order('event_date').order('start_time').limit(3)
     if(live&&es?.length)setEvents(es.map(e=>{const d=new Date(e.event_date+'T12:00:00');return {date:String(d.getDate()).padStart(2,'0'),mon:new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(d).replace('.','').toUpperCase(),title:e.title,place:e.location||e.address||'Laguna',time:e.start_time?String(e.start_time).slice(0,5):'Confira'}}))
    }catch{}
   }
