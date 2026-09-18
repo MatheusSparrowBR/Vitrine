@@ -68,11 +68,13 @@ function LaunchHomePreview(){
     const{data:bs}=await db.from('public_business_directory').select('id,name,slug,short_description,cover_url,logo_url,neighborhood,verified,featured,category_name,category_slug').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(4)
     if(live&&bs?.length){
      const ratings={}
-     for(const b of bs){
-      const{data:rs}=await db.from('business_reviews').select('rating').eq('business_id',b.id)
-      if(rs?.length)ratings[b.slug]=(rs.reduce((sum,r)=>sum+Number(r.rating||0),0)/rs.length).toFixed(1).replace('.',',')
+     const{data:rs}=await db.from('business_reviews').select('business_id,rating').in('business_id',bs.map(b=>b.id))
+     for(const r of rs||[]){
+      const key=r.business_id
+      if(!ratings[key])ratings[key]=[]
+      ratings[key].push(Number(r.rating||0))
      }
-     setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,cat:b.category_name||'Outros',rating:ratings[b.slug]||'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
+     setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,cat:b.category_name||'Outros',rating:ratings[b.id]?.length?(ratings[b.id].reduce((sum,r)=>sum+r,0)/ratings[b.id].length).toFixed(1).replace('.',','):'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
     }
     const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).order('created_at',{ascending:false}).limit(3)
     if(live&&ps?.length){
