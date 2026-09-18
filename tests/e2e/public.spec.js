@@ -16,6 +16,16 @@ test('home de Laguna usa a nova UX sobre dados reais do catálogo',async({page})
  await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
 })
 
+test('home desktop mantém header, hero e largura estável',async({page})=>{
+ await page.setViewportSize({width:1440,height:900})
+ await page.goto('/laguna')
+ await expect(page.locator('.vl-site-header')).toBeVisible()
+ await expect(page.locator('.lvp-hero')).toBeVisible()
+ await expect(page.locator('.lvp-hero-inner')).toBeVisible()
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1)
+ expect(overflow).toBe(false)
+})
+ 
 test('header global mantém o mesmo componente em todas as páginas principais',async({page})=>{
  const routes=['/laguna/empresas','/laguna/promocoes','/laguna/eventos','/planos','/privacidade','/termos','/conta']
  for(const route of routes){
