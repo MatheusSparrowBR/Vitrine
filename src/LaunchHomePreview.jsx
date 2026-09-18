@@ -109,9 +109,9 @@ function LaunchHomePreview(){
     {dataError&&<p className="lvp-data-warning">Alguns dados não puderam ser carregados agora.</p>}
    </section>
 
-   {sponsored&&<section className="lvp-wrap lvp-sponsored-wrap"><a className="lvp-sponsored" href={sponsored.target_url||'/laguna'}>
+<section className="lvp-wrap lvp-sponsored-wrap">{sponsored?<a className="lvp-sponsored" href={sponsored.target_url||'/laguna'}>
     <div className="lvp-sponsored-image"><img src={sponsored.image_url||''} alt="" onError={e=>{e.currentTarget.style.display='none'}}/></div><div className="lvp-sponsored-copy"><span className="lvp-sponsored-label">DESTAQUE PATROCINADO</span><h2>{sponsored.title}</h2><p>{sponsored.description||'Publicidade publicada no VitrineLocal.'}</p><strong>Saiba mais →</strong></div>
-   </a></section>}
+   </a>:<div className="lvp-empty-sponsored lvp-empty-panel"><h3>Espaço para publicidade local</h3><p>Nenhum anúncio patrocinado está ativo em Laguna neste momento.</p><a href="/conta/publicidade">Conhecer publicidade →</a></div>}</section>
 
    <section id="explorar" className="lvp-wrap lvp-featured"><div className="lvp-section-head"><div><span className="lvp-eyebrow">DESCUBRA NEGÓCIOS</span><h2>Empresas em destaque</h2><p>Empresas ativas e publicadas no catálogo de Laguna.</p></div><a href="/laguna/empresas">Ver todas →</a></div>
     {businesses.length?<div className={'lvp-business-grid'+(businesses.length===1?' lvp-business-grid-single':'')}>{businesses.map(b=><a href={'/laguna/empresa/'+encodeURIComponent(b.slug)} className="lvp-business-card" key={b.id}><div className="lvp-business-image">{b.img?<img src={b.img} alt="" onError={e=>{e.currentTarget.style.display='none'}}/>:<div className="lvp-business-placeholder">{String(b.name).slice(0,1).toUpperCase()}</div>}{b.verified&&<span className="lvp-verified">✓ Verificada</span>}</div><div className="lvp-business-body"><span className="lvp-card-cat">{b.cat}</span><h3>{b.name}</h3><p>{b.rating&&<>⭐ {b.rating} · </>}📍 {b.place}</p><span className="lvp-card-link">Ver empresa →</span></div></a>)}</div>:<EmptyPanel title="Nenhuma empresa em destaque" text="Ainda não há empresas ativas e publicadas para destacar nesta área." href="/laguna/empresas" label="Explorar catálogo →"/>}
