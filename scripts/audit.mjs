@@ -35,7 +35,8 @@ const homeSource=read('src/LaunchHomePreview.jsx')
 for(const token of ['images.unsplash.com','Bistrô Laguna - Teste','Festival de Sabores — 20% OFF','5 lugares para conhecer neste fim de semana','Novos negócios que chegaram à cidade']){
  if(homeSource.includes(token))fail.push('Demo/fictitious homepage content remains: '+token)
 }
-\nconst workflow=read('.github/workflows/ci.yml')
+
+const workflow=read('.github/workflows/ci.yml')
 for(const token of ['npm run audit:static','npm run test','npm run build','npm run test:e2e']){
  if(workflow.includes(token))ok.push('CI includes '+token)
  else fail.push('CI missing '+token)
