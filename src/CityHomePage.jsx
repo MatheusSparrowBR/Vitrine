@@ -6,6 +6,7 @@ import './premium-banner-carousel.css'
 import './home-v2.css'
 import './home-v2-fixes.css'
 import './home-content-layout.css'
+import './launch-home-preview.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -58,8 +59,9 @@ async function fetchCityWeather(city){
 }
 
 export default function CityHomePage({citySlug='laguna'}){
- const [cities,setCities]=useState([]),[city,setCity]=useState(citySlug==='laguna'?FALLBACK:{...FALLBACK,slug:citySlug,name:citySlug}),[categories,setCategories]=useState(fallbackCategories),[businesses,setBusinesses]=useState([]),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[banners,setBanners]=useState([]),[bannerIndex,setBannerIndex]=useState(0),[q,setQ]=useState(''),[loading,setLoading]=useState(true),[eventError,setEventError]=useState(''),[promoError,setPromoError]=useState(''),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true),[weatherError,setWeatherError]=useState('')
+ const [cities,setCities]=useState([]),[city,setCity]=useState(citySlug==='laguna'?FALLBACK:{...FALLBACK,slug:citySlug,name:citySlug}),[categories,setCategories]=useState(fallbackCategories),[businesses,setBusinesses]=useState([]),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[banners,setBanners]=useState([]),[bannerIndex,setBannerIndex]=useState(0),[catStart,setCatStart]=useState(0),[q,setQ]=useState(''),[loading,setLoading]=useState(true),[eventError,setEventError]=useState(''),[promoError,setPromoError]=useState(''),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true),[weatherError,setWeatherError]=useState('')
  useEffect(()=>{if(!db){setLoading(false);return}let alive=true;(async()=>{try{const{data,error}=await withTimeout(db.from('cities').select('id,name,state,country,slug,active').eq('active',true).eq('slug',citySlug).maybeSingle());if(!alive)return;if(error||!data){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false);return}setCities([data]);setCity(data)}catch(error){if(alive){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false)}}})();return()=>{alive=false}},[citySlug])
+ useEffect(()=>{setCatStart(0)},[city?.id])
  useEffect(()=>{if(!city?.name)return;let alive=true;let timer=null;const loadWeather=async()=>{setWeatherLoading(true);setWeatherError('');try{const result=await fetchCityWeather(city);if(!alive)return;setWeather(result)}catch(error){if(!alive)return;setWeather(null);setWeatherError(error?.message||'Clima indisponível')}finally{if(alive)setWeatherLoading(false)}};loadWeather();timer=setInterval(loadWeather,10*60*1000);return()=>{alive=false;if(timer)clearInterval(timer)}},[city?.id,city?.name,city?.state,city?.country])
  useEffect(()=>{if(!db||!city?.id||city.id==='fallback')return;let alive=true;setLoading(true);setEventError('');setPromoError('')
   const loadCategories=async()=>{try{const r=await withTimeout(db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'));if(!alive)return;setCategories(r.data?.length?r.data:fallbackCategories())}catch(_){if(alive)setCategories(fallbackCategories())}}
@@ -77,20 +79,76 @@ export default function CityHomePage({citySlug='laguna'}){
  const eventCount=Math.min(events.length,3)
  const banner=banners[bannerIndex]||null
  const base=`/${city?.slug||citySlug}`
+ const visibleCats=categories.slice(catStart,catStart+Math.min(7,categories.length))
+ const maxCatStart=Math.max(0,categories.length-7)
  const go=path=>location.href=path
- const categoryHref=c=>`${base}/empresas?categoria=${encodeURIComponent(c.slug)}`
- return <div className="home-v2 vl-public-app">
-  <section className="home-hero hero">
-   <div className="home-hero-inner"><div className="hero-copy"><span className="hero-kicker">✦ A cidade na palma da mão</span><h1>Descubra o que <span>{city?.name||'sua cidade'}</span> tem de melhor.</h1><p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p><div className="hero-search searchbox"><span className="hero-search-icon">⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="O que você procura hoje?" aria-label="O que você procura hoje"/><button onClick={()=>go(`${base}/empresas${q.trim()?`?q=${encodeURIComponent(q.trim())}`:''}`)}>Buscar</button></div><div className="hero-buttons"><a href={`${base}/empresas`}>Explorar empresas →</a><a href="/conta?new=business">Cadastre sua empresa <span>→</span></a></div><div className="hero-note">● Catálogo local de {city?.name||'sua cidade'} · atualizado por negócios locais.</div></div>
-   <aside className="hero-panel" aria-label={`Resumo de ${city?.name||'sua cidade'}`}><div className="hero-panel-top"><span>• O QUE ESTÁ ROLANDO</span><span>{city?.name||'—'}</span></div><div className="hero-weather" aria-label={`Clima atual em ${city?.name||'sua cidade'}`}>{weatherLoading?<><div className="hero-weather-icon hero-weather-loading">◌</div><div className="hero-weather-copy"><strong>Carregando clima…</strong><small>Atualizando agora</small></div></>:weather?<><div className="hero-weather-icon">{weather.icon}</div><div className="hero-weather-copy"><strong>{Math.round(weather.temperature)}°C</strong><small>{weather.description}{weather.apparentTemperature!=null?` · sensação ${Math.round(weather.apparentTemperature)}°`:''}</small></div><span className="hero-weather-live">AO VIVO</span></>:<><div className="hero-weather-icon">🌡️</div><div className="hero-weather-copy"><strong>Clima indisponível</strong><small>{weatherError||'Tente novamente em instantes.'}</small></div></>}</div><div className="hero-stat"><div className="hero-stat-icon">📣</div><div><strong>{promotions.length} promoções</strong><small>Ofertas publicadas por empresas locais</small></div></div><div className="hero-stat"><div className="hero-stat-icon">📅</div><div><strong>{events.length} eventos próximos</strong><small>Veja o que acontece na cidade</small></div></div><a className="hero-panel-action" href={`${base}/eventos`}>Ver agenda →</a></aside></div>
-  </section>
-  <div className="home-wrap">
-   <nav className="category-dock vl-category-slot" aria-label="Categorias"><div className="category-grid">{categories.map(c=><a className="category-card" key={c.id} href={categoryHref(c)}><span className="category-icon">{c.icon||'✦'}</span><strong>{c.name}</strong></a>)}</div></nav>
-   <section className="home-section">{banner?<div className="ad-card"><a className="ad-media" href={banner.target_url||'#'} target={banner.target_url?'_blank':undefined} rel="noreferrer"><img src={banner.image_url||'/laguna-hero.svg'} alt={banner.title||'Banner patrocinado'}/></a><div className="ad-content"><span className="eyebrow">ESPAÇO PUBLICITÁRIO · PREMIUM</span><h2>{banner.title}</h2><p>{banner.description||'Sua marca em destaque na VitrineLocal.'}</p><a href={banner.target_url||'#'} target={banner.target_url?'_blank':undefined} rel="noreferrer">Conhecer anúncio →</a>{banners.length>1&&<div className="ad-controls"><button type="button" onClick={()=>setBannerIndex(i=>(i-1+banners.length)%banners.length)} aria-label="Banner anterior">‹</button><div className="ad-dots">{banners.map((item,i)=><button key={item.id} type="button" className={`ad-dot ${i===bannerIndex?'active':''}`} onClick={()=>setBannerIndex(i)} aria-label={`Ver banner ${i+1}`}/>)}</div><button type="button" onClick={()=>setBannerIndex(i=>(i+1)%banners.length)} aria-label="Próximo banner">›</button></div>}</div></div>:<div className="empty-v2"><h3>Espaço publicitário premium</h3><p>Este espaço é reservado para empresas que desejam colocar sua marca em destaque na página inicial.</p></div>}</section>
-   {featuredBusinesses.length>0&&<section className="home-section"><div className="section-heading"><div><span className="eyebrow">NEGÓCIOS LOCAIS</span><h2>Empresas em destaque</h2><p>Conheça negócios selecionados que fazem parte da VitrineLocal.</p></div><a href={`${base}/empresas`}>Ver todas →</a></div><div className={`business-grid business-grid-${businessCount}`}>{featuredBusinesses.slice(0,4).map(b=><a className="business-card-v2" key={b.id} href={`${base}/empresa/${encodeURIComponent(b.slug)}`}><div className="business-image">{b.cover_url?<img src={b.cover_url} alt="" loading="lazy"/>:<div className="cover-placeholder">V</div>}</div><div className="business-info"><div className="business-meta">{b.verified&&<span className="verified">✓ Verificada</span>}<span className="category">{b.categories?.name||'Empresa local'}</span></div><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small>📍 {b.address}</small>}</div></a>)}</div></section>}
-  </div>
-  {promotions.length>0&&<section className="soft-section promo-section"><div className="home-wrap"><div className="section-heading"><div><span className="eyebrow">OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Descubra oportunidades e ofertas de empresas locais.</p></div><a href={`${base}/promocoes`}>Ver todas →</a></div>{promoError&&<div className="empty-v2"><h3>Não foi possível carregar todas as promoções.</h3><p>{promoError}</p></div>}<div className={`promotion-grid promotion-grid-${promoCount}`}>{promotions.slice(0,3).map(p=><a className="content-card-v2" key={p.id} href={`${base}/empresa/${encodeURIComponent(p.businesses?.slug||'')}`}><div className="content-card-media"><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title} loading="lazy"/></div><div className="content-card-body"><span className="tag">PROMOÇÃO</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><p><strong>{p.businesses?.name}</strong></p><div className="price-row">{p.original_price!=null&&<del>{money(p.original_price)}</del>}{p.price!=null&&<strong>{money(p.price)}</strong>}</div></div></a>)}</div></div></section>}
-  {promotions.length===0&&promoError&&<section className="soft-section promo-section"><div className="home-wrap"><div className="empty-v2"><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p><a href={`${base}/promocoes`}>Abrir área de promoções →</a></div></div></section>}
-  <div className="home-wrap"><section className="home-section"><div className="section-heading"><div><span className="eyebrow">AGENDA</span><h2>Próximos eventos</h2><p>O que está acontecendo e o que vem por aí na cidade.</p></div><a href={`${base}/eventos`}>Ver agenda →</a></div>{loading?<div className="empty-v2"><h3>Carregando eventos…</h3></div>:eventError?<div className="empty-v2"><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={`${base}/eventos`}>Abrir agenda →</a></div>:events.length?<div className={`event-grid event-grid-${eventCount}`}>{events.slice(0,3).map(e=><a className="content-card-v2" key={e.id} href={`${base}/eventos`}>{e.image_url&&<img src={e.image_url} alt="" loading="lazy"/>}<div className="content-card-body"><span className="tag">{new Date(`${e.event_date}T00:00:00`).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span><h3>{e.title}</h3><p>{e.location||'Local a confirmar'}{e.start_time?` · ${String(e.start_time).slice(0,5)}`:''}</p></div></a>)}</div>:<div className="empty-v2"><h3>Nenhum evento próximo.</h3><p>Quando novos eventos forem cadastrados, eles aparecerão aqui.</p></div>}</section><section className="home-section"><div className="commercial"><div className="commercial-copy"><span className="eyebrow">PARA EMPRESAS</span><h2>Coloque sua empresa na vitrine da cidade.</h2><p>Crie seu perfil, publique promoções, acompanhe o desempenho e apareça para quem está procurando negócios locais.</p></div><div className="commercial-actions"><a href="/conta?new=business">Cadastrar empresa</a><a href="/planos">Conhecer planos</a></div></div></section></div>
+ const categoryHref=c=>base+'/empresas?categoria='+encodeURIComponent(c.slug)
+ const quickCategories=categories.slice(0,4)
+ const todayLabel=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date()).replace('.','').toUpperCase()
+ const formatEventDate=value=>{const date=new Date(`${value}T00:00:00`);return Number.isNaN(date.getTime())?{day:'--',month:'--'}:{day:date.toLocaleDateString('pt-BR',{day:'2-digit'}),month:date.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}}
+ return <div className='lvp-page'>
+  <main>
+   <section className='lvp-hero'>
+    <div className='lvp-hero-bg'></div>
+    <div className='lvp-hero-inner'>
+     <div className='lvp-hero-copy'>
+      <span className='lvp-kicker'>✦ A cidade na palma da mão</span>
+      <h1>Descubra o que <span>{city?.name||'sua cidade'}</span> tem de melhor.</h1>
+      <p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p>
+      <form className='lvp-search' onSubmit={e=>{e.preventDefault();go(base+'/empresas'+(q.trim()?'?q='+encodeURIComponent(q.trim()):''))}}>
+       <span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder='O que você procura hoje?' aria-label='O que você procura hoje?'/><button type='submit'>Buscar</button>
+      </form>
+      <div className='lvp-quick'>{quickCategories.map(c=><a key={c.id} href={categoryHref(c)}>{c.name}</a>)}</div>
+      <div className='lvp-note'>● Catálogo local de {city?.name||'sua cidade'} · atualizado por negócios da cidade.</div>
+     </div>
+     <aside className='lvp-hero-card'>
+      <div className='lvp-mini-head'><span>HOJE EM {String(city?.name||'CIDADE').toUpperCase()}</span><strong>{todayLabel}</strong></div>
+      <div className='lvp-weather'><span className='lvp-weather-icon'>{weatherLoading?'◌':weather?.icon||'🌡️'}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature!=null?`${Math.round(weather.temperature)}°C`:'Clima indisponível'}</b><small>{weather?.description?`${city?.name||'Cidade'} · ${weather.description}${weather.apparentTemperature!=null?` · sensação ${Math.round(weather.apparentTemperature)}°C`:''}`:(weatherError||'Atualização em tempo real')}</small></div><span className='lvp-live-dot'>{weather?'AO VIVO':'INFO'}</span></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>🏪</span><div><b>{businesses.length} empresas cadastradas</b><small>Negócios disponíveis no catálogo local</small></div></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>🏷️</span><div><b>{promotions.length} promoções ativas</b><small>Ofertas publicadas por empresas locais</small></div></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>📅</span><div><b>{events.length} eventos próximos</b><small>Programação cadastrada na cidade</small></div></div>
+      <a className='lvp-mini-cta' href={base+'/empresas'}>Explorar empresas →</a>
+     </aside>
+    </div>
+   </section>
+   <section id='categorias' className='lvp-wrap lvp-categories'>
+    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>EXPLORE</span><h2>Encontre por categoria</h2><p>Use as categorias cadastradas no VitrineLocal para encontrar o que precisa.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
+    <div className='lvp-cat-box'>
+     <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
+     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span>{c.icon||'✦'}</span><b>{c.name}</b></a>)}</div>
+     <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.min(maxCatStart,v+1))} disabled={catStart>=maxCatStart} aria-label='Próximas categorias'>›</button>
+    </div>
+    <div className='lvp-category-count'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
+   </section>
+   <section className='lvp-wrap lvp-sponsored-wrap'>
+    {banner?<a className='lvp-sponsored' href={banner.target_url||'#'} target={banner.target_url?'_blank':undefined} rel='noreferrer'>
+      <div className='lvp-sponsored-image'><img src={banner.image_url||'/laguna-hero.svg'} alt={banner.title||'Espaço publicitário'}/></div>
+      <div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>DESTAQUE PATROCINADO</span><h2>{banner.title}</h2><p>{banner.description||'Publicidade publicada pela plataforma.'}</p><strong>Ver destaque →</strong></div>
+      {banners.length>1&&<span className='lvp-sponsored-badge'>{bannerIndex+1}/{banners.length}</span>}
+    </a>:<div className='lvp-sponsored lvp-empty-sponsored'><div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>ESPAÇO PREMIUM</span><h2>Seu negócio pode aparecer aqui.</h2><p>Este espaço só é preenchido quando um anúncio premium é cadastrado e publicado no sistema.</p><a href='/conta/publicidade'>Conhecer publicidade →</a></div></div>}
+   </section>
+   <section id='explorar' className='lvp-wrap lvp-featured'>
+    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
+    {featuredBusinesses.length?<div className='lvp-business-grid'>{featuredBusinesses.slice(0,4).map(b=><a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
+      <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className='lvp-verified'>✓ Verificada</span>}</div>
+      <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'>📍 {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
+    </a>)}</div>:<div className='lvp-empty-panel'><h3>Nenhuma empresa em destaque cadastrada.</h3><p>Quando uma empresa for marcada como destaque no sistema, ela aparecerá aqui.</p><a href={base+'/empresas'}>Abrir catálogo de empresas →</a></div>}
+   </section>
+   {promotions.length>0&&<section id='promocoes' className='lvp-soft'>
+    <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
+     {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className='lvp-promo-grid'>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
+       <div className='lvp-promo-image'><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title||'Promoção'} loading='lazy'/><strong>PROMOÇÃO</strong></div>
+       <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div><b>Ver oferta →</b></div>
+      </a>)}</div>}
+    </div>
+   </section>}
+   <section id='eventos' className='lvp-wrap lvp-events'>
+    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>AGENDA LOCAL</span><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Eventos publicados e ainda válidos para a cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
+    {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda →</a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className='lvp-date'><b>{d.day}</b><span>{d.month}</span></div><div><h3>{e.title}</h3><p>📍 {e.location||'Local a confirmar'}{e.start_time?` · 🕐 ${String(e.start_time).slice(0,5)}`:''}</p></div><span className='lvp-event-arrow'>→</span></a>})}</div>:<div className='lvp-empty-panel'><h3>Nenhum evento próximo cadastrado.</h3><p>Quando novos eventos forem cadastrados, eles aparecerão aqui.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
+   </section>
+   <section className='lvp-business-cta-section'>
+    <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
+   </section>
+  </main>
  </div>
 }
