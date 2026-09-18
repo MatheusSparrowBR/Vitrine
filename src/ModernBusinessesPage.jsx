@@ -31,10 +31,10 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
   let reviewMap={}
   const ids=publicBusinesses.map(row=>row.id).filter(Boolean)
-  if(ids.length){
-   const{data:reviewRows}=await db.from('business_reviews').select('business_id,rating').in('business_id',ids).eq('status','published')
-   reviewMap=(reviewRows||[]).reduce((acc,row)=>{const current=acc[row.business_id]||{sum:0,count:0};current.sum+=Number(row.rating)||0;current.count+=1;acc[row.business_id]=current;return acc},{})
-  }
+   if(ids.length){
+    const results=await Promise.all(ids.map(id=>db.rpc('get_public_business_reviews',{p_business_id:id,p_limit:100})))
+    results.forEach((reviews,index)=>{if(reviews.error)return;(reviews.data||[]).forEach(row=>{const businessId=ids[index];const current=reviewMap[businessId]||{sum:0,count:0};current.sum+=Number(row.rating)||0;current.count+=1;reviewMap[businessId]=current})})
+   }
   setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
  })();return()=>{live=false}},[citySlug])
  const items=useMemo(()=>{const term=q.trim().toLowerCase();return businesses.filter(b=>{const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term);const matchesCat=!cat||b.categories?.slug===cat;return matchesText&&matchesCat})},[businesses,q,cat])

@@ -9,3 +9,10 @@ test('empresas em destaque exibem verificação somente quando a empresa é veri
  assert.match(page,/featured,verified,category_name,created_at/)
  assert.match(page,/\{b\.verified&&<span className="verified">✓ Verificada<\/span>\}/)
 })
+
+test('empresas em destaque carregam e exibem a média das avaliações publicadas',()=>{
+ assert.match(page,/rpc\('get_public_business_reviews'/)
+ assert.match(page,/p_limit:100/)
+ assert.match(page,/lvp-card-rating/)
+ assert.match(page,/avg\.toFixed\(1\)/)
+})

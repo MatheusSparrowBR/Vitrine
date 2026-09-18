@@ -31,7 +31,18 @@ export default function AdminBusinessesPage(){
  async function writeAudit(action,id,metadata={}){if(!db||!session?.user?.id)return;await db.from('admin_audit_logs').insert({actor_id:session.user.id,action,entity_type:'business',entity_id:id,metadata})}
  async function review(id,nextStatus,reason=''){
   if(!db||!session)return;setBusy(id);setError('');const payload={status:nextStatus,updated_at:new Date().toISOString(),rejection_reason:nextStatus==='rejected'?(reason.trim()||'Ajustes necessários antes da publicação.'):null};const{error:e}=await db.from('businesses').update(payload).eq('id',id);if(e){setError(e.message);setBusy('');return}await writeAudit(`business_${nextStatus}`,id,{reason:reason.trim()||null,source:'admin_businesses'});setBusy('');setRejecting(null);setRejectReason('');notify(nextStatus==='active'?'Empresa aprovada e publicada.':nextStatus==='rejected'?'Empresa rejeitada com motivo registrado.':'Status atualizado.');await load()}
- async function toggle(id,field,value){if(!db||!session)return;setBusy(id);setBusinesses(xs=>xs.map(x=>x.id===id?{...x,[field]:!value}:x));const{error:e}=await db.from('businesses').update({[field]:!value,updated_at:new Date().toISOString()}).eq('id',id);if(e){setError(e.message);await load();setBusy('');return}await writeAudit(field==='featured'?(!value?'business_featured':'business_unfeatured'):(!value?'business_verified':'business_unverified'),id,{field,value:!value});setBusy('')}
+  async function toggle(id,field,value){
+   if(!db||!session)return
+   const nextValue=!value
+   setBusy(id);setError('')
+   const{data,error:e}=await db.from('businesses').update({[field]:nextValue,updated_at:new Date().toISOString()}).eq('id',id).select('id,featured,verified').maybeSingle()
+   if(e){setError(e.message);await load();setBusy('');return}
+   if(!data){setError('A empresa não foi encontrada ou a alteração não foi persistida.');await load();setBusy('');return}
+   setBusinesses(xs=>xs.map(x=>x.id===id?{...x,...data}:x))
+   if(data[field]!==nextValue){setError(`O banco manteve ${field==='featured'?'o destaque':'a verificação'} ativo. Verifique as regras de moderação do Supabase.`);await load();setBusy('');return}
+   await writeAudit(field==='featured'?(nextValue?'business_featured':'business_unfeatured'):(nextValue?'business_verified':'business_unverified'),id,{field,value:nextValue,source:'admin_businesses'})
+   setBusy('');notify(nextValue?(field==='featured'?'Destaque ativado.':'Verificação ativada.'):(field==='featured'?'Destaque removido.':'Verificação removida.'));await load()
+  }
  async function removeBusiness(b){
   if(!db||!session)return
   const confirmed=window.confirm(`Excluir permanentemente a empresa "${b.name}"?\n\nEsta ação remove o cadastro e os dados vinculados. Ela não pode ser desfeita.`)

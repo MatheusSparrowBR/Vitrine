@@ -49,6 +49,7 @@ test('public business profile keeps products and services in separate sections',
 test('media adaptation does not double-adapt catalog item uploads',()=>{
  const adapter=read('src/media-adapter.js')
  assert.match(adapter,/input\.closest\('\.vl-item-file'\)\)return/)
+ assert.match(adapter,/input\.closest\('\.file-button'\)\?\.parentElement/)
 })
 
 test('media add control is disabled at plan limit',()=>{

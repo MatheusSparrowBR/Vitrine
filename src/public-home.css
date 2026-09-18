@@ -62,6 +62,10 @@
 .lvp-verified{position:absolute;top:11px;right:11px;padding:5px 9px;border:1px solid #bfe8d0;border-radius:999px;background:rgba(237,250,243,.96);color:#16804b;font-size:9px;font-weight:900}
 .lvp-business-body{display:flex;flex-direction:column;min-height:162px;padding:16px}
 .lvp-card-cat{color:var(--lvp-blue);font-size:9px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.lvp-card-rating{display:flex;align-items:center;gap:5px;min-height:17px;margin-top:7px;color:#7b8b9d;font-size:9px}
+.lvp-card-rating-stars{color:#f3a817;font-size:12px;letter-spacing:1px;line-height:1}
+.lvp-card-rating strong{color:var(--lvp-ink);font-size:10px}
+.lvp-card-rating small{color:#8293a4;font-size:9px}
 .lvp-business-body h3{margin:6px 0 5px;font:900 18px/1.12 "Manrope",sans-serif;letter-spacing:-.02em}
 .lvp-business-body p{margin:0;color:#71859b;font-size:10px}
 .lvp-card-link{margin-top:auto;padding-top:14px;color:var(--lvp-blue);font-size:10px;font-weight:900}
