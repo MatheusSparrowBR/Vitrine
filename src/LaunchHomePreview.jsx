@@ -9,24 +9,9 @@ const fallbackCats=[
  ['🍽️','Restaurantes'],['🛒','Supermercado'],['🏪','Conveniência'],['🏋️','Academia'],['🛍️','Lojas'],['❤️','Saúde'],['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
 ]
 
-const businesses=[
- {name:'Bistrô Laguna',cat:'Restaurantes',rating:'4,9',place:'Centro',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'},
- {name:'Mercado da Praia',cat:'Supermercado',rating:'4,8',place:'Mar Grosso',img:'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=900&q=82'},
- {name:'Studio Bella',cat:'Beleza',rating:'4,9',place:'Centro',img:'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=900&q=82'},
- {name:'Auto Laguna',cat:'Automóveis',rating:'4,7',place:'Portinho',img:'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=82'}
-]
-
-const promotions=[
- {business:'Bistrô Laguna',title:'Festival de Sabores',desc:'20% OFF no prato executivo',price:'R$ 24,90',old:'R$ 31,13',badge:'20% OFF',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'},
- {business:'Studio Bella',title:'Semana da Beleza',desc:'Corte + escova com condição especial',price:'R$ 69,90',old:'R$ 89,90',badge:'22% OFF',img:'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=900&q=82'},
- {business:'Mercado da Praia',title:'Quarta do Hortifruti',desc:'Ofertas especiais em frutas e verduras',price:'Confira',old:'',badge:'OFERTA',img:'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=82'}
-]
-
-const events=[
- {date:'18',mon:'SET',title:'Feira Cultural de Laguna',place:'Centro Histórico',time:'19:00'},
- {date:'20',mon:'SET',title:'Festival Gastronômico',place:'Mar Grosso',time:'12:00'},
- {date:'21',mon:'SET',title:'Música ao vivo na praça',place:'Praça Vidal Ramos',time:'18:30'}
-]
+const fallbackBusinesses=[{name:'Bistrô Laguna - Teste',cat:'Restaurantes',rating:'',place:'MAGALHÃES',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'}]
+const fallbackPromotionData=[{business:'Bistrô Laguna - Teste',title:'Festival de Sabores',desc:'Oferta disponível.',price:'Confira',old:'',badge:'OFERTA',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'}]
+const fallbackEvents=[{date:'24',mon:'SET',title:'Noite de Música ao Vivo - Bistrô Laguna',place:'Bistrô Laguna',time:'20:00'}]
 
 function PreviewHeader(){
  return <header className="lvp-header">
@@ -48,6 +33,9 @@ function LaunchHomePreview(){
  const [today,setToday]=useState(()=>new Date())
  const [weather,setWeather]=useState(null)
  const [weatherLoading,setWeatherLoading]=useState(true)
+ const [businesses,setBusinesses]=useState(()=>fallbackBusinesses)
+ const [promotions,setPromotions]=useState(()=>fallbackPromotionData)
+ const [events,setEvents]=useState(()=>fallbackEvents)
  useEffect(()=>{
   const tick=()=>setToday(new Date())
   tick()
@@ -69,6 +57,24 @@ function LaunchHomePreview(){
   return()=>{live=false}
  },[])
  useEffect(()=>setCatStart(start=>Math.min(start,Math.max(0,cats.length-7))),[cats.length])
+ useEffect(()=>{
+  let live=true
+  const loadHomeData=async()=>{
+   if(!db)return
+   try{
+    const{data:city}=await db.from('cities').select('id').eq('slug','laguna').eq('active',true).maybeSingle()
+    if(!city||!live)return
+    const{data:bs}=await db.from('public_business_directory').select('name,slug,short_description,cover_url,logo_url,neighborhood,verified,featured,category_name,category_slug').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(4)
+    if(live&&bs?.length)setBusinesses(bs.map(b=>({name:b.name,cat:b.category_name||'Outros',rating:'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
+    const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).order('created_at',{ascending:false}).limit(3)
+    if(live&&ps?.length)setPromotions(ps.map(p=>({business:p.businesses?.name||'Empresa local',title:p.title,desc:p.description||'Oferta disponível.',price:p.price!=null?'R$ '+Number(p.price).toFixed(2).replace('.',','):'Confira',old:p.original_price!=null?'R$ '+Number(p.original_price).toFixed(2).replace('.',','):'',badge:p.original_price&&p.price?Math.max(0,Math.round((1-Number(p.price)/Number(p.original_price))*100))+'% OFF':'OFERTA',img:p.image_url||''})))
+    const{data:es}=await db.from('events').select('title,event_date,start_time,location,address').eq('city_id',city.id).eq('active',true).gte('event_date',new Date().toISOString().slice(0,10)).order('event_date').order('start_time').limit(3)
+    if(live&&es?.length)setEvents(es.map(e=>{const d=new Date(e.event_date+'T12:00:00');return {date:String(d.getDate()).padStart(2,'0'),mon:new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(d).replace('.','').toUpperCase(),title:e.title,place:e.location||e.address||'Laguna',time:e.start_time?String(e.start_time).slice(0,5):'Confira'}}))
+   }catch{}
+  }
+  loadHomeData()
+  return()=>{live=false}
+ },[])
  useEffect(()=>{
   let live=true
   const load=async()=>{
