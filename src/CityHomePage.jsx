@@ -129,14 +129,14 @@ export default function CityHomePage({citySlug='laguna'}){
    </section>
    <section id='explorar' className='lvp-wrap lvp-featured'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
-    {featuredBusinesses.length?<div className='lvp-business-grid'>{featuredBusinesses.slice(0,4).map(b=><a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
+    {featuredBusinesses.length?<div className={`lvp-business-grid ${featuredBusinesses.length===1?'lvp-business-grid-single':''}`}>{featuredBusinesses.slice(0,4).map(b=><a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
       <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className="verified">✓ Verificada</span>}</div>
       <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'>📍 {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
     </a>)}</div>:<div className='lvp-empty-panel'><h3>Nenhuma empresa em destaque cadastrada.</h3><p>Quando uma empresa for marcada como destaque no sistema, ela aparecerá aqui.</p><a href={base+'/empresas'}>Abrir catálogo de empresas →</a></div>}
    </section>
    {promotions.length>0&&<section id='promocoes' className='lvp-soft'>
     <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
-     {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className='lvp-promo-grid'>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
+     {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className={`lvp-promo-grid ${promotions.length===1?'lvp-promo-grid-single':''}`}>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
        <div className='lvp-promo-image'><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title||'Promoção'} loading='lazy'/><strong>PROMOÇÃO</strong></div>
        <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div><b>Ver oferta →</b></div>
       </a>)}</div>}
@@ -150,5 +150,34 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
    </section>
   </main>
+  <footer className='lvp-footer'>
+   <div className='lvp-wrap lvp-footer-grid'>
+    <div>
+     <img src='/vitrine-local-header-logo.svg' alt='VitrineLocal'/>
+     <p>A cidade em um só lugar.</p>
+    </div>
+    <div>
+     <b>Explorar</b>
+     <a href={base+'/empresas'}>Empresas</a>
+     <a href={base+'/promocoes'}>Promoções</a>
+     <a href={base+'/eventos'}>Eventos</a>
+     <a href={base+'#categorias'}>Categorias</a>
+    </div>
+    <div>
+     <b>Para empresas</b>
+     <a href='/conta?new=business'>Cadastrar empresa</a>
+     <a href='/conta/publicidade'>Publicidade</a>
+     <a href='/planos'>Planos</a>
+    </div>
+    <div>
+     <b>VitrineLocal</b>
+     <a href='/'>Início</a>
+     <a href='mailto:contato@vitrinelocal.net'>Contato</a>
+     <a href='/privacidade'>Privacidade</a>
+     <a href='/termos'>Termos</a>
+    </div>
+   </div>
+   <div className='lvp-footer-bottom'>© 2026 VitrineLocal · {city?.name||'Laguna'}, {city?.state||'SC'}</div>
+  </footer>
  </div>
 }
