@@ -1,11 +1,12 @@
 import React,{useEffect,useMemo,useState} from 'react'
+import {supabase as db} from './supabase-client.js'
 import './launch-home-preview.css'
 
 const slugify=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
 
-const cats=[
- ['🍽️','Restaurantes'],['🛒','Supermercado'],['🛍️','Lojas'],['☕','Cafés'],['❤️','Saúde'],
- ['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
+const iconFor=name=>({Restaurantes:'🍽️',Supermercado:'🛒',Conveniência:'🏪',Academia:'🏋️',Lojas:'🛍️',Cafés:'☕',Saúde:'❤️',Beleza:'✨',Serviços:'🔧',Automóveis:'🚗',Imóveis:'🏠',Pets:'🐾',Turismo:'🧭',Outros:'✦'}[name]||'✦')
+const fallbackCats=[
+ ['🍽️','Restaurantes'],['🛒','Supermercado'],['🏪','Conveniência'],['🏋️','Academia'],['🛍️','Lojas'],['❤️','Saúde'],['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
 ]
 
 const businesses=[
@@ -42,6 +43,7 @@ function PreviewHeader(){
 
 function LaunchHomePreview(){
  const [q,setQ]=useState('')
+ const [cats,setCats]=useState(()=>fallbackCats)
  const [catStart,setCatStart]=useState(0)
  const [today,setToday]=useState(()=>new Date())
  const [weather,setWeather]=useState(null)
@@ -52,6 +54,21 @@ function LaunchHomePreview(){
   const dateTimer=setInterval(tick,60*1000)
   return()=>clearInterval(dateTimer)
  },[])
+ useEffect(()=>{
+  let live=true
+  const loadCategories=async()=>{
+   if(!db){setCats(fallbackCats);return}
+   try{
+    const{data,error}=await db.from('categories').select('name,icon').eq('active',true).order('sort_order').order('name')
+    if(!live)return
+    if(error||!data?.length){setCats(fallbackCats);return}
+    setCats(data.map(row=>[row.icon||iconFor(row.name),row.name]))
+   }catch{if(live)setCats(fallbackCats)}
+  }
+  loadCategories()
+  return()=>{live=false}
+ },[])
+ useEffect(()=>setCatStart(start=>Math.min(start,Math.max(0,cats.length-7))),[cats.length])
  useEffect(()=>{
   let live=true
   const load=async()=>{
