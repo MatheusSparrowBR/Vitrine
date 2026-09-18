@@ -59,9 +59,10 @@ async function fetchCityWeather(city){
 }
 
 export default function CityHomePage({citySlug='laguna'}){
- const [cities,setCities]=useState([]),[city,setCity]=useState(citySlug==='laguna'?FALLBACK:{...FALLBACK,slug:citySlug,name:citySlug}),[categories,setCategories]=useState(fallbackCategories),[businesses,setBusinesses]=useState([]),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[banners,setBanners]=useState([]),[bannerIndex,setBannerIndex]=useState(0),[catStart,setCatStart]=useState(0),[q,setQ]=useState(''),[loading,setLoading]=useState(true),[eventError,setEventError]=useState(''),[promoError,setPromoError]=useState(''),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true),[weatherError,setWeatherError]=useState('')
+ const [cities,setCities]=useState([]),[city,setCity]=useState(citySlug==='laguna'?FALLBACK:{...FALLBACK,slug:citySlug,name:citySlug}),[categories,setCategories]=useState(fallbackCategories),[businesses,setBusinesses]=useState([]),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[banners,setBanners]=useState([]),[bannerIndex,setBannerIndex]=useState(0),[catStart,setCatStart]=useState(0),[catVisibleCount,setCatVisibleCount]=useState(typeof window!=='undefined'&&window.matchMedia('(max-width:760px)').matches?4:7),[q,setQ]=useState(''),[loading,setLoading]=useState(true),[eventError,setEventError]=useState(''),[promoError,setPromoError]=useState(''),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true),[weatherError,setWeatherError]=useState('')
  useEffect(()=>{if(!db){setLoading(false);return}let alive=true;(async()=>{try{const{data,error}=await withTimeout(db.from('cities').select('id,name,state,country,slug,active').eq('active',true).eq('slug',citySlug).maybeSingle());if(!alive)return;if(error||!data){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false);return}setCities([data]);setCity(data)}catch(error){if(alive){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false)}}})();return()=>{alive=false}},[citySlug])
  useEffect(()=>{setCatStart(0)},[city?.id])
+ useEffect(()=>{const update=()=>setCatVisibleCount(window.matchMedia('(max-width:760px)').matches?4:7);update();window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)},[])
  useEffect(()=>{if(!city?.name)return;let alive=true;let timer=null;const loadWeather=async()=>{setWeatherLoading(true);setWeatherError('');try{const result=await fetchCityWeather(city);if(!alive)return;setWeather(result)}catch(error){if(!alive)return;setWeather(null);setWeatherError(error?.message||'Clima indisponível')}finally{if(alive)setWeatherLoading(false)}};loadWeather();timer=setInterval(loadWeather,10*60*1000);return()=>{alive=false;if(timer)clearInterval(timer)}},[city?.id,city?.name,city?.state,city?.country])
  useEffect(()=>{if(!db||!city?.id||city.id==='fallback')return;let alive=true;setLoading(true);setEventError('');setPromoError('')
   const loadCategories=async()=>{try{const r=await withTimeout(db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'));if(!alive)return;setCategories(r.data?.length?r.data:fallbackCategories())}catch(_){if(alive)setCategories(fallbackCategories())}}
@@ -79,8 +80,8 @@ export default function CityHomePage({citySlug='laguna'}){
  const eventCount=Math.min(events.length,3)
  const banner=banners[bannerIndex]||null
  const base=`/${city?.slug||citySlug}`
- const visibleCats=categories.slice(catStart,catStart+Math.min(7,categories.length))
- const maxCatStart=Math.max(0,categories.length-7)
+ const visibleCats=categories.slice(catStart,catStart+catVisibleCount)
+ const maxCatStart=Math.max(0,categories.length-catVisibleCount)
  const go=path=>location.href=path
  const categoryHref=c=>base+'/empresas?categoria='+encodeURIComponent(c.slug)
  const quickCategories=categories.slice(0,4)
@@ -134,6 +135,16 @@ export default function CityHomePage({citySlug='laguna'}){
       <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'>📍 {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
     </a>)}</div>:<div className='lvp-empty-panel'><h3>Nenhuma empresa em destaque cadastrada.</h3><p>Quando uma empresa for marcada como destaque no sistema, ela aparecerá aqui.</p><a href={base+'/empresas'}>Abrir catálogo de empresas →</a></div>}
    </section>
+   <section className='lvp-wrap lvp-needs'>
+    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>DO JEITO QUE VOCÊ PENSA</span><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
+    <div className='lvp-need-grid'>
+     <a href={base+'/empresas?categoria=restaurantes'}><span>🍽️</span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
+     <a href={base+'/empresas'}><span>🛍️</span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
+     <a href={base+'/empresas'}><span>🔧</span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
+     <a href={base+'/empresas'}><span>💆</span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
+    </div>
+   </section>
+
    {promotions.length>0&&<section id='promocoes' className='lvp-soft'>
     <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
      {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className={`lvp-promo-grid ${promotions.length===1?'lvp-promo-grid-single':''}`}>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
