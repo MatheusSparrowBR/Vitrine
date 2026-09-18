@@ -16,14 +16,15 @@ const fallbackEvents=[{date:'24',mon:'SET',title:'Noite de Música ao Vivo - Bis
 const weatherLabel=code=>({0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',48:'Neblina',51:'Garoa',53:'Garoa',55:'Garoa',61:'Chuva fraca',63:'Chuva moderada',65:'Chuva forte',80:'Pancadas de chuva',81:'Pancadas de chuva',82:'Pancadas de chuva',95:'Trovoada',96:'Trovoada',99:'Trovoada'}[Number(code)]||'Condições atuais')
 
 function PreviewHeader(){
- return <header className="lvp-header">
+ const [menuOpen,setMenuOpen]=useState(false)
+ return <header className="lvp-header vl-site-header">
   <div className="lvp-header-inner">
-   <a className="lvp-logo" href="/laguna"><img src="/vitrine-local-header-logo.svg" alt="VitrineLocal"/></a>
+   <a className="lvp-logo vl-site-brand" href="/laguna"><img className="vl-site-brand-logo" src="/vitrine-local-header-logo.svg" alt="VitrineLocal"/></a>
    <a className="lvp-city" href="/laguna" aria-label="Abrir Laguna - SC">⌖ <span>Laguna - SC</span><b>⌄</b></a>
-   <nav className="lvp-nav">
+   <nav className={`lvp-nav${menuOpen?" is-open":""}`}>
     <a className="active" href="#explorar">Explorar</a><a href="#promocoes">Promoções</a><a href="#eventos">Eventos</a><a href="#categorias">Categorias</a>
    </nav>
-   <div className="lvp-actions"><a href="/login">Entrar</a><a className="lvp-business" href="/conta?new=business">Cadastrar empresa</a></div>
+   <button className="vl-site-menu-toggle" type="button" aria-label="Abrir menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(open=>!open)}>☰</button><div className={`lvp-actions${menuOpen?" is-open":""}`}><a href="/login">Entrar</a><a className="lvp-business" href="/conta?new=business">Cadastrar empresa</a></div>
   </div>
  </header>
 }
