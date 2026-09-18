@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useEffect,useState} from 'react'
 import './launch-home-preview.css'
 
 const cats=[
@@ -41,6 +41,24 @@ function PreviewHeader(){
 function LaunchHomePreview(){
  const [q,setQ]=useState('')
  const [catStart,setCatStart]=useState(0)
+ const [weather,setWeather]=useState(null)
+ const [weatherLoading,setWeatherLoading]=useState(true)
+ useEffect(()=>{
+  let live=true
+  const load=async()=>{
+   try{
+    const geo=await fetch('https://geocoding-api.open-meteo.com/v1/search?name=Laguna&count=5&language=pt&format=json&countryCode=BR').then(r=>r.json())
+    const match=(geo.results||[]).find(x=>String(x.name||'').toLowerCase()==='laguna'&&String(x.admin1||'').toLowerCase().includes('santa catarina'))||(geo.results||[])[0]
+    if(!match?.latitude||!match?.longitude)throw new Error('weather')
+    const data=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(match.latitude)+'&longitude='+encodeURIComponent(match.longitude)+'&current=temperature_2m,apparent_temperature,weather_code&temperature_unit=celsius&timezone=America%2FSao_Paulo').then(r=>r.json())
+    if(!live)return
+    setWeather(data.current||null)
+   }catch{if(live)setWeather(null)}finally{if(live)setWeatherLoading(false)}
+  }
+  load()
+  const timer=setInterval(load,10*60*1000)
+  return()=>{live=false;clearInterval(timer)}
+ },[])
  const visibleCats=cats.slice(catStart,catStart+7)
  return <div className="lvp-page">
   <PreviewHeader/>
@@ -62,7 +80,7 @@ function LaunchHomePreview(){
      </div>
      <aside className="lvp-hero-card">
       <div className="lvp-mini-head"><span>HOJE EM LAGUNA</span><strong>18 SET</strong></div>
-      <div className="lvp-mini-stat"><span className="lvp-mini-icon">🏪</span><div><b>Empresas locais</b><small>Encontre serviços, lojas e negócios</small></div></div>
+      <div className="lvp-weather"><span className="lvp-weather-icon">{weatherLoading?'◌':'🌤️'}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature_2m!=null?`${Math.round(weather.temperature_2m)}°C`:'Clima indisponível'}</b><small>{weather?.apparent_temperature!=null?`Laguna · sensação ${Math.round(weather.apparent_temperature)}°C`:'Atualização em tempo real'}</small></div><span className="lvp-live-dot">AO VIVO</span></div><div className="lvp-mini-stat"><span className="lvp-mini-icon">🏪</span><div><b>Empresas locais</b><small>Encontre serviços, lojas e negócios</small></div></div>
       <div className="lvp-mini-stat"><span className="lvp-mini-icon">🏷️</span><div><b>Ofertas ativas</b><small>Promoções para aproveitar hoje</small></div></div>
       <div className="lvp-mini-stat"><span className="lvp-mini-icon">📅</span><div><b>Eventos próximos</b><small>O que acontece na cidade</small></div></div>
       <a className="lvp-mini-cta" href="#explorar">Explorar Laguna →</a>
@@ -78,6 +96,19 @@ function LaunchHomePreview(){
       <button className="lvp-arrow" onClick={()=>setCatStart(Math.min(cats.length-7,catStart+1))} disabled={catStart>=cats.length-7}>›</button>
     </div>
     <div className="lvp-category-count">{cats.length} categorias disponíveis</div>
+   </section>
+
+   <section className="lvp-wrap lvp-sponsored-wrap">
+    <a className="lvp-sponsored" href="#publicidade">
+      <div className="lvp-sponsored-image"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=84" alt="Destaque patrocinado"/></div>
+      <div className="lvp-sponsored-copy">
+       <span className="lvp-sponsored-label">DESTAQUE PATROCINADO</span>
+       <h2>Festival de Sabores · Bistrô Laguna</h2>
+       <p>20% OFF no prato executivo para aproveitar hoje.</p>
+       <strong>Ver destaque →</strong>
+      </div>
+      <span className="lvp-sponsored-badge">20% OFF</span>
+    </a>
    </section>
 
    <section id="explorar" className="lvp-wrap lvp-featured">
