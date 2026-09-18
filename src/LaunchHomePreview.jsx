@@ -10,7 +10,7 @@ const weatherLabel=code=>({0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmen
 function EmptyPanel({title,text,href,label}){return <div className="lvp-empty-panel"><h3>{title}</h3><p>{text}</p>{href&&<a href={href}>{label||'Ver mais →'}</a>}</div>}
 
 function LaunchHomePreview(){
- const[q,setQ]=useState(''),[cats,setCats]=useState([]),[catStart,setCatStart]=useState(0)
+ const[q,setQ]=useState(''),[cats,setCats]=useState([]),[catStart,setCatStart]=useState(0),[mobileCats,setMobileCats]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:760px)').matches)
  const[today,setToday]=useState(()=>new Date()),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true)
  const[businesses,setBusinesses]=useState([]),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[sponsored,setSponsored]=useState(null),[stories,setStories]=useState([])
  const[stats,setStats]=useState({businesses:0,promotions:0,events:0}),[dataError,setDataError]=useState(false)
@@ -29,7 +29,8 @@ function LaunchHomePreview(){
   })()
   return()=>{live=false}
  },[])
- useEffect(()=>setCatStart(start=>Math.min(start,Math.max(0,cats.length-7))),[cats.length])
+ useEffect(()=>{const m=window.matchMedia('(max-width:760px)'),sync=()=>setMobileCats(m.matches);sync();m.addEventListener?.('change',sync);return()=>m.removeEventListener?.('change',sync)},[])
+ useEffect(()=>{const per=mobileCats?6:7;setCatStart(start=>Math.min(start,Math.max(0,cats.length-per)))},[cats.length,mobileCats])
 
  useEffect(()=>{
   let live=true
@@ -78,10 +79,11 @@ function LaunchHomePreview(){
   load();const t=setInterval(load,600000);return()=>{live=false;clearInterval(t)}
  },[])
 
- const visibleCats=cats.slice(catStart,catStart+7),categoryPages=Math.max(1,Math.ceil(cats.length/7))
+ const catsPerPage=mobileCats?6:7
+ const visibleCats=cats.slice(catStart,catStart+catsPerPage),categoryPages=Math.max(1,Math.ceil(cats.length/catsPerPage))
  const quickCats=['Restaurantes','Serviços','Beleza','Supermercado'].filter(name=>cats.some(([_,label])=>label===name))
  const dateLabel=useMemo(()=>new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(today).replace('.','').toUpperCase(),[today])
- const moveCats=dir=>setCatStart(start=>dir<0?Math.max(0,start-7):Math.min(Math.max(0,cats.length-7),start+7))
+ const moveCats=dir=>setCatStart(start=>dir<0?Math.max(0,start-catsPerPage):Math.min(Math.max(0,cats.length-catsPerPage),start+catsPerPage))
 
  return <div className="lvp-page">
   <SiteHeader/>
@@ -104,7 +106,7 @@ function LaunchHomePreview(){
    </div></section>
 
    <section id="categorias" className="lvp-wrap lvp-categories"><div className="lvp-section-head"><div><span className="lvp-eyebrow">EXPLORE</span><h2>Encontre por categoria</h2><p>Descubra categorias cadastradas no VitrineLocal.</p></div><a href="/laguna/empresas">Ver todas →</a></div>
-    <div className="lvp-cat-box"><button className="lvp-arrow" onClick={()=>moveCats(-1)} disabled={catStart===0}>‹</button><div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href={'/laguna/empresas?categoria='+encodeURIComponent(slugify(label))} key={label}><span>{icon}</span><b>{label}</b></a>)}</div><button className="lvp-arrow" onClick={()=>moveCats(1)} disabled={catStart+7>=cats.length}>›</button></div>
+    <div className="lvp-cat-box"><button className="lvp-arrow" onClick={()=>moveCats(-1)} disabled={catStart===0}>‹</button><div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href={'/laguna/empresas?categoria='+encodeURIComponent(slugify(label))} key={label}><span>{icon}</span><b>{label}</b></a>)}</div><button className="lvp-arrow" onClick={()=>moveCats(1)} disabled={catStart+catsPerPage>=cats.length}>›</button></div>
     <div className="lvp-cat-page-indicator" aria-live="polite">Página {Math.floor(catStart/7)+1} de {categoryPages}</div><div className="lvp-category-count">{cats.length} categorias disponíveis</div>
     {dataError&&<p className="lvp-data-warning">Alguns dados não puderam ser carregados agora.</p>}
    </section>
