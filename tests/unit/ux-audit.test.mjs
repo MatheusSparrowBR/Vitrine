@@ -65,3 +65,9 @@ test('home real usa centralização para item único e rodapé da UX de lançame
  assert.match(css,/\.lvp-business-grid-single\{/)
  assert.match(css,/\.lvp-promo-grid-single\{/)
 })
+
+test('rodapé usa a logo original sem filtro que a transforme em bloco branco',()=>{
+ const css=read('src/launch-home-preview.css')
+ assert.match(css,/\.lvp-footer-grid>div:first-child img\{width:210px;height:auto;display:block;opacity:1\}/)
+ assert.doesNotMatch(css,/\.lvp-footer-grid>div:first-child img\{[^}]*filter:/)
+})
