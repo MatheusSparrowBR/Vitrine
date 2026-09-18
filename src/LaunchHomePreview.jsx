@@ -13,6 +13,8 @@ const fallbackBusinesses=[{name:'Bistrô Laguna - Teste',cat:'Restaurantes',rati
 const fallbackPromotionData=[{business:'Bistrô Laguna - Teste',title:'Festival de Sabores — 20% OFF',desc:'Aproveite 20% de desconto em pratos selecionados.',price:'R$ 24,90',old:'R$ 31,13',badge:'20% OFF',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'}]
 const fallbackEvents=[{date:'24',mon:'SET',title:'Noite de Música ao Vivo - Bistrô Laguna',place:'Bistrô Laguna',time:'20:00'}]
 
+const weatherLabel=code=>({0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',48:'Neblina',51:'Garoa',53:'Garoa',55:'Garoa',61:'Chuva fraca',63:'Chuva moderada',65:'Chuva forte',80:'Pancadas de chuva',81:'Pancadas de chuva',82:'Pancadas de chuva',95:'Trovoada',96:'Trovoada',99:'Trovoada'}[Number(code)]||'Condições atuais')
+
 function PreviewHeader(){
  return <header className="lvp-header">
   <div className="lvp-header-inner">
@@ -127,7 +129,7 @@ function LaunchHomePreview(){
      </div>
      <aside className="lvp-hero-card">
       <div className="lvp-mini-head"><span>HOJE EM LAGUNA</span><strong>{dateLabel}</strong></div>
-      <div className="lvp-weather"><span className="lvp-weather-icon">{weatherLoading?'◌':'🌤️'}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature_2m!=null?`${Math.round(weather.temperature_2m)}°C`:'Clima indisponível'}</b><small>{weather?.apparent_temperature!=null?`Laguna · sensação ${Math.round(weather.apparent_temperature)}°C`:'Atualização em tempo real'}</small></div><span className="lvp-live-dot">AO VIVO</span></div><div className="lvp-mini-stat"><span className="lvp-mini-icon">🏪</span><div><b>Empresas locais</b><small>Encontre serviços, lojas e negócios</small></div></div>
+      <div className="lvp-weather"><span className="lvp-weather-icon">{weatherLoading?'◌':'🌤️'}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature_2m!=null?`${Math.round(weather.temperature_2m)}°C`:'Clima indisponível'}</b><small>{weather?.apparent_temperature!=null?`Laguna · ${weatherLabel(weather.weather_code)} · sensação ${Math.round(weather.apparent_temperature)}°C`:'Atualização em tempo real'}</small></div><span className="lvp-live-dot">AO VIVO</span></div><div className="lvp-mini-stat"><span className="lvp-mini-icon">🏪</span><div><b>Empresas locais</b><small>Encontre serviços, lojas e negócios</small></div></div>
       <div className="lvp-mini-stat"><span className="lvp-mini-icon">🏷️</span><div><b>Ofertas ativas</b><small>Promoções para aproveitar hoje</small></div></div>
       <div className="lvp-mini-stat"><span className="lvp-mini-icon">📅</span><div><b>Eventos próximos</b><small>O que acontece na cidade</small></div></div>
       <a className="lvp-mini-cta" href="/laguna/empresas">Explorar Laguna →</a>
