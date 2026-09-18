@@ -154,3 +154,7 @@
 @media(max-width:760px){
  .lvp-business-grid-single,.lvp-promo-grid-single{grid-template-columns:minmax(0,420px);justify-content:center}
 }
+
+
+.lvp-cat-page-indicator{font-size:.78rem;color:#6b7280;text-align:center;margin-top:10px;font-weight:600;letter-spacing:.01em}
+@media (max-width:700px){.lvp-cat-page-indicator{margin-top:8px;font-size:.72rem}}
