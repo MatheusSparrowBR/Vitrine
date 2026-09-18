@@ -115,3 +115,27 @@
 .lvp-footer-grid b{display:block;margin-bottom:12px;font-size:10px;letter-spacing:.06em;text-transform:uppercase}.lvp-footer-grid a{display:block;margin:8px 0;color:#b9cee0;font-size:10px}.lvp-footer-bottom{width:min(1180px,100%);margin:36px auto 0;padding:17px 24px 0;border-top:1px solid rgba(255,255,255,.12);color:#85a7c0;font-size:9px}
 @media(max-width:1050px){.lvp-hero-inner{grid-template-columns:minmax(0,1fr) 330px;gap:30px}.lvp-nav{gap:16px}.lvp-business-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lvp-cat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.lvp-need-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.lvp-header-inner{height:64px;padding:0 16px}.lvp-logo img{width:145px}.lvp-city span{display:none}.lvp-nav{display:none}.lvp-actions>a:first-child{display:none}.lvp-actions .lvp-business{min-height:36px;padding:0 12px;font-size:10px}.lvp-hero{min-height:auto}.lvp-hero-inner{grid-template-columns:1fr;padding:55px 18px 65px;gap:24px}.lvp-hero-copy h1{font-size:46px}.lvp-hero-copy>p{font-size:14px}.lvp-search{margin-top:22px}.lvp-search button{padding:0 15px}.lvp-hero-card{order:2}.lvp-wrap{padding:0 16px}.lvp-section-head{align-items:flex-start}.lvp-section-head h2{font-size:25px}.lvp-section-head>a{font-size:10px}.lvp-cat-box{grid-template-columns:32px minmax(0,1fr) 32px;padding:7px}.lvp-arrow{width:30px;height:34px}.lvp-cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.lvp-cat-grid a{min-height:92px}.lvp-business-grid{grid-template-columns:1fr 1fr;gap:11px}.lvp-business-image{height:150px}.lvp-business-body{min-height:146px;padding:13px}.lvp-business-body h3{font-size:15px}.lvp-needs{padding-bottom:65px}.lvp-need-grid{grid-template-columns:1fr 1fr}.lvp-promo-grid,.lvp-story-grid{grid-template-columns:1fr}.lvp-promo-image{height:200px}.lvp-event{grid-template-columns:66px minmax(0,1fr) 30px}.lvp-business-cta-wrap{flex-direction:column;align-items:flex-start;padding:30px 24px}.lvp-business-cta-wrap h2{font-size:28px}.lvp-footer-grid{grid-template-columns:1fr 1fr}.lvp-footer-grid>div:first-child{grid-column:1/-1}}
+
+.lvp-weather{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.11)}
+.lvp-weather-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.11);font-size:20px}
+.lvp-weather b{display:block;font:900 22px/1 "Manrope",sans-serif}
+.lvp-weather small{display:block;margin-top:4px;color:#bfd5e7;font-size:9px;line-height:1.4}
+.lvp-live-dot{margin-left:auto;padding:5px 7px;border:1px solid rgba(118,213,158,.35);border-radius:999px;background:rgba(44,151,95,.16);color:#9be1b7;font-size:7px;font-weight:900;letter-spacing:.08em}
+.lvp-sponsored-wrap{padding-top:28px}
+.lvp-sponsored{position:relative;display:grid;grid-template-columns:300px minmax(0,1fr) auto;align-items:stretch;min-height:152px;overflow:hidden;border:1px solid #d8e5f0;border-radius:23px;background:linear-gradient(110deg,#fff 0%,#f7fbff 100%);box-shadow:0 16px 38px rgba(13,45,78,.075)}
+.lvp-sponsored-image{min-height:152px;overflow:hidden;background:#eaf1f7}
+.lvp-sponsored-image img{width:100%;height:100%;display:block;object-fit:cover}
+.lvp-sponsored-copy{display:flex;flex-direction:column;justify-content:center;padding:24px 28px;min-width:0}
+.lvp-sponsored-label{color:#216df3;font-size:8px;font-weight:900;letter-spacing:.15em}
+.lvp-sponsored-copy h2{margin:7px 0 5px;font:900 23px/1.08 "Manrope",sans-serif;letter-spacing:-.035em;color:#09294d}
+.lvp-sponsored-copy p{margin:0;color:#71859b;font-size:10px;line-height:1.5}
+.lvp-sponsored-copy strong{margin-top:12px;color:#216df3;font-size:10px;font-weight:900}
+.lvp-sponsored-badge{align-self:center;margin-right:24px;padding:9px 11px;border-radius:999px;background:#216df3;color:#fff;font-size:9px;font-weight:900;white-space:nowrap;box-shadow:0 7px 17px rgba(33,109,243,.2)}
+@media(max-width:760px){
+ .lvp-sponsored-wrap{padding-top:20px}
+ .lvp-sponsored{grid-template-columns:1fr;min-height:0}
+ .lvp-sponsored-image{height:165px;min-height:165px}
+ .lvp-sponsored-copy{padding:18px 18px 20px}
+ .lvp-sponsored-copy h2{font-size:20px}
+ .lvp-sponsored-badge{position:absolute;top:12px;left:12px;margin:0}
+}
