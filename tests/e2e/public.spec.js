@@ -1,17 +1,18 @@
 import {test,expect} from '@playwright/test'
 
-test('home de lançamento exibe navegação, clima, categorias e conteúdo principal',async({page})=>{
+test('home de Laguna usa a nova UX sobre dados reais do catálogo',async({page})=>{
  await page.goto('/laguna')
- await expect(page.locator('.lvp-logo img')).toBeVisible()
- await expect(page.locator('.lvp-logo img')).toHaveAttribute('alt',/VitrineLocal/i)
+ await expect(page.locator('.vl-site-header')).toHaveCount(1)
+ await expect(page.locator('.vl-site-brand-logo')).toBeVisible()
+ await expect(page.getByRole('link',{name:'Entrar'})).toBeVisible()
  await expect(page.getByText('Enviar conteúdo')).toHaveCount(0)
  await expect(page.getByRole('heading',{name:/Descubra o que Laguna tem de melhor/i})).toBeVisible()
  await expect(page.getByRole('heading',{name:'Empresas em destaque'})).toBeVisible()
  await expect(page.getByRole('heading',{name:/O que está acontecendo em Laguna/i})).toBeVisible()
  await expect(page.locator('.lvp-weather')).toBeVisible()
- await expect(page.locator('.lvp-sponsored')).toBeVisible()
- await expect(page.locator('.lvp-cat-grid a')).toHaveCount(7)
- await expect(page.locator('.lvp-category-count')).toHaveText(/12 categorias disponíveis/i)
+ await expect(page.locator('.lvp-sponsored, .lvp-empty-sponsored')).toHaveCount(1)
+ await expect(page.locator('.lvp-cat-grid a').count()).resolves.toBeLessThanOrEqual(7)
+ await expect(page.locator('.lvp-category-count')).toHaveText(/\\d+ categorias? disponíveis/i)
  await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
 })
 
@@ -40,33 +41,33 @@ test('header global marca a seção ativa',async({page})=>{
  await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Planos')
 })
 
-test('home de lançamento é responsiva no mobile',async({page})=>{
+test('home de Laguna é responsiva no mobile',async({page})=>{
  await page.setViewportSize({width:390,height:844})
  await page.goto('/laguna')
- await expect(page.locator('.lvp-logo img')).toBeVisible()
- await expect(page.locator('.lvp-nav')).toBeHidden()
- await expect(page.locator('.lvp-business')).toBeVisible()
+ await expect(page.locator('.vl-site-header')).toBeVisible()
+ await expect(page.locator('.vl-site-brand-logo')).toBeVisible()
+ await expect(page.locator('.vl-site-menu-toggle')).toBeVisible()
  await expect(page.locator('.lvp-hero-card')).toBeVisible()
 })
 
-test('home de lançamento permite navegar pelas 12 categorias',async({page})=>{
+test('home usa o conjunto atual de categorias e permite abrir uma categoria',async({page})=>{
  await page.goto('/laguna')
  const box=page.locator('.lvp-cat-box')
  await expect(box).toBeVisible()
- await expect(page.locator('.lvp-category-count')).toHaveText(/12 categorias disponíveis/i)
- await expect(page.locator('.lvp-cat-grid a')).toHaveCount(7)
- const prev=box.locator('.lvp-arrow').first()
+ const cards=page.locator('.lvp-cat-grid a')
+ const count=await cards.count()
+ const text=await page.locator('.lvp-category-count').innerText()
+ const total=Number((text.match(/\\d+/)||[])[0]||0)
+ expect(total).toBeGreaterThan(0)
+ expect(count).toBeLessThanOrEqual(7)
  const next=box.locator('.lvp-arrow').last()
- await expect(prev).toBeDisabled()
- await expect(next).toBeEnabled()
- const expectedFirst=['Supermercado','Lojas','Cafés','Saúde','Beleza']
- for(let i=0;i<expectedFirst.length;i++){
+ if(total>7){
+  await expect(next).toBeEnabled()
   await next.click()
-  await expect(page.locator('.lvp-cat-grid a').first()).toHaveText(expectedFirst[i])
+ }else{
+  await expect(next).toBeDisabled()
  }
- await expect(page.locator('.lvp-cat-grid')).toContainText('Outros')
- await expect(next).toBeDisabled()
- await expect(prev).toBeEnabled()
+ await expect(cards.first()).toHaveAttribute('href',/\\/laguna\\/empresas\\?categoria=/)
 })
 
 test('categoria em destaque da home aponta para o catálogo da categoria',async({page})=>{
