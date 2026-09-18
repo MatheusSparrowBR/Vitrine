@@ -148,3 +148,9 @@
 .lvp-empty-panel a{display:inline-flex;margin-top:14px;color:#216df3;font-size:10px;font-weight:900}
 .lvp-empty-sponsored{display:block;min-height:152px}
 .lvp-empty-sponsored .lvp-sponsored-copy{padding:28px}
+
+.lvp-business-grid-single{grid-template-columns:minmax(280px,360px);justify-content:center}
+.lvp-promo-grid-single{grid-template-columns:minmax(300px,365px);justify-content:center}
+@media(max-width:760px){
+ .lvp-business-grid-single,.lvp-promo-grid-single{grid-template-columns:minmax(0,420px);justify-content:center}
+}
