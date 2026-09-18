@@ -130,7 +130,7 @@ export default function CityHomePage({citySlug='laguna'}){
    <section id='explorar' className='lvp-wrap lvp-featured'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
     {featuredBusinesses.length?<div className='lvp-business-grid'>{featuredBusinesses.slice(0,4).map(b=><a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
-      <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className='verified'>✓ Verificada</span>}</div>
+      <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className="verified">✓ Verificada</span>}</div>
       <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'>📍 {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
     </a>)}</div>:<div className='lvp-empty-panel'><h3>Nenhuma empresa em destaque cadastrada.</h3><p>Quando uma empresa for marcada como destaque no sistema, ela aparecerá aqui.</p><a href={base+'/empresas'}>Abrir catálogo de empresas →</a></div>}
    </section>
