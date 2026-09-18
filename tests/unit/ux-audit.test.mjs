@@ -57,7 +57,7 @@ test('camadas de UX e responsividade são carregadas globalmente',()=>{
 
 
 test('home real usa centralização para item único e rodapé da UX de lançamento',()=>{
- const page=read('src/CityHomePage.jsx'),css=read('src/launch-home-preview.css')
+ const page=read('src/CityHomePage.jsx'),css=read('src/public-home.css')
  assert.match(page,/lvp-business-grid-single/)
  assert.match(page,/lvp-promo-grid-single/)
  assert.match(page,/lvp-footer/)
@@ -67,7 +67,7 @@ test('home real usa centralização para item único e rodapé da UX de lançame
 })
 
 test('rodapé usa a logo original sem filtro que a transforme em bloco branco',()=>{
- const css=read('src/launch-home-preview.css')
+ const css=read('src/public-home.css')
  assert.match(css,/\.lvp-footer-grid>div:first-child img\{width:210px;height:auto;display:block;opacity:1\}/)
  assert.doesNotMatch(css,/\.lvp-footer-grid>div:first-child img\{[^}]*filter:/)
 })

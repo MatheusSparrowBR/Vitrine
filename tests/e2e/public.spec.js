@@ -82,9 +82,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  const count=await cards.count()
  const text=await page.locator('.lvp-category-count').innerText()
  const total=Number((text.match(/\d+/)||[])[0]||0)
- const hasSupabase=Boolean(process.env.VITE_SUPABASE_URL&&process.env.VITE_SUPABASE_PUBLISHABLE_KEY)
- if(hasSupabase)expect(total).toBeGreaterThan(0)
- else expect(total).toBe(0)
+ expect(total).toBeGreaterThan(0)
  expect(count).toBeLessThanOrEqual(7)
  const next=box.locator('.lvp-arrow').last()
  if(total>7){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
@@ -180,11 +178,11 @@ test('politica e termos sao acessiveis',async({page})=>{
 })
 
 
-test('home traz o fluxo de necessidades da UX de lançamento com links funcionais',async({page})=>{
+test('home principal traz necessidades com links funcionais',async({page})=>{
  await page.goto('/laguna')
  await expect(page.getByRole('heading',{name:'O que você precisa hoje?'})).toBeVisible()
  const needs=page.locator('.lvp-need-grid a')
- const expectedNeeds=Boolean(process.env.VITE_SUPABASE_URL&&process.env.VITE_SUPABASE_PUBLISHABLE_KEY)?4:0
- await expect(needs).toHaveCount(expectedNeeds)
- if(expectedNeeds){await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/);await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)}
+ await expect(needs).toHaveCount(4)
+ await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
+ await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)
 })

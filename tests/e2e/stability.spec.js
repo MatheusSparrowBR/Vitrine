@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test'
 
 const routes=[
+ '/',
  '/laguna',
  '/laguna/empresas',
  '/laguna/promocoes',
@@ -127,4 +128,10 @@ test('página de planos do pré-lançamento não usa o cabeçalho global e prese
  await expect(page.getByRole('heading',{name:'Premium'})).toBeVisible()
  await expect(page.getByText('R$ 29,90')).toBeVisible()
  await expect(page.getByText('R$ 59,90')).toBeVisible()
+})
+
+test('rota de preview removida não exibe a página demonstrativa',async({page})=>{
+ await page.goto('/preview-lancamento',{waitUntil:'domcontentloaded'})
+ await expect(page.locator('#root')).toBeVisible()
+ await expect(page.locator('body')).not.toContainText('Bistrô Laguna - Teste')
 })

@@ -9,7 +9,7 @@ const read=p=>readFileSync(join(root,p),'utf8')
 
 const required=[
  'index.html','public/.htaccess','public/robots.txt','public/site.webmanifest',
- 'src/app-entry.jsx','src/LaunchHomePreview.jsx','src/PrelaunchGate.jsx',
+ 'src/app-entry.jsx','src/CityHomePage.jsx','src/PrelaunchGate.jsx','src/PrelaunchPage.jsx',
  'scripts/generate-sitemap.mjs','.github/workflows/ci.yml'
 ]
 for(const p of required){
@@ -18,8 +18,10 @@ for(const p of required){
 }
 
 const app=read('src/app-entry.jsx')
-if(/route\.kind==='home'&&route\.citySlug==='laguna'/.test(app)&&/LaunchHomePreview/.test(app))ok.push('Laguna launch homepage is wired in the main router')
-else fail.push('Laguna launch homepage is not wired as the production home route')
+if(app.includes("if(route.kind==='home')return <CityHomePage citySlug={route.citySlug}/>"))ok.push('City homepage is wired in the main router')
+else fail.push('City homepage is not wired as the production home route')
+if(app.includes('PrelaunchGate')&&app.includes("path==='/em-breve/planos'"))ok.push('Pre-launch mode remains available until official launch')
+else fail.push('Pre-launch mode is not wired in the main router')
 
 const index=read('index.html')
 for(const token of ['meta name="description"','meta name="robots"','property="og:title"','name="twitter:card"','link rel="manifest"']){
@@ -30,11 +32,6 @@ for(const token of ['meta name="description"','meta name="robots"','property="og
 const ht=read('public/.htaccess')
 if(/RewriteRule \^ index\.html \[L\]/.test(ht))ok.push('Hostinger/Apache SPA fallback present')
 else fail.push('Missing Hostinger/Apache SPA fallback')
-
-const homeSource=read('src/LaunchHomePreview.jsx')
-for(const token of ['images.unsplash.com','Bistrô Laguna - Teste','Festival de Sabores — 20% OFF','5 lugares para conhecer neste fim de semana','Novos negócios que chegaram à cidade']){
- if(homeSource.includes(token))fail.push('Demo/fictitious homepage content remains: '+token)
-}
 
 const workflow=read('.github/workflows/ci.yml')
 for(const token of ['npm run audit:static','npm run test','npm run build','npm run test:e2e']){
@@ -77,7 +74,6 @@ if(!existsSync(join(root,'package-lock.json')))warn.push('package-lock.json is a
 
 const pkg=JSON.parse(read('package.json'))
 for(const s of ['audit:static','test','build','test:e2e']) if(!pkg.scripts?.[s]) fail.push('Missing package script: '+s)
-if(process.env.VITE_PRELAUNCH_MODE!=='false') warn.push('VITE_PRELAUNCH_MODE is not false in this CI process')
 
 console.log('AUDIT RESULTS')
 console.log('PASS:',ok.length)
