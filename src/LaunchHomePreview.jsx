@@ -9,7 +9,7 @@ const fallbackCats=[
  ['🍽️','Restaurantes'],['🛒','Supermercado'],['🏪','Conveniência'],['🏋️','Academia'],['🛍️','Lojas'],['❤️','Saúde'],['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
 ]
 
-const fallbackBusinesses=[{name:'Bistrô Laguna - Teste',cat:'Restaurantes',rating:'',place:'MAGALHÃES',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'}]
+const fallbackBusinesses=[{name:'Bistrô Laguna - Teste',slug:'teste',cat:'Restaurantes',rating:'',place:'MAGALHÃES',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'}]
 const fallbackPromotionData=[{business:'Bistrô Laguna - Teste',title:'Festival de Sabores — 20% OFF',desc:'Aproveite 20% de desconto em pratos selecionados.',price:'R$ 24,90',old:'R$ 31,13',badge:'20% OFF',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'}]
 const fallbackEvents=[{date:'24',mon:'SET',title:'Noite de Música ao Vivo - Bistrô Laguna',place:'Bistrô Laguna',time:'20:00'}]
 
@@ -76,7 +76,7 @@ function LaunchHomePreview(){
       if(!ratings[key])ratings[key]=[]
       ratings[key].push(Number(r.rating||0))
      }
-     setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,cat:b.category_name||'Outros',rating:ratings[b.id]?.length?(ratings[b.id].reduce((sum,r)=>sum+r,0)/ratings[b.id].length).toFixed(1).replace('.',','):'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
+     setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,verified:b.verified,cat:b.category_name||'Outros',rating:ratings[b.id]?.length?(ratings[b.id].reduce((sum,r)=>sum+r,0)/ratings[b.id].length).toFixed(1).replace('.',','):'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
     }
     const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).order('created_at',{ascending:false}).limit(3)
     if(live&&ps?.length){
@@ -163,7 +163,7 @@ function LaunchHomePreview(){
    <section id="explorar" className="lvp-wrap lvp-featured">
     <div className="lvp-section-head"><div><span className="lvp-eyebrow">DESCUBRA NEGÓCIOS</span><h2>Empresas em destaque</h2><p>Conheça lugares e profissionais que fazem Laguna acontecer.</p></div><a href="/laguna/empresas">Ver todas →</a></div>
     <div className="lvp-business-grid">{businesses.map(b=><a href={b.slug?`/laguna/empresa/${encodeURIComponent(b.slug)}`:`/laguna/empresas?categoria=${encodeURIComponent(slugify(b.cat))}`} className="lvp-business-card" key={b.name}>
-      <div className="lvp-business-image"><img src={b.img} alt=""/><span className="lvp-verified">✓ Verificada</span></div>
+      <div className="lvp-business-image"><img src={b.img} alt=""/>{b.verified&&<span className="lvp-verified">✓ Verificada</span>}</div>
       <div className="lvp-business-body"><span className="lvp-card-cat">{b.cat}</span><h3>{b.name}</h3><p>{b.rating&&<>⭐ {b.rating} · </>}📍 {b.place}</p><span className="lvp-card-link">Ver empresa →</span></div>
     </a>)}</div>
    </section>
