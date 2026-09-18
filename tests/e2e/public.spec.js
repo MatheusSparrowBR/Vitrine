@@ -59,8 +59,9 @@ test('home de lançamento permite navegar pelas 12 categorias',async({page})=>{
  const next=box.locator('.lvp-arrow').last()
  await expect(prev).toBeDisabled()
  await expect(next).toBeEnabled()
- await next.click()
+ for(let i=0;i<5;i++) await next.click()
  await expect(page.locator('.lvp-cat-grid')).toContainText('Outros')
+ await expect(next).toBeDisabled()
  await expect(prev).toBeEnabled()
 })
 
