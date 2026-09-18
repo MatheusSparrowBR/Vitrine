@@ -52,7 +52,10 @@ function walk(dir){
   }
  }
 }
-walk(root)
+for(const target of scanRoots){const p=join(root,target);if(existsSync(p)){const s=statSync(p);if(s.isDirectory())walk(p);else if(/\\.(js|jsx|mjs|cjs|json|yml|yaml|html|css|txt|conf)$/.test(target)){
+ const content=readFileSync(p,'utf8'); if(forbidden.test(content))fail.push('Forbidden Vercel reference in '+target)
+ if(/SUPABASE_SERVICE_ROLE_KEY\\s*=\\s*['\"][^'\"]+['\"]|service_role\\s*[:=]\\s*['\"][^'\"]{10,}/i.test(content))warn.push('Review possible secret-like service-role reference in '+target)
+}}}
 if(!existsSync(join(root,'package-lock.json')))warn.push('package-lock.json is absent; CI uses npm install rather than npm ci')
 
 const pkg=JSON.parse(read('package.json'))
