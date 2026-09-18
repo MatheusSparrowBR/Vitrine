@@ -78,7 +78,8 @@ function LaunchHomePreview(){
      }
      setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,verified:b.verified,cat:b.category_name||'Outros',rating:ratings[b.id]?.length?(ratings[b.id].reduce((sum,r)=>sum+r,0)/ratings[b.id].length).toFixed(1).replace('.',','):'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
     }
-    const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).order('created_at',{ascending:false}).limit(3)
+    const now=new Date().toISOString()
+    const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).lte('starts_at',now).gte('ends_at',now).order('created_at',{ascending:false}).limit(3)
     if(live&&ps?.length){
      const mapped=ps.map(p=>({id:p.id,business:p.businesses?.name||'Empresa local',title:p.title,desc:p.description||'Oferta disponível.',price:p.price!=null?'R$ '+Number(p.price).toFixed(2).replace('.',','):'Confira',old:p.original_price!=null?'R$ '+Number(p.original_price).toFixed(2).replace('.',','):'',badge:p.original_price&&p.price?Math.max(0,Math.round((1-Number(p.price)/Number(p.original_price))*100))+'% OFF':'OFERTA',img:p.image_url||''}))
      setPromotions(mapped)
