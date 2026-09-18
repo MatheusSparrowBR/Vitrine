@@ -110,6 +110,7 @@ function LaunchHomePreview(){
   return()=>{live=false;clearInterval(timer)}
  },[])
  const visibleCats=cats.slice(catStart,catStart+7)
+ const categoryPages=Math.max(1,Math.ceil(cats.length/7))
  const hasPrevCats=catStart>0
  const hasNextCats=catStart+7<cats.length
  const moveCats=direction=>setCatStart(start=>{
@@ -152,7 +153,7 @@ function LaunchHomePreview(){
     <div className="lvp-cat-box">
       <button className="lvp-arrow" onClick={()=>moveCats(-1)} disabled={!hasPrevCats}>‹</button>
       <div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href={`/laguna/empresas?categoria=${encodeURIComponent(slugify(label))}`} key={label}><span>{icon}</span><b>{label}</b></a>)}</div>
-    <div className="lvp-cat-page-indicator" aria-live="polite">Página {Math.floor(catStart/7)+1} de {Math.max(1,Math.ceil(cats.length/7))}</div>
+    <div className="lvp-cat-page-indicator" aria-live="polite">Página {Math.floor(catStart/7)+1} de {categoryPages}</div>
       <button className="lvp-arrow" onClick={()=>moveCats(1)} disabled={!hasNextCats}>›</button>
     </div>
     <div className="lvp-category-count">{cats.length} categorias disponíveis</div>
