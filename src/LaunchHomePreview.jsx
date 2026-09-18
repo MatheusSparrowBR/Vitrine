@@ -1,0 +1,130 @@
+import React,{useState} from 'react'
+import './launch-home-preview.css'
+
+const cats=[
+ ['🍽️','Restaurantes'],['🛒','Supermercado'],['🛍️','Lojas'],['☕','Cafés'],['❤️','Saúde'],
+ ['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
+]
+
+const businesses=[
+ {name:'Bistrô Laguna',cat:'Restaurantes',rating:'4,9',place:'Centro',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'},
+ {name:'Mercado da Praia',cat:'Supermercado',rating:'4,8',place:'Mar Grosso',img:'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=900&q=82'},
+ {name:'Studio Bella',cat:'Beleza',rating:'4,9',place:'Centro',img:'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=900&q=82'},
+ {name:'Auto Laguna',cat:'Automóveis',rating:'4,7',place:'Portinho',img:'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=82'}
+]
+
+const promotions=[
+ {business:'Bistrô Laguna',title:'Festival de Sabores',desc:'20% OFF no prato executivo',price:'R$ 24,90',old:'R$ 31,13',badge:'20% OFF',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'},
+ {business:'Studio Bella',title:'Semana da Beleza',desc:'Corte + escova com condição especial',price:'R$ 69,90',old:'R$ 89,90',badge:'22% OFF',img:'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=900&q=82'},
+ {business:'Mercado da Praia',title:'Quarta do Hortifruti',desc:'Ofertas especiais em frutas e verduras',price:'Confira',old:'',badge:'OFERTA',img:'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=82'}
+]
+
+const events=[
+ {date:'18',mon:'SET',title:'Feira Cultural de Laguna',place:'Centro Histórico',time:'19:00'},
+ {date:'20',mon:'SET',title:'Festival Gastronômico',place:'Mar Grosso',time:'12:00'},
+ {date:'21',mon:'SET',title:'Música ao vivo na praça',place:'Praça Vidal Ramos',time:'18:30'}
+]
+
+function PreviewHeader(){
+ return <header className="lvp-header">
+  <div className="lvp-header-inner">
+   <a className="lvp-logo" href="/preview-lancamento"><img src="/vitrine-local-header-logo.svg" alt="VitrineLocal"/></a>
+   <button className="lvp-city" type="button">⌖ <span>Laguna - SC</span><b>⌄</b></button>
+   <nav className="lvp-nav">
+    <a className="active" href="#explorar">Explorar</a><a href="#promocoes">Promoções</a><a href="#eventos">Eventos</a><a href="#categorias">Categorias</a>
+   </nav>
+   <div className="lvp-actions"><a href="#entrar">Entrar</a><a className="lvp-business" href="#empresa">Cadastrar empresa</a></div>
+  </div>
+ </header>
+}
+
+function LaunchHomePreview(){
+ const [q,setQ]=useState('')
+ const [catStart,setCatStart]=useState(0)
+ const visibleCats=cats.slice(catStart,catStart+7)
+ return <div className="lvp-page">
+  <PreviewHeader/>
+  <main>
+   <section className="lvp-hero">
+    <div className="lvp-hero-bg"></div>
+    <div className="lvp-hero-inner">
+     <div className="lvp-hero-copy">
+      <span className="lvp-kicker">✦ A cidade na palma da mão</span>
+      <h1>Descubra o que <span>Laguna</span> tem de melhor.</h1>
+      <p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p>
+      <form className="lvp-search" onSubmit={e=>e.preventDefault()}>
+       <span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="O que você procura hoje?"/><button>Buscar</button>
+      </form>
+      <div className="lvp-quick">
+       {['Restaurantes','Serviços','Beleza','Mercados'].map(x=><a key={x} href="#categorias">{x}</a>)}
+      </div>
+      <div className="lvp-note">● Catálogo local de Laguna · atualizado por negócios da cidade.</div>
+     </div>
+     <aside className="lvp-hero-card">
+      <div className="lvp-mini-head"><span>HOJE EM LAGUNA</span><strong>18 SET</strong></div>
+      <div className="lvp-mini-stat"><span className="lvp-mini-icon">🏪</span><div><b>Empresas locais</b><small>Encontre serviços, lojas e negócios</small></div></div>
+      <div className="lvp-mini-stat"><span className="lvp-mini-icon">🏷️</span><div><b>Ofertas ativas</b><small>Promoções para aproveitar hoje</small></div></div>
+      <div className="lvp-mini-stat"><span className="lvp-mini-icon">📅</span><div><b>Eventos próximos</b><small>O que acontece na cidade</small></div></div>
+      <a className="lvp-mini-cta" href="#explorar">Explorar Laguna →</a>
+     </aside>
+    </div>
+   </section>
+
+   <section id="categorias" className="lvp-wrap lvp-categories">
+    <div className="lvp-section-head"><div><span className="lvp-eyebrow">EXPLORE</span><h2>Encontre por categoria</h2><p>Descubra negócios de acordo com o que você precisa.</p></div><a href="#todas">Ver todas →</a></div>
+    <div className="lvp-cat-box">
+      <button className="lvp-arrow" onClick={()=>setCatStart(Math.max(0,catStart-1))} disabled={catStart===0}>‹</button>
+      <div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href="#explorar" key={label}><span>{icon}</span><b>{label}</b></a>)}</div>
+      <button className="lvp-arrow" onClick={()=>setCatStart(Math.min(cats.length-7,catStart+1))} disabled={catStart>=cats.length-7}>›</button>
+    </div>
+    <div className="lvp-category-count">{cats.length} categorias disponíveis</div>
+   </section>
+
+   <section id="explorar" className="lvp-wrap lvp-featured">
+    <div className="lvp-section-head"><div><span className="lvp-eyebrow">DESCUBRA NEGÓCIOS</span><h2>Empresas em destaque</h2><p>Conheça lugares e profissionais que fazem Laguna acontecer.</p></div><a href="#todas-empresas">Ver todas →</a></div>
+    <div className="lvp-business-grid">{businesses.map(b=><a href="#empresa" className="lvp-business-card" key={b.name}>
+      <div className="lvp-business-image"><img src={b.img} alt=""/><span className="lvp-verified">✓ Verificada</span></div>
+      <div className="lvp-business-body"><span className="lvp-card-cat">{b.cat}</span><h3>{b.name}</h3><p>⭐ {b.rating} · 📍 {b.place}</p><span className="lvp-card-link">Ver empresa →</span></div>
+    </a>)}</div>
+   </section>
+
+   <section className="lvp-wrap lvp-needs">
+    <div className="lvp-section-head"><div><span className="lvp-eyebrow">DO JEITO QUE VOCÊ PENSA</span><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
+    <div className="lvp-need-grid">
+     <a href="#explorar"><span>🍽️</span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
+     <a href="#explorar"><span>🛍️</span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
+     <a href="#explorar"><span>🔧</span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
+     <a href="#explorar"><span>💆</span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
+    </div>
+   </section>
+
+   <section id="promocoes" className="lvp-soft">
+    <div className="lvp-wrap">
+     <div className="lvp-section-head"><div><span className="lvp-eyebrow">APROVEITE</span><h2>Ofertas perto de você</h2><p>Economize nas empresas locais.</p></div><a href="#todas-ofertas">Ver todas →</a></div>
+     <div className="lvp-promo-grid">{promotions.map(p=><a href="#promocao" className="lvp-promo-card" key={p.title}>
+      <div className="lvp-promo-image"><img src={p.img} alt=""/><strong>{p.badge}</strong></div>
+      <div className="lvp-promo-body"><span>{p.business}</span><h3>{p.title}</h3><p>{p.desc}</p><div className="lvp-price">{p.price}{p.old&&<del>{p.old}</del>}</div><b>Ver oferta →</b></div>
+     </a>)}</div>
+    </div>
+   </section>
+
+   <section id="eventos" className="lvp-wrap lvp-events">
+    <div className="lvp-section-head"><div><span className="lvp-eyebrow">AGENDA LOCAL</span><h2>O que está acontecendo em Laguna</h2><p>Eventos para aproveitar a cidade nos próximos dias.</p></div><a href="#agenda">Ver agenda →</a></div>
+    <div className="lvp-event-list">{events.map(e=><a className="lvp-event" href="#evento" key={e.title}><div className="lvp-date"><b>{e.date}</b><span>{e.mon}</span></div><div><h3>{e.title}</h3><p>📍 {e.place} · 🕐 {e.time}</p></div><span className="lvp-event-arrow">→</span></a>)}</div>
+   </section>
+
+   <section className="lvp-discover">
+    <div className="lvp-wrap"><div className="lvp-section-head"><div><span className="lvp-eyebrow">DESCUBRA LAGUNA</span><h2>Mais motivos para voltar</h2><p>Lugares, dicas e novidades que dão vida à cidade.</p></div><a href="#novidades">Ver novidades →</a></div>
+     <div className="lvp-story-grid"><article><div className="lvp-story-image s1"></div><span>GUIA LOCAL</span><h3>5 lugares para conhecer neste fim de semana</h3><p>Dicas para aproveitar Laguna como quem conhece a cidade.</p></article><article><div className="lvp-story-image s2"></div><span>NOVIDADE</span><h3>Novos negócios que chegaram à cidade</h3><p>Descubra empresas e serviços que estão começando por aqui.</p></article><article><div className="lvp-story-image s3"></div><span>EXPERIÊNCIA</span><h3>Onde comer, comprar e passear em Laguna</h3><p>Um jeito simples de encontrar tudo em um só lugar.</p></article></div>
+    </div>
+   </section>
+
+   <section id="empresa" className="lvp-business-cta-section">
+    <div className="lvp-wrap lvp-business-cta-wrap"><div><span className="lvp-eyebrow">PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className="lvp-business-points"><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href="#cadastro" className="lvp-business-cta-button">Cadastrar minha empresa →</a></div>
+   </section>
+  </main>
+  <footer className="lvp-footer"><div className="lvp-wrap lvp-footer-grid"><div><img src="/vitrine-local-header-logo.svg" alt="VitrineLocal"/><p>A cidade em um só lugar.</p></div><div><b>Explorar</b><a href="#explorar">Empresas</a><a href="#promocoes">Promoções</a><a href="#eventos">Eventos</a><a href="#categorias">Categorias</a></div><div><b>Para empresas</b><a href="#empresa">Cadastrar empresa</a><a href="#publicidade">Publicidade</a><a href="#planos">Planos</a></div><div><b>VitrineLocal</b><a href="#sobre">Sobre</a><a href="#contato">Contato</a><a href="#privacidade">Privacidade</a><a href="#termos">Termos</a></div></div><div className="lvp-footer-bottom">© 2026 VitrineLocal · Laguna, SC</div></footer>
+ </div>
+}
+
+export default LaunchHomePreview
