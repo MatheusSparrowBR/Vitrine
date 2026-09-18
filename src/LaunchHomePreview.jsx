@@ -10,7 +10,7 @@ const fallbackCats=[
 ]
 
 const fallbackBusinesses=[{name:'Bistrô Laguna - Teste',cat:'Restaurantes',rating:'',place:'MAGALHÃES',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=82'}]
-const fallbackPromotionData=[{business:'Bistrô Laguna - Teste',title:'Festival de Sabores',desc:'Oferta disponível.',price:'Confira',old:'',badge:'OFERTA',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'}]
+const fallbackPromotionData=[{business:'Bistrô Laguna - Teste',title:'Festival de Sabores — 20% OFF',desc:'Aproveite 20% de desconto em pratos selecionados.',price:'R$ 24,90',old:'R$ 31,13',badge:'20% OFF',img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82'}]
 const fallbackEvents=[{date:'24',mon:'SET',title:'Noite de Música ao Vivo - Bistrô Laguna',place:'Bistrô Laguna',time:'20:00'}]
 
 function PreviewHeader(){
@@ -36,6 +36,7 @@ function LaunchHomePreview(){
  const [businesses,setBusinesses]=useState(()=>fallbackBusinesses)
  const [promotions,setPromotions]=useState(()=>fallbackPromotionData)
  const [events,setEvents]=useState(()=>fallbackEvents)
+ const [sponsored,setSponsored]=useState(()=>fallbackPromotionData[0])
  useEffect(()=>{
   const tick=()=>setToday(new Date())
   tick()
@@ -64,10 +65,22 @@ function LaunchHomePreview(){
    try{
     const{data:city}=await db.from('cities').select('id').eq('slug','laguna').eq('active',true).maybeSingle()
     if(!city||!live)return
-    const{data:bs}=await db.from('public_business_directory').select('name,slug,short_description,cover_url,logo_url,neighborhood,verified,featured,category_name,category_slug').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(4)
-    if(live&&bs?.length)setBusinesses(bs.map(b=>({name:b.name,cat:b.category_name||'Outros',rating:'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
+    const{data:bs}=await db.from('public_business_directory').select('id,name,slug,short_description,cover_url,logo_url,neighborhood,verified,featured,category_name,category_slug').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(4)
+    if(live&&bs?.length){
+     const ids=bs.map(b=>b.slug).filter(Boolean)
+     const ratings={}
+     for(const b of bs){
+      const{data:rs}=await db.from('business_reviews').select('rating').eq('business_id',b.id)
+      if(rs?.length)ratings[b.slug]=(rs.reduce((sum,r)=>sum+Number(r.rating||0),0)/rs.length).toFixed(1).replace('.',',')
+     }
+     setBusinesses(bs.map(b=>({name:b.name,slug:b.slug,cat:b.category_name||'Outros',rating:ratings[b.slug]||'',place:b.neighborhood||'Laguna',img:b.cover_url||b.logo_url||''})))
+    }
     const{data:ps}=await db.from('promotions').select('id,title,description,image_url,price,original_price,business_id,starts_at,ends_at,businesses!inner(name,city_id)').eq('status','published').eq('businesses.city_id',city.id).order('created_at',{ascending:false}).limit(3)
-    if(live&&ps?.length)setPromotions(ps.map(p=>({business:p.businesses?.name||'Empresa local',title:p.title,desc:p.description||'Oferta disponível.',price:p.price!=null?'R$ '+Number(p.price).toFixed(2).replace('.',','):'Confira',old:p.original_price!=null?'R$ '+Number(p.original_price).toFixed(2).replace('.',','):'',badge:p.original_price&&p.price?Math.max(0,Math.round((1-Number(p.price)/Number(p.original_price))*100))+'% OFF':'OFERTA',img:p.image_url||''})))
+    if(live&&ps?.length){
+     const mapped=ps.map(p=>({id:p.id,business:p.businesses?.name||'Empresa local',title:p.title,desc:p.description||'Oferta disponível.',price:p.price!=null?'R$ '+Number(p.price).toFixed(2).replace('.',','):'Confira',old:p.original_price!=null?'R$ '+Number(p.original_price).toFixed(2).replace('.',','):'',badge:p.original_price&&p.price?Math.max(0,Math.round((1-Number(p.price)/Number(p.original_price))*100))+'% OFF':'OFERTA',img:p.image_url||''}))
+     setPromotions(mapped)
+     setSponsored(mapped[0])
+    }
     const{data:es}=await db.from('events').select('title,event_date,start_time,location,address').eq('city_id',city.id).eq('active',true).gte('event_date',new Date().toISOString().slice(0,10)).order('event_date').order('start_time').limit(3)
     if(live&&es?.length)setEvents(es.map(e=>{const d=new Date(e.event_date+'T12:00:00');return {date:String(d.getDate()).padStart(2,'0'),mon:new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(d).replace('.','').toUpperCase(),title:e.title,place:e.location||e.address||'Laguna',time:e.start_time?String(e.start_time).slice(0,5):'Confira'}}))
    }catch{}
@@ -133,22 +146,22 @@ function LaunchHomePreview(){
 
    <section className="lvp-wrap lvp-sponsored-wrap">
     <a className="lvp-sponsored" href="/laguna/promocoes">
-      <div className="lvp-sponsored-image"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=84" alt="Destaque patrocinado"/></div>
+      <div className="lvp-sponsored-image"><img src={sponsored.img||'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=84'} alt="Destaque patrocinado"/></div>
       <div className="lvp-sponsored-copy">
        <span className="lvp-sponsored-label">DESTAQUE PATROCINADO</span>
-       <h2>Festival de Sabores · Bistrô Laguna</h2>
-       <p>20% OFF no prato executivo para aproveitar hoje.</p>
+       <h2>{sponsored.title} · {sponsored.business}</h2>
+       <p>{sponsored.desc}</p>
        <strong>Ver destaque →</strong>
       </div>
-      <span className="lvp-sponsored-badge">20% OFF</span>
+      <span className="lvp-sponsored-badge">{sponsored.badge}</span>
     </a>
    </section>
 
    <section id="explorar" className="lvp-wrap lvp-featured">
     <div className="lvp-section-head"><div><span className="lvp-eyebrow">DESCUBRA NEGÓCIOS</span><h2>Empresas em destaque</h2><p>Conheça lugares e profissionais que fazem Laguna acontecer.</p></div><a href="/laguna/empresas">Ver todas →</a></div>
-    <div className="lvp-business-grid">{businesses.map(b=><a href={`/laguna/empresas?categoria=${encodeURIComponent(slugify(b.cat))}`} className="lvp-business-card" key={b.name}>
+    <div className="lvp-business-grid">{businesses.map(b=><a href={b.slug?`/laguna/empresa/${encodeURIComponent(b.slug)}`:`/laguna/empresas?categoria=${encodeURIComponent(slugify(b.cat))}`} className="lvp-business-card" key={b.name}>
       <div className="lvp-business-image"><img src={b.img} alt=""/><span className="lvp-verified">✓ Verificada</span></div>
-      <div className="lvp-business-body"><span className="lvp-card-cat">{b.cat}</span><h3>{b.name}</h3><p>⭐ {b.rating} · 📍 {b.place}</p><span className="lvp-card-link">Ver empresa →</span></div>
+      <div className="lvp-business-body"><span className="lvp-card-cat">{b.cat}</span><h3>{b.name}</h3><p>{b.rating&&<>⭐ {b.rating} · </>}📍 {b.place}</p><span className="lvp-card-link">Ver empresa →</span></div>
     </a>)}</div>
    </section>
 
