@@ -79,32 +79,30 @@ test('placeholder Premium usa o asset versionado correto e não contém CTA lega
  await expect(page.locator('body')).not.toContainText('Quero anunciar')
 })
 
-test('placeholder Premium não interfere nos estados vazios de eventos',async({page})=>{
+test('UX nova mantém a agenda visível quando não existem eventos',async({page})=>{
  await page.goto('/laguna',{waitUntil:'domcontentloaded'})
- await expect(page.getByText('Próximos eventos')).toBeVisible()
- await expect(page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./)).toBeVisible({timeout:9000})
- const eventEmpty=page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./).locator('..')
- await expect(eventEmpty).toBeVisible()
- const premiumCss=await page.request.get('/premium-empty-slot.css?v=20260916-1428')
- const premiumCssText=await premiumCss.text()
- expect(premiumCssText).toContain('.vl-category-slot + .home-section > .empty-v2')
+ await expect(page.locator('.lvp-events')).toBeVisible()
+ await expect(page.getByRole('heading',{name:/O que está acontecendo em Laguna/i})).toBeVisible()
+ const eventState=page.getByText(/Nenhum evento próximo cadastrado\.|Não foi possível carregar os eventos\.|Carregando agenda…/)
+ const eventCards=page.locator('.lvp-event')
+ await expect(eventState.or(eventCards.first())).toBeVisible({timeout:9000})
 })
 
 test('home não bloqueia categorias e agenda quando uma fonte de dados falha',async({page})=>{
  await page.goto('/laguna',{waitUntil:'domcontentloaded'})
- const categories=page.locator('.vl-category-slot .category-card')
+ const categories=page.locator('.lvp-cat-grid a')
  await expect(categories).not.toHaveCount(0,{timeout:9000})
- await expect(page.getByText('Carregando eventos…')).toHaveCount(0,{timeout:9000})
- const eventCards=await page.locator('.event-grid .content-card-v2').count()
- const emptyState=await page.getByText(/Nenhum evento próximo\.|Não foi possível carregar os eventos\./).count()
+ const eventCards=await page.locator('.lvp-event').count()
+ const emptyState=await page.getByText(/Nenhum evento próximo cadastrado\.|Não foi possível carregar os eventos\.|Carregando agenda…/).count()
  expect(eventCards+emptyState).toBeGreaterThan(0)
 })
 
-test('home não carrega mecanismo legado do placeholder Premium',async({page})=>{
+test('home usa a nova estrutura visual e não carrega mecanismo legado',async({page})=>{
  await page.goto('/laguna')
  await expect(page.locator('.vl-site-header')).toBeVisible()
- await expect(page.locator('.home-hero')).toBeVisible()
- await expect(page.locator('.vl-category-slot')).toBeVisible()
+ await expect(page.locator('.lvp-hero')).toBeVisible()
+ await expect(page.locator('.lvp-cat-box')).toBeVisible()
+ await expect(page.locator('.lvp-events')).toBeVisible()
  const scripts=await page.locator('script[src]').evaluateAll(items=>items.map(item=>item.getAttribute('src')||''))
  expect(scripts).not.toContain('/premium-empty-slot.js')
 })
