@@ -54,3 +54,14 @@ test('camadas de UX e responsividade são carregadas globalmente',()=>{
  assert.match(ux,/\.legal-content/)
  assert.match(ux,/@media\(max-width:760px\)/)
 })
+
+
+test('home real usa centralização para item único e rodapé da UX de lançamento',()=>{
+ const page=read('src/CityHomePage.jsx'),css=read('src/launch-home-preview.css')
+ assert.match(page,/lvp-business-grid-single/)
+ assert.match(page,/lvp-promo-grid-single/)
+ assert.match(page,/lvp-footer/)
+ assert.match(page,/contato@vitrinelocal\.net/)
+ assert.match(css,/\.lvp-business-grid-single\{/)
+ assert.match(css,/\.lvp-promo-grid-single\{/)
+})
