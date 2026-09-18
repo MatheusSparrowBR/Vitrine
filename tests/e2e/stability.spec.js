@@ -47,7 +47,7 @@ test('rotas principais não exibem tela branca nem erro de runtime',async({page}
 })
 
 test('logo do header é realmente carregada pelo navegador',async({page})=>{
- await page.goto('/laguna',{waitUntil:'networkidle'})
+ await page.goto('/laguna',{waitUntil:'domcontentloaded'})
  const logo=page.locator('.vl-site-brand-logo')
  await expect(logo).toBeVisible()
  await expect(logo).toHaveAttribute('alt',/VitrineLocal/i)
