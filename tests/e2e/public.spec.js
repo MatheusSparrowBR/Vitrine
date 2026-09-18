@@ -1,23 +1,22 @@
 import {test,expect} from '@playwright/test'
 
-test('home publica não exibe comunidade e usa navegacao limpa',async({page})=>{
+test('home de lançamento exibe navegação, clima, categorias e conteúdo principal',async({page})=>{
  await page.goto('/laguna')
- await expect(page.locator('.vl-site-brand-logo')).toBeVisible()
- await expect(page.locator('.vl-site-brand-logo')).toHaveAttribute('alt',/VitrineLocal/i)
+ await expect(page.locator('.lvp-logo img')).toBeVisible()
+ await expect(page.locator('.lvp-logo img')).toHaveAttribute('alt',/VitrineLocal/i)
  await expect(page.getByText('Enviar conteúdo')).toHaveCount(0)
- await expect(page.getByText('O que está acontecendo?')).toHaveCount(0)
- await expect(page.getByRole('heading',{name:'Próximos eventos'})).toBeVisible()
- await expect(page.getByRole('link',{name:/Explorar empresas/i})).toBeVisible()
- await expect(page.getByRole('link',{name:/Cadastre sua empresa/i}).first()).toBeVisible()
- const navLink=page.locator('.category-card').first()
- await expect(navLink).toBeVisible()
- await expect(navLink).toHaveCSS('text-decoration-line','none')
- const heroBackground=await page.locator('.hero').evaluate(el=>getComputedStyle(el).backgroundImage)
- expect(heroBackground).toContain('laguna-hero.svg')
+ await expect(page.getByRole('heading',{name:/Descubra o que Laguna tem de melhor/i})).toBeVisible()
+ await expect(page.getByRole('heading',{name:'Empresas em destaque'})).toBeVisible()
+ await expect(page.getByRole('heading',{name:/O que está acontecendo em Laguna/i})).toBeVisible()
+ await expect(page.locator('.lvp-weather')).toBeVisible()
+ await expect(page.locator('.lvp-sponsored')).toBeVisible()
+ await expect(page.locator('.lvp-cat-grid a')).toHaveCount(7)
+ await expect(page.locator('.lvp-category-count')).toHaveText(/12 categorias disponíveis/i)
+ await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
 })
 
 test('header global mantém o mesmo componente em todas as páginas principais',async({page})=>{
- const routes=['/laguna','/laguna/empresas','/laguna/promocoes','/laguna/eventos','/planos','/privacidade','/termos','/conta']
+ const routes=['/laguna/empresas','/laguna/promocoes','/laguna/eventos','/planos','/privacidade','/termos','/conta']
  for(const route of routes){
   await page.goto(route)
   await expect(page.locator('.vl-site-header')).toHaveCount(1)
@@ -41,34 +40,35 @@ test('header global marca a seção ativa',async({page})=>{
  await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Planos')
 })
 
-test('header global é responsivo e abre o menu mobile',async({page})=>{
+test('home de lançamento é responsiva no mobile',async({page})=>{
  await page.setViewportSize({width:390,height:844})
  await page.goto('/laguna')
- await expect(page.locator('.vl-site-menu-toggle')).toBeVisible()
- await expect(page.locator('.vl-site-nav')).toBeHidden()
- await page.locator('.vl-site-menu-toggle').click()
- await expect(page.locator('.vl-site-mobile-panel')).toBeVisible()
- await expect(page.locator('.vl-site-mobile-panel a').filter({hasText:'Explorar'})).toBeVisible()
+ await expect(page.locator('.lvp-logo img')).toBeVisible()
+ await expect(page.locator('.lvp-nav')).toBeHidden()
+ await expect(page.locator('.lvp-business')).toBeVisible()
+ await expect(page.locator('.lvp-hero-card')).toBeVisible()
 })
 
-test('home mantém dock de categorias em uma única faixa visual',async({page})=>{
+test('home de lançamento permite navegar pelas 12 categorias',async({page})=>{
  await page.goto('/laguna')
- const categorySlot=page.locator('.vl-category-slot')
- await expect(categorySlot).toBeVisible()
- await expect(categorySlot.locator('.category-card')).toHaveCount(10)
- const style=await categorySlot.locator('.category-grid').evaluate(el=>({display:getComputedStyle(el).display,flexWrap:getComputedStyle(el).flexWrap,overflowX:getComputedStyle(el).overflowX}))
- expect(style.display).toBe('flex')
- expect(style.flexWrap).toBe('nowrap')
- expect(['auto','scroll']).toContain(style.overflowX)
+ const box=page.locator('.lvp-cat-box')
+ await expect(box).toBeVisible()
+ await expect(page.locator('.lvp-category-count')).toHaveText(/12 categorias disponíveis/i)
+ await expect(page.locator('.lvp-cat-grid a')).toHaveCount(7)
+ const prev=box.locator('.lvp-arrow').first()
+ const next=box.locator('.lvp-arrow').last()
+ await expect(prev).toBeDisabled()
+ await expect(next).toBeEnabled()
+ await next.click()
+ await expect(page.locator('.lvp-cat-grid')).toContainText('Outros')
+ await expect(prev).toBeEnabled()
 })
 
-test('categoria da home abre somente a categoria selecionada',async({page})=>{
+test('categoria em destaque da home aponta para o catálogo da categoria',async({page})=>{
  await page.goto('/laguna')
- const restaurant=page.locator('.category-card').filter({hasText:'Restaurantes'}).first()
+ const restaurant=page.locator('.lvp-cat-grid a').filter({hasText:'Restaurantes'}).first()
  await expect(restaurant).toBeVisible()
- await restaurant.click()
- await expect(page).toHaveURL(/\/laguna\/empresas\?categoria=restaurantes/)
- await expect(page.getByRole('button',{name:/Restaurantes/i})).toHaveClass(/active/)
+ await expect(restaurant).toHaveAttribute('href',/\/laguna\/empresas\?categoria=restaurantes/)
 })
 
 test('agenda possui URL por cidade e retorno',async({page})=>{
