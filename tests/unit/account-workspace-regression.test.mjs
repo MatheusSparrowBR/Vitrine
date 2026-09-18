@@ -13,6 +13,15 @@ test('account workspace renders media usage without an undefined mediaUsage refe
  assert.match(account,/db\.from\('business_photos'\)\.insert/)
 })
 
+test('media gallery has a compact responsive layout and accessible guidance',()=>{
+ const account=read('src/AccountWorkspacePage.jsx'),css=read('src/account-workspace.css')
+ assert.match(account,/Galeria e identidade visual/)
+ assert.match(account,/Formatos aceitos: JPG, PNG, WebP, GIF ou vídeo MP4\/WebM até 50 MB/)
+ assert.match(account,/loading="lazy" decoding="async"/)
+ assert.match(css,/\.account-media-grid\{[^}]*align-items:start/)
+ assert.match(css,/\.account-gallery-grid\{[^}]*auto-fill/)
+})
+
 test('performance navigation lives inside the merchant account workspace',()=>{
  const account=read('src/AccountWorkspacePage.jsx')
  const header=read('src/SiteHeader.jsx')
