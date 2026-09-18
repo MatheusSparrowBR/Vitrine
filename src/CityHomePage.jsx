@@ -84,6 +84,7 @@ export default function CityHomePage({citySlug='laguna'}){
  const maxCatStart=Math.max(0,categories.length-catVisibleCount)
  const go=path=>location.href=path
  const categoryHref=c=>base+'/empresas?categoria='+encodeURIComponent(c.slug)
+ const needHref=names=>{const found=categories.find(c=>names.some(name=>String(c.name||'').toLowerCase()===name.toLowerCase()));return found?base+'/empresas?categoria='+encodeURIComponent(found.slug):base+'/empresas'}
  const quickCategories=categories.slice(0,4)
  const todayLabel=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date()).replace('.','').toUpperCase()
  const formatEventDate=value=>{const date=new Date(`${value}T00:00:00`);return Number.isNaN(date.getTime())?{day:'--',month:'--'}:{day:date.toLocaleDateString('pt-BR',{day:'2-digit'}),month:date.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}}
@@ -138,10 +139,10 @@ export default function CityHomePage({citySlug='laguna'}){
    <section className='lvp-wrap lvp-needs'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>DO JEITO QUE VOCÊ PENSA</span><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
     <div className='lvp-need-grid'>
-     <a href={base+'/empresas?categoria=restaurantes'}><span>🍽️</span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
-     <a href={base+'/empresas'}><span>🛍️</span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
-     <a href={base+'/empresas'}><span>🔧</span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
-     <a href={base+'/empresas'}><span>💆</span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
+     <a href={needHref(['Restaurantes','Cafés','Lanches'])}><span>🍽️</span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
+     <a href={needHref(['Lojas','Supermercado','Mercado','Conveniência'])}><span>🛍️</span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
+     <a href={needHref(['Serviços','Oficinas','Assistência'])}><span>🔧</span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
+     <a href={needHref(['Beleza','Saúde','Bem-estar'])}><span>💆</span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
     </div>
    </section>
 
