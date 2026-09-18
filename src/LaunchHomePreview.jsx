@@ -67,7 +67,6 @@ function LaunchHomePreview(){
     if(!city||!live)return
     const{data:bs}=await db.from('public_business_directory').select('id,name,slug,short_description,cover_url,logo_url,neighborhood,verified,featured,category_name,category_slug').eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(4)
     if(live&&bs?.length){
-     const ids=bs.map(b=>b.slug).filter(Boolean)
      const ratings={}
      for(const b of bs){
       const{data:rs}=await db.from('business_reviews').select('rating').eq('business_id',b.id)
