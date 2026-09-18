@@ -1,6 +1,8 @@
 import React,{useEffect,useState} from 'react'
 import './launch-home-preview.css'
 
+const slugify=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
+
 const cats=[
  ['🍽️','Restaurantes'],['🛒','Supermercado'],['🛍️','Lojas'],['☕','Cafés'],['❤️','Saúde'],
  ['✨','Beleza'],['🔧','Serviços'],['🚗','Automóveis'],['🏠','Imóveis'],['🐾','Pets'],['🧭','Turismo'],['✦','Outros']
@@ -74,7 +76,7 @@ function LaunchHomePreview(){
        <span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="O que você procura hoje?"/><button>Buscar</button>
       </form>
       <div className="lvp-quick">
-       {['Restaurantes','Serviços','Beleza','Mercados'].map(x=><a key={x} href="#categorias">{x}</a>)}
+       {['Restaurantes','Serviços','Beleza','Mercados'].map(x=><a key={x} href={`/laguna/empresas?categoria=${encodeURIComponent(slugify(x==='Mercados'?'Supermercado':x))}`}>{x}</a>)}
       </div>
       <div className="lvp-note">● Catálogo local de Laguna · atualizado por negócios da cidade.</div>
      </div>
@@ -92,7 +94,7 @@ function LaunchHomePreview(){
     <div className="lvp-section-head"><div><span className="lvp-eyebrow">EXPLORE</span><h2>Encontre por categoria</h2><p>Descubra negócios de acordo com o que você precisa.</p></div><a href="#todas">Ver todas →</a></div>
     <div className="lvp-cat-box">
       <button className="lvp-arrow" onClick={()=>setCatStart(Math.max(0,catStart-1))} disabled={catStart===0}>‹</button>
-      <div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href="#explorar" key={label}><span>{icon}</span><b>{label}</b></a>)}</div>
+      <div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href={`/laguna/empresas?categoria=${encodeURIComponent(slugify(label))}`} key={label}><span>{icon}</span><b>{label}</b></a>)}</div>
       <button className="lvp-arrow" onClick={()=>setCatStart(Math.min(cats.length-7,catStart+1))} disabled={catStart>=cats.length-7}>›</button>
     </div>
     <div className="lvp-category-count">{cats.length} categorias disponíveis</div>
