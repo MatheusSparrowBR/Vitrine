@@ -110,6 +110,14 @@ function LaunchHomePreview(){
   return()=>{live=false;clearInterval(timer)}
  },[])
  const visibleCats=cats.slice(catStart,catStart+7)
+ const hasPrevCats=catStart>0
+ const hasNextCats=catStart+7<cats.length
+ const moveCats=direction=>setCatStart(start=>{
+  const maxStart=Math.max(0,cats.length-7)
+  if(direction<0)return Math.max(0,start-7)
+  if(direction>0)return Math.min(maxStart,start+7)
+  return start
+ })
  const dateLabel=useMemo(()=>new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(today).replace('.','').toUpperCase(),[today])
  return <div className="lvp-page">
   <PreviewHeader/>
@@ -142,9 +150,9 @@ function LaunchHomePreview(){
    <section id="categorias" className="lvp-wrap lvp-categories">
     <div className="lvp-section-head"><div><span className="lvp-eyebrow">EXPLORE</span><h2>Encontre por categoria</h2><p>Descubra negócios de acordo com o que você precisa.</p></div><a href="/laguna/empresas">Ver todas →</a></div>
     <div className="lvp-cat-box">
-      <button className="lvp-arrow" onClick={()=>setCatStart(Math.max(0,catStart-1))} disabled={catStart===0}>‹</button>
+      <button className="lvp-arrow" onClick={()=>moveCats(-1)} disabled={!hasPrevCats}>‹</button>
       <div className="lvp-cat-grid">{visibleCats.map(([icon,label])=><a href={`/laguna/empresas?categoria=${encodeURIComponent(slugify(label))}`} key={label}><span>{icon}</span><b>{label}</b></a>)}</div>
-      <button className="lvp-arrow" onClick={()=>setCatStart(Math.min(cats.length-7,catStart+1))} disabled={catStart>=cats.length-7}>›</button>
+      <button className="lvp-arrow" onClick={()=>moveCats(1)} disabled={!hasNextCats}>›</button>
     </div>
     <div className="lvp-category-count">{cats.length} categorias disponíveis</div>
    </section>
