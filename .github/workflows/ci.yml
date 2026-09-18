@@ -15,7 +15,9 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - run: npm run audit:static
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm audit --omit=dev --audit-level=high
