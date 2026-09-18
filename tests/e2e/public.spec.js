@@ -12,7 +12,7 @@ test('home de Laguna usa a nova UX sobre dados reais do catálogo',async({page})
  await expect(page.locator('.lvp-weather')).toBeVisible()
  await expect(page.locator('.lvp-sponsored, .lvp-empty-sponsored')).toHaveCount(1)
  expect(await page.locator('.lvp-cat-grid a').count()).toBeLessThanOrEqual(7)
- await expect(page.locator('.lvp-category-count')).toHaveText(/\\d+ categorias? disponíveis/i)
+ await expect(page.locator('.lvp-category-count')).toHaveText(/\d+ categorias? disponíveis/i)
  await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
 })
 
@@ -57,7 +57,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  const cards=page.locator('.lvp-cat-grid a')
  const count=await cards.count()
  const text=await page.locator('.lvp-category-count').innerText()
- const total=Number((text.match(/\\d+/)||[])[0]||0)
+ const total=Number((text.match(/\d+/)||[])[0]||0)
  expect(total).toBeGreaterThan(0)
  expect(count).toBeLessThanOrEqual(7)
  const next=box.locator('.lvp-arrow').last()
@@ -67,7 +67,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  }else{
   await expect(next).toBeDisabled()
  }
- await expect(cards.first()).toHaveAttribute('href',/\\/laguna\\/empresas\\?categoria=/)
+ await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
 })
 
 test('categoria da home aponta para o catálogo da categoria',async({page})=>{
