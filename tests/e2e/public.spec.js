@@ -63,13 +63,8 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  else expect(total).toBe(0)
  expect(count).toBeLessThanOrEqual(7)
  const next=box.locator('.lvp-arrow').last()
- if(total>7){
-  await expect(next).toBeEnabled()
-  await next.click()
- }else{
-  await expect(next).toBeDisabled()
- }
- await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
+ if(total>7){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
+ if(count)await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
 })
 
 test('categoria da home aponta para o catálogo da categoria',async({page})=>{
@@ -167,6 +162,5 @@ test('home traz o fluxo de necessidades da UX de lançamento com links funcionai
  const needs=page.locator('.lvp-need-grid a')
  const expectedNeeds=Boolean(process.env.VITE_SUPABASE_URL&&process.env.VITE_SUPABASE_PUBLISHABLE_KEY)?4:0
  await expect(needs).toHaveCount(expectedNeeds)
- await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
- await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)
+ if(expectedNeeds){await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/);await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)}
 })
