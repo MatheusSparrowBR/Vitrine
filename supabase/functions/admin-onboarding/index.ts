@@ -38,10 +38,11 @@ async function uniqueBusinessSlug(base: string) {
   return `${initial}-${crypto.randomUUID().slice(0, 8)}`.slice(0, 100)
 }
 
-async function applyInitialPlan(businessId: string, ownerId: string, planCode: string, endsAt: string | null) {
+async function applyInitialPlan(businessId: string, ownerId: string | null, planCode: string, endsAt: string | null) {
   const normalized = clean(planCode).toLowerCase() || 'free'
   if (!['free', 'pro', 'premium'].includes(normalized)) return { error: 'Plano inicial inválido.' }
   if (normalized === 'free') return { error: null }
+  if (!ownerId) return { error: 'Vincule um proprietário antes de selecionar um plano pago.' }
   const { data: plan, error: planError } = await adminDb.from('plans').select('id,code,active').eq('code', normalized).eq('active', true).maybeSingle()
   if (planError) return { error: planError.message }
   if (!plan) return { error: 'Plano inicial não encontrado ou inativo.' }
@@ -51,14 +52,18 @@ async function applyInitialPlan(businessId: string, ownerId: string, planCode: s
 }
 
 async function createBusiness(params: any, actorId: string, forcedOwnerId?: string) {
-  const ownerId = forcedOwnerId || clean(params.owner_id)
+  const ownerId = forcedOwnerId || nullable(params.owner_id)
   const name = clean(params.name)
   const cityId = clean(params.city_id)
-  if (!ownerId || !name || !cityId) return { response: json({ error: 'Responsável, nome da empresa e cidade são obrigatórios.' }, 400) }
-  const { data: owner, error: ownerError } = await adminDb.from('profiles').select('id,role,account_status').eq('id', ownerId).maybeSingle()
-  if (ownerError) return { response: json({ error: ownerError.message }, 500) }
-  if (!owner || !['business_owner', 'admin'].includes(owner.role)) return { response: json({ error: 'O responsável precisa ser proprietário de empresa ou administrador.' }, 400) }
-  if (owner.account_status !== 'active') return { response: json({ error: 'O responsável está com a conta inativa.' }, 409) }
+  const planCode = clean(params.plan_code).toLowerCase() || 'free'
+  if (!name || !cityId) return { response: json({ error: 'Nome da empresa e cidade são obrigatórios.' }, 400) }
+  if (!ownerId && planCode !== 'free') return { response: json({ error: 'Vincule um proprietário antes de selecionar um plano pago.' }, 400) }
+  if (ownerId) {
+    const { data: owner, error: ownerError } = await adminDb.from('profiles').select('id,role,account_status').eq('id', ownerId).maybeSingle()
+    if (ownerError) return { response: json({ error: ownerError.message }, 500) }
+    if (!owner || !['business_owner', 'admin'].includes(owner.role)) return { response: json({ error: 'O responsável precisa ser proprietário de empresa ou administrador.' }, 400) }
+    if (owner.account_status !== 'active') return { response: json({ error: 'O responsável está com a conta inativa.' }, 409) }
+  }
   const { data: city, error: cityError } = await adminDb.from('cities').select('id,active').eq('id', cityId).maybeSingle()
   if (cityError) return { response: json({ error: cityError.message }, 500) }
   if (!city || !city.active) return { response: json({ error: 'Cidade inválida ou inativa.' }, 400) }
@@ -72,9 +77,9 @@ async function createBusiness(params: any, actorId: string, forcedOwnerId?: stri
   const status = ['pending', 'active'].includes(clean(params.status)) ? clean(params.status) : 'pending'
   const { data: business, error: businessError } = await adminDb.from('businesses').insert({ owner_id: ownerId, city_id: cityId, category_id: categoryId, name, slug, short_description: nullable(params.short_description), description: nullable(params.description), address: nullable(params.address), neighborhood: nullable(params.neighborhood), phone: nullable(params.phone), whatsapp: nullable(params.whatsapp), instagram_url: nullable(params.instagram_url), website_url: nullable(params.website_url), facebook_url: nullable(params.facebook_url), status }).select('id,name,slug,owner_id,city_id,category_id,status').single()
   if (businessError || !business) return { response: json({ error: businessError?.message || 'Não foi possível criar a empresa.' }, 500) }
-  const planResult = await applyInitialPlan(business.id, ownerId, clean(params.plan_code) || 'free', nullable(params.plan_ends_at))
-  if (planResult.error) { await adminDb.from('businesses').delete().eq('id', business.id); return { response: json({ error: planResult.error }, 500) }
-  await adminDb.from('admin_audit_logs').insert({ actor_id: actorId, action: 'business_created', entity_type: 'business', entity_id: business.id, metadata: { owner_id: ownerId, city_id: cityId, plan_code: clean(params.plan_code) || 'free', source: 'admin_onboarding' } })
+  const planResult = await applyInitialPlan(business.id, ownerId, planCode, nullable(params.plan_ends_at))
+  if (planResult.error) { await adminDb.from('businesses').delete().eq('id', business.id); return { response: json({ error: planResult.error }, 500) } }
+  await adminDb.from('admin_audit_logs').insert({ actor_id: actorId, action: 'business_created', entity_type: 'business', entity_id: business.id, metadata: { owner_id: ownerId, city_id: cityId, plan_code: planCode, source: 'admin_onboarding' } })
   return { data: business }
 }
 
@@ -110,8 +115,9 @@ Deno.serve(async (req) => {
   if (action === 'create_business') {
     const result = await createBusiness(body.business || {}, auth.user.id)
     if ('response' in result) return result.response
-    return json({ ok: true, business: result.data, access_url: `${APP_URL}/conta` })
+    return json({ ok: true, business: result.data, access_url: result.data?.owner_id ? `${APP_URL}/conta` : `${APP_URL}/admin/empresas` })
   }
 
   return json({ error: 'Ação não suportada.' }, 400)
 })
+
