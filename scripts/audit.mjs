@@ -34,11 +34,11 @@ if(/RewriteRule \^ index\.html \[L\]/.test(ht))ok.push('Hostinger/Apache SPA fal
 else fail.push('Missing Hostinger/Apache SPA fallback')
 
 const workflow=read('.github/workflows/ci.yml')
-for(const token of ['npm run audit:static','npm run test','npm run build','npm run test:e2e']){
- if(workflow.includes(token))ok.push('CI includes '+token)
- else fail.push('CI missing '+token)
+for(const script of ['audit:static','test','build','test:e2e']){
+ if(new RegExp(`(?:npm|pnpm) run ${script.replace(':','\\:')}`).test(workflow))ok.push('CI includes '+script)
+ else fail.push('CI missing '+script)
 }
-if(workflow.includes('npm audit --omit=dev --audit-level=high'))ok.push('CI includes dependency security audit')
+if(/(?:npm audit --omit=dev|pnpm audit --prod) --audit-level high/.test(workflow))ok.push('CI includes dependency security audit')
 else fail.push('CI missing dependency security audit')
 
 const forbidden=['vercel.json','vercel.app','.vercel/','Vercel']
@@ -70,7 +70,7 @@ for(const target of scanRoots){
  else scanFile(p)
 }
 
-if(!existsSync(join(root,'package-lock.json')))warn.push('package-lock.json is absent; CI uses npm install rather than npm ci')
+if(!existsSync(join(root,'package-lock.json'))&&!existsSync(join(root,'pnpm-lock.yaml')))warn.push('No dependency lockfile is present')
 
 const pkg=JSON.parse(read('package.json'))
 for(const s of ['audit:static','test','build','test:e2e']) if(!pkg.scripts?.[s]) fail.push('Missing package script: '+s)
@@ -83,3 +83,4 @@ for(const x of ok)console.log('PASS '+x)
 for(const x of warn)console.log('WARN '+x)
 for(const x of fail)console.log('FAIL '+x)
 if(fail.length)process.exit(1)
+

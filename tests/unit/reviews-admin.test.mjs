@@ -16,7 +16,7 @@ test('admin reviews supports company filtering and review editing',()=>{
 
 test('business cards render published review average and stars',()=>{
  const src=read('src/ModernBusinessesPage.jsx')
- assert.match(src,/business_reviews/)
+ assert.match(src,/loadPublicBusinessReviewSummaries/)
  assert.match(src,/rating/)
  assert.match(src,/mbl-rating/)
  assert.match(src,/mbl-stars/)
@@ -37,3 +37,4 @@ test('review edit metadata migration is versioned',()=>{
  assert.match(sql,/admin_edit/)
  assert.match(fix,/actor_role = 'admin'/)
 })
+

@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{lazy,Suspense} from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase-client.js'
 import SiteHeader from './SiteHeader.jsx'
@@ -6,34 +6,38 @@ import AnalyticsTracker from './analytics-tracker.jsx'
 import AppErrorBoundary from './AppErrorBoundary.jsx'
 import PrelaunchGate from './PrelaunchGate.jsx'
 import PrelaunchPlansPage from './PrelaunchPlansPage.jsx'
-import EventsPage from './EventsPage.jsx'
-import AdminPremiumBannerPage from './AdminPremiumBannerPage.jsx'
-import AdminAdvertisingPage from './AdminAdvertisingPage.jsx'
-import AdminAdvertisingSalesPage from './AdminAdvertisingSalesPage.jsx'
-import AdminPlatformPage from './AdminPlatformPage.jsx'
-import AdminHomePage from './AdminHomePage.jsx'
-import AdminAnalyticsPage from './AdminAnalyticsPage.jsx'
-import AdminBusinessesPage from './AdminBusinessesPage.jsx'
-import AdminReviewsPage from './AdminReviewsPage.jsx'
-import AdminUsersPage from './AdminUsersPage.jsx'
-import AdminOnboardingPage from './AdminOnboardingPage.jsx'
-import BusinessRegistrationPage from './BusinessRegistrationPage.jsx'
-import CityHomePage from './CityHomePage.jsx'
-import AccountPage from './AccountWorkspacePage.jsx'
 import AccountOnboardingPage,{AccountOnboardingGate} from './AccountOnboardingPage.jsx'
-import CommercialAnalyticsPage from './CommercialAnalyticsPage.jsx'
-import MerchantAdvertisingPage from './MerchantAdvertisingPage.jsx'
-import MerchantAdvertisingSalesPage from './MerchantAdvertisingSalesPage.jsx'
-import AuthPage from './AuthPage.jsx'
-import UserAuthPage from './UserAuthPage.jsx'
-import UserProfilePage from './UserProfilePage.jsx'
-import PasswordUpdatePage from './PasswordUpdatePage.jsx'
-import BillingPlansPage from './BillingPlansPage.jsx'
-import ModernBusinessProfilePage from './ModernBusinessProfilePage.jsx'
-import ModernBusinessesPage from './ModernBusinessesPage.jsx'
-import { PromotionsPage,NotFoundPage } from './PublicCatalogPages.jsx'
-import { PrivacyPage,TermsPage } from './LegalPages.jsx'
+
+const EventsPage=lazy(()=>import('./EventsPage.jsx'))
+const AdminPremiumBannerPage=lazy(()=>import('./AdminPremiumBannerPage.jsx'))
+const AdminAdvertisingPage=lazy(()=>import('./AdminAdvertisingPage.jsx'))
+const AdminAdvertisingSalesPage=lazy(()=>import('./AdminAdvertisingSalesPage.jsx'))
+const AdminPlatformPage=lazy(()=>import('./AdminPlatformPage.jsx'))
+const AdminHomePage=lazy(()=>import('./AdminHomePage.jsx'))
+const AdminAnalyticsPage=lazy(()=>import('./AdminAnalyticsPage.jsx'))
+const AdminBusinessesPage=lazy(()=>import('./AdminBusinessesPage.jsx'))
+const AdminReviewsPage=lazy(()=>import('./AdminReviewsPage.jsx'))
+const AdminUsersPage=lazy(()=>import('./AdminUsersPage.jsx'))
+const AdminOnboardingPage=lazy(()=>import('./AdminOnboardingPage.jsx'))
+const BusinessRegistrationPage=lazy(()=>import('./BusinessRegistrationPage.jsx'))
+const CityHomePage=lazy(()=>import('./CityHomePage.jsx'))
+const AccountPage=lazy(()=>import('./AccountWorkspacePage.jsx'))
+const CommercialAnalyticsPage=lazy(()=>import('./CommercialAnalyticsPage.jsx'))
+const MerchantAdvertisingPage=lazy(()=>import('./MerchantAdvertisingPage.jsx'))
+const MerchantAdvertisingSalesPage=lazy(()=>import('./MerchantAdvertisingSalesPage.jsx'))
+const AuthPage=lazy(()=>import('./AuthPage.jsx'))
+const UserAuthPage=lazy(()=>import('./UserAuthPage.jsx'))
+const UserProfilePage=lazy(()=>import('./UserProfilePage.jsx'))
+const PasswordUpdatePage=lazy(()=>import('./PasswordUpdatePage.jsx'))
+const BillingPlansPage=lazy(()=>import('./BillingPlansPage.jsx'))
+const ModernBusinessProfilePage=lazy(()=>import('./ModernBusinessProfilePage.jsx'))
+const ModernBusinessesPage=lazy(()=>import('./ModernBusinessesPage.jsx'))
+const PromotionsPage=lazy(()=>import('./PublicCatalogPages.jsx').then(module=>({default:module.PromotionsPage})))
+const NotFoundPage=lazy(()=>import('./PublicCatalogPages.jsx').then(module=>({default:module.NotFoundPage})))
+const PrivacyPage=lazy(()=>import('./LegalPages.jsx').then(module=>({default:module.PrivacyPage})))
+const TermsPage=lazy(()=>import('./LegalPages.jsx').then(module=>({default:module.TermsPage})))
 import './core.css'
+import './route-loading.css'
 import './events.css'
 import './city-home.css'
 import './commercial-home.css'
@@ -100,5 +104,6 @@ function AccountRoute(){const params=new URLSearchParams(location.search),isNewB
 function UserProfileRoute(){const[checking,setChecking]=React.useState(true);React.useEffect(()=>{let live=true;(async()=>{if(!supabase){if(live)setChecking(false);return}const{data:{session}}=await supabase.auth.getSession();if(!session){if(live)setChecking(false);return}const[{data:profile},{count:businessCount,error:businessError}]=await Promise.all([supabase.from('profiles').select('role').eq('id',session.user.id).maybeSingle(),supabase.from('businesses').select('id',{count:'exact',head:true}).eq('owner_id',session.user.id)]);if(!live)return;if(profile?.role==='admin'||profile?.role==='business_owner'||(!businessError&&(businessCount||0)>0)){window.location.replace('/conta');return}setChecking(false)})();return()=>{live=false}},[]);if(checking)return <main className="user-profile-page"><div className="user-profile-loading">Carregando perfil…</div></main>;return <UserProfilePage/>}
 function AccountModerationGuard({children}){React.useEffect(()=>{if(!supabase)return;let live=true;const check=async()=>{const{data:{session}}=await supabase.auth.getSession();if(!session||!live)return;const{data:profile}=await supabase.from('profiles').select('role,account_status').eq('id',session.user.id).maybeSingle();if(!live)return;if((profile?.role==='user'||profile?.role==='business_owner')&&profile.account_status&&profile.account_status!=='active'){await supabase.auth.signOut();window.location.href=`/usuario/login?blocked=${encodeURIComponent(profile.account_status)}`}};check();const sub=supabase.auth.onAuthStateChange(()=>setTimeout(check,0));return()=>{live=false;sub?.data?.subscription?.unsubscribe?.()}},[]);return children}
 function RootRoute(){const path=normalizePath(location.pathname);if(path==='/em-breve/planos')return <PrelaunchPlansPage/>;if(path==='/login')return <AuthPage/>;if(path==='/usuario/login'||path==='/usuario/cadastro')return <UserAuthPage/>;if(path==='/usuario/perfil')return <UserProfileRoute/>;if(path==='/planos')return <BillingPlansPage/>;if(path==='/conta/onboarding')return <AccountOnboardingPage/>;if(path==='/conta')return <AccountRoute/>;if(path==='/conta/analytics')return <CommercialAnalyticsPage/>;if(path==='/conta/analytics-comercial')return <CommercialAnalyticsPage/>;if(path==='/conta/publicidade')return <MerchantAdvertisingSalesPage/>;if(path==='/conta/publicidade-legado')return <MerchantAdvertisingPage/>;if(path==='/conta/nova')return <BusinessRegistrationPage/>;if(path==='/atualizar-senha')return <PasswordUpdatePage/>;if(path==='/privacidade')return <PrivacyPage/>;if(path==='/termos')return <TermsPage/>;if(path==='/admin')return <AdminHomePage/>;if(path==='/admin/analytics')return <AdminAnalyticsPage/>;if(path==='/admin/empresas')return <AdminBusinessesPage/>;if(path==='/admin/usuarios')return <AdminUsersPage/>;if(path==='/admin/novo-parceiro')return <AdminOnboardingPage mode="partner"/>;if(path==='/admin/novo-usuario')return <AdminOnboardingPage mode="user"/>;if(path==='/admin/nova-empresa')return <AdminOnboardingPage mode="business"/>;if(path==='/admin/avaliacoes')return <AdminReviewsPage/>;if(path==='/admin/banners')return <AdminPremiumBannerPage supabase={supabase}/>;if(path==='/admin/publicidade')return <AdminAdvertisingSalesPage/>;if(path==='/admin/publicidade-legado')return <AdminAdvertisingPage/>;if(path==='/admin/gestao')return <AdminPlatformPage supabase={supabase}/>;const route=getCityRoute(path);if(!route)return <NotFoundPage/>;if(route.kind==='home')return <CityHomePage citySlug={route.citySlug}/>;if(route.kind==='events')return <EventRoute citySlug={route.citySlug}/>;if(route.kind==='businesses')return <ModernBusinessesPage citySlug={route.citySlug}/>;if(route.kind==='promotions')return <PromotionsPage citySlug={route.citySlug}/>;if(route.kind==='business')return <ModernBusinessProfilePage citySlug={route.citySlug} businessSlug={route.businessSlug}/>;return <NotFoundPage/>}
- function App(){const path=normalizePath(location.pathname),isAdmin=path.startsWith('/admin'),isStandalone=path==='/conta/onboarding',isPrelaunchPlans=path==='/em-breve/planos';return <AppErrorBoundary><AccountModerationGuard><><PrelaunchGate path={path}>{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<SiteHeader/>}{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<AnalyticsTracker/>}<RootRoute/></PrelaunchGate></></AccountModerationGuard></AppErrorBoundary>}
+function App(){const path=normalizePath(location.pathname),isAdmin=path.startsWith('/admin'),isStandalone=path==='/conta/onboarding',isPrelaunchPlans=path==='/em-breve/planos';return <AppErrorBoundary><AccountModerationGuard><><PrelaunchGate path={path}>{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<SiteHeader/>}{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<AnalyticsTracker/>}<Suspense fallback={<main className="app-route-loading" aria-live="polite">Carregando…</main>}><RootRoute/></Suspense></PrelaunchGate></></AccountModerationGuard></AppErrorBoundary>}
 createRoot(document.getElementById('root')).render(<App/>)
+

@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
+import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 
 const fallbackCats=[['Restaurantes','🍽️'],['Lojas','🛍️'],['Serviços','🧰'],['Saúde','❤️'],['Beleza','✨'],['Turismo','📍'],['Automóveis','🚗'],['Imóveis','🏠'],['Pets','🐾'],['Outros','✦']]
 const stars=avg=>Array.from({length:5},(_,i)=>i<Math.round(avg)?'★':'☆').join('')
@@ -29,12 +30,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   ])
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
-  let reviewMap={}
-  const ids=publicBusinesses.map(row=>row.id).filter(Boolean)
-   if(ids.length){
-    const results=await Promise.all(ids.map(id=>db.rpc('get_public_business_reviews',{p_business_id:id,p_limit:100})))
-    results.forEach((reviews,index)=>{if(reviews.error)return;(reviews.data||[]).forEach(row=>{const businessId=ids[index];const current=reviewMap[businessId]||{sum:0,count:0};current.sum+=Number(row.rating)||0;current.count+=1;reviewMap[businessId]=current})})
-   }
+  const reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))
   setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
  })();return()=>{live=false}},[citySlug])
  const items=useMemo(()=>{const term=q.trim().toLowerCase();return businesses.filter(b=>{const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term);const matchesCat=!cat||b.categories?.slug===cat;return matchesText&&matchesCat})},[businesses,q,cat])
@@ -49,9 +45,10 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
    <div className="mbl-toolbar-row"><div className="mbl-search-large"><span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){const url=new URL(location.href);if(q.trim())url.searchParams.set('q',q.trim());else url.searchParams.delete('q');location.href=url.pathname+(url.search?'?'+url.searchParams.toString():'')}}} placeholder="Buscar empresa, serviço ou bairro" aria-label="Buscar no catálogo"/></div><button className="mbl-clear" type="button" onClick={clearFilters}>Limpar filtros</button></div>
    <div className="mbl-chips" role="list"><button className={cat===''?'active':''} onClick={()=>setCategory('')}>Todos</button>{categories.map(c=><button key={c.id} className={cat===c.slug?'active':''} onClick={()=>setCategory(c.slug)}><span>{c.icon||'✦'}</span>{c.name}</button>)}</div>
   </section>
-  {items.length?<section className="mbl-grid">{items.map(b=>{const stat=ratings[b.id]||{sum:0,count:0};const avg=stat.count?stat.sum/stat.count:0;return <a className="mbl-card" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`} key={b.id}>
+  {items.length?<section className="mbl-grid">{items.map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <a className="mbl-card" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`} key={b.id}>
     <div className="mbl-cover">{b.cover_url?<img src={b.cover_url} alt={`${b.name} capa`} loading="lazy"/>:<div className="mbl-cover-placeholder">VitrineLocal</div>}{b.featured&&<span className="mbl-featured">Destaque</span>}{b.verified&&<span className="mbl-verified">✓ Verificada</span>}{b.logo_url&&<span className="mbl-logo"><img src={b.logo_url} alt={`${b.name} logo`} loading="lazy"/></span>}</div>
     <div className="mbl-body"><div className="mbl-category"><span>{b.categories?.name||'Empresa'}</span>{b.whatsapp&&<small>WhatsApp</small>}</div><h2>{b.name}</h2><p>{b.short_description||b.description||'Conheça este negócio local.'}</p><div className="mbl-footer"><span>⌖ {b.neighborhood||b.address||city.name+' - '+(city.state||'SC')}</span><strong className={`mbl-rating ${stat.count?'has-reviews':''}`} aria-label={stat.count?`${avg.toFixed(1)} de 5, ${stat.count} avaliações`:'Sem avaliações'}><span className="mbl-stars" aria-hidden="true">{stat.count?stars(avg):'☆'}</span>{stat.count?`${avg.toFixed(1)} · ${stat.count}`:'Sem avaliações'}</strong></div></div>
   </a>})}</section>:<section className="mbl-empty"><div className="mbl-empty-icon">⌕</div><h2>Nenhuma empresa encontrada</h2><p>Não encontramos resultados para os filtros atuais.</p><button onClick={clearFilters}>Ver todas as empresas</button></section>}
  </main></div>
 }
+

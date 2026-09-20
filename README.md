@@ -22,7 +22,7 @@ O banco contém cidades, categorias, empresas, fotos, produtos/serviços, promo�
 1. Copie `.env.example` para `.env.local`.
 2. Preencha `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` com os valores do projeto Supabase.
 3. Rode `npm install`.
-4. Rode `npm run dev`.
+4. Rode `pnpm install` e depois `pnpm run dev`.
 
 Nunca coloque chaves secretas/service role ou token do Mercado Pago no frontend.
 
@@ -116,3 +116,4 @@ As leituras públicas de `businesses` feitas pelo frontend são redirecionadas p
 ## Produção
 
 O checklist operacional completo para o release está em `docs/PRODUCAO.md`.
+
