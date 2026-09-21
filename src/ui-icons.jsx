@@ -45,6 +45,12 @@ const PATHS={
   ticket:<><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4Z"/><path d="M12 8v8"/></>,
   fuel:<><path d="M6 20V4h8v16M8 7h4M16 7l3 3v7a1.5 1.5 0 0 0 3 0v-5"/></>,
   flower:<><circle cx="12" cy="13" r="3"/><path d="M12 10c-2.5-6 5-7 5-2.5 4-2 5 5-.5 5.5M9 10c-4.5-.5-4.5-7-.5-5.5 0-4.5 7.5-3.5 5 2.5"/></>,
+  pizza:<><path d="m5 4 14 16"/><path d="M5 4c5 0 10 2 14 5l-7 11c-5-4-7-9-7-16Z"/><circle cx="11" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="14" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1.1" fill="currentColor" stroke="none"/></>,
+  burger:<><path d="M4 10h16M5 10c.3-3.5 3-5.5 7-5.5s6.7 2 7 5.5"/><path d="M5 14h14M6 14v2.5h12V14M7 19h10"/><path d="M7 7h.01M12 6h.01M17 7h.01"/></>,
+  sandwich:<><path d="m4 8 8-4 8 4-8 4Z"/><path d="M5 9.5 4 15l8 4 8-4-1-5.5-7 3.5Z"/><path d="M7 8.5 12 11l5-2.5"/></>,
+  bread:<><path d="M5 19V9c0-3.2 3.1-5.5 7-5.5S19 5.8 19 9v10Z"/><path d="M5 19h14M8 11c0-1.2 1-2 2-2M13 12c0-1.2 1-2 2-2M10 16h.01M14 16h.01"/></>,
+  cupcake:<><path d="M6 10h12l-1 10H7L6 10Z"/><path d="M7 10c0-2 1.6-3.5 3.5-3.5 0-2.1 3-3.5 4.7-1.2 1.8 0 3.2 1.3 3.2 3.1 0 .6-.2 1.1-.5 1.6Z"/></>,
+  iceCream:<><path d="m7 10 5 11 5-11"/><path d="M8 9.5a4 4 0 0 1 8 0c0 .3 0 .6-.1.9H8.1c-.1-.3-.1-.6-.1-.9Z"/><path d="M9 6c.3-2 1.7-3 3-3s2.7 1 3 3"/></>,
   motorcycle:<><path d="m5 17 2-5h5l3 5M7 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM22 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12l-1.5-3H6M12 12h3l2 5"/></>
 }
 
@@ -55,7 +61,13 @@ export const ICON_CATALOG=[
  {name:'shirt',label:'Moda / Roupas',group:'Comércio'},
  {name:'tag',label:'Oferta',group:'Comércio'},
  {name:'utensils',label:'Restaurante',group:'Alimentação'},
- {name:'coffee',label:'Café / Lanches',group:'Alimentação'},
+ {name:'pizza',label:'Pizzaria',group:'Alimentação'},
+ {name:'burger',label:'Hamburgueria',group:'Alimentação'},
+ {name:'sandwich',label:'Lanchonete',group:'Alimentação'},
+ {name:'coffee',label:'Cafeteria',group:'Alimentação'},
+ {name:'bread',label:'Padaria',group:'Alimentação'},
+ {name:'cupcake',label:'Doceria',group:'Alimentação'},
+ {name:'iceCream',label:'Sorveteria',group:'Alimentação'},
  {name:'wrench',label:'Serviços',group:'Serviços'},
  {name:'briefcase',label:'Negócios',group:'Serviços'},
  {name:'heart',label:'Saúde / Bem-estar',group:'Saúde'},
