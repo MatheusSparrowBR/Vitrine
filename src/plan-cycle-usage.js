@@ -11,7 +11,7 @@ export async function getPlanCycleUsage(businessId){
  if(error)return{rows:[],error}
  return{rows:(data||[]).map(row=>{
   const rawLimit=Number(row.limit_count)
-  return{...row,used_count:Math.max(0,Number(row.used_count)||0),limit_count:rawLimit<0?ADMIN_UNLIMITED_LIMIT:(Number.isFinite(rawLimit)?rawLimit:0),unlimited:rawLimit<0}
+  return{...row,used_count:Math.max(0,Number(row.used_count)||0),limit_count:rawLimit<0?-1:(Number.isFinite(rawLimit)?rawLimit:0),unlimited:rawLimit<0}
  }),error:null}
 }
 
