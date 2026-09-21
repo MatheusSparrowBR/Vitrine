@@ -12,7 +12,7 @@ test("demo é rota pública, read-only e premium",()=>{
  assert.match(gate,/["']\/demo["']/)
  assert.match(page,/Experiência Premium/)
  assert.match(page,/Somente visualização/)
- assert.match(page,/from\("businesses"\)/
+ assert.match(page,/from\("businesses"\)/)
  assert.match(page,/tab==="account"/)
  assert.doesNotMatch(page,/\.insert\(/)
  assert.doesNotMatch(page,/\.update\(/)
