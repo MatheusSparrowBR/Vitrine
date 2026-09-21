@@ -16,7 +16,7 @@ const money=value=>value==null||value===""?"":"R$ "+Number(value).toFixed(2).rep
 
 export default function DemoPage(){
  useEffect(()=>{document.body.classList.add("demo-active");return()=>document.body.classList.remove("demo-active")},[])
- const [tab,setTab]=useState("home"),[accountSection,setAccountSection]=useState("overview"),[city,setCity]=useState(null),[businesses,setBusinesses]=useState([]),[categories,setCategories]=useState([]),[selectedId,setSelectedId]=useState(""),[promotions,setPromotions]=useState([]),[photos,setPhotos]=useState([]),[items,setItems]=useState([]),[premiumPlan,setPremiumPlan]=useState(null),[loading,setLoading]=useState(true)
+ const [tab,setTab]=useState("home"),[accountSection,setAccountSection]=useState("overview"),[city,setCity]=useState(null),[businesses,setBusinesses]=useState([]),[categories,setCategories]=useState([]),[selectedId,setSelectedId]=useState(""),[promotions,setPromotions]=useState([]),[photos,setPhotos]=useState([]),[items,setItems]=useState([]),[premiumPlan,setPremiumPlan]=useState(null),[loading,setLoading]=useState(true),[dataError,setDataError]=useState("")
  useEffect(()=>{let live=true;(async()=>{
   if(!supabase){setLoading(false);return}
   const {data:cityRow}=await supabase.from("cities").select("id,name,state,slug,active").eq("slug","laguna").eq("active",true).maybeSingle()
@@ -24,17 +24,24 @@ export default function DemoPage(){
   setCity(cityRow||null)
   if(!cityRow){setLoading(false);return}
   const [businessRes,promoRes,planRes,categoryRes]=await Promise.all([
-   supabase.from("public_business_directory").select("*").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
+   supabase.from("public_business_directory").select("id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,category_name,category_slug,created_at,search_featured,city_id,category_id,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
    supabase.from("promotions").select("id,title,description,price,original_price,image_url,status,business_id,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false}).limit(100),
    supabase.from("plans").select("id,code,name,price_monthly,features,active").eq("code","premium").eq("active",true).maybeSingle(),
    supabase.from("categories").select("id,name,slug,icon").eq("active",true).order("sort_order").order("name")
   ])
   if(!live)return
-  const sourceRows=businessRes.error?[]:(businessRes.data||[])
+  let sourceRows=businessRes.data||[]
+  if(!sourceRows.length){
+   const fallback=await supabase.from("businesses").select("id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,created_at,city_id,category_id,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).eq("status","active").order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100)
+   sourceRows=fallback.data||[]
+   if(fallback.error&&!sourceRows.length)setDataError("Não foi possível carregar as empresas da demonstração.")
+  }
   const categoryMap=new Map((categoryRes.data||[]).map(row=>[row.id,row]))
-  const rows=sourceRows.map(row=>{const category=categoryMap.get(row.category_id);return {...row,city_name:row.city_name||cityRow.name,city_state:row.city_state||cityRow.state,category_name:row.category_name||category?.name||null,category_slug:row.category_slug||category?.slug||null,categories:category||null}})
+  const rows=sourceRows.map(row=>{const category=categoryMap.get(row.category_id);return {...row,city_name:cityRow.name,city_state:cityRow.state,category_name:row.category_name||category?.name||null,category_slug:row.category_slug||category?.slug||null,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:category||null}})
   const uniqueCategories=[],seen=new Set()
-  rows.forEach(row=>{if(!row.category_name||seen.has(row.category_name))return;seen.add(row.category_name);uniqueCategories.push({name:row.category_name,slug:row.category_slug||slugify(row.category_name),icon:row.categories?.icon||"grid"})})
+  const categoryRows=categoryRes.data||[]
+  categoryRows.forEach(row=>{if(seen.has(row.name))return;seen.add(row.name);uniqueCategories.push({name:row.name,slug:row.slug||slugify(row.name),icon:row.icon||"grid"})})
+  rows.forEach(row=>{if(row.category_name&&!seen.has(row.category_name)){seen.add(row.category_name);uniqueCategories.push({name:row.category_name,slug:row.category_slug||slugify(row.category_name),icon:row.categories?.icon||"grid"})}})
   setBusinesses(rows);setCategories(uniqueCategories);setSelectedId(rows.find(row=>row.slug==="teste")?.id||rows.find(row=>row.featured)?.id||rows[0]?.id||"");setPromotions(promoRes.data||[]);setPremiumPlan(planRes.data||null);setLoading(false)
  })();return()=>{live=false}},[])
  useEffect(()=>{let live=true;if(!selectedId||!supabase){setPhotos([]);setItems([]);return()=>{}}
@@ -61,6 +68,7 @@ export default function DemoPage(){
  }
  if(loading)return <div className="demo-loading"><span className="demo-kicker">MODO DEMONSTRAÇÃO</span><h1>Preparando o VitrineLocal…</h1><p>Carregando a estrutura visual e os dados públicos atuais.</p></div>
  if(!city)return <div className="demo-loading"><h1>Demo indisponível</h1><p>A cidade Laguna não está disponível no catálogo público.</p></div>
+ if(dataError&&tab==="businesses"&&!businesses.length)return <main className="demo-shell"><div className="demo-loading"><h1>Catálogo temporariamente indisponível</h1><p>{dataError}</p><button className="demo-retry-button" onClick={()=>window.location.reload()}>Tentar novamente</button></div></main>
  return <main className="demo-shell">
   <section className="demo-banner"><div><span className="demo-kicker">VITRINELOCAL · DEMO</span><strong>Demonstração completa e interativa</strong><p>Experiência visual do projeto principal, com dados públicos atuais e ambiente 100% somente leitura.</p></div><div className="demo-banner-actions"><span className="demo-premium"><Icon name="star" size={13}/> Experiência Premium</span><span className="demo-readonly-top"><Icon name="lock" size={12}/> Sem login · sem edição</span></div></section>
   <nav className="demo-nav" aria-label="Navegação da demonstração">{TABS.map(([key,label])=><button key={key} className={tab===key?"active":""} onClick={()=>setTab(key)}>{label}</button>)}<span className="demo-nav-spacer"/><span className="demo-readonly"><Icon name="lock" size={12}/> Somente visualização</span></nav>
