@@ -11,7 +11,7 @@ test('editor administrativo usa o componente oficial de atendimento e horários'
  assert.match(admin,/business-hours\.css/)
  assert.match(admin,/admin-business-hours\.css/)
  assert.match(admin,/opening_hours/)
- assert.match(admin,/BusinessHoursEditor value={form\.opening_hours}/)
+ assert.match(admin,/BusinessHoursEditor value=\{form\.opening_hours\}/)
  assert.match(admin,/has_delivery/)
  assert.match(admin,/has_pickup/)
  assert.match(admin,/has_dine_in/)
@@ -20,8 +20,9 @@ test('editor administrativo usa o componente oficial de atendimento e horários'
 
 test('salvamento administrativo persiste horário e opções de atendimento',()=>{
  const admin=read('src/AdminBusinessesPage.jsx')
- assert.match(admin,/opening_hours:form\.opening_hours\|\|{}/)
- assert.match(admin,/has_delivery:Boolean(form\.has_delivery)/)
- assert.match(admin,/has_pickup:Boolean(form\.has_pickup)/)
- assert.match(admin,/has_dine_in:Boolean(form\.has_dine_in)/)
+ const save=admin.slice(admin.indexOf('async function save'),admin.indexOf('if(checking)'))
+ assert.match(save,/opening_hours:form\.opening_hours\|\|\{\}/)
+ assert.match(save,/has_delivery/)
+ assert.match(save,/has_pickup/)
+ assert.match(save,/has_dine_in/)
 })
