@@ -28,6 +28,29 @@ const PATHS={
   heart:<path d="M20.8 8.7c0 5.2-8.8 10.2-8.8 10.2S3.2 13.9 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/>
 }
 
+export const ICON_CATALOG=[
+ {name:'store',label:'Loja / Restaurante',group:'Comércio e alimentação'},
+ {name:'bag',label:'Sacola / Mercado',group:'Comércio e alimentação'},
+ {name:'tag',label:'Oferta',group:'Comércio e alimentação'},
+ {name:'wrench',label:'Serviços',group:'Serviços'},
+ {name:'heart',label:'Saúde / Bem-estar',group:'Saúde e beleza'},
+ {name:'star',label:'Beleza / Destaque',group:'Saúde e beleza'},
+ {name:'briefcase',label:'Academia / Negócios',group:'Serviços e negócios'},
+ {name:'pin',label:'Turismo / Localização',group:'Turismo'},
+ {name:'calendar',label:'Eventos',group:'Eventos e agenda'},
+ {name:'clock',label:'Horários',group:'Eventos e agenda'},
+ {name:'phone',label:'Telefone',group:'Contato'},
+ {name:'instagram',label:'Instagram',group:'Contato'},
+ {name:'grid',label:'Categoria genérica',group:'Outros'},
+ {name:'image',label:'Imagem',group:'Mídia'},
+ {name:'camera',label:'Câmera',group:'Mídia'},
+ {name:'share',label:'Compartilhar',group:'Ações'},
+ {name:'bookmark',label:'Salvar',group:'Ações'},
+ {name:'user',label:'Pessoa',group:'Ações'},
+ {name:'search',label:'Busca',group:'Ações'},
+ {name:'check',label:'Verificado',group:'Ações'}
+]
+
 export default function Icon({name,size=18,strokeWidth=1.8,filled=false,className=''}) {
   const path=PATHS[name]||PATHS.grid
   return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill={filled?'currentColor':'none'} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{path}</svg>
