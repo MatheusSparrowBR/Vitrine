@@ -7,7 +7,6 @@ const read=path=>fs.readFileSync(path,'utf8')
 test('admin controla as três opções de atendimento da empresa',()=>{
  const admin=read('src/AdminBusinessesPage.jsx')
  const adminOnboarding=read('src/AdminOnboardingPage.jsx')
- const adminOnboarding=read('src/AdminOnboardingPage.jsx')
  const registration=read('src/BusinessRegistrationPage.jsx')
  const ownerWorkspace=read('src/AccountWorkspacePage.jsx')
  for(const field of ['has_delivery','has_pickup','has_dine_in']) assert.match(admin,new RegExp(field))
