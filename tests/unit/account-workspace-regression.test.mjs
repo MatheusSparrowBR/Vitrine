@@ -9,7 +9,7 @@ test('account workspace renders media usage without an undefined mediaUsage refe
  assert.match(account,/mediaUsage=\{mediaUsage\}/)
  assert.match(account,/function MediaSection\(\{[^}]*mediaUsage[^}]*\}\)/)
  assert.match(account,/AccountResourceUsage businessId=\{businessId\} resource="photos"/)
- assert.match(account,/className=\{`account-primary-btn small file-button \$\{mediaReached\?'is-disabled':''\}`\}/)
+ assert.match(account,/account-media-dropzone/)
  assert.match(account,/db\.from\('business_photos'\)\.insert/)
 })
 
