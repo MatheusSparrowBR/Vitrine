@@ -3,7 +3,7 @@ import assert from'node:assert/strict'
 import fs from'node:fs'
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('meu plano renderiza o mesmo gráfico de utilização para mídias, produtos e promoções',()=>{
+test('meu plano diferencia capacidade armazenada e quota mensal',()=>{
  const plan=read('src/PlanUsageReact.jsx')
  for(const value of ["LABELS={photos:'Mídias'","LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'",'function UsageCard(','USO NO CICLO','Math.round(percent)','const unlimited=limit<0','unlimited?\'∞\'','SEM LIMITE PARA TESTES'])assert.ok(plan.includes(value),`Meu plano precisa conter ${value}`)
 })
