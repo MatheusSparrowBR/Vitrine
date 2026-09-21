@@ -5,7 +5,7 @@ import PrelaunchPage from './PrelaunchPage.jsx'
 const PRELAUNCH_MODE=String(import.meta.env.VITE_PRELAUNCH_MODE ?? 'true').toLowerCase()!=='false'
 const OPEN_PATHS=new Set([
  '/login','/planos','/em-breve/planos','/privacidade','/termos','/atualizar-senha',
- '/usuario/login','/usuario/cadastro','/usuario/perfil',
+ '/usuario/login','/usuario/cadastro','/usuario/perfil','/demo',
  '/conta','/conta/onboarding','/conta/analytics','/conta/analytics-comercial',
  '/conta/publicidade','/conta/publicidade-legado','/conta/nova'
 ])
