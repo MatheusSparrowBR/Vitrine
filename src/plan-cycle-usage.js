@@ -11,11 +11,29 @@ export async function getPlanCycleUsage(businessId){
  if(error)return{rows:[],error}
  return{rows:(data||[]).map(row=>{
   const rawLimit=Number(row.limit_count)
+  return{...row,used_count:Math.max(0,Number(row.used_count)||0),limit_count:rawLimit<0?-1:(Number.isFinite(rawLimit)?rawLimit:0),unlimited:rawLimit<0}
+ }),error:null}
+}
+
+
+export async function getBusinessCollectionUsage(businessId){
+ if(!db||!businessId)return{rows:[],error:new Error('Banco indisponível.')}
+ const{data,error}=await db.rpc('get_business_collection_usage',{p_business_id:businessId})
+ if(error)return{rows:[],error}
+ return{rows:(data||[]).map(row=>{
+  const rawLimit=Number(row.limit_count)
   return{...row,used_count:Math.max(0,Number(row.used_count)||0),limit_count:rawLimit<0?ADMIN_UNLIMITED_LIMIT:(Number.isFinite(rawLimit)?rawLimit:0),unlimited:rawLimit<0}
  }),error:null}
 }
 
 export async function getPlanCycleFeatureUsage(businessId,feature){
+ if(feature==='photos'||feature==='items'){
+  const{rows,error}=await getBusinessCollectionUsage(businessId)
+  if(error)return{usage:null,error}
+  const row=rows.find(item=>item.feature===feature)||null
+  if(!row)return{usage:{used:0,limit:0,unlimited:false,cycleStart:null,cycleEnd:null,planCode:'free'},error:null}
+  return{usage:{used:Math.max(0,Number(row.used_count)||0),limit:Number(row.limit_count)||0,unlimited:Boolean(row.unlimited),cycleStart:null,cycleEnd:null,planCode:row.plan_code||'free'},error:null}
+ }
  const{rows,error}=await getPlanCycleUsage(businessId)
  if(error)return{usage:null,error}
  const row=rows.find(item=>item.feature===feature)||null
