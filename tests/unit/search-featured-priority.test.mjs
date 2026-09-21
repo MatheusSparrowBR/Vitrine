@@ -10,7 +10,7 @@ test('empresa possui controle separado de busca em destaque',()=>{
  assert.match(migration,/add column if not exists search_featured boolean not null default false/)
  assert.match(migration,/businesses_city_search_featured_idx/)
  assert.match(migration,/search_featured_mode/)
- assert.match(migration,/p\.code in .*pro.*premium/))
+ assert.match(migration,/p\.code in .*pro.*premium/)
  assert.match(migration,/business_search_featured_enabled/)
  assert.match(admin,/search_featured_mode/)
  assert.match(admin,/Busca em destaque/)
