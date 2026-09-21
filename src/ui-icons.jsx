@@ -44,7 +44,8 @@ const PATHS={
   hotel:<><path d="M4 20V6h16v14M7 9h3v3H7zM14 9h3v3h-3zM7 15h3v3H7zM14 15h3v3h-3z"/></>,
   ticket:<><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4Z"/><path d="M12 8v8"/></>,
   fuel:<><path d="M6 20V4h8v16M8 7h4M16 7l3 3v7a1.5 1.5 0 0 0 3 0v-5"/></>,
-  flower:<><circle cx="12" cy="13" r="3"/><path d="M12 10c-2.5-6 5-7 5-2.5 4-2 5 5-.5 5.5M9 10c-4.5-.5-4.5-7-.5-5.5 0-4.5 7.5-3.5 5 2.5"/></>
+  flower:<><circle cx="12" cy="13" r="3"/><path d="M12 10c-2.5-6 5-7 5-2.5 4-2 5 5-.5 5.5M9 10c-4.5-.5-4.5-7-.5-5.5 0-4.5 7.5-3.5 5 2.5"/></>,
+  motorcycle:<><path d="m5 17 2-5h5l3 5M7 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM22 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12l-1.5-3H6M12 12h3l2 5"/></>
 }
 
 export const ICON_CATALOG=[
@@ -64,6 +65,7 @@ export const ICON_CATALOG=[
  {name:'flower',label:'Estética / Cuidados',group:'Beleza'},
  {name:'home',label:'Casa / Imóveis',group:'Casa'},
  {name:'car',label:'Automóveis',group:'Transporte'},
+ {name:'motorcycle',label:'Delivery / Motoboy',group:'Transporte'},
  {name:'fuel',label:'Posto / Combustível',group:'Transporte'},
  {name:'pin',label:'Localização',group:'Turismo'},
  {name:'plane',label:'Viagens',group:'Turismo'},
