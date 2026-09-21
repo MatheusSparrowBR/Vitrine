@@ -1,10 +1,10 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
-import Icon from './ui-icons.jsx'
+import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
-const iconForCategory=name=>{const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
+const iconForCategory=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
 const stars=avg=>Array.from({length:5},(_,i)=><Icon key={i} name="star" size={12} filled={i<Math.round(Number(avg)||0)}/>)
 
 function syncQuery(values){
@@ -80,7 +80,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   <section className="mbl-hero"><div><span className="mbl-kicker">CATÁLOGO LOCAL</span><h1>Empresas em {city.name}</h1><p>Encontre negócios e serviços da cidade. Filtre por categoria, pesquise pelo que precisa e compare opções.</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
   <section className="mbl-toolbar" aria-label="Filtros do catálogo">
    <div className="mbl-toolbar-row"><div className="mbl-search-large"><Icon name="search" size={18}/><input value={q} onChange={e=>setSearch(e.target.value)} placeholder="Buscar empresa, serviço ou bairro" aria-label="Buscar no catálogo"/></div><button className="mbl-clear" type="button" onClick={clearFilters}>Limpar filtros</button></div>
-   <div className="mbl-chips" role="list"><button className={cat===''?'active':''} onClick={()=>setCategory('')}>Todos</button>{categories.map(c=><button key={c.id} className={cat===c.slug?'active':''} onClick={()=>setCategory(c.slug)}><Icon name={iconForCategory(c.name)} size={13}/>{c.name}</button>)}</div>
+   <div className="mbl-chips" role="list"><button className={cat===''?'active':''} onClick={()=>setCategory('')}>Todos</button>{categories.map(c=><button key={c.id} className={cat===c.slug?'active':''} onClick={()=>setCategory(c.slug)}><Icon name={iconForCategory(c.name,c.icon)} size={13}/>{c.name}</button>)}</div>
    <div className="mbl-sort-row"><span className="mbl-sort-label">Ordenar por</span><select className="mbl-sort-select" value={sort} onChange={e=>setSortValue(e.target.value)} aria-label="Ordenar resultados"><option value="relevancia">Relevância</option><option value="avaliacao">Melhor avaliadas</option><option value="recentes">Mais recentes</option></select></div>
    {(q||cat)&&<div className="mbl-active-filters" aria-label="Filtros ativos">{q&&<span className="mbl-filter-chip">Busca: {q}<button type="button" aria-label="Remover busca" onClick={()=>setSearch('')}>×</button></span>}{cat&&<span className="mbl-filter-chip">Categoria: {categories.find(c=>c.slug===cat)?.name||cat}<button type="button" aria-label="Remover categoria" onClick={()=>setCategory('')}>×</button></span>}</div>}
   </section>
