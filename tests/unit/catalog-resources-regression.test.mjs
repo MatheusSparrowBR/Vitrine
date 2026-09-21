@@ -56,5 +56,5 @@ test('media add control is disabled at plan limit',()=>{
  const account=read('src/AccountWorkspacePage.jsx')
  assert.match(account,/mediaUsage/)
  assert.match(account,/const mediaReached=Boolean\(mediaUsage\?\.reached\)/)
- assert.match(account,/disabled=\{mediaReached\}/)
+ assert.match(account,/function openPicker\(\)\{if\(!mediaReached\)/)
 })
