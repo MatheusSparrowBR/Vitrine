@@ -1,0 +1,33 @@
+.admin-business-media-section{margin-top:14px;border:1px solid #dce7f2;border-radius:16px;background:#f9fbfe;padding:15px 16px}
+.admin-business-media-head{margin-bottom:13px}
+.admin-business-media-head strong{display:block;margin-top:4px;font:900 13px/1.25 'Manrope',sans-serif;color:#123353}
+.admin-business-media-head small{display:block;margin-top:4px;color:#8190a2;font:500 9px/1.45 'DM Sans',sans-serif}
+.admin-business-media-error{margin-bottom:12px;border:1px solid #f2cccc;border-radius:10px;background:#fff6f6;color:#a53636;padding:9px 11px;font:700 9px/1.4 'DM Sans',sans-serif}
+.admin-business-brand-grid{display:grid;grid-template-columns:1.5fr .75fr;gap:10px}
+.admin-business-brand-card{border:1px solid #dce6ef;border-radius:13px;background:#fff;padding:11px;min-width:0}
+.admin-business-brand-label{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:9px}
+.admin-business-brand-label strong{font:900 10px/1.2 'DM Sans',sans-serif;color:#183754}
+.admin-business-brand-label small{font:600 8px/1.25 'DM Sans',sans-serif;color:#8a98a8;text-align:right}
+.admin-business-cover-preview{height:118px;border-radius:10px;overflow:hidden;background:#eaf0f7;display:grid;place-items:center;color:#8197b2;font:800 11px 'DM Sans',sans-serif}
+.admin-business-cover-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-business-logo-preview{height:118px;border-radius:10px;overflow:hidden;background:#f4f8fc;display:grid;place-items:center;color:#216df3;border:1px dashed #d5e1ec}
+.admin-business-logo-preview img{width:100%;height:100%;object-fit:contain;padding:14px;display:block}
+.admin-business-logo-preview span{font:900 38px 'Manrope',sans-serif}
+.admin-business-media-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.admin-business-media-actions .admin-v2-btn{min-height:34px;padding:0 10px}
+.admin-business-gallery-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px;padding-top:13px;border-top:1px solid #e8eef4}
+.admin-business-gallery-toolbar>div{min-width:0}
+.admin-business-gallery-toolbar strong{display:block;font:900 11px 'DM Sans',sans-serif;color:#183754}
+.admin-business-gallery-toolbar small{display:block;margin-top:3px;color:#8a98a8;font:600 8px 'DM Sans',sans-serif}
+.admin-business-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.admin-business-gallery-item{margin:0;min-width:0;border:1px solid #dce6ef;border-radius:11px;overflow:hidden;background:#fff}
+.admin-business-gallery-item>div{height:108px;background:#eaf0f7}
+.admin-business-gallery-item img,.admin-business-gallery-item video{width:100%;height:100%;display:block;object-fit:cover}
+.admin-business-gallery-item figcaption{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 8px}
+.admin-business-gallery-item figcaption span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 8px 'DM Sans',sans-serif;color:#74869c}
+.admin-business-gallery-item figcaption button{border:0;background:transparent;color:#a53636;font:900 8px 'DM Sans',sans-serif;cursor:pointer;padding:3px}
+.admin-business-gallery-empty{display:grid;place-items:center;gap:5px;padding:24px 12px;margin-top:10px;border:1px dashed #ccd9e6;border-radius:11px;background:#fff;color:#8291a4;text-align:center}
+.admin-business-gallery-empty strong{font:900 10px 'DM Sans',sans-serif;color:#52677e}
+.admin-business-gallery-empty span{font:600 8px 'DM Sans',sans-serif}
+@media(max-width:760px){.admin-business-brand-grid{grid-template-columns:1fr}.admin-business-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.admin-business-gallery-toolbar{align-items:flex-start;flex-direction:column}.admin-business-gallery-toolbar .admin-v2-btn{width:100%}.admin-business-gallery-item>div{height:96px}.admin-business-media-section{padding:12px}}

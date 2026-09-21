@@ -31,7 +31,8 @@ test('admin controla as três opções de atendimento da empresa',()=>{
 test('perfil público exibe badges somente quando as opções estão ativas',()=>{
  const profile=read('src/ModernBusinessProfilePage.jsx')
  for(const field of ['has_delivery','has_pickup','has_dine_in']) assert.match(profile,new RegExp(field))
- assert.match(profile,/mbp-service-badges/)
+ assert.match(profile,/mbp-badges/)
+ assert.match(profile,/mbp-service-badge/)
  assert.match(profile,/Delivery/)
  assert.match(profile,/Retirada no local/)
  assert.match(profile,/Consumo no local/)
