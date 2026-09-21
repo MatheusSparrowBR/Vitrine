@@ -13,7 +13,7 @@ test("demo é rota pública, read-only e premium",()=>{
  assert.match(page,/Experiência Premium/)
  assert.match(page,/Somente visualização/)
  assert.match(page,/public_business_directory/)
- assert.match(page,/section==="account"/)
+ assert.match(page,/tab==="account"/)
  assert.match(page,/function DemoPlan/)
  assert.match(css,/\.demo-shell/)
 })
