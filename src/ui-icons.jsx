@@ -51,6 +51,8 @@ export const ICON_CATALOG=[
  {name:'check',label:'Verificado',group:'Ações'}
 ]
 
+export const isOfficialIcon=name=>Boolean(PATHS[name])
+
 export default function Icon({name,size=18,strokeWidth=1.8,filled=false,className=''}) {
   const path=PATHS[name]||PATHS.grid
   return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill={filled?'currentColor':'none'} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{path}</svg>
