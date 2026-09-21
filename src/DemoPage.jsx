@@ -23,13 +23,13 @@ export default function DemoPage(){
   setCity(cityRow||null)
   if(!cityRow){setLoading(false);return}
   const [businessRes,promoRes,planRes]=await Promise.all([
-   supabase.from("public_business_directory").select("id,name,slug,short_description,description,logo_url,cover_url,address,neighborhood,phone,whatsapp,instagram_url,website_url,verified,featured,search_featured,created_at,city_id,city_name,city_state,category_name,category_slug,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
+   supabase.from("businesses").select("id,name,slug,short_description,description,logo_url,cover_url,address,neighborhood,phone,whatsapp,instagram_url,website_url,facebook_url,verified,featured,search_featured,created_at,city_id,opening_hours,has_delivery,has_pickup,has_dine_in,categories(id,name,slug,icon),cities(id,name,state,slug)").eq("city_id",cityRow.id).eq("status","active").order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
    supabase.from("promotions").select("id,title,description,price,original_price,image_url,status,business_id,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false}).limit(100),
    supabase.from("plans").select("id,code,name,price_monthly,features,active").eq("code","premium").eq("active",true).maybeSingle()
   ])
   if(!live)return
-  const rows=businessRes.data||[],uniqueCategories=[],seen=new Set()
-  rows.forEach(row=>{if(!row.category_name||seen.has(row.category_name))return;seen.add(row.category_name);uniqueCategories.push({name:row.category_name,slug:row.category_slug||slugify(row.category_name)})})
+  const rows=(businessRes.data||[]).map(row=>({...row,city_name:row.cities?.name||cityRow.name,city_state:row.cities?.state||cityRow.state,category_name:row.categories?.name||null,category_slug:row.categories?.slug||null})),uniqueCategories=[],seen=new Set()
+  rows.forEach(row=>{if(!row.category_name||seen.has(row.category_name))return;seen.add(row.category_name);uniqueCategories.push({name:row.category_name,slug:row.category_slug||slugify(row.category_name),icon:row.categories?.icon||"grid"})})
   setBusinesses(rows);setCategories(uniqueCategories);setSelectedId(rows.find(row=>row.slug==="teste")?.id||rows.find(row=>row.featured)?.id||rows[0]?.id||"");setPromotions(promoRes.data||[]);setPremiumPlan(planRes.data||null);setLoading(false)
  })();return()=>{live=false}},[])
  useEffect(()=>{let live=true;if(!selectedId||!supabase){setPhotos([]);setItems([]);return()=>{}}
