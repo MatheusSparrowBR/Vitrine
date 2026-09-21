@@ -15,3 +15,34 @@
 .vl-admin-events-empty{min-height:260px;display:grid;place-items:center;text-align:center;padding:30px;color:#7a8ba0;font-size:11px;border:1px dashed #c7d8e9;border-radius:12px;background:#fbfdff}.vl-admin-events-empty strong{display:block;color:#365675;font-size:14px}.vl-admin-events-empty span{display:block;margin-top:5px}
 @media(max-width:900px){.vl-admin-events-layout{grid-template-columns:1fr}.vl-admin-events-form{order:1}.vl-admin-events-list{order:2}.vl-admin-event-row{grid-template-columns:64px minmax(0,1fr)}.vl-admin-event-thumb{width:64px;height:58px}.vl-admin-event-actions{grid-column:1/-1;display:flex;flex-direction:row;flex-wrap:wrap}.vl-admin-event-actions button{flex:1}.vl-admin-events-upload{grid-template-columns:34px minmax(0,1fr)}.vl-admin-events-upload-button{grid-column:1/-1}}
 @media(max-width:600px){.vl-admin-events-backdrop{padding:8px}.vl-admin-events-head{padding:16px}.vl-admin-events-modal{max-height:98vh;border-radius:17px}.vl-admin-events-layout{padding:8px}.vl-admin-events-form,.vl-admin-events-list{padding:13px}.vl-admin-events-two{grid-template-columns:1fr}.vl-admin-events-trigger{min-height:42px;right:auto;bottom:auto;padding:10px 13px}.vl-admin-event-row{grid-template-columns:54px minmax(0,1fr);gap:8px}.vl-admin-event-thumb{width:54px;height:54px}.vl-admin-event-actions button{flex-basis:45%}.vl-admin-events-cover-head{display:grid;gap:3px}.vl-admin-events-cover-preview{grid-template-columns:1fr}.vl-admin-events-cover-preview img{width:100%;height:150px}.vl-admin-events-upload{grid-template-columns:34px minmax(0,1fr)}}
+/* Redesign do formulário de eventos: hierarquia, período e espaçamento */
+.vl-admin-events-modal{background:#f4f7fb}
+.vl-admin-events-layout{grid-template-columns:430px minmax(0,1fr);align-items:start}
+.vl-admin-events-form{padding:18px}
+.vl-admin-events-form>label{margin-top:13px}
+.vl-admin-events-form>label:first-of-type{margin-top:0}
+.vl-admin-event-date-block{margin-top:13px;padding:13px;border:1px solid #dfe8f1;border-radius:13px;background:#fbfdff}
+.vl-admin-event-block-label{display:grid;gap:3px;margin-bottom:10px}
+.vl-admin-event-block-label strong{font-size:11px;color:#183a5a}
+.vl-admin-event-block-label small{font-size:9px;color:#7d8fa2;line-height:1.35}
+.vl-admin-event-date-range{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);align-items:end;gap:7px}
+.vl-admin-event-date-range label{display:grid;gap:5px;margin:0!important}
+.vl-admin-event-date-range label span{font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:#73869a;font-weight:900}
+.vl-admin-event-range-arrow{height:36px;display:grid;place-items:center;color:#7c90a4;font-weight:900}
+.vl-admin-event-category-row{margin-top:10px}
+.vl-admin-event-category-row label{margin-top:0}
+.vl-admin-events-form textarea{min-height:92px;resize:vertical}
+.vl-admin-events-checks{padding:10px 11px;border:1px solid #e0e8f1;border-radius:11px;background:#fbfdff}
+.vl-admin-events-checks label{padding:7px 0}
+.vl-admin-events-checks label+label{border-top:1px solid #edf2f6}
+.vl-admin-events-checks input{accent-color:#1677ff}
+.vl-admin-events-submit{margin-top:7px;height:44px;font-size:11px}
+.vl-admin-event-row{grid-template-columns:82px minmax(0,1fr) 84px;padding:12px}
+.vl-admin-event-thumb{width:82px;height:70px}
+.vl-admin-event-copy h4{font-size:14px}
+.vl-admin-event-copy p{line-height:1.45;white-space:normal}
+.vl-admin-event-actions{gap:6px}
+.vl-admin-event-actions button{min-width:84px}
+.vl-admin-events-list{padding:18px}
+@media(max-width:900px){.vl-admin-events-layout{grid-template-columns:1fr}.vl-admin-event-row{grid-template-columns:70px minmax(0,1fr)}.vl-admin-event-thumb{width:70px;height:64px}.vl-admin-event-actions{grid-column:1/-1}}
+@media(max-width:600px){.vl-admin-event-date-range{grid-template-columns:1fr}.vl-admin-event-range-arrow{height:22px;transform:rotate(90deg)}.vl-admin-events-form,.vl-admin-events-list{padding:14px}}
