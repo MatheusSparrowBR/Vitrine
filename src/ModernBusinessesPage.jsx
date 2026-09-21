@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
+import './search-featured.css'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
