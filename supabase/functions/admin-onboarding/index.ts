@@ -75,11 +75,11 @@ async function createBusiness(params: any, actorId: string, forcedOwnerId?: stri
   }
   const slug = await uniqueBusinessSlug(nullable(params.slug) || name)
   const status = ['pending', 'active'].includes(clean(params.status)) ? clean(params.status) : 'pending'
-  const { data: business, error: businessError } = await adminDb.from('businesses').insert({ owner_id: ownerId, city_id: cityId, category_id: categoryId, name, slug, short_description: nullable(params.short_description), description: nullable(params.description), address: nullable(params.address), neighborhood: nullable(params.neighborhood), phone: nullable(params.phone), whatsapp: nullable(params.whatsapp), instagram_url: nullable(params.instagram_url), website_url: nullable(params.website_url), facebook_url: nullable(params.facebook_url), status }).select('id,name,slug,owner_id,city_id,category_id,status').single()
+  const { data: business, error: businessError } = await adminDb.from('businesses').insert({ owner_id: ownerId, city_id: cityId, category_id: categoryId, name, slug, short_description: nullable(params.short_description), description: nullable(params.description), address: nullable(params.address), neighborhood: nullable(params.neighborhood), phone: nullable(params.phone), whatsapp: nullable(params.whatsapp), instagram_url: nullable(params.instagram_url), website_url: nullable(params.website_url), facebook_url: nullable(params.facebook_url), has_delivery: Boolean(params.has_delivery), has_pickup: Boolean(params.has_pickup), has_dine_in: Boolean(params.has_dine_in), status }).select('id,name,slug,owner_id,city_id,category_id,status,has_delivery,has_pickup,has_dine_in').single()
   if (businessError || !business) return { response: json({ error: businessError?.message || 'Não foi possível criar a empresa.' }, 500) }
   const planResult = await applyInitialPlan(business.id, ownerId, planCode, nullable(params.plan_ends_at))
   if (planResult.error) { await adminDb.from('businesses').delete().eq('id', business.id); return { response: json({ error: planResult.error }, 500) } }
-  await adminDb.from('admin_audit_logs').insert({ actor_id: actorId, action: 'business_created', entity_type: 'business', entity_id: business.id, metadata: { owner_id: ownerId, city_id: cityId, plan_code: planCode, source: 'admin_onboarding' } })
+  await adminDb.from('admin_audit_logs').insert({ actor_id: actorId, action: 'business_created', entity_type: 'business', entity_id: business.id, metadata: { owner_id: ownerId, city_id: cityId, plan_code: planCode, has_delivery: Boolean(params.has_delivery), has_pickup: Boolean(params.has_pickup), has_dine_in: Boolean(params.has_dine_in), source: 'admin_onboarding' } })
   return { data: business }
 }
 
