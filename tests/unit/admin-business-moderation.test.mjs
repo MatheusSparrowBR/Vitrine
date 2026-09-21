@@ -6,7 +6,7 @@ const page=fs.readFileSync('src/AdminBusinessesPage.jsx','utf8')
 const migration=fs.readFileSync('supabase/migrations/20260918130000_allow_admin_moderation_overrides.sql','utf8')
 
 test('ações de moderação confirmam o valor persistido antes de atualizar a fila',()=>{
- assert.match(page,/select\('id,featured,search_featured,verified'\)/)
+ assert.match(page,/select\('id,featured,search_featured,search_featured_mode,verified'\)/)
  assert.match(page,/maybeSingle\(\)/)
  assert.match(page,/if\(!data\)/)
  assert.match(page,/data\[field\]!==nextValue/)
