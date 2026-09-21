@@ -7,7 +7,7 @@ const css=fs.readFileSync("src/demo.css","utf8")
 
 test("demo apresenta home, empresas do catálogo e Minha Conta sem escrita",()=>{
  assert.match(page,/CityHomePage/)
- assert.match(page,/from\("businesses"\)/)
+ assert.match(page,/from\("public_business_directory"\)/)
  assert.match(page,/\.eq\("city_id",cityRow\.id\)/)
  assert.match(page,/\["account","Minha conta"\]/)
  assert.match(page,/Demonstração completa e interativa/)

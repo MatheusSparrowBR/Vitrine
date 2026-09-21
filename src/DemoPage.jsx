@@ -15,6 +15,7 @@ const slugify=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]
 const money=value=>value==null||value===""?"":"R$ "+Number(value).toFixed(2).replace(".",",")
 
 export default function DemoPage(){
+ useEffect(()=>{document.body.classList.add("demo-active");return()=>document.body.classList.remove("demo-active")},[])
  const [tab,setTab]=useState("home"),[accountSection,setAccountSection]=useState("overview"),[city,setCity]=useState(null),[businesses,setBusinesses]=useState([]),[categories,setCategories]=useState([]),[selectedId,setSelectedId]=useState(""),[promotions,setPromotions]=useState([]),[photos,setPhotos]=useState([]),[items,setItems]=useState([]),[premiumPlan,setPremiumPlan]=useState(null),[loading,setLoading]=useState(true)
  useEffect(()=>{let live=true;(async()=>{
   if(!supabase){setLoading(false);return}
@@ -23,14 +24,16 @@ export default function DemoPage(){
   setCity(cityRow||null)
   if(!cityRow){setLoading(false);return}
   const [businessRes,promoRes,planRes,categoryRes]=await Promise.all([
-   supabase.from("businesses").select("id,name,slug,short_description,description,logo_url,cover_url,address,neighborhood,phone,whatsapp,instagram_url,website_url,facebook_url,verified,featured,search_featured,created_at,city_id,category_id,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).eq("status","active").order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
+   supabase.from("public_business_directory").select("*").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
    supabase.from("promotions").select("id,title,description,price,original_price,image_url,status,business_id,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false}).limit(100),
    supabase.from("plans").select("id,code,name,price_monthly,features,active").eq("code","premium").eq("active",true).maybeSingle(),
    supabase.from("categories").select("id,name,slug,icon").eq("active",true).order("sort_order").order("name")
   ])
   if(!live)return
+  const sourceRows=businessRes.error?[]:(businessRes.data||[])
   const categoryMap=new Map((categoryRes.data||[]).map(row=>[row.id,row]))
-  const rows=(businessRes.data||[]).map(row=>{const category=categoryMap.get(row.category_id);return {...row,city_name:cityRow.name,city_state:cityRow.state,category_name:category?.name||null,category_slug:category?.slug||null,categories:category||null}}),uniqueCategories=[],seen=new Set()
+  const rows=sourceRows.map(row=>{const category=categoryMap.get(row.category_id);return {...row,city_name:row.city_name||cityRow.name,city_state:row.city_state||cityRow.state,category_name:row.category_name||category?.name||null,category_slug:row.category_slug||category?.slug||null,categories:category||null}})
+  const uniqueCategories=[],seen=new Set()
   rows.forEach(row=>{if(!row.category_name||seen.has(row.category_name))return;seen.add(row.category_name);uniqueCategories.push({name:row.category_name,slug:row.category_slug||slugify(row.category_name),icon:row.categories?.icon||"grid"})})
   setBusinesses(rows);setCategories(uniqueCategories);setSelectedId(rows.find(row=>row.slug==="teste")?.id||rows.find(row=>row.featured)?.id||rows[0]?.id||"");setPromotions(promoRes.data||[]);setPremiumPlan(planRes.data||null);setLoading(false)
  })();return()=>{live=false}},[])
