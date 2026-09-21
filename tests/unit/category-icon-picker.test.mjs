@@ -8,7 +8,7 @@ test('biblioteca oficial de ícones existe e o seletor administrativo usa a mesm
  const icons=read('src/ui-icons.jsx')
  const admin=read('src/admin-tools.jsx')
  assert.match(icons,/export const ICON_CATALOG=\[/)
- for(const name of ['store','bag','shoppingCart','utensils','dumbbell','medical','scissors','car','home','pin','calendar','grid']){
+ for(const name of ['store','bag','shoppingCart','utensils','pizza','burger','sandwich','coffee','bread','cupcake','iceCream','dumbbell','medical','scissors','car','home','pin','calendar','grid']){
   assert.match(icons,new RegExp(`name:'${name}'`))
  }
  assert.match(admin,/ICON_CATALOG/)
@@ -18,6 +18,7 @@ test('biblioteca oficial de ícones existe e o seletor administrativo usa a mesm
  assert.match(admin,/aria-modal="true"/)
  assert.match(admin,/setIconPickerOpen\(false\)/)
  assert.match(admin,/icon:iconKey/)
+ for(const label of ['Pizzaria','Hamburgueria','Lanchonete','Cafeteria','Padaria','Doceria','Sorveteria']) assert.match(icons,new RegExp(label))
 })
 
 test('categorias públicas respeitam o ícone oficial salvo no banco',()=>{
