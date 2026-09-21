@@ -14,6 +14,7 @@ test("demo é rota pública, read-only e premium",()=>{
  assert.match(page,/Somente visualização/)
  assert.match(page,/from\("public_business_directory"\)/)
  assert.match(page,/tab==="account"/)
+ assert.match(page,/selected=useMemo/
  assert.doesNotMatch(page,/\.insert\(/)
  assert.doesNotMatch(page,/\.update\(/)
  assert.doesNotMatch(page,/\.delete\(/)
