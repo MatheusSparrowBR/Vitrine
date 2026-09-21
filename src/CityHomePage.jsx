@@ -21,7 +21,7 @@ const categoryIcon=(name,selected)=>{if(isOfficialIcon(selected))return selected
 const slugify=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
 const money=value=>value==null||value===''?'':`R$ ${Number(value).toFixed(2).replace('.',',')}`
 const withTimeout=(promise,ms=8000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tempo limite de carregamento excedido.')),ms))])
-const weatherLabel=code=>{const map={0:['☀️','Céu limpo'],1:['🌤️','Predominantemente limpo'],2:['⛅','Parcialmente nublado'],3:['☁️','Nublado'],45:['🌫️','Neblina'],48:['🌫️','Neblina com geada'],51:['🌦️','Garoa leve'],53:['🌦️','Garoa moderada'],55:['🌦️','Garoa intensa'],56:['🌧️','Garoa congelante'],57:['🌧️','Garoa congelante'],61:['🌦️','Chuva leve'],63:['🌧️','Chuva moderada'],65:['🌧️','Chuva forte'],66:['🌧️','Chuva congelante'],67:['🌧️','Chuva congelante forte'],71:['🌨️','Neve leve'],73:['🌨️','Neve moderada'],75:['❄️','Neve forte'],77:['❄️','Grãos de neve'],80:['🌦️','Pancadas leves'],81:['🌧️','Pancadas moderadas'],82:['⛈️','Pancadas fortes'],85:['🌨️','Pancadas de neve leves'],86:['❄️','Pancadas de neve fortes'],95:['⛈️','Trovoada'],96:['⛈️','Trovoada com granizo'],99:['⛈️','Trovoada com granizo']};return map[Number(code)]||['🌡️','Condição atual']}
+const weatherLabel=(code,isDay=true)=>{const map={0:[isDay?'sun':'moon','Céu limpo'],1:['cloudSun','Predominantemente limpo'],2:['cloudSun','Parcialmente nublado'],3:['cloud','Nublado'],45:['fog','Neblina'],48:['fog','Neblina com geada'],51:['drizzle','Garoa leve'],53:['drizzle','Garoa moderada'],55:['drizzle','Garoa intensa'],56:['drizzle','Garoa congelante'],57:['drizzle','Garoa congelante'],61:['rain','Chuva leve'],63:['rain','Chuva moderada'],65:['rain','Chuva forte'],66:['rain','Chuva congelante'],67:['rain','Chuva congelante forte'],71:['snow','Neve leve'],73:['snow','Neve moderada'],75:['snow','Neve forte'],77:['snow','Grãos de neve'],80:['rain','Pancadas leves'],81:['rain','Pancadas moderadas'],82:['rain','Pancadas fortes'],85:['snow','Pancadas de neve leves'],86:['snow','Pancadas de neve fortes'],95:['storm','Trovoada'],96:['storm','Trovoada com granizo'],99:['storm','Trovoada com granizo']};return map[Number(code)]||[isDay?'sun':'moon','Condição atual']}
 
 async function fetchCityWeather(city){
  const name=String(city?.name||'').trim()
@@ -58,7 +58,7 @@ async function fetchCityWeather(city){
  const data=await weatherResponse.json()
  const current=data?.current
  if(current?.temperature_2m==null)return null
- const [icon,description]=weatherLabel(current.weather_code)
+ const [icon,description]=weatherLabel(current.weather_code,current.is_day!==0)
  return {temperature:Number(current.temperature_2m),apparentTemperature:current.apparent_temperature==null?null:Number(current.apparent_temperature),icon,description,updatedAt:current.time||null}
 }
 
