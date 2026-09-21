@@ -1,0 +1,76 @@
+/* Refinamento completo do topo do perfil público da empresa */
+.mbp-main-card{padding:20px;border-radius:22px}
+.mbp-gallery{grid-template-columns:minmax(0,1.78fr) minmax(188px,.72fr);gap:10px}
+.mbp-gallery-main{height:330px;border-radius:18px;box-shadow:inset 0 0 0 1px rgba(18,41,67,.06)}
+.mbp-gallery-main img{object-position:center}
+.mbp-gallery-caption{left:14px;bottom:14px;padding:8px 11px;border-radius:9px;font-size:11px;max-width:calc(100% - 28px)}
+.mbp-gallery-side{grid-template-columns:1fr;grid-template-rows:1fr 1fr;gap:10px}
+.mbp-gallery-thumb,.mbp-gallery-more{border-radius:14px;min-height:0}
+.mbp-gallery-more{min-height:0}
+.mbp-company-head{gap:17px;padding:22px 2px 14px;align-items:flex-start}
+.mbp-logo{flex-basis:104px;height:104px;border-radius:17px;box-shadow:0 8px 22px rgba(24,42,66,.06)}
+.mbp-logo img{padding:9px}
+.mbp-company-copy{padding-top:1px}
+.mbp-company-copy h1{font-size:38px;line-height:1.08;letter-spacing:-1.45px;margin:0 0 9px}
+.mbp-rating-summary{display:flex;align-items:center;flex-wrap:wrap;gap:7px 9px;margin:0 0 11px;padding:9px 11px;border:1px solid #e2eaf2;border-radius:12px;background:#fbfcfe;width:max-content;max-width:100%}
+.mbp-rating-summary-stars{display:inline-flex;gap:2px;color:#e9a400}
+.mbp-rating-summary-score{font-size:12px;color:#1a3553}
+.mbp-rating-summary-count{font-size:10px;color:#7c8ca0}
+.mbp-badges{gap:7px;margin-bottom:11px}
+.mbp-verified,.mbp-category,.mbp-live-pill,.mbp-closed-pill,.mbp-service-badge{min-height:30px;padding:0 10px;border-radius:999px;font-size:10px;line-height:1}
+.mbp-company-copy p{max-width:820px;font-size:13px;line-height:1.55}
+.mbp-contact-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid #edf2f6}
+.mbp-contact-card{min-height:64px;padding:10px 11px;border-radius:12px;background:#fbfcfe}
+.mbp-contact-icon{width:34px;height:34px;flex-basis:34px}
+.mbp-contact-card strong{font-size:10px}
+.mbp-contact-card small{font-size:10px}
+.mbp-primary-cta{margin-top:11px;height:54px;border-radius:12px;font-size:14px}
+.mbp-action-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:9px}
+.mbp-action-row a,.mbp-action-row button{height:46px;border-radius:11px;font-size:11px;gap:6px;padding:0 9px}
+.mbp-action-row .mbp-secondary-action:first-child{background:#eef5ff;border-color:#c8daf5;color:#175ead}
+.mbp-action-row .mbp-secondary-action:first-child:hover{background:#e7f1ff;border-color:#a9c6ee}
+.mbp-action-row button.saved{background:#f5f9ff}
+.mbp-secondary-actions{display:none}
+.mbp-section{margin-top:23px;padding-top:23px}
+
+@media(max-width:1120px){
+ .mbp-gallery{grid-template-columns:minmax(0,1.55fr) minmax(170px,.7fr)}
+ .mbp-gallery-main{height:300px}
+ .mbp-contact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mbp-action-row{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .mbp-main-card{padding:13px;border-radius:18px}
+ .mbp-gallery{grid-template-columns:1fr}
+ .mbp-gallery-main{height:250px;border-radius:15px}
+ .mbp-gallery-side{grid-template-columns:1fr 1fr;grid-template-rows:145px;gap:8px;height:auto}
+ .mbp-gallery-more,.mbp-gallery-thumb{height:145px}
+ .mbp-company-head{gap:12px;padding:17px 1px 12px}
+ .mbp-logo{flex-basis:82px;height:82px;border-radius:15px}
+ .mbp-company-copy h1{font-size:29px;letter-spacing:-1px}
+ .mbp-rating-summary{gap:6px 8px;padding:8px 9px;margin-bottom:9px}
+ .mbp-company-copy p{font-size:12px}
+ .mbp-contact-grid{grid-template-columns:1fr 1fr;padding-top:11px;margin-top:11px}
+ .mbp-primary-cta{height:52px;font-size:13px}
+ .mbp-action-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .mbp-action-row a,.mbp-action-row button{height:44px}
+}
+@media(max-width:480px){
+ .mbp-gallery-main{height:215px}
+ .mbp-gallery-side{grid-template-columns:1fr 1fr;grid-template-rows:125px}
+ .mbp-gallery-more,.mbp-gallery-thumb{height:125px}
+ .mbp-company-head{align-items:flex-start}
+ .mbp-logo{flex-basis:70px;height:70px}
+ .mbp-company-copy h1{font-size:24px}
+ .mbp-rating-summary{width:auto}
+ .mbp-badges{gap:6px}
+ .mbp-verified,.mbp-category,.mbp-live-pill,.mbp-closed-pill,.mbp-service-badge{min-height:29px;padding:0 8px;font-size:9px}
+ .mbp-contact-grid{grid-template-columns:1fr}
+ .mbp-contact-card{min-height:58px}
+ .mbp-action-row{grid-template-columns:1fr 1fr}
+}
+
+@media(min-width:1121px){
+ .mbp-gallery-side{align-content:stretch}
+ .mbp-gallery-thumb img{object-position:center}
+}
