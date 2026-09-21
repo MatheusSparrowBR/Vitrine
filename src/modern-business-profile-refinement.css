@@ -25,7 +25,7 @@
 .mbp-contact-card strong{font-size:10px}
 .mbp-contact-card small{font-size:10px}
 .mbp-primary-cta{margin-top:11px;height:54px;border-radius:12px;font-size:14px}
-.mbp-action-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:9px}
+.mbp-action-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:9px}
 .mbp-action-row a,.mbp-action-row button{height:46px;border-radius:11px;font-size:11px;gap:6px;padding:0 9px}
 .mbp-action-row .mbp-secondary-action:first-child{background:#eef5ff;border-color:#c8daf5;color:#175ead}
 .mbp-action-row .mbp-secondary-action:first-child:hover{background:#e7f1ff;border-color:#a9c6ee}
