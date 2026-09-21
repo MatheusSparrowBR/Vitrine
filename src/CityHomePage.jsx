@@ -102,10 +102,10 @@ export default function CityHomePage({citySlug='laguna'}){
       <h1>Descubra o que <span>{city?.name||'sua cidade'}</span> tem de melhor.</h1>
       <p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p>
       <form className='lvp-search' onSubmit={e=>{e.preventDefault();go(base+'/empresas'+(q.trim()?'?q='+encodeURIComponent(q.trim()):''))}}>
-       <span>⌕</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder='O que você procura hoje?' aria-label='O que você procura hoje?'/><button type='submit'>Buscar</button>
+       <Icon name="search" size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder='O que você procura hoje?' aria-label='O que você procura hoje?'/><button type='submit'>Buscar</button>
       </form>
       <div className='lvp-quick'>{quickCategories.map(c=><a key={c.id} href={categoryHref(c)}>{c.name}</a>)}</div>
-      <div className='lvp-note'>● Catálogo local de {city?.name||'sua cidade'} · atualizado por negócios da cidade.</div>
+      <div className='lvp-note'><span className='lvp-note-dot' aria-hidden='true'/> Catálogo local de {city?.name||'sua cidade'} · atualizado por negócios da cidade.</div>
      </div>
      <aside className='lvp-hero-card'>
       <div className='lvp-mini-head'><span>HOJE EM {String(city?.name||'CIDADE').toUpperCase()}</span><strong>{todayLabel}</strong></div>
