@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react'
 import{supabase as db}from'./supabase-client.js'
 import AdminShell from './AdminShell.jsx'
 import './admin-v2.css'
+import './admin-home.css'
 
 const actions=[
  ['businesses','Empresas','Revise cadastros, status, destaque e verificação.','/admin/empresas'],
