@@ -15,7 +15,7 @@ export default function AdminBusinessesPage(){
 
  useEffect(()=>{let live=true;(async()=>{if(!db){setChecking(false);return}const{data:{session:s}}=await db.auth.getSession();if(!live)return;setSession(s||null);if(!s){setChecking(false);return}const{data:p,error:e}=await db.from('profiles').select('role').eq('id',s.user.id).maybeSingle();if(!live)return;setAllowed(!e&&p?.role==='admin');setChecking(false)})();return()=>{live=false}},[])
 
- async function load(){if(!db)return;setLoading(true);setError('');const[c,b,cat]=await Promise.all([
+ async function load(){if(!db)return;setLoading(true);setError('');const[c,b,cat,o]=await Promise.all([
   db.from('cities').select('id,name,state,slug').order('name'),
    db.from('businesses').select('id,owner_id,name,slug,short_description,description,city_id,category_id,address,neighborhood,phone,whatsapp,instagram_url,website_url,cover_url,logo_url,status,featured,verified,has_delivery,has_pickup,has_dine_in,reviewed_at,reviewed_by,rejection_reason,created_at,updated_at,cities(name,state),categories(id,name,slug,icon)').order('created_at',{ascending:false}).limit(1000),
    db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'),
