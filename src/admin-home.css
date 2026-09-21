@@ -1,0 +1,27 @@
+/* Styles specific to the administrative overview page. */
+
+/* Visão geral do admin: refinamento de leitura e densidade */
+.admin-home-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:2px}
+.admin-home-kpi{min-height:150px;padding:21px 20px;display:flex;flex-direction:column;justify-content:space-between}
+.admin-home-kpi span{font-size:9px;letter-spacing:1px}
+.admin-home-kpi strong{font-size:38px;line-height:1;margin:10px 0 6px}
+.admin-home-kpi small{font-size:9px;line-height:1.45;max-width:210px}
+.admin-home-main-grid{grid-template-columns:minmax(0,.96fr) minmax(0,1.08fr);gap:16px;margin-top:16px}
+.admin-home-actions-card,.admin-home-health-card{padding:20px}
+.admin-home-actions-card .admin-v2-section-head,.admin-home-health-card .admin-v2-section-head{margin-bottom:16px}
+.admin-home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-home-quick{position:relative;min-height:132px;padding:16px 36px 16px 16px;box-sizing:border-box;display:grid;align-content:start;gap:5px;border-radius:15px;transition:.18s ease}
+.admin-home-quick:hover{transform:translateY(-2px);border-color:#c8d9ef;box-shadow:0 14px 30px rgba(17,34,59,.07)}
+.admin-home-quick>span{display:inline-flex;align-items:center;justify-content:flex-start;width:max-content;min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;border-radius:9px;background:var(--a2-blue-soft);color:var(--a2-blue);font-size:14px;font-weight:900}
+.admin-home-quick strong{display:block;font-size:13px;color:#1c2e47;margin:4px 0 0}
+.admin-home-quick small{display:block;color:#7e8da0;font-size:9px;line-height:1.5;max-width:230px}
+.admin-home-quick-arrow{position:absolute;right:14px;bottom:12px;color:#9aabc0;font-size:15px;font-weight:900}
+.admin-home-attention-badge{display:inline-flex;align-items:center;justify-content:center;min-height:27px;padding:0 10px;border:1px solid #d7f0e4;border-radius:999px;background:var(--a2-green-soft);color:var(--a2-green);font-size:8px;font-weight:900;white-space:nowrap}
+.admin-home-health-list{gap:8px}
+.admin-home-health-row{min-height:58px;box-sizing:border-box;padding:10px 12px;border-radius:13px}
+.admin-home-health-row strong{font-size:11px}
+.admin-home-health-row small{font-size:8.5px;line-height:1.35}
+.admin-home-health-row .admin-v2-pill{font-size:8px;padding:6px 9px}
+.admin-home-flow{margin-top:16px}
+@media(max-width:1100px){.admin-home-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-home-main-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.admin-home-kpis{grid-template-columns:1fr 1fr;gap:10px}.admin-home-kpi{min-height:120px;padding:16px}.admin-home-kpi strong{font-size:31px}.admin-home-quick-grid{grid-template-columns:1fr}.admin-home-actions-card,.admin-home-health-card{padding:15px}}
