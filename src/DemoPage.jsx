@@ -117,7 +117,9 @@ function DemoProfile({city,business,photos,items,promotions}){
    </section>
   </div>
  </main></div>
-}\n\nfunction DemoAccount({businesses,selected,onSelect,photos,items,promotions,plan,section,setSection}){
+}
+
+function DemoAccount({businesses,selected,onSelect,photos,items,promotions,plan,section,setSection}){
  return <div className="app account-workspace-app demo-account-app"><main className="account-workspace demo-account-workspace"><aside className="account-sidebar">
   <div className="account-sidebar-head"><div><span className="account-eyebrow">ESPAÇO DO EMPREENDEDOR</span><h2>Minha conta</h2></div><span className="demo-account-lock"><Icon name="lock" size={12}/></span></div>
   <div className="account-business-switcher"><span className="account-business-switcher-label">EMPRESA ATIVA · DEMO</span><div className="account-business-switcher-row"><div className="account-business-switcher-avatar"><Icon name="store" size={15}/></div><select value={selected.id} onChange={e=>onSelect(e.target.value)}>{businesses.map(row=><option value={row.id} key={row.id}>{row.name}</option>)}</select><span className="account-business-switcher-status">Premium</span></div></div>
