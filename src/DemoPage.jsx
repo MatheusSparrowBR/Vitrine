@@ -120,7 +120,7 @@ function DemoProfile({city,business,photos,items,promotions}){
       </div>
     </div>
     <div className="mbp-company-head">
-      <div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt=`${business.name} logo`/>:<span>V</span>}</div>
+      <div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt={`${business.name} logo`}/>:<span>V</span>}</div>
       <div className="mbp-company-copy">
        <div className="mbp-kicker">EMPRESA LOCAL · DEMO</div>
        <h1>{business.name}</h1>
