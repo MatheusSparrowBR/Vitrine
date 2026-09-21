@@ -30,8 +30,11 @@ export default function DemoPage(){
    supabase.from("categories").select("id,name,slug,icon").eq("active",true).order("sort_order").order("name")
   ])
   if(!live)return
-  if(businessRes.error){
-   setDataError("Não foi possível carregar as empresas públicas da demonstração.")
+  let sourceRows=businessRes.data||[]
+  if(!sourceRows.length){
+   const fallback=await supabase.from("businesses").select("id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,created_at,city_id,category_id,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).eq("status","active").order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100)
+   sourceRows=fallback.data||[]
+   if(fallback.error&&!sourceRows.length)setDataError("Não foi possível carregar as empresas da demonstração.")
   }
   const rows=(businessRes.data||[]).map(row=>({...row,city_name:cityRow.name,city_state:cityRow.state,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
   const uniqueCategories=[],seen=new Set()
