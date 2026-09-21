@@ -8,7 +8,7 @@ import "./account-workspace.css"
 import "./demo.css"
 
 const TABS=[["catalog","Catálogo público"],["profile","Perfil empresarial"],["account","Minha conta"]]
-const NAV=[["overview","grid","Visão geral"],["company","briefcase","Minha empresa"],["media","image","Mídias"],["items","grid","Produtos e serviços"],["promotions","tag","Promoções"],["analytics","chart","Desempenho"],["plan","tag","Meu plano"]]
+const NAV=[["overview","grid","Visão geral"],["company","briefcase","Minha empresa"],["media","image","Mídias"],["items","grid","Produtos e serviços"],["promotions","tag","Promoções"],["analytics","grid","Desempenho"],["plan","tag","Meu plano"]]
 const LIMITS={photos:100,items:200,promotions:20}
 
 export default function DemoPage(){
