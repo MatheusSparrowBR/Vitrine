@@ -13,6 +13,8 @@ test('admin controla as três opções de atendimento da empresa',()=>{
  assert.match(admin,/ATENDIMENTO/)
  assert.match(admin,/Retirada no local/)
  assert.match(admin,/Consumo no local/)
+ assert.match(adminOnboarding,/import Icon from['"]\.\/ui-icons\.jsx['"]/) 
+ assert.match(adminOnboarding,/import['"]\.\/business-service-badges\.css['"]/) 
  assert.match(adminOnboarding,/has_delivery/)
  assert.match(adminOnboarding,/has_pickup/)
  assert.match(adminOnboarding,/has_dine_in/)

@@ -1,7 +1,9 @@
 import React,{useEffect,useMemo,useState}from'react'
 import{db}from'./supabase-client.js'
 import AdminShell from'./AdminShell.jsx'
+import Icon from'./ui-icons.jsx'
 import'./admin-onboarding.css'
+import'./business-service-badges.css'
 
 const emptyBusiness={name:'',slug:'',short_description:'',description:'',city_id:'',category_id:'',address:'',neighborhood:'',phone:'',whatsapp:'',instagram_url:'',website_url:'',facebook_url:'',status:'pending',plan_code:'free',plan_ends_at:'',owner_id:'',has_delivery:false,has_pickup:false,has_dine_in:false}
 
