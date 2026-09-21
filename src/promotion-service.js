@@ -15,7 +15,7 @@ export async function getActiveCityPromotions(db,cityId,{limit=100}={}){
  if(!db)return{data:[],error:new Error('Supabase não configurado.')}
  if(!cityId)return{data:[],error:new Error('Cidade não informada.')}
  const businessesResponse=await db.from('businesses')
-  .select('id,name,slug,city_id,status')
+  .select('id,name,slug,city_id,status,cover_url,logo_url')
   .eq('city_id',cityId)
   .eq('status','active')
   .limit(1000)
