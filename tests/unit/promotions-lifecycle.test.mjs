@@ -18,7 +18,7 @@ test('React owns the public promotion data flow',()=>{
  assert.match(service,/export async function getActiveCityPromotions/)
  assert.match(service,/export async function getActiveBusinessPromotions/)
  assert.match(home,/getActiveCityPromotions\(db,city\.id/)
- assert.match(home,/DEFAULT_PROMOTION_IMAGE/)
+ assert.match(home,/p\.businesses\?\.cover_url|p\.businesses\?\.logo_url/)
  assert.match(catalog,/getActiveCityPromotions\(db,c\.id/)
  assert.match(profile,/getActiveBusinessPromotions\(db,b\.id/)
 })

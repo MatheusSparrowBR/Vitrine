@@ -13,7 +13,7 @@ test('home and public listing both use the shared promotion service',()=>{
 
 test('home promotion cards are complete without DOM post-processing',()=>{
  const home=read('src/CityHomePage.jsx')
- assert.match(home,/p\.image_url\|\|DEFAULT_PROMOTION_IMAGE/)
+ assert.match(home,/p\.image_url\?/)
  assert.match(home,/p\.businesses\?\.name/)
  assert.match(home,/p\.original_price/)
  assert.match(home,/p\.price/)

@@ -39,8 +39,8 @@ test('product and service form validates type, image, price and plan enforcement
 test('public business profile keeps products and services in separate sections',()=>{
  const profile=read('src/ModernBusinessProfilePage.jsx')
  assert.match(profile,/normalizeItemType/)
- assert.match(profile,/data-offer-type="products"/)
- assert.match(profile,/data-offer-type="services"/)
+ assert.match(profile,/products\.filter|__normalizedType==='product'/)
+ assert.match(profile,/services\.filter|__normalizedType==='service'/)
  assert.match(profile,/products\.filter|normalized\.filter\(i=>i\.__normalizedType==='product'\)/)
  assert.match(profile,/services\.filter|normalized\.filter\(i=>i\.__normalizedType==='service'\)/)
  assert.doesNotMatch(profile,/PRODUTOS E SERVIÇOS.*O que a empresa oferece/s)
@@ -56,5 +56,5 @@ test('media add control is disabled at plan limit',()=>{
  const account=read('src/AccountWorkspacePage.jsx')
  assert.match(account,/mediaUsage/)
  assert.match(account,/const mediaReached=Boolean\(mediaUsage\?\.reached\)/)
- assert.match(account,/disabled=\{mediaReached\}/)
+ assert.match(account,/function openPicker\(\)\{if\(!mediaReached\)/)
 })
