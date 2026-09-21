@@ -27,7 +27,7 @@ test('meu plano preserva limites de catálogo e quota mensal de IA',()=>{
 test('catálogo usa capacidade armazenada e promoções usam quota mensal',()=>{
  const plan=read('src/PlanUsageReact.jsx')
  const service=read('src/plan-cycle-usage.js')
- assert.match(plan,/getBusinessCollectionUsage\\(businessId\\)/)
+ assert.match(plan,/getBusinessCollectionUsage\(businessId\)/)
  assert.match(plan,/basis="capacity"/)
  assert.match(plan,/basis="monthly"/)
  assert.match(plan,/CAPACIDADE ATUAL/)
