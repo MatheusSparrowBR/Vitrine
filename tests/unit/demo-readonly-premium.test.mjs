@@ -12,7 +12,7 @@ test("demo é rota pública, read-only e premium",()=>{
  assert.ok(gate.includes("'/demo'"))
  assert.ok(page.includes("Experiência Premium"))
  assert.ok(page.includes("Somente visualização"))
- assert.ok(page.includes('from("public_business_directory")'))
+ assert.ok(page.includes('demo_public_business_directory'))
  assert.ok(page.includes('tab==="account"'))
  assert.ok(page.includes("selected=useMemo"))
  assert.ok(!page.includes(".insert("))

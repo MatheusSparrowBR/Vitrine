@@ -2,7 +2,6 @@ import React,{useEffect,useMemo,useState} from "react"
 import {supabase} from "./supabase-client.js"
 import Icon from "./ui-icons.jsx"
 import CityHomePage from "./CityHomePage.jsx"
-import ModernBusinessProfilePage from "./ModernBusinessProfilePage.jsx"
 import EventsPage from "./EventsPage.jsx"
 import "./account-modern.css"
 import "./account-workspace.css"
@@ -24,7 +23,7 @@ export default function DemoPage(){
   setCity(cityRow||null)
   if(!cityRow){setLoading(false);return}
   const [businessRes,promoRes,planRes,categoryRes]=await Promise.all([
-   supabase.from("public_business_directory").select("id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,category_name,category_slug,created_at,search_featured,city_id,category_id,opening_hours,has_delivery,has_pickup,has_dine_in").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
+   supabase.from("demo_public_business_directory").select("*").eq("city_id",cityRow.id).order("featured",{ascending:false}).order("created_at",{ascending:false}).limit(100),
    supabase.from("promotions").select("id,title,description,price,original_price,image_url,status,business_id,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false}).limit(100),
    supabase.from("plans").select("id,code,name,price_monthly,features,active").eq("code","premium").eq("active",true).maybeSingle(),
    supabase.from("categories").select("id,name,slug,icon").eq("active",true).order("sort_order").order("name")
@@ -77,7 +76,7 @@ export default function DemoPage(){
    {tab==="businesses"&&<DemoBusinesses businesses={businesses} categories={categories} city={city} onProfile={id=>{setSelectedId(id);setTab("profile")}}/>}
    {tab==="promotions"&&<DemoPromotions city={city} promotions={promotions} businesses={businesses}/>}
    {tab==="events"&&<div className="demo-embedded demo-events-view"><EventsPage supabase={supabase} city={city} onBack={()=>setTab("home")}/></div>}
-   {tab==="profile"&&selected&&<div className="demo-embedded demo-profile-view"><ModernBusinessProfilePage citySlug={city.slug} businessSlug={selected.slug}/></div>}
+   {tab==="profile"&&selected&&<DemoProfile city={city} business={selected} photos={photos} items={items} promotions={selectedPromotions}/>}
    {tab==="account"&&selected&&<DemoAccount businesses={businesses} selected={selected} onSelect={setSelectedId} photos={photos} items={items} promotions={selectedPromotions} plan={premiumPlan} section={accountSection} setSection={setAccountSection}/>}
   </div>
  </main>
@@ -97,6 +96,27 @@ function DemoBusinesses({businesses,categories,city,onProfile}){
 function DemoPromotions({city,promotions,businesses}){
  const byId=useMemo(()=>Object.fromEntries(businesses.map(row=>[row.id,row])),[businesses])
  return <div className="demo-promotions-page"><div className="page"><div className="page-title"><span className="section-kicker">OFERTAS LOCAIS · DEMO</span><h1>Promoções em {city.name}</h1><p>Promoções atualmente publicadas no projeto principal, exibidas em modo somente leitura.</p></div>{promotions.length?<div className="business-grid">{promotions.map(p=>{const business=byId[p.business_id];return <article className="business-card demo-promotion-card" key={p.id}><div className="business-cover">{p.image_url?<img className="business-cover-image" src={p.image_url} alt="" loading="lazy"/>:business?.cover_url?<img className="business-cover-image" src={business.cover_url} alt="" loading="lazy"/>:<div className="cover-placeholder">V</div>}<span className="demo-promotion-badge">PROMOÇÃO</span></div><div className="business-body"><span className="business-category">{business?.name||"Empresa local"}</span><h3>{p.title}</h3><p>{p.description||"Confira esta oferta publicada."}</p><div className="business-footer"><span>{p.ends_at?"Válida até "+new Date(p.ends_at).toLocaleDateString("pt-BR"):"Oferta vigente"}</span><span className="business-meta"><span className="business-rating">{p.price!=null?money(p.price):"Confira"}</span></span></div></div></article>})}</div>:<div className="empty"><h3>Nenhuma promoção publicada.</h3><p>As promoções aparecerão aqui assim que forem publicadas no projeto principal.</p></div>}</div></div>
+}
+
+function DemoProfile({city,business,photos,items,promotions}){
+ const location=business.neighborhood?business.neighborhood+", "+city.name+" - "+city.state:business.address||city.name+" - "+city.state
+ const wa=business.whatsapp||business.phone
+ return <div className="demo-profile-page mbp-shell"><main className="mbp-page">
+  <div className="mbp-breadcrumbs"><span className="demo-inline-link">Voltar para Empresas</span><span>⌖ {city.name}</span><span>›</span><span>{business.category_name||"Empresa"}</span><span>›</span><strong>{business.name}</strong></div>
+  <div className="mbp-layout">
+   <section className="mbp-main-card">
+    <div className="mbp-gallery">{business.cover_url?<img src={business.cover_url} alt="" className="mbp-gallery-main"/>:<div className="mbp-gallery-main mbp-gallery-placeholder">VitrineLocal</div>}</div>
+    <div className="mbp-company-head"><div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt=""/>:<span>V</span>}</div><div className="mbp-company-copy"><div className="mbp-kicker">EMPRESA LOCAL · DEMO</div><h1>{business.name}</h1><div className="mbp-badges">{business.verified&&<span className="mbp-verified"><Icon name="check" size={11}/> Verificada</span>}<span className="mbp-category"><Icon name={business.categories?.icon||"grid"} size={11}/> {business.category_name||"Empresa"}</span>{business.has_delivery&&<span className="mbp-service-badge mbp-service-badge-delivery"><Icon name="motorcycle" size={12}/> Delivery</span>}{business.has_pickup&&<span className="mbp-service-badge mbp-service-badge-pickup"><Icon name="bag" size={12}/> Retirada no local</span>}{business.has_dine_in&&<span className="mbp-service-badge mbp-service-badge-dinein"><Icon name="utensils" size={12}/> Consumo no local</span>}</div><p>{business.short_description||business.description||"Conheça esta empresa local."}</p></div></div>
+    <div className="mbp-contact-grid"><div className="mbp-contact-card"><Icon name="pin" size={14}/><div><strong>Localização</strong><span>{location}</span></div></div>{wa&&<div className="mbp-contact-card"><Icon name="phone" size={14}/><div><strong>{business.whatsapp?"WhatsApp":"Telefone"}</strong><span>{wa}</span></div></div>}{business.instagram_url&&<div className="mbp-contact-card"><Icon name="instagram" size={14}/><div><strong>Instagram</strong><span>{business.instagram_url}</span></div></div>}</div>
+    {wa&&<span className="mbp-primary-cta demo-disabled-action"><Icon name="phone" size={16}/> {business.whatsapp?"Falar no WhatsApp":"Entrar em contato"}</span>}
+    <div className="mbp-action-row"><span className="mbp-secondary-action demo-disabled-action"><Icon name="pin" size={14}/> Como chegar</span><span className="mbp-secondary-action demo-disabled-action"><Icon name="share" size={14}/> Compartilhar</span><span className="mbp-secondary-action demo-disabled-action"><Icon name="heart" size={14}/> Salvar</span></div>
+    <div className="mbp-section"><div className="mbp-section-title"><span>SOBRE A EMPRESA</span><h2>Sobre {business.name}</h2></div><div className="mbp-about-description"><p>{business.description||business.short_description||"Este espaço apresenta a descrição pública da empresa no VitrineLocal."}</p></div></div>
+    {photos.length>0&&<div className="mbp-section"><div className="mbp-section-title"><span>GALERIA</span><h2>Fotos da empresa</h2></div><div className="demo-profile-gallery">{photos.slice(0,8).map(photo=><img key={photo.id} src={photo.url} alt={photo.alt_text||""}/>)}</div></div>}
+    {items.length>0&&<div className="mbp-section"><div className="mbp-section-title"><span>CATÁLOGO</span><div className="mbp-section-heading-row"><h2>Produtos e serviços</h2><small>{items.length} itens</small></div></div><div className="demo-profile-items">{items.slice(0,8).map(item=><article key={item.id}><h3>{item.name}</h3><p>{item.description||""}</p>{item.price!=null&&<strong>{money(item.price)}</strong>}</article>)}</div></div>}
+    {promotions.length>0&&<div className="mbp-section"><div className="mbp-section-title"><span>PROMOÇÕES</span><h2>Ofertas da empresa</h2></div><div className="demo-profile-promotions">{promotions.slice(0,6).map(p=><article key={p.id}><div><strong>{p.title}</strong><p>{p.description||""}</p></div><b>{p.price!=null?money(p.price):"Confira"}</b></article>)}</div></div>}
+   </section>
+  </div>
+ </main></div>
 }
 
 function DemoAccount({businesses,selected,onSelect,photos,items,promotions,plan,section,setSection}){
