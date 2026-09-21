@@ -94,3 +94,7 @@ body:has(.demo-shell) .topbar{display:none!important}
 body:has(.demo-shell) .site-header{display:none!important}
 body:has(.demo-shell){background:#f4f7fb}
 .demo-stage{padding-bottom:20px}
+
+/* Isolamento robusto do cabeçalho global: somente a rota /demo aplica a classe demo-active. */
+body.demo-active .vl-site-header{display:none!important}
+body.demo-active{padding-top:0!important}
