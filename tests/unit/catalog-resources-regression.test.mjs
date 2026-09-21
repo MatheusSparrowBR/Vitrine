@@ -40,7 +40,7 @@ test('public business profile keeps products and services in separate sections',
  const profile=read('src/ModernBusinessProfilePage.jsx')
  assert.match(profile,/normalizeItemType/)
  assert.match(profile,/products\.filter|__normalizedType==='product'/)
- assert.match(profile,/data-offer-type="services"/)
+ assert.match(profile,/services\.filter|__normalizedType==='service'/)
  assert.match(profile,/products\.filter|normalized\.filter\(i=>i\.__normalizedType==='product'\)/)
  assert.match(profile,/services\.filter|normalized\.filter\(i=>i\.__normalizedType==='service'\)/)
  assert.doesNotMatch(profile,/PRODUTOS E SERVIÇOS.*O que a empresa oferece/s)
