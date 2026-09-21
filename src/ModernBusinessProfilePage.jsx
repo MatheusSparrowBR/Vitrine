@@ -6,6 +6,7 @@ import{loadPublicBusinessReviewSummaries}from'./public-review-summary.js'
 import Icon from'./ui-icons.jsx'
 import'./item-cards-compact.css'
 import'./business-service-badges.css'
+import'./modern-business-profile-refinement.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
