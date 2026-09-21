@@ -23,10 +23,36 @@ const PATHS={
   briefcase:<><rect x="4" y="6.5" width="16" height="12.5" rx="2"/><path d="M9 6.5V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M4 11h16M10 11v2h4v-2"/></>,
   grid:<><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></>,
   bag:<><path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></>,
+  camera:<><path d="M5 7h3l1.5-2h5L16 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3.5"/></>,
   image:<><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m6 17 4.5-4.5 3 3 2-2 2.5 3"/></>,
   wrench:<><path d="M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5l-2.2 2.2-2.6-.7-.7-2.6Z"/></>,
   heart:<path d="M20.8 8.7c0 5.2-8.8 10.2-8.8 10.2S3.2 13.9 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/>
 }
+
+export const ICON_CATALOG=[
+ {name:'store',label:'Loja / Restaurante',group:'Comércio e alimentação'},
+ {name:'bag',label:'Sacola / Mercado',group:'Comércio e alimentação'},
+ {name:'tag',label:'Oferta',group:'Comércio e alimentação'},
+ {name:'wrench',label:'Serviços',group:'Serviços'},
+ {name:'heart',label:'Saúde / Bem-estar',group:'Saúde e beleza'},
+ {name:'star',label:'Beleza / Destaque',group:'Saúde e beleza'},
+ {name:'briefcase',label:'Academia / Negócios',group:'Serviços e negócios'},
+ {name:'pin',label:'Turismo / Localização',group:'Turismo'},
+ {name:'calendar',label:'Eventos',group:'Eventos e agenda'},
+ {name:'clock',label:'Horários',group:'Eventos e agenda'},
+ {name:'phone',label:'Telefone',group:'Contato'},
+ {name:'instagram',label:'Instagram',group:'Contato'},
+ {name:'grid',label:'Categoria genérica',group:'Outros'},
+ {name:'image',label:'Imagem',group:'Mídia'},
+ {name:'camera',label:'Câmera',group:'Mídia'},
+ {name:'share',label:'Compartilhar',group:'Ações'},
+ {name:'bookmark',label:'Salvar',group:'Ações'},
+ {name:'user',label:'Pessoa',group:'Ações'},
+ {name:'search',label:'Busca',group:'Ações'},
+ {name:'check',label:'Verificado',group:'Ações'}
+]
+
+export const isOfficialIcon=name=>Boolean(PATHS[name])
 
 export default function Icon({name,size=18,strokeWidth=1.8,filled=false,className=''}) {
   const path=PATHS[name]||PATHS.grid

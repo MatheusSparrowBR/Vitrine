@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
 import {getActiveCityPromotions,projectTodayISO} from './promotion-service.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
-import Icon from './ui-icons.jsx'
+import Icon,{isOfficialIcon} from './ui-icons.jsx'
 import './city-home.css'
 import './premium-banner-carousel.css'
 import './home-v2.css'
@@ -17,7 +17,7 @@ const FALLBACK={id:'fallback',name:'Laguna',state:'SC',slug:'laguna',active:true
 const FALLBACK_CATS=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
 const fallbackCategories=()=>FALLBACK_CATS.map(([name,icon],i)=>({id:`fallback-${i}`,name,icon,slug:String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}))
 const ratingStars=avg=>Math.max(0,Math.min(5,Math.round(Number(avg)||0)))
-const categoryIcon=name=>{const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza')||n.includes('bem-estar'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
+const categoryIcon=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza')||n.includes('bem-estar'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
 const slugify=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
 const money=value=>value==null||value===''?'':`R$ ${Number(value).toFixed(2).replace('.',',')}`
 const withTimeout=(promise,ms=8000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tempo limite de carregamento excedido.')),ms))])
@@ -121,7 +121,7 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>EXPLORE</span><h2>Encontre por categoria</h2><p>Use as categorias cadastradas no VitrineLocal para encontrar o que precisa.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
     <div className='lvp-cat-box'>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
-     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span><Icon name={categoryIcon(c.name)} size={20}/></span><b>{c.name}</b></a>)}</div>
+     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span><Icon name={categoryIcon(c.name,c.icon)} size={20}/></span><b>{c.name}</b></a>)}</div>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.min(maxCatStart,v+1))} disabled={catStart>=maxCatStart} aria-label='Próximas categorias'>›</button>
     </div>
     <div className='lvp-category-count'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
