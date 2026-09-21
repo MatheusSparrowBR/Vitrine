@@ -74,3 +74,32 @@ select b.id,
  where b.status='active'::public.business_status
    and c.active=true
    and (cat.active=true or cat.id is null);
+
+create or replace function public.protect_search_featured_mode()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+begin
+  if not private.is_admin() and new.search_featured_mode is distinct from old.search_featured_mode then
+    raise exception 'Somente administradores podem alterar o modo da busca em destaque.'
+      using errcode='42501';
+  end if;
+
+  if new.search_featured_mode not in ('auto','on','off') then
+    raise exception 'Modo de busca em destaque inválido.'
+      using errcode='22P02';
+  end if;
+
+  new.search_featured := (new.search_featured_mode='on');
+  return new;
+end;
+$function$;
+
+drop trigger if exists trg_protect_search_featured_mode on public.businesses;
+create trigger trg_protect_search_featured_mode
+before insert or update of search_featured_mode, search_featured
+on public.businesses
+for each row
+execute function public.protect_search_featured_mode();
