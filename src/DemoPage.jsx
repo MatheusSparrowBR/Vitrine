@@ -36,7 +36,8 @@ export default function DemoPage(){
    sourceRows=fallback.data||[]
    if(fallback.error&&!sourceRows.length)setDataError("Não foi possível carregar as empresas da demonstração.")
   }
-  const rows=(businessRes.data||[]).map(row=>({...row,city_name:cityRow.name,city_state:cityRow.state,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
+  const categoryMap=new Map((categoryRes.data||[]).map(row=>[row.id,row]))
+  const rows=sourceRows.map(row=>{const category=categoryMap.get(row.category_id);return {...row,city_name:cityRow.name,city_state:cityRow.state,category_name:row.category_name||category?.name||null,category_slug:row.category_slug||category?.slug||null,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:category||null}})
   const uniqueCategories=[],seen=new Set()
   const categoryRows=categoryRes.data||[]
   categoryRows.forEach(row=>{if(seen.has(row.name))return;seen.add(row.name);uniqueCategories.push({name:row.name,slug:row.slug||slugify(row.name),icon:row.icon||"grid"})})
