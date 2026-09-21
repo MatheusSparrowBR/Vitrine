@@ -54,7 +54,27 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
 
  useEffect(()=>{try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}},[cat,q,sort])
 
- const items=useMemo(()=>{\n  const term=q.trim().toLowerCase()\n  const filtered=businesses.filter(b=>{\n   const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term)\n   const matchesCat=!cat||b.categories?.slug===cat\n   return matchesText&&matchesCat\n  })\n  return [...filtered].sort((a,b)=>{\n   if(term){\n    const scoreA=searchScore(a,term,Boolean(a.search_featured))\n    const scoreB=searchScore(b,term,Boolean(b.search_featured))\n    if(scoreB!==scoreA)return scoreB-scoreA\n   }\n   if(sort==='recentes')return new Date(b.created_at||0)-new Date(a.created_at||0)\n   if(sort==='avaliacao')return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)\n   const featuredScore=(b.featured?1:0)-(a.featured?1:0)\n   if(featuredScore)return featuredScore\n   return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)\n  })\n },[businesses,q,cat,sort,ratings])\n const setCategory=next=>{setCat(next);syncQuery({cat:next})}
+ const items=useMemo(()=>{
+  const term=q.trim().toLowerCase()
+  const filtered=businesses.filter(b=>{
+   const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term)
+   const matchesCat=!cat||b.categories?.slug===cat
+   return matchesText&&matchesCat
+  })
+  return [...filtered].sort((a,b)=>{
+   if(term){
+    const scoreA=searchScore(a,term,Boolean(a.search_featured))
+    const scoreB=searchScore(b,term,Boolean(b.search_featured))
+    if(scoreB!==scoreA)return scoreB-scoreA
+   }
+   if(sort==='recentes')return new Date(b.created_at||0)-new Date(a.created_at||0)
+   if(sort==='avaliacao')return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)
+   const featuredScore=(b.featured?1:0)-(a.featured?1:0)
+   if(featuredScore)return featuredScore
+   return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)
+  })
+ },[businesses,q,cat,sort,ratings])
+ const setCategory=next=>{setCat(next);syncQuery({cat:next})}
  const setSearch=value=>{setQ(value);syncQuery({q:value})}
  const setSortValue=value=>{setSort(value);syncQuery({sort:value})}
  const clearFilters=()=>{setQ('');setCat('');setSort('relevancia');history.replaceState(null,'',`/${city.slug}/empresas`)}
