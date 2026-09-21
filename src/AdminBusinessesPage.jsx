@@ -7,6 +7,7 @@ import './admin-v2.css'
 import './admin-business-media.css'
 import './business-service-badges.css'
 import './business-hours.css'
+import './admin-business-hours.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
 const emptyForm={name:'',slug:'',short_description:'',description:'',city_id:'',category_id:'',address:'',neighborhood:'',phone:'',whatsapp:'',instagram_url:'',website_url:'',cover_url:'',logo_url:'',status:'pending',featured:false,verified:false,owner_id:'',rejection_reason:'',opening_hours:{},has_delivery:false,has_pickup:false,has_dine_in:false}
