@@ -1,7 +1,8 @@
 import React,{useEffect,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
-import {DEFAULT_PROMOTION_IMAGE,getActiveCityPromotions,projectTodayISO} from './promotion-service.js'
+import {getActiveCityPromotions,projectTodayISO} from './promotion-service.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
+import Icon from './ui-icons.jsx'
 import './city-home.css'
 import './premium-banner-carousel.css'
 import './home-v2.css'
@@ -13,9 +14,10 @@ const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db=URL&&KEY?createClient(URL,KEY):null
 const FALLBACK={id:'fallback',name:'Laguna',state:'SC',slug:'laguna',active:true}
-const FALLBACK_CATS=[['Restaurantes','🍽️'],['Lojas','🛍️'],['Serviços','🧰'],['Saúde','❤️'],['Beleza','✨'],['Turismo','📍'],['Automóveis','🚗'],['Imóveis','🏠'],['Pets','🐾'],['Outros','✦']]
+const FALLBACK_CATS=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
 const fallbackCategories=()=>FALLBACK_CATS.map(([name,icon],i)=>({id:`fallback-${i}`,name,icon,slug:String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}))
-const stars=avg=>Array.from({length:5},(_,i)=>i<Math.round(avg)?'★':'☆').join('')
+const ratingStars=avg=>Math.max(0,Math.min(5,Math.round(Number(avg)||0)))
+const categoryIcon=name=>{const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza')||n.includes('bem-estar'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
 const slugify=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
 const money=value=>value==null||value===''?'':`R$ ${Number(value).toFixed(2).replace('.',',')}`
 const withTimeout=(promise,ms=8000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tempo limite de carregamento excedido.')),ms))])
@@ -96,7 +98,7 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-hero-bg'></div>
     <div className='lvp-hero-inner'>
      <div className='lvp-hero-copy'>
-      <span className='lvp-kicker'>✦ A cidade na palma da mão</span>
+      <span className='lvp-kicker'><Icon name="grid" size={14}/> A cidade na palma da mão</span>
       <h1>Descubra o que <span>{city?.name||'sua cidade'}</span> tem de melhor.</h1>
       <p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p>
       <form className='lvp-search' onSubmit={e=>{e.preventDefault();go(base+'/empresas'+(q.trim()?'?q='+encodeURIComponent(q.trim()):''))}}>
@@ -107,11 +109,11 @@ export default function CityHomePage({citySlug='laguna'}){
      </div>
      <aside className='lvp-hero-card'>
       <div className='lvp-mini-head'><span>HOJE EM {String(city?.name||'CIDADE').toUpperCase()}</span><strong>{todayLabel}</strong></div>
-      <div className='lvp-weather hero-weather'><span className='lvp-weather-icon'>{weatherLoading?'◌':weather?.icon||'🌡️'}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature!=null?`${Math.round(weather.temperature)}°C`:'Clima indisponível'}</b><small>{weather?.description?`${city?.name||'Cidade'} · ${weather.description}${weather.apparentTemperature!=null?` · sensação ${Math.round(weather.apparentTemperature)}°C`:''}`:(weatherError||'Atualização em tempo real')}</small></div><span className='lvp-live-dot'>{weather?'AO VIVO':'INFO'}</span></div>
-      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>🏪</span><div><b>{businesses.length} empresas cadastradas</b><small>Negócios disponíveis no catálogo local</small></div></div>
-      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>🏷️</span><div><b>{promotions.length} promoções ativas</b><small>Ofertas publicadas por empresas locais</small></div></div>
-      <div className='lvp-mini-stat'><span className='lvp-mini-icon'>📅</span><div><b>{events.length} eventos próximos</b><small>Programação cadastrada na cidade</small></div></div>
-      <a className='lvp-mini-cta' href={base+'/empresas'}>Explorar empresas →</a>
+      <div className='lvp-weather hero-weather'><span className='lvp-weather-icon'>{weatherLoading?<Icon name="grid" size={18}/>:<Icon name={weather?.icon||'grid'} size={18}/>}</span><div><b>{weatherLoading?'Carregando clima…':weather?.temperature!=null?`${Math.round(weather.temperature)}°C`:'Clima indisponível'}</b><small>{weather?.description?`${city?.name||'Cidade'} · ${weather.description}${weather.apparentTemperature!=null?` · sensação ${Math.round(weather.apparentTemperature)}°C`:''}`:(weatherError||'Atualização em tempo real')}</small></div><span className='lvp-live-dot'>{weather?'AO VIVO':'INFO'}</span></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'><Icon name="store" size={14}/></span><div><b>{businesses.length} empresas cadastradas</b><small>Negócios disponíveis no catálogo local</small></div></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'><Icon name="tag" size={14}/></span><div><b>{promotions.length} promoções ativas</b><small>Ofertas publicadas por empresas locais</small></div></div>
+      <div className='lvp-mini-stat'><span className='lvp-mini-icon'><Icon name="calendar" size={14}/></span><div><b>{events.length} eventos próximos</b><small>Programação cadastrada na cidade</small></div></div>
+      <a className='lvp-mini-cta' href={base+'/empresas'}>Explorar empresas <Icon name="arrowRight" size={15}/></a>
      </aside>
     </div>
    </section>
@@ -119,46 +121,45 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>EXPLORE</span><h2>Encontre por categoria</h2><p>Use as categorias cadastradas no VitrineLocal para encontrar o que precisa.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
     <div className='lvp-cat-box'>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
-     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span>{c.icon||'✦'}</span><b>{c.name}</b></a>)}</div>
+     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span><Icon name={categoryIcon(c.name)} size={20}/></span><b>{c.name}</b></a>)}</div>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.min(maxCatStart,v+1))} disabled={catStart>=maxCatStart} aria-label='Próximas categorias'>›</button>
     </div>
     <div className='lvp-category-count'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
    </section>
-   <section className='lvp-wrap lvp-sponsored-wrap'>
+   <section id='explorar' className='lvp-wrap lvp-featured'>
+    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
+    {featuredBusinesses.length?<div className={`lvp-business-grid ${featuredBusinesses.length===1?'lvp-business-grid-single':''}`}>{featuredBusinesses.slice(0,4).map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
+      <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className="verified">✓ Verificada</span>}</div>
+      <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><div className='lvp-card-rating' aria-label={stat.count?`${avg.toFixed(1)} de 5, ${stat.count} avaliações`:'Sem avaliações'}><span className='lvp-card-rating-stars' aria-hidden='true'>{Array.from({length:5},(_,i)=><Icon key={i} name="star" size={12} filled={Boolean(stat.count&&i<ratingStars(avg))}/>)}</span>{stat.count?<><strong>{avg.toFixed(1)}</strong><small>· {stat.count} {stat.count===1?'avaliação':'avaliações'}</small></>:<small>Sem avaliações</small>}</div><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'><Icon name="pin" size={12}/> {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
+    </a>})}</div>:<div className='lvp-empty-panel'><h3>Ainda não há empresas em destaque.</h3><p>Explore o catálogo completo para encontrar negócios disponíveis em {city?.name||'sua cidade'}.</p><a href={base+'/empresas'}>Explorar empresas <Icon name="arrowRight" size={14}/></a></div>}
+   </section>   <section className='lvp-wrap lvp-sponsored-wrap'>
     {banner?<a className='lvp-sponsored' href={banner.target_url||'#'} target={banner.target_url?'_blank':undefined} rel='noreferrer'>
       <div className='lvp-sponsored-image'><img src={banner.image_url||'/laguna-hero.svg'} alt={banner.title||'Espaço publicitário'}/></div>
       <div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>DESTAQUE PATROCINADO</span><h2>{banner.title}</h2><p>{banner.description||'Publicidade publicada pela plataforma.'}</p><strong>Ver destaque →</strong></div>
       {banners.length>1&&<span className='lvp-sponsored-badge'>{bannerIndex+1}/{banners.length}</span>}
     </a>:<div className='lvp-sponsored lvp-empty-sponsored'><div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>ESPAÇO PREMIUM</span><h2>Seu negócio pode aparecer aqui.</h2><p>Este espaço só é preenchido quando um anúncio premium é cadastrado e publicado no sistema.</p><a href='/conta/publicidade'>Conhecer publicidade →</a></div></div>}
    </section>
-   <section id='explorar' className='lvp-wrap lvp-featured'>
-    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
-    {featuredBusinesses.length?<div className={`lvp-business-grid ${featuredBusinesses.length===1?'lvp-business-grid-single':''}`}>{featuredBusinesses.slice(0,4).map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
-      <div className='lvp-business-image'>{b.cover_url?<img src={b.cover_url} alt='' loading='lazy'/>:<div className='lvp-business-placeholder'>V</div>}{b.verified&&<span className="verified">✓ Verificada</span>}</div>
-      <div className='lvp-business-body'><span className='lvp-card-cat'>{b.categories?.name||'Empresa local'}</span><div className='lvp-card-rating' aria-label={stat.count?`${avg.toFixed(1)} de 5, ${stat.count} avaliações`:'Sem avaliações'}><span className='lvp-card-rating-stars' aria-hidden='true'>{stat.count?stars(avg):'☆'}</span>{stat.count?<><strong>{avg.toFixed(1)}</strong><small>· {stat.count} {stat.count===1?'avaliação':'avaliações'}</small></>:<small>Sem avaliações</small>}</div><h3>{b.name}</h3><p>{b.short_description||'Conheça este negócio local.'}</p>{b.address&&<small className='lvp-card-address'>📍 {b.address}</small>}<span className='lvp-card-link'>Ver empresa →</span></div>
-    </a>})}</div>:<div className='lvp-empty-panel'><h3>Nenhuma empresa em destaque cadastrada.</h3><p>Quando uma empresa for marcada como destaque no sistema, ela aparecerá aqui.</p><a href={base+'/empresas'}>Abrir catálogo de empresas →</a></div>}
-   </section>
    <section className='lvp-wrap lvp-needs'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>DO JEITO QUE VOCÊ PENSA</span><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
     <div className='lvp-need-grid'>
-     <a href={needHref(['Restaurantes','Cafés','Lanches'])}><span>🍽️</span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
-     <a href={needHref(['Lojas','Supermercado','Mercado','Conveniência'])}><span>🛍️</span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
-     <a href={needHref(['Serviços','Oficinas','Assistência'])}><span>🔧</span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
-     <a href={needHref(['Beleza','Saúde','Bem-estar'])}><span>💆</span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
+     <a href={needHref(['Restaurantes','Cafés','Lanches'])}><span><Icon name="store" size={20}/></span><b>Quero comer</b><small>Restaurantes · Cafés · Lanches</small></a>
+     <a href={needHref(['Lojas','Supermercado','Mercado','Conveniência'])}><span><Icon name="bag" size={20}/></span><b>Quero comprar</b><small>Lojas · Mercado · Conveniência</small></a>
+     <a href={needHref(['Serviços','Oficinas','Assistência'])}><span><Icon name="wrench" size={20}/></span><b>Preciso resolver</b><small>Serviços · Oficinas · Assistência</small></a>
+     <a href={needHref(['Beleza','Saúde','Bem-estar'])}><span><Icon name="heart" size={20}/></span><b>Quero cuidar de mim</b><small>Beleza · Saúde · Bem-estar</small></a>
     </div>
    </section>
 
    {promotions.length>0&&<section id='promocoes' className='lvp-soft'>
     <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
      {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className={`lvp-promo-grid ${promotions.length===1?'lvp-promo-grid-single':''}`}>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
-       <div className='lvp-promo-image'><img src={p.image_url||DEFAULT_PROMOTION_IMAGE} alt={p.title||'Promoção'} loading='lazy'/><strong>PROMOÇÃO</strong></div>
+       <div className='lvp-promo-image'>{p.image_url?<img src={p.image_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.cover_url?<img src={p.businesses.cover_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.logo_url?<img src={p.businesses.logo_url} alt={p.title||'Promoção'} loading='lazy'/>:<div className='lvp-promo-image-placeholder'><Icon name="tag" size={24}/></div>}<strong>PROMOÇÃO</strong></div>
        <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div><b>Ver oferta →</b></div>
       </a>)}</div>}
     </div>
    </section>}
    <section id='eventos' className='lvp-wrap lvp-events'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>AGENDA LOCAL</span><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Eventos publicados e ainda válidos para a cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
-    {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda →</a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className='lvp-date'><b>{d.day}</b><span>{d.month}</span></div><div><h3>{e.title}</h3><p>📍 {e.location||'Local a confirmar'}{e.start_time?` · 🕐 ${String(e.start_time).slice(0,5)}`:''}</p></div><span className='lvp-event-arrow'>→</span></a>})}</div>:<div className='lvp-empty-panel'><h3>Nenhum evento próximo cadastrado.</h3><p>Quando novos eventos forem cadastrados, eles aparecerão aqui.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
+    {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda <Icon name="arrowRight" size={14}/></a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className='lvp-date'><b>{d.day}</b><span>{d.month}</span></div><div><h3>{e.title}</h3><p><Icon name="pin" size={11}/> {e.location||'Local a confirmar'}{e.start_time?<> <Icon name="clock" size={11}/> {String(e.start_time).slice(0,5)}</>:null}</p></div><span className='lvp-event-arrow'><Icon name="arrowRight" size={16}/></span></a>})}</div>:<div className='lvp-empty-panel'><h3>A agenda está tranquila por enquanto.</h3><p>Novos eventos publicados para a cidade aparecerão aqui automaticamente.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
    </section>
    <section className='lvp-business-cta-section'>
     <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
