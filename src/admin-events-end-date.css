@@ -1,0 +1,44 @@
+/* Redesign do gestor principal de eventos */
+.vl-admin-events-main .vl-admin-events-layout{grid-template-columns:minmax(420px,470px) minmax(0,1fr);gap:18px;padding:18px;background:#f4f7fb}
+.vl-admin-events-main .vl-admin-events-form,.vl-admin-events-main .vl-admin-events-list{padding:18px;border-radius:18px;background:#fff;border:1px solid #dfe7f1}
+.vl-admin-events-main .vl-admin-events-form-head{padding-bottom:12px;margin-bottom:13px;border-bottom:1px solid #edf2f6}
+.vl-admin-events-main .vl-admin-events-form-head h3{margin:5px 0 2px;font-size:18px}
+.vl-admin-events-main .vl-admin-events-form-head small{display:block;color:#8090a2;font-size:9px}
+.vl-admin-event-section{margin-top:11px;padding:13px;border:1px solid #e0e8f0;border-radius:13px;background:#fbfdff}
+.vl-admin-event-section-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.vl-admin-event-section-head>span{width:26px;height:26px;border-radius:8px;background:#e9f2ff;color:#1f6df2;display:grid;place-items:center;font-size:9px;font-weight:900}
+.vl-admin-event-section-head strong{display:block;color:#173a5a;font-size:11px}
+.vl-admin-event-section-head small{display:block;margin-top:2px;color:#7d8da0;font-size:8px;line-height:1.35}
+.vl-admin-events-main .vl-admin-events-form>label{margin-top:9px}
+.vl-admin-event-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.vl-admin-event-date-range{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:7px;align-items:end}
+.vl-admin-event-date-range label{display:grid;gap:5px;margin:0!important}
+.vl-admin-event-date-range label span{font-size:8px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;color:#72869a}
+.vl-admin-event-range-arrow{height:35px;display:grid;place-items:center;color:#7c90a4;font-weight:900}
+.vl-admin-event-time-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+.vl-admin-event-section textarea{min-height:92px;resize:vertical}
+.vl-admin-event-section .vl-admin-events-cover{margin-top:9px}
+.vl-admin-event-section .vl-admin-events-cover-head{margin-bottom:8px}
+.vl-admin-event-section .vl-admin-events-checks{margin:0;border:0;padding:0;background:transparent}
+.vl-admin-event-section .vl-admin-events-checks label{padding:8px 0}
+.vl-admin-events-submit{height:44px;margin-top:12px;font-size:11px}
+.vl-admin-events-main .vl-admin-events-list-head{padding-bottom:13px;margin-bottom:12px;border-bottom:1px solid #edf2f6}
+.vl-admin-events-main .vl-admin-event-row{grid-template-columns:82px minmax(0,1fr) 86px;gap:12px;padding:12px;border-radius:13px}
+.vl-admin-events-main .vl-admin-event-thumb{width:82px;height:70px}
+.vl-admin-events-main .vl-admin-event-copy h4{font-size:14px}
+.vl-admin-events-main .vl-admin-event-copy p{white-space:normal;line-height:1.45}
+.vl-admin-events-main .vl-admin-event-actions{gap:5px}
+.vl-admin-events-main .vl-admin-event-actions button{min-width:86px}
+.vl-admin-events-head-cta{min-width:120px}
+@media(max-width:980px){
+ .vl-admin-events-main .vl-admin-events-layout{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ .vl-admin-event-fields,.vl-admin-event-time-row{grid-template-columns:1fr}
+ .vl-admin-event-date-range{grid-template-columns:1fr}
+ .vl-admin-event-range-arrow{height:20px;transform:rotate(90deg)}
+ .vl-admin-events-main .vl-admin-event-row{grid-template-columns:60px minmax(0,1fr);gap:9px}
+ .vl-admin-events-main .vl-admin-event-thumb{width:60px;height:58px}
+ .vl-admin-events-main .vl-admin-event-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+ .vl-admin-events-head-cta{width:100%}
+}
