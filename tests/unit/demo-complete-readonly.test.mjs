@@ -10,7 +10,7 @@ test("demo apresenta home, empresas do catálogo e Minha Conta sem escrita",()=>
  assert.match(page,/public_business_directory/)
  assert.match(page,/\.eq\("city_id",cityRow\.id\)/)
  assert.match(page,/\["account","Minha conta"\]/)
- assert.match(page,/Experiência completa e interativa/)
+ assert.match(page,/Demonstração completa e interativa/)
  assert.match(page,/Somente visualização/)
  assert.match(page,/business_photos/)
  assert.match(page,/business_items/)
