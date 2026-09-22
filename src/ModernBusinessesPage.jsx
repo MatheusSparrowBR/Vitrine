@@ -27,7 +27,6 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const[q,setQ]=useState('')
  const[sort,setSort]=useState('relevancia')
  const[loading,setLoading]=useState(true)
- const[loadError,setLoadError]=useState('')
 
  useEffect(()=>{let live=true;(async()=>{
   const params=new URLSearchParams(location.search)
@@ -47,10 +46,10 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   ])
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
-  let reviewMap={};try{reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))}catch{}
+  const reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))
   if(!live)return
   setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
- }catch(err){if(!live)return;console.error('[VitrineLocal] erro ao carregar empresas:',err);setLoadError(err?.message||'Não foi possível carregar as empresas.');setLoading(false)} })();return()=>{live=false}},[citySlug])
+ })();return()=>{live=false}},[citySlug])
 
  useEffect(()=>{try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}},[cat,q,sort])
 
@@ -77,7 +76,6 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const clearFilters=()=>{setQ('');setCat('');setSort('relevancia');history.replaceState(null,'',`/${city.slug}/empresas`)}
  const returnUrl=()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${city.slug}/empresas`)?stored:`/${city.slug}/empresas`}catch{return`/${city.slug}/empresas`}}
 
- if(loadError)return <main className="mbl-shell"><div className="mbl-error"><h1>Não foi possível carregar as empresas.</h1><p>{loadError}</p><button type="button" onClick={()=>location.reload()}>Tentar novamente</button></div></main>
  if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
  if(!city)return <main className="mbl-shell"><div className="mbl-error"><h1>Cidade não encontrada.</h1><a href="/laguna">Voltar</a></div></main>
 
