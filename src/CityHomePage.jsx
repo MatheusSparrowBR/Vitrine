@@ -168,6 +168,12 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
    </section>
   </main>
+  <nav className='lvp-mobile-bottom-nav' aria-label='Navegação principal mobile'>
+   <a href={base} className='is-active'><Icon name='grid' size={18}/><span>Início</span></a>
+   <a href={base+'/empresas'}><Icon name='search' size={18}/><span>Explorar</span></a>
+   <a href={base+'#promocoes'}><Icon name='tag' size={18}/><span>Ofertas</span></a>
+   <a href='/conta'><Icon name='user' size={18}/><span>Conta</span></a>
+  </nav>
   <footer className='lvp-footer'>
    <div className='lvp-wrap lvp-footer-grid'>
     <div>
