@@ -67,9 +67,6 @@ export default function CommercialAnalyticsPage(){
  const previous=Number(m.previous_profile_views||0)
  const currentViews=Number(m.profile_views||0)
  const delta=deltaLabel(currentViews,previous)
- const previousContacts=Number(m.previous_whatsapp_clicks||0)
- const previousConversion=previous?((previousContacts/previous)*100):0
- const conversionChange=previousConversion?((Number(conversion)-previousConversion).toFixed(1)):null
  const previousAdvanced=Number(a.previous_profile_views||0)
  const advancedDelta=deltaLabel(Number(a.profile_views||0),previousAdvanced)
  const daily=Array.isArray(a.daily)?a.daily:[]
@@ -105,8 +102,8 @@ export default function CommercialAnalyticsPage(){
 
   <section className="ca-kpis">
    <Kpi title="Visualizações" value={fmt(m.profile_views)} note={range+' dias'} trend={delta} trendClass={deltaClass(currentViews,previous)}/>
-   <Kpi title="Contatos" value={fmt(leadCount)} note="WhatsApp + Instagram + site" tone="green" trend={(leadCount||previousContacts)?deltaLabel(leadCount,previousContacts):null} trendClass={deltaClass(leadCount,previousContacts)}/>
-   <Kpi title="Conversão" value={conversion+'%'} note="visita → contato" tone="purple" trend={conversionChange?((Number(conversionChange)>0?'+':'')+conversionChange+' p.p.'):null} trendClass={Number(conversionChange||0)>0?'positive':Number(conversionChange||0)<0?'negative':'neutral'}/>
+   <Kpi title="Contatos" value={fmt(leadCount)} note="WhatsApp + Instagram + site" tone="green"/>
+   <Kpi title="Conversão" value={conversion+'%'} note="visita → contato" tone="purple"/>
    <Kpi title="Interações" value={fmt(m.total_interactions)} note="ações registradas" tone="amber"/>
   </section>
 
@@ -132,9 +129,9 @@ export default function CommercialAnalyticsPage(){
     <div className="ca-funnel">{funnel.map(([label,value])=>{const max=Math.max(1,m.profile_views||1);return <div className="ca-funnel-row" key={label}><div><strong>{label}</strong><small>{fmt(value)}</small></div><div className="ca-track"><i style={{width:Math.max(3,value/max*100)+'%'}}/></div><b>{pct(value,m.profile_views||0)}%</b></div>})}</div>
    </article>
    <article className="ca-card ca-channels-card">
-    <div className="ca-card-head"><div><span>CANAIS DE CONTATO</span><h2>De onde vieram os contatos</h2><p>Quais canais estão gerando ações no seu perfil.</p></div></div>
+    <div className="ca-card-head"><div><span>CANAIS DE CONTATO</span><h2>Canais que geraram contatos</h2><p>Veja quais ações de contato aconteceram no seu perfil.</p></div></div>
     <div className="ca-channel-list ca-channel-list-emphasis">{channelEntries.map(([label,value])=><div key={label}><div><strong>{label}</strong><span>{fmt(value)}</span></div><div className="ca-channel-track"><i style={{width:Math.max(4,pct(Number(value),leadCount))+'%'}}/></div></div>)}</div>
-    <p className="ca-caption">Este painel mede o canal que gerou o contato; ele não identifica a origem externa do visitante antes de abrir o perfil.</p>
+    <p className="ca-caption">Aqui medimos as ações realizadas no perfil. Isso não representa a origem externa do visitante.</p>
    </article>
   </section>
 
@@ -144,8 +141,8 @@ export default function CommercialAnalyticsPage(){
   </section>
 
   <section className="ca-card ca-advanced-card">
-   <div className="ca-card-head"><div><span>ESTATÍSTICAS AVANÇADAS</span><h2>Leitura avançada do desempenho</h2><p>Aprofunde os dados com visitantes únicos, tendências diárias, canais de contato e comparação de períodos.</p></div><strong className="ca-premium-badge">PREMIUM</strong></div>
-   {hasPlanFeature(s.plan?.features,'advanced_analytics',false)?s.advanced?<><div className="ca-advanced-kpis"><Kpi title="Visitantes únicos" value={fmt(a.unique_visitors)} note={pct(a.unique_visitors,a.profile_views||0)+'% das visualizações'} /><Kpi title="Engajamentos" value={fmt(a.engaged_interactions)} note="interações qualificadas" tone="green"/><Kpi title="Taxa de engajamento" value={Number(a.engagement_rate||0).toFixed(1)+'%'} note="contato / visualização" tone="purple"/><Kpi title="Variação" value={advancedDelta||'—'} note="vs. período anterior" tone="amber"/></div><div className="ca-advanced-grid"><article className="ca-advanced-panel"><div className="ca-subhead"><h3>Tendência diária</h3><span>{range} dias</span></div><div className="ca-daily-chart" aria-label="Visualizações por dia">{daily.map(row=><div className="ca-day-bar" key={row.day} title={String(row.day)+': '+fmt(row.profile_views)+' visualizações'}><i style={{height:Math.max(6,(Number(row.profile_views||0)/maxDaily)*100)+'%'}}/><small>{String(row.day||'').slice(8,10)}</small></div>)}</div><p className="ca-caption">Visualizações diárias do período atual. {advancedDelta?'No período anterior foram '+fmt(previousAdvanced)+' visualizações.':'Ainda não há período anterior suficiente para comparação.'}</p></article><article className="ca-advanced-panel"><div className="ca-subhead"><h3>Canais de contato</h3><span>{fmt(a.total_contacts)} contatos</span></div><div className="ca-channel-list">{channelEntries.map(([label,value])=><div key={label}><div><strong>{label}</strong><span>{fmt(value)}</span></div><div className="ca-channel-track"><i style={{width:Math.max(4,pct(Number(value),Number(a.total_contacts||0)))+'%'}}/></div></div>)}</div></article></div></>:<div className="ca-advanced-loading">Carregando estatísticas avançadas…</div>:<div className="ca-advanced-locked"><span>EXCLUSIVO DO PREMIUM</span><h3>Estatísticas avançadas</h3><p>O Premium libera visitantes únicos, tendências diárias, canais de contato, engajamento e comparação com o período anterior.</p><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}
+   <div className="ca-card-head"><div><span>ESTATÍSTICAS AVANÇADAS</span><h2>O que os dados avançados acrescentam</h2><p>Indicadores exclusivos para entender qualidade do tráfego e engajamento sem repetir os gráficos acima.</p></div><strong className="ca-premium-badge">PREMIUM</strong></div>
+   {hasPlanFeature(s.plan?.features,'advanced_analytics',false)?s.advanced?<><div className="ca-advanced-kpis"><Kpi title="Visitantes únicos" value={fmt(a.unique_visitors)} note={pct(a.unique_visitors,a.profile_views||0)+'% das visualizações'} /><Kpi title="Engajamentos" value={fmt(a.engaged_interactions)} note="interações qualificadas" tone="green"/><Kpi title="Taxa de engajamento" value={Number(a.engagement_rate||0).toFixed(1)+'%'} note="contato / visualização" tone="purple"/><Kpi title="Variação" value={advancedDelta||'—'} note="visualizações vs. período anterior" tone="amber"/></div><div className="ca-advanced-summary"><div><span>Visitantes recorrentes</span><strong>{Math.max(0,Number(a.profile_views||0)-Number(a.unique_visitors||0)).toLocaleString('pt-BR')}</strong><small>diferença entre visualizações e visitantes únicos</small></div><div><span>Qualidade do tráfego</span><strong>{Number(a.engagement_rate||0).toFixed(1)}%</strong><small>engajamentos em relação às visualizações</small></div><div><span>Comparação</span><strong>{advancedDelta||'—'}</strong><small>variação de visualizações no período</small></div></div></>:<div className="ca-advanced-loading">Carregando estatísticas avançadas…</div>:<div className="ca-advanced-locked"><span>EXCLUSIVO DO PREMIUM</span><h3>Estatísticas avançadas</h3><p>O Premium libera visitantes únicos, engajamento e comparação de períodos para aprofundar a leitura do desempenho.</p><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}
    {s.advancedError&&<p className="ca-advanced-error">{s.advancedError}</p>}
   </section>
 
