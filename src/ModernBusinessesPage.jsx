@@ -16,6 +16,7 @@ function syncQuery(values){
  const url=new URL(location.href)
  if(values.q!==undefined){if(values.q)url.searchParams.set('q',values.q);else url.searchParams.delete('q')}
  if(values.cat!==undefined){if(values.cat)url.searchParams.set('categoria',values.cat);else url.searchParams.delete('categoria')}
+ if(values.need!==undefined){if(values.need)url.searchParams.set('necessidade',values.need);else url.searchParams.delete('necessidade')}
  if(values.sort!==undefined){if(values.sort&&values.sort!=='relevancia')url.searchParams.set('ordenar',values.sort);else url.searchParams.delete('ordenar')}
  history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))
 }
@@ -24,8 +25,11 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const[city,setCity]=useState(null)
  const[businesses,setBusinesses]=useState([])
  const[categories,setCategories]=useState([])
+ const[needs,setNeeds]=useState([])
+ const[needCategorySlugs,setNeedCategorySlugs]=useState({})
  const[ratings,setRatings]=useState({})
  const[cat,setCat]=useState('')
+ const[need,setNeed]=useState('')
  const[q,setQ]=useState('')
  const[sort,setSort]=useState('relevancia')
  const[quickFilters,setQuickFilters]=useState({open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false})
@@ -35,25 +39,31 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  useEffect(()=>{let live=true;(async()=>{
   const params=new URLSearchParams(location.search)
   const initialCat=params.get('categoria')||params.get('category')||''
+  const initialNeed=params.get('necessidade')||params.get('need')||''
   const initialQ=params.get('q')||''
   const initialSort=['relevancia','recentes','avaliacao'].includes(params.get('ordenar'))?params.get('ordenar'):'relevancia'
   const initialFilters={open:params.get('aberto')==='1',delivery:params.get('delivery')==='1',pickup:params.get('retirada')==='1',dine:params.get('consumo')==='1',verified:params.get('verificada')==='1',searchFeatured:params.get('busca_destaque')==='1'}
-  setQ(initialQ);setSort(initialSort);setCat(initialCat);setQuickFilters(initialFilters)
+  setQ(initialQ);setSort(initialSort);setCat(initialCat);setNeed(initialNeed);setQuickFilters(initialFilters)
   try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}
   if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setCategories(fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setCat(initialCat);setLoading(false);return}
   const{data:c}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle()
   if(!live)return
   setCity(c||null)
   if(!c){setLoading(false);return}
-  const[b,cs]=await Promise.all([
+  const[b,cs,ns,ncs]=await Promise.all([
    db.from('public_business_directory').select('id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,phone,whatsapp,featured,verified,category_name,category_slug,created_at,search_featured,opening_hours,has_delivery,has_pickup,has_dine_in').eq('city_id',c.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(100),
-   db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name')
+   db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'),
+   db.from('business_needs').select('id,name,slug,icon,description,sort_order').eq('active',true).order('sort_order').order('name'),
+   db.from('category_needs').select('category_id,need_id')
   ])
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
+  const loadedNeeds=ns.data||[]
+  const needMap={}
+  ;(ncs.data||[]).forEach(link=>{const category=loaded.find(row=>row.id===link.category_id);const need=loadedNeeds.find(row=>row.id===link.need_id);if(category?.slug&&need?.slug){(needMap[need.slug]??=[]).push(category.slug)}})
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
   const reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))
   if(!live)return
-  setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
+  setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setNeeds(loadedNeeds);setNeedCategorySlugs(needMap);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setNeed(initialNeed&&loadedNeeds.some(x=>x.slug===initialNeed)?initialNeed:'');setLoading(false)
  })();return()=>{live=false}},[citySlug])
 
  useEffect(()=>{try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}},[cat,q,sort])
@@ -63,13 +73,14 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   const filtered=businesses.filter(b=>{
    const matchesText=!term||[b.name,b.short_description,b.description,b.address,b.neighborhood,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(term)
    const matchesCat=!cat||b.categories?.slug===cat
+   const matchesNeed=!need||(needCategorySlugs[need]||[]).includes(b.categories?.slug)
    const matchesOpen=!quickFilters.open||isOpenNow(b.opening_hours)
    const matchesDelivery=!quickFilters.delivery||b.has_delivery
    const matchesPickup=!quickFilters.pickup||b.has_pickup
    const matchesDine=!quickFilters.dine||b.has_dine_in
    const matchesVerified=!quickFilters.verified||b.verified
    const matchesSearchFeatured=!quickFilters.searchFeatured||b.search_featured
-   return matchesText&&matchesCat&&matchesOpen&&matchesDelivery&&matchesPickup&&matchesDine&&matchesVerified&&matchesSearchFeatured
+   return matchesText&&matchesCat&&matchesNeed&&matchesOpen&&matchesDelivery&&matchesPickup&&matchesDine&&matchesVerified&&matchesSearchFeatured
   })
   return [...filtered].sort((a,b)=>{
    if(term){const scoreA=searchScore(a,term,Boolean(a.search_featured)),scoreB=searchScore(b,term,Boolean(b.search_featured));if(scoreB!==scoreA)return scoreB-scoreA}
@@ -79,13 +90,14 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
    if(featuredScore)return featuredScore
    return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)
   })
- },[businesses,q,cat,sort,ratings,quickFilters])
+ },[businesses,q,cat,need,needCategorySlugs,sort,ratings,quickFilters])
 
  const setCategory=next=>{setCat(next);syncQuery({cat:next})}
+ const setNeedFilter=next=>{setNeed(next);syncQuery({need:next})}
  const setSearch=value=>{setQ(value);syncQuery({q:value})}
  const setSortValue=value=>{setSort(value);syncQuery({sort:value})}
  const updateQuickFilter=(key)=>{const next={...quickFilters,[key]:!quickFilters[key]};setQuickFilters(next);const params={};Object.entries(next).forEach(([k,v])=>{if(v)params[{open:'aberto',delivery:'delivery',pickup:'retirada',dine:'consumo',verified:'verificada',searchFeatured:'busca_destaque'}[k]]='1'});const url=new URL(location.href);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));['aberto','delivery','retirada','consumo','verificada','busca_destaque'].filter(k=>!Object.values(params).includes('1')).forEach(k=>url.searchParams.delete(k));history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))}
- const clearFilters=()=>{setQ('');setCat('');setSort('relevancia');const reset={open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false};setQuickFilters(reset);history.replaceState(null,'',`/${city.slug}/empresas`)}
+ const clearFilters=()=>{setQ('');setCat('');setNeed('');setSort('relevancia');const reset={open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false};setQuickFilters(reset);history.replaceState(null,'',`/${city.slug}/empresas`)}
  const returnUrl=()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${city.slug}/empresas`)?stored:`/${city.slug}/empresas`}catch{return`/${city.slug}/empresas`}}
 
  if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
@@ -96,10 +108,10 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   <section className="mbl-hero"><div><span className="mbl-kicker">CATÁLOGO LOCAL</span><h1>Empresas em {city.name}</h1><p>Encontre negócios e serviços da cidade. Filtre por categoria, pesquise pelo que precisa e compare opções.</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
   <section className="mbl-toolbar" aria-label="Filtros do catálogo">
    <div className="mbl-toolbar-row"><div className="mbl-search-large"><Icon name="search" size={18}/><input value={q} onChange={e=>setSearch(e.target.value)} placeholder="Buscar empresa, serviço ou bairro" aria-label="Buscar no catálogo"/></div><button className="mbl-clear" type="button" onClick={clearFilters}>Limpar filtros</button></div>
-   <div className="mbl-filter-title"><strong>Explore por categoria</strong><span>{categories.length} opções</span></div>
+   {needs.length>0&&<><div className="mbl-filter-title"><strong>Explore por necessidade</strong><span>{needs.length} opções</span></div><div className="mbl-chips mbl-need-chips" role="list"><button type="button" className={need===''?'active':''} onClick={()=>setNeedFilter('')}>Todas</button>{needs.map(item=><button type="button" key={item.id} className={need===item.slug?'active':''} onClick={()=>setNeedFilter(item.slug)}><Icon name={item.icon||'grid'} size={13}/>{item.name}</button>)}</div></>}   <div className="mbl-filter-title"><strong>Explore por categoria</strong><span>{categories.length} opções</span></div>
    <div className="mbl-chips" role="list"><button className={cat===''?'active':''} onClick={()=>setCategory('')}>Todos</button>{categories.map(c=><button key={c.id} className={cat===c.slug?'active':''} onClick={()=>setCategory(c.slug)}><Icon name={iconForCategory(c.name,c.icon)} size={13}/>{c.name}</button>)}</div>
    <div className="mbl-sort-row"><span className="mbl-sort-label">Ordenar por</span><select className="mbl-sort-select" value={sort} onChange={e=>setSortValue(e.target.value)} aria-label="Ordenar resultados"><option value="relevancia">Relevância</option><option value="avaliacao">Melhor avaliadas</option><option value="recentes">Mais recentes</option></select></div><div className="mbl-quick-filter-head"><strong>Filtros rápidos</strong><button type="button" onClick={()=>setShowMoreFilters(v=>!v)}>{showMoreFilters?'Ocultar':'Mais filtros'}</button></div><div className="mbl-quick-filters">{[['open','Aberto agora'],['delivery','Delivery'],['pickup','Retirada'],['dine','Consumo no local'],['verified','Verificada'],['searchFeatured','Busca em destaque']].map(([key,label])=><button key={key} type="button" className={quickFilters[key]?'active':''} onClick={()=>updateQuickFilter(key)}>{quickFilters[key]?'✓ ':''}{label}</button>)}</div>
-   {(q||cat)&&<div className="mbl-active-filters" aria-label="Filtros ativos">{q&&<span className="mbl-filter-chip">Busca: {q}<button type="button" aria-label="Remover busca" onClick={()=>setSearch('')}>×</button></span>}{cat&&<span className="mbl-filter-chip">Categoria: {categories.find(c=>c.slug===cat)?.name||cat}<button type="button" aria-label="Remover categoria" onClick={()=>setCategory('')}>×</button></span>}</div>}
+   {(q||cat||need)&&<div className="mbl-active-filters" aria-label="Filtros ativos">{q&&<span className="mbl-filter-chip">Busca: {q}<button type="button" aria-label="Remover busca" onClick={()=>setSearch('')}>×</button></span>}{cat&&<span className="mbl-filter-chip">Categoria: {categories.find(c=>c.slug===cat)?.name||cat}<button type="button" aria-label="Remover categoria" onClick={()=>setCategory('')}>×</button></span>}{need&&<span className="mbl-filter-chip">Necessidade: {needs.find(x=>x.slug===need)?.name||need}<button type="button" aria-label="Remover necessidade" onClick={()=>setNeedFilter('')}>×</button></span>}</div>}
   </section>
   {items.length?<section className="mbl-grid" aria-label="Empresas encontradas">{items.map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <article className="mbl-card" key={b.id}>
     <a className="mbl-card-main" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`}>
