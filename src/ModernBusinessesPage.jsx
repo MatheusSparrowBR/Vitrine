@@ -16,6 +16,7 @@ function syncQuery(values){
  const url=new URL(location.href)
  if(values.q!==undefined){if(values.q)url.searchParams.set('q',values.q);else url.searchParams.delete('q')}
  if(values.cat!==undefined){if(values.cat)url.searchParams.set('categoria',values.cat);else url.searchParams.delete('categoria')}
+ if(values.need!==undefined){if(values.need)url.searchParams.set('necessidade',values.need);else url.searchParams.delete('necessidade')}
  if(values.sort!==undefined){if(values.sort&&values.sort!=='relevancia')url.searchParams.set('ordenar',values.sort);else url.searchParams.delete('ordenar')}
  history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))
 }
@@ -28,6 +29,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const[needCategorySlugs,setNeedCategorySlugs]=useState({})
  const[ratings,setRatings]=useState({})
  const[cat,setCat]=useState('')
+ const[need,setNeed]=useState('')
  const[q,setQ]=useState('')
  const[sort,setSort]=useState('relevancia')
  const[quickFilters,setQuickFilters]=useState({open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false})
@@ -37,6 +39,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  useEffect(()=>{let live=true;(async()=>{
   const params=new URLSearchParams(location.search)
   const initialCat=params.get('categoria')||params.get('category')||''
+  const initialNeed=params.get('necessidade')||params.get('need')||''
   const initialQ=params.get('q')||''
   const initialSort=['relevancia','recentes','avaliacao'].includes(params.get('ordenar'))?params.get('ordenar'):'relevancia'
   const initialFilters={open:params.get('aberto')==='1',delivery:params.get('delivery')==='1',pickup:params.get('retirada')==='1',dine:params.get('consumo')==='1',verified:params.get('verificada')==='1',searchFeatured:params.get('busca_destaque')==='1'}
