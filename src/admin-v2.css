@@ -79,3 +79,25 @@
 .admin-v2-need-check-grid strong{font-size:10px;color:#29415b}
 .admin-v2-need-check-grid small{font-size:8px;line-height:1.4;color:#8a97a8;font-weight:500}
 @media(max-width:700px){.admin-v2-need-check-grid{grid-template-columns:1fr}}
+
+.admin-v2-category-selector{border:1px solid #dfe7f0;border-radius:12px;padding:12px;background:#fbfdff;margin:0}
+.admin-v2-category-selector legend{padding:0 6px;font-size:9px;font-weight:900;color:#30445b}
+.admin-v2-category-selector>p{margin:0 0 10px;font-size:9px;line-height:1.45;color:#8090a3}
+.admin-v2-category-selector-search{display:flex;align-items:center;gap:8px;border:1px solid #dce4ed;background:#fff;border-radius:10px;padding:0 10px}
+.admin-v2-category-selector-search svg{flex:0 0 auto;color:#8392a4}
+.admin-v2-category-selector-search input{border:0!important;box-shadow:none!important;padding:10px 0!important}
+.admin-v2-category-selected{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+.admin-v2-category-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbdcf1;border-radius:999px;background:#eef5ff;color:#244c7c;padding:6px 9px;font:700 9px Inter,ui-sans-serif,sans-serif;cursor:pointer}
+.admin-v2-category-chip span{font-size:12px;line-height:1}
+.admin-v2-category-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:210px;overflow:auto;margin-top:9px;padding-right:2px}
+.admin-v2-category-options label{display:flex!important;align-items:center;gap:8px;padding:8px;border:1px solid #e0e7ef;border-radius:10px;background:#fff;cursor:pointer}
+.admin-v2-category-options label:hover,.admin-v2-category-options label.selected{border-color:#b9d1ee;background:#f6faff}
+.admin-v2-category-options input{width:auto!important;margin:0!important}
+.admin-v2-category-option-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:#eef4fb;color:#183d66}
+.admin-v2-category-option-copy{min-width:0;display:grid;gap:2px;flex:1}
+.admin-v2-category-option-copy strong{font-size:9px;color:#29415b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-v2-category-option-copy small{font-size:8px;color:#8a97a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-v2-category-options>label>svg{color:#1976ff;flex:0 0 auto}
+.admin-v2-category-empty{padding:10px 4px;text-align:center;color:#8b97a7;font-size:9px}
+.admin-v2-category-count{display:block;margin-top:8px;color:#718198;font-size:8px;font-weight:800}
+@media(max-width:700px){.admin-v2-category-options{grid-template-columns:1fr}}
