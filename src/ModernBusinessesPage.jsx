@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
 import './search-featured.css'
+import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
@@ -49,7 +50,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
   let reviewMap={}
-  try{const ids=publicBusinesses.map(row=>row.id).filter(Boolean);if(ids.length){const reviewRes=await db.rpc('get_public_business_review_summaries',{p_business_ids:ids});if(!reviewRes.error)reviewMap=Object.fromEntries((reviewRes.data||[]).map(row=>[row.business_id,{avg:Number(row.avg_rating)||0,count:Number(row.review_count)||0}]))}}catch{}
+  try{reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))}catch{}
   if(!live)return
   setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
  }catch(err){if(!live)return;console.error('[VitrineLocal] erro ao carregar empresas:',err);setLoadError(err?.message||'Não foi possível carregar as empresas.');setLoading(false)}})();return()=>{live=false}},[citySlug])
