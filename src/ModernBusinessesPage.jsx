@@ -1,15 +1,14 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
-import './search-featured.css'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
+import './search-featured.css'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
 const iconForCategory=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
 const stars=avg=>Array.from({length:5},(_,i)=><Icon key={i} name="star" size={12} filled={i<Math.round(Number(avg)||0)}/>)
-
 const normalizeSearchText=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()
-const searchScore=(business,term,boosted=false)=>{const q=normalizeSearchText(term),words=q.split(/\s+/).filter(Boolean);if(!q)return 0;const name=normalizeSearchText(business.name),category=normalizeSearchText(business.categories?.name),short=normalizeSearchText(business.short_description),description=normalizeSearchText(business.description),address=normalizeSearchText(business.address),neighborhood=normalizeSearchText(business.neighborhood);let score=0;if(name===q)score+=140;else if(name.startsWith(q))score+=110;else if(name.includes(q))score+=85;if(category===q)score+=80;else if(category.includes(q))score+=55;if(short.includes(q))score+=35;if(description.includes(q))score+=20;if(address.includes(q)||neighborhood.includes(q))score+=12;const combined=[name,category,short,description,address,neighborhood].join(' ');if(words.length>1&&words.every(word=>combined.includes(word)))score+=30;if(boosted)score+=90;return score}
+const searchScore=(business,term,boosted=false)=>{const q=normalizeSearchText(term);if(!q)return 0;const name=normalizeSearchText(business.name),category=normalizeSearchText(business.categories?.name),short=normalizeSearchText(business.short_description),description=normalizeSearchText(business.description),address=normalizeSearchText(business.address),neighborhood=normalizeSearchText(business.neighborhood);let score=0;if(name===q)score+=140;else if(name.startsWith(q))score+=110;else if(name.includes(q))score+=85;if(category===q)score+=80;else if(category.includes(q))score+=55;if(short.includes(q))score+=35;if(description.includes(q))score+=20;if(address.includes(q)||neighborhood.includes(q))score+=12;if(boosted)score+=90;return score}
 
 function syncQuery(values){
  const url=new URL(location.href)
@@ -62,11 +61,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
    return matchesText&&matchesCat
   })
   return [...filtered].sort((a,b)=>{
-   if(term){
-    const scoreA=searchScore(a,term,Boolean(a.search_featured))
-    const scoreB=searchScore(b,term,Boolean(b.search_featured))
-    if(scoreB!==scoreA)return scoreB-scoreA
-   }
+   if(term){const scoreA=searchScore(a,term,Boolean(a.search_featured)),scoreB=searchScore(b,term,Boolean(b.search_featured));if(scoreB!==scoreA)return scoreB-scoreA}
    if(sort==='recentes')return new Date(b.created_at||0)-new Date(a.created_at||0)
    if(sort==='avaliacao')return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)
    const featuredScore=(b.featured?1:0)-(a.featured?1:0)
@@ -74,6 +69,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
    return (ratings[b.id]?.avg||0)-(ratings[a.id]?.avg||0)
   })
  },[businesses,q,cat,sort,ratings])
+
  const setCategory=next=>{setCat(next);syncQuery({cat:next})}
  const setSearch=value=>{setQ(value);syncQuery({q:value})}
  const setSortValue=value=>{setSort(value);syncQuery({sort:value})}
@@ -94,7 +90,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   </section>
   {items.length?<section className="mbl-grid" aria-label="Empresas encontradas">{items.map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <article className="mbl-card" key={b.id}>
     <a className="mbl-card-main" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`}>
-     <div className="mbl-cover">{b.cover_url?<img src={b.cover_url} alt={`${b.name} capa`} loading="lazy"/>:<div className="mbl-cover-placeholder"><Icon name="store" size={30}/></div>}{b.search_featured&&q.trim()&&<span className="mbl-search-featured">Busca em destaque</span>}{b.featured&&<span className="mbl-featured">Destaque</span>}{b.verified&&<span className="mbl-verified"><Icon name="check" size={11}/> Verificada</span>}{b.logo_url&&<span className="mbl-logo"><img src={b.logo_url} alt={`${b.name} logo`} loading="lazy"/></span>}</div>
+     <div className="mbl-cover">{b.cover_url?<img src={b.cover_url} alt={`${b.name} capa`} loading="lazy"/>:<div className="mbl-cover-placeholder"><Icon name="store" size={30}/></div>}{b.featured&&<span className="mbl-featured">Destaque</span>}{b.search_featured&&q.trim()&&<span className="mbl-search-featured">Busca em destaque</span>}{b.verified&&<span className="mbl-verified"><Icon name="check" size={11}/> Verificada</span>}{b.logo_url&&<span className="mbl-logo"><img src={b.logo_url} alt={`${b.name} logo`} loading="lazy"/></span>}</div>
      <div className="mbl-body"><div className="mbl-category"><span>{b.categories?.name||'Empresa'}</span><span className="mbl-rating-inline">{stat.count?`${avg.toFixed(1)} · ${stat.count} avaliações`:'Ainda sem avaliações'}</span></div><h2>{b.name}</h2><p>{b.short_description||b.description||'Conheça este negócio local.'}</p><div className="mbl-footer"><span><Icon name="pin" size={11}/>{b.neighborhood||b.address||city.name+' - '+(city.state||'SC')}</span><strong className={stat.count?'has-reviews':''} aria-label={stat.count?`${avg.toFixed(1)} de 5, ${stat.count} avaliações`:'Sem avaliações'}><span className="mbl-stars" aria-hidden="true">{stars(avg)}</span></strong></div></div>
     </a>
     {b.whatsapp&&<div className="mbl-card-actions"><a className="mbl-quick-contact" href={`https://wa.me/${String(b.whatsapp).replace(/\D/g,'')}`} target="_blank" rel="noreferrer"><Icon name="phone" size={13}/>WhatsApp</a></div>}

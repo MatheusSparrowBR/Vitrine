@@ -32,7 +32,7 @@ const UserProfilePage=lazy(()=>import('./UserProfilePage.jsx'))
 const PasswordUpdatePage=lazy(()=>import('./PasswordUpdatePage.jsx'))
 const BillingPlansPage=lazy(()=>import('./BillingPlansPage.jsx'))
 const ModernBusinessProfilePage=lazy(()=>import('./ModernBusinessProfilePage.jsx'))
-const ModernBusinessesPage=lazy(()=>import('./ModernBusinessesPage.jsx'))
+import ModernBusinessesPage from './ModernBusinessesPage.jsx'
 const PromotionsPage=lazy(()=>import('./PublicCatalogPages.jsx').then(module=>({default:module.PromotionsPage})))
 const NotFoundPage=lazy(()=>import('./PublicCatalogPages.jsx').then(module=>({default:module.NotFoundPage})))
 const PrivacyPage=lazy(()=>import('./LegalPages.jsx').then(module=>({default:module.PrivacyPage})))
