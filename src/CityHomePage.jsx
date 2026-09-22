@@ -171,7 +171,7 @@ export default function CityHomePage({citySlug='laguna'}){
   <nav className='lvp-mobile-bottom-nav' aria-label='Navegação principal mobile'>
    <a href={base} className='is-active'><Icon name='grid' size={18}/><span>Início</span></a>
    <a href={base+'/empresas'}><Icon name='search' size={18}/><span>Explorar</span></a>
-   <a href={base+'#promocoes'}><Icon name='tag' size={18}/><span>Ofertas</span></a>
+   <a href={base+'/promocoes'}><Icon name='tag' size={18}/><span>Ofertas</span></a>
    <a href='/conta'><Icon name='user' size={18}/><span>Conta</span></a>
   </nav>
   <footer className='lvp-footer'>
