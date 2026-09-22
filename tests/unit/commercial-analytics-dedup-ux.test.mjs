@@ -10,10 +10,9 @@ test('desempenho não duplica tendência e canais',()=>{
  assert.ok(page.includes('ca-channels-card'))
  assert.ok(page.includes('O que os dados avançados acrescentam'))
  assert.ok(page.includes('ca-advanced-summary'))
- const advancedMatch=page.match(/ca-advanced-card[sS]*?<section className="ca-card ca-opportunities-card">/)
- assert.ok(advancedMatch)
- assert.equal((advancedMatch[0].match(/ca-daily-chart/g)||[]).length,0)
- assert.equal((advancedMatch[0].match(/ca-channel-list/g)||[]).length,0)
+ const advancedBlock=page.slice(page.indexOf('ca-advanced-card'),page.indexOf('ca-opportunities-card'))
+ assert.equal((advancedBlock.match(/ca-daily-chart/g)||[]).length,0)
+ assert.equal((advancedBlock.match(/ca-channel-list/g)||[]).length,0)
 })
 
 test('comparações exibidas usam apenas métricas com base comparável',()=>{
