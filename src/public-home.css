@@ -182,3 +182,16 @@
 .lvp-discovery-actions a:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28)}
 .lvp-discovery-actions a:last-child{border-color:rgba(102,182,255,.4);color:#bfe1ff}
 @media(max-width:760px){.lvp-discovery-actions{gap:6px}.lvp-discovery-actions>span{width:100%;margin-bottom:1px}.lvp-discovery-actions a{font-size:8px;padding:0 8px}}
+
+/* Mobile: keep featured business profile/brand images fully visible and centered. */
+@media (max-width:760px){
+  .lvp-business-image img{
+    object-fit:contain;
+    object-position:center;
+    padding:10px;
+    box-sizing:border-box;
+  }
+  .lvp-business-card:hover .lvp-business-image img{
+    transform:none;
+  }
+}
