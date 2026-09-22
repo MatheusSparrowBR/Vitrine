@@ -46,3 +46,11 @@ test('public event media is gated by active future events and active cities',()=
  assert.match(migration,/e\.event_date >= \(now\(\) AT TIME ZONE 'America\/Sao_Paulo'\)::date/)
  assert.match(migration,/c\.active = true/)
 })
+
+test('auditoria de segurança endurece view pública e RPCs que não devem ser públicas',()=>{
+ const migration=read('supabase/migrations/20260922150000_audit_security_hardening.sql')
+ assert.match(migration,/alter view public\.demo_public_business_directory set \(security_invoker = true\)/i)
+ assert.match(migration,/revoke execute on function public\.get_business_collection_usage\(uuid\) from public, anon/i)
+ assert.match(migration,/grant execute on function public\.get_business_collection_usage\(uuid\) to authenticated/i)
+ assert.match(migration,/revoke execute on function public\.protect_search_featured_mode\(\) from public, anon, authenticated/i)
+})
