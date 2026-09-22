@@ -134,3 +134,47 @@
   .mbp-primary-cta{height:50px}
   .mbp-action-row{grid-template-columns:1fr 1fr}
 }
+
+/* Mobile final pass: compactar identidade, badges e topo sem mudar a estrutura do perfil. */
+@media(max-width:760px){
+  .mbp-company-head{display:grid!important;grid-template-columns:62px minmax(0,1fr)!important;gap:9px!important;padding:13px 1px 7px!important}
+  .mbp-company-copy h1{font-size:24px!important;line-height:1.08!important;margin:1px 0 7px!important}
+  .mbp-rating-summary{display:flex!important;align-items:center!important;gap:6px!important;width:auto!important;padding:5px 8px!important;margin:0 0 8px!important;border:1px solid #e1e8f0!important;border-radius:10px!important;background:#fbfcfe!important}
+  .mbp-rating-summary-stars svg{width:12px!important;height:12px!important}
+  .mbp-rating-summary-score{font-size:10px!important;min-width:12px!important}
+  .mbp-rating-summary-count{font-size:8px!important;color:#7e8fa3!important;white-space:nowrap!important}
+  .mbp-identity-badges{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;width:100%!important;margin:0 0 7px!important}
+  .mbp-identity-badges>.mbp-verified,
+  .mbp-identity-badges>.mbp-category,
+  .mbp-identity-badges>.mbp-live-pill,
+  .mbp-identity-badges>.mbp-closed-pill,
+  .mbp-identity-badges>.mbp-service-badge{display:flex!important;width:100%!important;min-width:0!important;height:32px!important;min-height:32px!important;box-sizing:border-box!important;padding:0 7px!important;font-size:8px!important;border-radius:9px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .mbp-identity-badges>.mbp-service-badge{white-space:nowrap!important}
+  .mbp-company-copy>p{font-size:10px!important;line-height:1.42!important;margin:5px 0 0!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+  .mbp-gallery-main{height:185px!important;border-radius:13px!important}
+  .mbp-gallery-side{height:58px!important;grid-template-columns:1fr 1fr!important;grid-template-rows:58px!important}
+  .mbp-gallery-thumb,.mbp-gallery-more{height:58px!important;border-radius:10px!important}
+  .mbp-gallery.is-empty .mbp-gallery-side{height:48px!important;grid-template-rows:48px!important}
+  .mbp-gallery.is-empty .mbp-gallery-more{height:48px!important;min-height:48px!important;font-size:8px!important}
+  .mbp-contact-grid{margin-top:9px!important;padding-top:9px!important;gap:7px!important}
+  .mbp-contact-card{min-height:56px!important;padding:8px 9px!important;border-radius:11px!important}
+  .mbp-contact-card:first-child{grid-column:1/-1!important}
+  .mbp-contact-icon{width:29px!important;height:29px!important;flex-basis:29px!important}
+  .mbp-contact-card strong{font-size:8px!important}
+  .mbp-contact-card small{font-size:8px!important;line-height:1.3!important}
+  .mbp-primary-cta{height:48px!important;margin-top:8px!important;border-radius:12px!important;font-size:12px!important}
+  .mbp-action-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:7px!important}
+  .mbp-action-row a,.mbp-action-row button{height:40px!important;border-radius:10px!important;font-size:9px!important}
+  .mbp-section{margin-top:18px!important;padding-top:17px!important}
+}
+@media(max-width:480px){
+  .mbp-page{padding:7px 7px 48px!important}
+  .mbp-main-card{padding:10px!important;border-radius:16px!important}
+  .mbp-company-head{grid-template-columns:56px minmax(0,1fr)!important;gap:8px!important}
+  .mbp-logo{width:56px!important;height:56px!important;border-radius:12px!important}
+  .mbp-company-copy h1{font-size:22px!important}
+  .mbp-identity-badges{gap:5px!important}
+  .mbp-identity-badges>.mbp-verified,.mbp-identity-badges>.mbp-category,.mbp-identity-badges>.mbp-live-pill,.mbp-identity-badges>.mbp-closed-pill,.mbp-identity-badges>.mbp-service-badge{height:30px!important;min-height:30px!important;font-size:7.5px!important;padding:0 6px!important}
+  .mbp-gallery-main{height:170px!important}
+  .mbp-contact-card{min-height:52px!important}
+}
