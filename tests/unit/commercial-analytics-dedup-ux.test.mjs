@@ -19,7 +19,7 @@ test('comparações exibidas usam apenas métricas com base comparável',()=>{
  assert.ok(page.includes('trend={delta}'))
  assert.ok(!page.includes('previousContacts'))
  assert.ok(!page.includes('conversionChange'))
- assert.ok(css.includes('.ca-advanced-summary'))
+ assert.ok(!css.includes('.ca-advanced-summary'))
 })
 test('métricas e estados do desempenho não sugerem dados que a base não mede',()=>{
  assert.ok(t.includes('Taxa de contato'))
