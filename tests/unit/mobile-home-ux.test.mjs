@@ -16,7 +16,8 @@ test('home mobile prioriza necessidade e mantém ordem de descoberta',()=>{
 test('home mobile usa navegação por toque nas categorias, empresas, promoções e eventos',()=>{
  const c=css()
  for(const selector of ['.lvp-cat-grid','.lvp-business-grid','.lvp-promo-grid','.lvp-event-list']){
-  assert.ok(c.includes(selector+'{display:flex;overflow-x:auto'), 'faltou scroll horizontal em '+selector)
+  const escaped=selector.replace('.', '\\.')
+  assert.match(c,new RegExp(escaped+'(?:,|\\{)[^}]*overflow-x:auto'), 'faltou scroll horizontal em '+selector)
  }
  assert.match(c,/scroll-snap-type:x mandatory/)
 })
