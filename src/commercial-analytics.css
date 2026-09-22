@@ -47,3 +47,16 @@
  .ca-daily-chart-large{height:150px}
  .ca-opportunities>div{min-height:0}
 }
+
+/* Limpeza do Advanced Analytics: sem repetir gráfico/tela já apresentada acima. */
+.ca-advanced-card .ca-card-head h2{margin-bottom:4px}
+.ca-advanced-card .ca-card-head p{max-width:760px}
+.ca-advanced-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.ca-advanced-summary>div{padding:14px;border:1px solid #e3e9f0;border-radius:13px;background:#fbfcfe}
+.ca-advanced-summary span{display:block;color:#7c8da1;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
+.ca-advanced-summary strong{display:block;color:#17304f;font-size:20px;letter-spacing:-.5px;margin:7px 0 4px}
+.ca-advanced-summary small{display:block;color:#8492a3;font-size:8px;line-height:1.45}
+.ca-channels-card{min-height:100%}
+.ca-channels-card .ca-channel-list{margin-top:16px}
+@media(max-width:700px){.ca-advanced-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.ca-advanced-summary{grid-template-columns:1fr}.ca-advanced-summary strong{font-size:18px}}
