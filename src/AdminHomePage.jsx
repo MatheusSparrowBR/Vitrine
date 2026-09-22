@@ -12,16 +12,48 @@ const actions=[
 ]
 export default function AdminHomePage(){
  const [checking,setChecking]=useState(true),[allowed,setAllowed]=useState(false),[session,setSession]=useState(null),[data,setData]=useState({cities:0,businesses:0,published:0,pendingPromotions:0,pendingBusinesses:0,rejectedBusinesses:0,events:0,banners:0,maintenanceStatus:'—',maintenanceAt:null,billingEvents:0,problemSubscriptions:0}),[loading,setLoading]=useState(true),[error,setError]=useState('')
- useEffect(()=>{let live=true;(async()=>{if(!db){setChecking(false);return}const {data:{session:s}}=await db.auth.getSession();if(!live)return;setSession(s||null);if(!s){setChecking(false);return}const {data:p,error:e}=await db.from('profiles').select('role').eq('id',s.user.id).maybeSingle();if(!live)return;const ok=!e&&p?.role==='admin';setAllowed(ok);setChecking(false);if(!ok)return;const [c,b,pr,ev,ad,m,bill,sub]=await Promise.all([
- db.from('cities').select('id,active'),
- db.from('businesses').select('id,status'),
- db.from('promotions').select('id,status'),
- db.from('events').select('id'),
- db.from('advertisements').select('id,active').eq('placement','home_banner'),
- db.from('operational_maintenance_runs').select('status,finished_at,started_at').order('started_at',{ascending:false}).limit(1).maybeSingle(),
- db.from('billing_events').select('id,processed_at').order('processed_at',{ascending:false}).limit(1).maybeSingle(),
- db.from('subscriptions').select('id,status').in('status',['past_due','unpaid','incomplete','incomplete_expired'])
- ]);if(!live)return;const firstError=[c.error,b.error,pr.error,ev.error,ad.error,m.error,bill.error,sub.error].find(Boolean);if(firstError)setError(firstError.message||'Não foi possível carregar todos os indicadores.');setData({cities:(c.data||[]).filter(x=>x.active).length,businesses:(b.data||[]).filter(x=>x.status==='active').length,published:(pr.data||[]).filter(x=>x.status==='published').length,pendingPromotions:(pr.data||[]).filter(x=>x.status==='pending_review').length,pendingBusinesses:(b.data||[]).filter(x=>x.status==='pending').length,rejectedBusinesses:(b.data||[]).filter(x=>x.status==='rejected').length,events:(ev.data||[]).length,banners:(ad.data||[]).filter(x=>x.active).length,maintenanceStatus:m.data?.status||'—',maintenanceAt:m.data?.finished_at||m.data?.started_at||null,billingEvents:bill.data?1:0,problemSubscriptions:(sub.data||[]).length});setLoading(false)})();return()=>{live=false}},[])
+ useEffect(()=>{let live=true;(async()=>{
+  if(!db){setChecking(false);return}
+  const{data:{session:s}}=await db.auth.getSession();if(!live)return
+  setSession(s||null);if(!s){setChecking(false);return}
+  const{data:p,error:e}=await db.from('profiles').select('role').eq('id',s.user.id).maybeSingle();if(!live)return
+  const ok=!e&&p?.role==='admin';setAllowed(ok);setChecking(false);if(!ok)return
+  setLoading(true);setError('')
+  const[counts,m,latestBilling,problemSubs]=await Promise.all([
+   Promise.all([
+    db.from('cities').select('id',{count:'exact',head:true}).eq('active',true),
+    db.from('businesses').select('id',{count:'exact',head:true}).eq('status','active'),
+    db.from('promotions').select('id',{count:'exact',head:true}).eq('status','published'),
+    db.from('advertisements').select('id',{count:'exact',head:true}).eq('placement','home_banner').eq('active',true),
+    db.from('businesses').select('id',{count:'exact',head:true}).eq('status','pending'),
+    db.from('promotions').select('id',{count:'exact',head:true}).eq('status','pending_review'),
+    db.from('businesses').select('id',{count:'exact',head:true}).eq('status','rejected'),
+    db.from('events').select('id',{count:'exact',head:true})
+   ]),
+   db.from('operational_maintenance_runs').select('status,finished_at,started_at').order('started_at',{ascending:false}).limit(1).maybeSingle(),
+   db.from('billing_events').select('id,processed_at').order('processed_at',{ascending:false}).limit(1).maybeSingle(),
+   db.from('subscriptions').select('id',{count:'exact',head:true}).in('status',['past_due','unpaid','incomplete','incomplete_expired'])
+  ])
+  if(!live)return
+  const[citiesCount,businessesCount,publishedCount,bannersCount,pendingBusinessesCount,pendingPromotionsCount,rejectedBusinessesCount,eventsCount]=counts
+  const firstError=[...counts.map(x=>x.error),m.error,latestBilling.error,problemSubs.error].find(Boolean)
+  if(firstError)setError(firstError.message||'Não foi possível carregar todos os indicadores.')
+  setData({
+   cities:Number(citiesCount.count||0),
+   businesses:Number(businessesCount.count||0),
+   published:Number(publishedCount.count||0),
+   pendingPromotions:Number(pendingPromotionsCount.count||0),
+   pendingBusinesses:Number(pendingBusinessesCount.count||0),
+   rejectedBusinesses:Number(rejectedBusinessesCount.count||0),
+   events:Number(eventsCount.count||0),
+   banners:Number(bannersCount.count||0),
+   maintenanceStatus:m.data?.status||'—',
+   maintenanceAt:m.data?.finished_at||m.data?.started_at||null,
+   billingEvents:latestBilling.data?1:0,
+   problemSubscriptions:Number(problemSubs.count||0)
+  })
+  setLoading(false)
+ })();return()=>{live=false}},[])
  if(checking)return <div className="admin-v2-shell"><div className="admin-v2-empty">Verificando acesso administrativo…</div></div>
  if(!allowed)return <div className="admin-v2-shell"><main className="admin-v2-content"><div className="admin-v2-card admin-v2-empty"><strong>Acesso restrito</strong><span>Faça login com uma conta administradora para continuar.</span><a className="admin-v2-btn primary" href="/login?next=%2Fadmin">Entrar</a></div></main></div>
  const maintenanceHealthy=data.maintenanceStatus==='success';const attentionCount=data.pendingBusinesses+data.pendingPromotions+data.problemSubscriptions
