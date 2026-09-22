@@ -23,6 +23,11 @@ test('Admin pode gerenciar necessidades e vincular uma categoria a múltiplas ne
  assert.match(admin,/need_ids/)
  assert.match(admin,/Necessidades relacionadas/)
  assert.match(admin,/tab==='needs'/)
+ assert.match(admin,/Buscar categoria\.\.\./)
+ assert.match(admin,/Categorias relacionadas/)
+ assert.match(admin,/setCategorySearch/)
+ assert.match(admin,/delete\(\)\.eq\('need_id',needId\)/)
+ assert.match(admin,/categoryIds\.map\(category_id=>\(\{category_id,need_id:needId\}\)\)/)
 })
 
 test('A home usa necessidades configuráveis em vez de filtrar por uma categoria única',()=>{
