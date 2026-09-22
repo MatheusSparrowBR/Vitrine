@@ -183,6 +183,6 @@ test('home principal traz necessidades com links funcionais',async({page})=>{
  await expect(page.getByRole('heading',{name:'O que você precisa hoje?'})).toBeVisible()
  const needs=page.locator('.lvp-need-grid a')
  await expect(needs).toHaveCount(4)
- await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
- await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas/)
+ await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?necessidade=quero-comer/)
+ await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas\?necessidade=quero-comprar/)
 })
