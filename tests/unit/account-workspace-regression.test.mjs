@@ -29,3 +29,16 @@ test('performance navigation lives inside the merchant account workspace',()=>{
  assert.match(account,/location\.href=`\/conta\/analytics\?business_id=/)
  assert.doesNotMatch(header,/\['analytics','Desempenho','\/conta\/analytics'\]/)
 })
+
+test('Publicidade Premium fica integrada como seção interna da Minha Conta',()=>{
+ const account=read('src/AccountWorkspacePage.jsx')
+ const embedded=read('src/MerchantAdvertisingWorkspaceSection.jsx')
+ assert.match(account,/label="Desempenho"/)
+ assert.match(account,/section==='advertising'/)
+ assert.match(account,/MerchantAdvertisingWorkspaceSection/)
+ assert.match(account,/data-account-premium-ad-nav/)
+ assert.match(embedded,/Solicitar banner/)
+ assert.match(embedded,/owner_set_advertising_request_creative/)
+ assert.match(embedded,/section className="ma-sales embedded"/)
+ assert.doesNotMatch(account,/location\.href='\/conta\/publicidade'/)
+})
