@@ -4,6 +4,7 @@ import Icon from './ui-icons.jsx'
 import BusinessHoursEditor from './BusinessHoursEditor.jsx'
 import './core.css'
 import './business-registration.css'
+import './business-hours.css'
 import './business-service-badges.css'
 const empty={name:'',short_description:'',description:'',city_id:'',category_id:'',phone:'',whatsapp:'',website_url:'',instagram_url:'',facebook_url:'',address:'',neighborhood:'',opening_hours:{},has_delivery:false,has_pickup:false,has_dine_in:false}
 function ServiceOption({values,update}){const items=[['has_delivery','motorcycle','Delivery','Entrega pedidos no endereço do cliente.'],['has_pickup','bag','Retirada no local','Permite retirar pedidos ou produtos no estabelecimento.'],['has_dine_in','utensils','Consumo no local','Recebe clientes para consumir no estabelecimento.']];return <>{items.map(([key,icon,title,description])=><label className="business-service-option" key={key}><input type="checkbox" checked={Boolean(values[key])} onChange={e=>update(key,e.target.checked)}/><span className="business-service-icon"><Icon name={icon} size={18}/></span><span className="business-service-copy"><strong>{title}</strong><small>{description}</small></span></label>)}</>}
