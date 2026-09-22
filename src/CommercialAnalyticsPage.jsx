@@ -19,7 +19,7 @@ const deltaClass=(current,previous)=>{
 const dateTime=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeZone:'America/Sao_Paulo'}).format(new Date(v)):'—'
 
 export default function CommercialAnalyticsPage(){
- const[s,setS]=useState({loading:true,session:null,businesses:[],businessId:'',plan:null,summary:null,advanced:null,advancedError:'',ads:[],requests:[],error:''})
+ const[s,setS]=useState({loading:true,session:null,businesses:[],businessId:'',plan:null,summary:null,advanced:null,advancedError:'',ads:[],requests:[],adsError:'',error:''})
  const[range,setRange]=useState(30)
 
  useEffect(()=>{let live=true;(async()=>{
@@ -32,12 +32,12 @@ export default function CommercialAnalyticsPage(){
   if(error){setS(x=>({...x,loading:false,session,businesses:[],businessId:'',plan:null,summary:null,advanced:null,error:error.message}));return}
   const selected=chooseBusiness(businesses,getRequestedBusinessId())
   persistBusinessId(selected?.id)
-  setS(x=>({...x,loading:false,session,businesses:businesses||[],businessId:selected?.id||'',error:'',advanced:null,advancedError:'',ads:[],requests:[]}))
+  setS(x=>({...x,loading:false,session,businesses:businesses||[],businessId:selected?.id||'',error:'',advanced:null,advancedError:'',ads:[],requests:[],adsError:''}))
  })();return()=>{live=false}},[])
 
  useEffect(()=>{let live=true;(async()=>{
   if(!db||!s.session||!s.businessId)return
-  setS(x=>({...x,plan:null,summary:null,advanced:null,advancedError:'',ads:[],requests:[],error:''}))
+  setS(x=>({...x,plan:null,summary:null,advanced:null,advancedError:'',ads:[],requests:[],adsError:'',error:''}))
   const[{data:planId,error:pe},{data:biz,error:be}]=await Promise.all([
    db.rpc('get_effective_plan_id',{p_business_id:s.businessId}),
    db.from('businesses').select('id,name,status').eq('id',s.businessId).eq('owner_id',s.session.user.id).maybeSingle()
@@ -57,7 +57,7 @@ export default function CommercialAnalyticsPage(){
   ])
   if(!live)return
   if(se){setS(x=>({...x,plan,biz,error:se.message||'Não foi possível carregar as métricas.'}));return}
-  if(ade||re){setS(x=>({...x,plan,biz,summary:summary?.[0]||null,advanced:advanced?.[0]||null,advancedError:advancedEnabled?(ae?.message||''):'',ads:[],requests:[],error:(ade||re)?.message||'Não foi possível carregar os dados de publicidade.'}));return}
+  if(ade||re){setS(x=>({...x,plan,biz,summary:summary?.[0]||null,advanced:advanced?.[0]||null,advancedError:advancedEnabled?(ae?.message||''):'',ads:ads||[],requests:requests||[],adsError:(ade||re)?.message||'Não foi possível carregar os dados de publicidade.',error:''}));return}
   setS(x=>({...x,plan,biz,summary:summary?.[0]||null,advanced:advanced?.[0]||null,advancedError:advancedEnabled?(ae?.message||''):'',ads:ads||[],requests:requests||[],error:''}))
  })();return()=>{live=false}},[s.session?.user?.id,s.businessId,range])
 
@@ -67,15 +67,20 @@ export default function CommercialAnalyticsPage(){
  const previous=Number(m.previous_profile_views||0)
  const currentViews=Number(m.profile_views||0)
  const delta=deltaLabel(currentViews,previous)
- const previousAdvanced=Number(a.previous_profile_views||0)
- const advancedDelta=deltaLabel(Number(a.profile_views||0),previousAdvanced)
+ const uniqueVisitors=Number(a.unique_visitors||0)
+ const previousUniqueVisitors=Number(a.previous_unique_visitors||0)
+ const uniqueVisitorsDelta=deltaLabel(uniqueVisitors,previousUniqueVisitors)
+ const engagedInteractions=Number(a.engaged_interactions||0)
+ const actionsPerVisitor=uniqueVisitors?(engagedInteractions/uniqueVisitors).toFixed(1):'0.0'
+ const additionalViews=Math.max(0,Number(a.profile_views||0)-uniqueVisitors)
  const daily=Array.isArray(a.daily)?a.daily:[]
  const maxDaily=Math.max(1,...daily.map(x=>Number(x?.profile_views||0)))
  const channelEntries=[['WhatsApp',a.channels?.whatsapp||0],['Instagram',a.channels?.instagram||0],['Site',a.channels?.website||0]]
- const activeAds=s.ads.filter(x=>x.active&&(!x.ends_at||new Date(x.ends_at)>new Date()))
+ const activeAds=s.ads.filter(x=>x.active&&(!x.starts_at||new Date(x.starts_at)<=new Date())&&(!x.ends_at||new Date(x.ends_at)>new Date()))
  const hasCampaignHistory=s.ads.length>0
  const latestAd=s.ads[0]||null
  const pendingRequests=s.requests.filter(x=>x.status==='pending')
+ const advancedEnabled=hasPlanFeature(s.plan?.features,'advanced_analytics',false)
 
  if(s.loading)return <div className="commercial-analytics-page"><div className="ca-empty">Carregando desempenho comercial…</div></div>
  if(!s.session)return <div className="commercial-analytics-page"><div className="ca-empty"><h1>Acompanhe o desempenho da sua empresa</h1><a href="/login?next=%2Fconta%2Fanalytics">Entrar</a></div></div>
@@ -84,7 +89,9 @@ export default function CommercialAnalyticsPage(){
  if(s.plan&&!hasPlanFeature(s.plan.features,'analytics',false))return <main className="commercial-analytics-page"><div className="ca-shell"><div className="ca-locked"><span>PLANO {s.plan.name?.toUpperCase()||'GRÁTIS'}</span><h1>Transforme visitas em oportunidades</h1><p>Veja quem encontrou sua empresa, quais canais geram contatos e como suas ações estão performando.</p><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Fazer upgrade para Pro →</a></div></div></main>
 
  const business=s.businesses.find(x=>x.id===s.businessId)||s.businesses[0]
- const recommendation=leadCount===0
+ const recommendation=currentViews===0
+  ?{kind:'PRIMEIRO PASSO',title:'Comece a atrair visitas para sua empresa',text:'Seu perfil ainda não registrou visualizações no período. Complete a apresentação, adicione fotos e mantenha seus canais de contato visíveis.',action:'Melhorar minha empresa',href:'/conta'}
+  :leadCount===0
   ?{kind:'ATENÇÃO',title:'Transforme visitas em contatos',text:'Seu perfil recebeu visitas, mas ainda não registrou contatos no período. Deixe o WhatsApp em destaque e ofereça um próximo passo claro.',action:'Ir para Minha empresa',href:'/conta'}
   :Number(m.promotion_clicks||0)===0
   ?{kind:'OPORTUNIDADE',title:'Crie sua primeira promoção',text:'Você já recebe interesse no perfil. Uma oferta relevante pode criar um motivo mais forte para o cliente agir.',action:'Criar promoção',href:'/conta'}
@@ -92,18 +99,18 @@ export default function CommercialAnalyticsPage(){
   ?{kind:'OPORTUNIDADE',title:'Fortaleça sua vitrine visual',text:'Seu perfil tem tráfego, mas ainda não registra aberturas da galeria no período.',action:'Adicionar fotos',href:'/conta'}
   :{kind:'CONTINUE ASSIM',title:'Continue acompanhando seus resultados',text:'Seu perfil já está gerando interações. Use o desempenho para descobrir quais canais merecem mais atenção.',action:'Ver Minha conta',href:'/conta'}
 
- const funnel=[['Visualizações',m.profile_views||0],['WhatsApp',m.whatsapp_clicks||0],['Instagram',m.instagram_clicks||0],['Site',m.website_clicks||0]]
+ const funnel=[['Visualizações',currentViews,100],['Contatos',leadCount,Number(conversion)]]
 
  return <main className="commercial-analytics-page"><div className="ca-shell">
   <header className="ca-head">
    <div><span>DESEMPENHO COMERCIAL</span><h1>Desempenho da sua empresa</h1><p>{business?.name||'Empresa'} · veja o que aconteceu e o próximo passo recomendado.</p></div>
-   <div className="ca-actions"><a href="/conta">← Minha conta</a><select value={s.businessId} onChange={e=>{persistBusinessId(e.target.value);setS(x=>({...x,businessId:e.target.value}))}} aria-label="Empresa analisada">{s.businesses.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select><select value={range} onChange={e=>setRange(Number(e.target.value))}><option value="7">7 dias</option><option value="30">30 dias</option><option value="90">90 dias</option></select></div>
+   <div className="ca-actions"><a href="/conta">← Minha conta</a><select value={s.businessId} onChange={e=>{persistBusinessId(e.target.value);setS(x=>({...x,businessId:e.target.value}))}} aria-label="Empresa analisada">{s.businesses.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select><select value={range} onChange={e=>setRange(Number(e.target.value))} aria-label="Período do desempenho"><option value="7">7 dias</option><option value="30">30 dias</option><option value="90">90 dias</option></select></div>
   </header>
 
   <section className="ca-kpis">
    <Kpi title="Visualizações" value={fmt(m.profile_views)} note={range+' dias'} trend={delta} trendClass={deltaClass(currentViews,previous)}/>
    <Kpi title="Contatos" value={fmt(leadCount)} note="WhatsApp + Instagram + site" tone="green"/>
-   <Kpi title="Conversão" value={conversion+'%'} note="visita → contato" tone="purple"/>
+   <Kpi title="Taxa de contato" value={conversion+'%'} note="contatos ÷ visualizações" tone="purple"/>
    <Kpi title="Interações" value={fmt(m.total_interactions)} note="ações registradas" tone="amber"/>
   </section>
 
@@ -119,14 +126,14 @@ export default function CommercialAnalyticsPage(){
 
   <section className="ca-card ca-trend-card">
    <div className="ca-card-head"><div><span>TENDÊNCIA</span><h2>Visualizações ao longo do período</h2><p>Veja como o interesse evoluiu dia a dia.</p></div><span className="ca-period-chip">{range} dias</span></div>
-   <div className="ca-daily-chart ca-daily-chart-large" aria-label="Visualizações por dia">{daily.length?daily.map(row=><div className="ca-day-bar" key={row.day} title={String(row.day)+': '+fmt(row.profile_views)+' visualizações'}><i style={{height:Math.max(6,(Number(row.profile_views||0)/maxDaily)*100)+'%'}}/><small>{String(row.day||'').slice(8,10)}</small></div>):<span className="ca-empty-chart">Sem dados suficientes para desenhar a tendência.</span>}</div>
+   <div className="ca-daily-chart ca-daily-chart-large" aria-label="Visualizações por dia">{daily.length?daily.map(row=><div className="ca-day-bar" key={row.day} title={String(row.day)+': '+fmt(row.profile_views)+' visualizações'}><i style={{height:Math.max(6,(Number(row.profile_views||0)/maxDaily)*100)+'%'}}/><small>{String(row.day||'').slice(8,10)}</small></div>):<div className="ca-chart-upgrade"><strong>Tendência diária</strong><span>O detalhamento por dia está disponível nas estatísticas avançadas do Premium.</span><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}</div>
    <p className="ca-caption">{delta?'Variação de '+delta+' em visualizações em relação ao período anterior.':'Ainda não há período anterior suficiente para comparar.'}</p>
   </section>
 
   <section className="ca-grid">
    <article className="ca-card">
     <div className="ca-card-head"><div><span>FUNIL</span><h2>De visita a contato</h2><p>Entenda onde o interesse acontece no seu perfil.</p></div></div>
-    <div className="ca-funnel">{funnel.map(([label,value])=>{const max=Math.max(1,m.profile_views||1);return <div className="ca-funnel-row" key={label}><div><strong>{label}</strong><small>{fmt(value)}</small></div><div className="ca-track"><i style={{width:Math.max(3,value/max*100)+'%'}}/></div><b>{pct(value,m.profile_views||0)}%</b></div>})}</div>
+    <div className="ca-funnel">{funnel.map(([label,value,ratio],index)=>{const width=index===0?100:Math.min(100,Math.max(3,Number(ratio||0)));return <div className="ca-funnel-row" key={label}><div><strong>{label}</strong><small>{fmt(value)}</small></div><div className="ca-track"><i style={{width:width+'%'}}/></div><b>{index===0?'100.0%':Number(ratio||0).toFixed(1)+'%'}</b></div>})}</div>
    </article>
    <article className="ca-card ca-channels-card">
     <div className="ca-card-head"><div><span>CANAIS DE CONTATO</span><h2>Canais que geraram contatos</h2><p>Veja quais ações de contato aconteceram no seu perfil.</p></div></div>
@@ -137,13 +144,14 @@ export default function CommercialAnalyticsPage(){
 
   <section className="ca-card">
    <div className="ca-card-head"><div><span>PUBLICIDADE</span><h2>Banner Premium</h2><p>{hasCampaignHistory?'Resultado de exposição patrocinada.':'Este recurso ainda não foi contratado.'}</p></div><strong className={'ca-ad-status '+(hasCampaignHistory?'contracted':'not-contracted')}>{hasCampaignHistory?'CONTRATADO':'NÃO CONTRATADO'}</strong></div>
+   {s.adsError&&<p className="ca-inline-error">Os dados de publicidade não puderam ser atualizados agora. O restante do desempenho continua disponível.</p>}
    {hasCampaignHistory?<><div className="ca-ad-campaign"><div><span>{activeAds.length?'● Campanha ativa':'Última campanha'}</span><strong>{latestAd?.title||'Campanha Premium'}</strong><small>{activeAds.length?activeAds.length+' campanha(s) ativa(s)':latestAd?.ends_at?'Encerrada em '+dateTime(latestAd.ends_at):'Campanha registrada'}</small></div><a href={'/conta/publicidade?business_id='+encodeURIComponent(s.businessId)}>Gerenciar →</a></div><div className="ca-ad-metrics"><Metric label="Impressões" value={fmt(m.banner_impressions)}/><Metric label="Cliques" value={fmt(m.banner_clicks)}/><Metric label="CTR" value={pct(m.banner_clicks,m.banner_impressions)+'%'}/></div>{s.ads.length>1&&<div className="ca-ad-history">{s.ads.slice(0,3).map(ad=><div key={ad.id}><strong>{ad.title}</strong><span>{ad.active?'Ativa':'Encerrada'}{ad.starts_at?' · '+dateTime(ad.starts_at):''}</span></div>)}</div>}</>:<div className="ca-ad-not-contracted"><div><strong>Coloque sua empresa em destaque na Home</strong><p>Este espaço só passa a mostrar resultados quando sua empresa contratar o Banner Premium. Enquanto isso, não há dados de campanha para exibir.</p></div><a href={'/conta/publicidade?business_id='+encodeURIComponent(s.businessId)}>{pendingRequests.length?'Ver solicitação em análise':'Conhecer Banner Premium'} →</a></div>}
   </section>
 
   <section className="ca-card ca-advanced-card">
    <div className="ca-card-head"><div><span>ESTATÍSTICAS AVANÇADAS</span><h2>O que os dados avançados acrescentam</h2><p>Indicadores exclusivos para entender qualidade do tráfego e engajamento sem repetir os gráficos acima.</p></div><strong className="ca-premium-badge">PREMIUM</strong></div>
-   {hasPlanFeature(s.plan?.features,'advanced_analytics',false)?s.advanced?<><div className="ca-advanced-kpis"><Kpi title="Visitantes únicos" value={fmt(a.unique_visitors)} note={pct(a.unique_visitors,a.profile_views||0)+'% das visualizações'} /><Kpi title="Engajamentos" value={fmt(a.engaged_interactions)} note="interações qualificadas" tone="green"/><Kpi title="Taxa de engajamento" value={Number(a.engagement_rate||0).toFixed(1)+'%'} note="contato / visualização" tone="purple"/><Kpi title="Variação" value={advancedDelta||'—'} note="visualizações vs. período anterior" tone="amber"/></div><div className="ca-advanced-summary"><div><span>Visitantes recorrentes</span><strong>{Math.max(0,Number(a.profile_views||0)-Number(a.unique_visitors||0)).toLocaleString('pt-BR')}</strong><small>diferença entre visualizações e visitantes únicos</small></div><div><span>Qualidade do tráfego</span><strong>{Number(a.engagement_rate||0).toFixed(1)}%</strong><small>engajamentos em relação às visualizações</small></div><div><span>Comparação</span><strong>{advancedDelta||'—'}</strong><small>variação de visualizações no período</small></div></div></>:<div className="ca-advanced-loading">Carregando estatísticas avançadas…</div>:<div className="ca-advanced-locked"><span>EXCLUSIVO DO PREMIUM</span><h3>Estatísticas avançadas</h3><p>O Premium libera visitantes únicos, engajamento e comparação de períodos para aprofundar a leitura do desempenho.</p><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}
-   {s.advancedError&&<p className="ca-advanced-error">{s.advancedError}</p>}
+   {advancedEnabled?s.advanced?<><div className="ca-advanced-kpis"><Kpi title="Visitantes únicos" value={fmt(uniqueVisitors)} note="sessões únicas com visita ao perfil" trend={uniqueVisitorsDelta} trendClass={deltaClass(uniqueVisitors,previousUniqueVisitors)} /><Kpi title="Engajamentos" value={fmt(engagedInteractions)} note="interações qualificadas" tone="green"/><Kpi title="Ações por visitante" value={actionsPerVisitor} note="interações por visitante único" tone="purple"/><Kpi title="Visualizações adicionais" value={fmt(additionalViews)} note="estimativa; não identifica pessoas" tone="amber"/></div><p className="ca-advanced-note">Os dados avançados ajudam a entender profundidade de interação. “Visualizações adicionais” é a diferença entre visualizações e sessões únicas, não uma contagem de pessoas recorrentes.</p></>:<div className="ca-advanced-loading">Carregando estatísticas avançadas…</div>:<div className="ca-advanced-locked"><span>EXCLUSIVO DO PREMIUM</span><h3>Estatísticas avançadas</h3><p>O Premium libera visitantes únicos, engajamentos, ações por visitante e indicadores de profundidade de interação.</p><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}
+   {s.advancedError&&<p className="ca-advanced-error">Não foi possível carregar as estatísticas avançadas agora. Os demais indicadores continuam disponíveis.</p>}
   </section>
 
   <section className="ca-card ca-opportunities-card">
