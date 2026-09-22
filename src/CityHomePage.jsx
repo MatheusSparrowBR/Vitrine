@@ -93,7 +93,7 @@ export default function CityHomePage({citySlug='laguna'}){
  const categoryHref=c=>base+'/empresas?categoria='+encodeURIComponent(c.slug)
  const needFallbackHref=names=>{const found=categories.find(c=>names.some(name=>String(c.name||'').toLowerCase()===name.toLowerCase()));return found?base+'/empresas?categoria='+encodeURIComponent(found.slug):base+'/empresas'}
  const needHref=need=>need?.slug?base+'/empresas?necessidade='+encodeURIComponent(need.slug):base+'/empresas'
- const visibleNeeds=needs.filter(need=>need?.active!==false).slice(0,4)
+ const visibleNeeds=needs.filter(need=>need?.active!==false)
  const quickCategories=categories.slice(0,4)
  const todayLabel=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date()).replace('.','').toUpperCase()
  const formatEventDate=value=>{const date=new Date(`${value}T00:00:00`);return Number.isNaN(date.getTime())?{day:'--',month:'--'}:{day:date.toLocaleDateString('pt-BR',{day:'2-digit'}),month:date.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}}
