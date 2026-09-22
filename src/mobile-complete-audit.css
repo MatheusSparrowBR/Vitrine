@@ -1,0 +1,134 @@
+/* Mobile-only complete UX audit: layout safety, touch targets, forms, cards, overlays and dense admin/account views. */
+@media(max-width:760px){
+  html,body,#root{width:100%;max-width:100%;overflow-x:clip}
+  button,a,input,select,textarea{max-width:100%}
+  input,select,textarea{font-size:16px}
+  button,a{touch-action:manipulation}
+
+  /* Public header */
+  .vl-site-header-inner,.mbl-nav,.mbp-nav{min-width:0;box-sizing:border-box}
+  .vl-site-brand,.mbp-brand,.mbl-brand{min-width:0;max-width:55vw;overflow:hidden}
+  .vl-site-brand-logo{max-width:100%;height:auto}
+  .vl-site-mobile-panel{width:100%;box-sizing:border-box}
+  .vl-site-mobile-panel nav a{min-height:44px;display:flex;align-items:center}
+
+  /* Public catalog/profile pages */
+  .page,.mbl-page,.mbp-page,.vl-events-page{width:100%;box-sizing:border-box;overflow:visible}
+  .page-title h1,.profile-head h1,.mbp-company-copy h1,.mbl-hero h1{overflow-wrap:anywhere}
+  .toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+  .toolbar select{height:44px;width:100%;min-width:0}
+  .business-card,.promotion-card,.profile-card,.mbp-main-card{min-width:0}
+  .business-cover-image,.promotion-image-wrap img,.profile-gallery img,.profile-gallery video,.item-card img{max-width:100%}
+  .profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .profile-actions a{min-height:44px;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+  .profile-actions .primary{grid-column:1/-1}
+  .profile-gallery img,.profile-gallery video{height:180px}
+  .public-hours-grid{min-width:0}
+  .public-hour{min-width:0}
+  .public-hour span{overflow-wrap:anywhere}
+  .item-card-body{min-width:0}
+  .item-card-body h3,.item-card-body p{overflow-wrap:anywhere}
+
+  /* Company profile */
+  .mbp-contact-card{min-height:54px}
+  .mbp-primary-cta,.mbp-action-row a,.mbp-action-row button{min-height:48px}
+  .mbp-action-row{gap:8px}
+  .mbp-tabs{position:sticky;top:68px;z-index:20}
+  .mbp-tabs button{min-height:48px;padding:0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mbp-side-card{min-width:0;overflow-wrap:anywhere}
+  .mbp-hours-list>div{min-width:0}
+  .mbp-hours-list span{overflow-wrap:anywhere;text-align:right}
+  .vl-photo-lightbox-panel{width:100%;max-height:calc(100dvh - 20px)}
+  .vl-photo-lightbox-view{height:55dvh;min-height:240px}
+
+  /* Account / owner workspace */
+  .account-workspace-app,.account-workspace,.account-content,.account-section,.account-card{min-width:0;box-sizing:border-box}
+  .account-topbar-inner{min-width:0}
+  .account-top-actions{min-width:0}
+  .account-top-actions>a,.account-top-actions>button{min-height:42px}
+  .account-sidebar-nav{min-width:0}
+  .account-nav-item{min-height:48px}
+  .account-section-header h1{overflow-wrap:anywhere}
+  .account-overview-info,.account-overview-actions,.account-card-title{min-width:0}
+  .account-overview-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .account-overview-actions button,.account-overview-actions a{min-height:44px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;margin:0}
+  .account-overview-actions button:first-child{grid-column:1/-1}
+  .account-form-grid{min-width:0}
+  .account-field input,.account-field select,.account-field textarea{min-width:0;box-sizing:border-box}
+  .account-form-grid .account-field.full{min-width:0}
+  .account-media-grid,.account-upload-previews,.account-gallery-card{min-width:0}
+  .account-gallery-grid figure{min-width:0}
+  .account-gallery-grid figure img,.account-gallery-grid figure video{max-width:100%;height:120px}
+  .account-list-row{min-width:0}
+  .account-list-main{min-width:0}
+  .account-list-main strong,.account-list-main p{overflow-wrap:anywhere}
+  .account-list-side{min-width:0;flex-wrap:wrap}
+  .account-unsaved-bar{left:10px!important;right:10px!important;bottom:10px!important;flex-wrap:wrap}
+  .account-unsaved-bar>*{min-width:0}
+
+  /* Auth, profile and registration */
+  .vl-auth-card,.user-profile-card,.business-registration-card{min-width:0;box-sizing:border-box}
+  .auth-brand-row{min-width:0}
+  .auth-secure{max-width:45vw;overflow:hidden;text-overflow:ellipsis}
+  .auth-field input{font-size:16px}
+  .user-profile-actions{justify-content:stretch}
+  .user-profile-actions button,.user-profile-primary{width:100%;min-height:46px}
+  .user-avatar-row{min-width:0}
+  .business-registration-grid,.business-registration-summary{min-width:0}
+  .business-registration-actions .btn{min-height:46px}
+
+  /* Plans / billing */
+  .plans-heading h1{overflow-wrap:anywhere}
+  .billing-bar,.billing-current,.billing-after-grid,.billing-scheduled,.plan-message{box-sizing:border-box;min-width:0}
+  .billing-toggle{width:100%}
+  .billing-toggle button{flex:1;min-height:44px}
+  .plan-card{min-width:0}
+  .plan-card button{min-height:46px;width:100%}
+
+  /* Events and public cards */
+  .vl-event{min-width:0}
+  .vl-event h3,.vl-event p,.vl-event-description{overflow-wrap:anywhere}
+  .vl-events-link{min-height:44px;display:inline-flex;align-items:center}
+
+  /* Admin */
+  .admin-v2-content{min-width:0;overflow:visible}
+  .admin-v2-heading,.admin-v2-section-head,.admin-v2-form-meta{min-width:0}
+  .admin-v2-heading h1,.admin-v2-section-head h2{overflow-wrap:anywhere}
+  .admin-v2-actions{width:100%}
+  .admin-v2-btn{min-height:42px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+  .admin-v2-form-panel input,.admin-v2-form-panel select,.admin-v2-form-panel textarea{min-width:0;font-size:16px}
+  .admin-v2-table-wrap,.au-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-v2-management-tabs{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-v2-management-tabs button{min-height:42px}
+  .au-toolbar input{font-size:16px;min-width:0}
+  .au-tabs{max-width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .au-tabs button{min-height:42px;white-space:nowrap;flex:none}
+  .au-actions button{min-height:42px}
+  .aa-chart{max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .aa-action-grid button,.aa-action-grid a{min-height:44px}
+  .ad-admin-controls input,.ad-admin-controls select{font-size:16px;min-width:0}
+  .ad-admin-controls .admin-v2-btn{min-height:42px}
+  .ad-admin-request-actions button{min-height:42px}
+  .asa-controls input{font-size:16px;min-width:0}
+  .asa-buttons>*{min-height:42px}
+
+  /* Generic overlays/toasts */
+  .modal-backdrop,.admin-tools-backdrop{padding:10px;align-items:start}
+  .modal,.vl-admin-tools-modal{width:100%;max-width:100%;max-height:calc(100dvh - 20px);margin-top:10px;padding:16px;box-sizing:border-box}
+  .modal .form-actions,.row-actions{display:grid;grid-template-columns:1fr 1fr}
+  .modal .form-actions>* ,.row-actions>*{min-height:44px}
+  .toast{left:10px;right:10px;bottom:10px;max-width:none;text-align:center}
+}
+
+@media(max-width:480px){
+  .vl-site-brand{max-width:48vw}
+  .mbl-brand,.mbp-brand{max-width:52vw}
+  .profile-actions{grid-template-columns:1fr}
+  .profile-actions .primary{grid-column:auto}
+  .account-overview-actions{grid-template-columns:1fr}
+  .account-overview-actions button:first-child{grid-column:auto}
+  .account-gallery-grid{grid-template-columns:1fr 1fr}
+  .mbp-tabs{top:64px}
+  .mbp-tabs button{font-size:9px}
+  .modal .form-actions,.row-actions{grid-template-columns:1fr}
+}
