@@ -21,3 +21,19 @@ test('comparações exibidas usam apenas métricas com base comparável',()=>{
  assert.ok(!page.includes('conversionChange'))
  assert.ok(css.includes('.ca-advanced-summary'))
 })
+test('métricas e estados do desempenho não sugerem dados que a base não mede',()=>{
+ assert.ok(t.includes('Taxa de contato'))
+ assert.ok(t.includes("const funnel=[['Visualizações',currentViews,100],['Contatos',leadCount,Number(conversion)]]"))
+ assert.ok(t.includes('Visualizações adicionais'))
+ assert.ok(t.includes('Ações por visitante'))
+ assert.ok(t.includes('currentViews===0'))
+ assert.ok(t.includes('adsError'))
+ assert.ok(!t.includes('Visitantes recorrentes'))
+ assert.ok(!t.includes('ca-advanced-summary'))
+})
+
+test('tendência avançada explica corretamente a limitação do plano',()=>{
+ assert.ok(t.includes('Tendência diária'))
+ assert.ok(t.includes('Conhecer o Premium'))
+ assert.ok(t.includes('ca-chart-upgrade'))
+})
