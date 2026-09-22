@@ -27,3 +27,48 @@
 @media(max-width:1100px){.account-workspace{grid-template-columns:235px minmax(0,1fr)}.account-stats-grid{grid-template-columns:1fr 1fr}.account-quick-grid{grid-template-columns:1fr}.account-media-grid{grid-template-columns:1fr}.account-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:820px){.account-topbar{height:auto}.account-topbar-inner{min-height:72px;padding:10px 16px;flex-wrap:wrap}.account-top-actions{width:100%;overflow:auto}.account-top-actions .account-city-pill{display:none}.account-mobile-toggle{display:block!important}.account-sidebar{position:fixed;left:16px;top:88px;bottom:16px;width:min(320px,calc(100vw - 32px));z-index:1200;transform:translateX(-120%);transition:.2s ease;overflow:auto}.account-sidebar.open{transform:translateX(0)}.account-sidebar-head>button{display:block}.account-workspace{display:block;padding:25px 16px 56px}.account-section-header{align-items:flex-start}.account-section-header h1{font-size:32px}.account-overview-info{display:grid;gap:16px}.account-overview-actions{align-items:center}.account-form-grid{grid-template-columns:1fr}.account-field.full{grid-column:auto}.account-gallery-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.account-top-actions>a{padding:8px 9px;font-size:11px}.account-top-actions>button:not(.account-mobile-toggle){padding:8px 9px}.account-overview-cover{height:190px}.account-overview-info{padding:38px 18px 18px}.account-overview-brand{left:18px;width:72px;height:72px}.account-card{padding:17px;border-radius:17px}.account-card-title{display:grid;gap:12px}.account-section-header{display:grid;gap:14px}.account-section-header .account-primary-btn{width:100%}.account-gallery-action{justify-items:stretch;min-width:0;width:100%}.account-gallery-action .account-primary-btn{width:100%;box-sizing:border-box}.account-gallery-action .vl-media-guidance{max-width:none;text-align:left}.account-stats-grid{grid-template-columns:1fr 1fr}.account-stat-card{padding:14px}.account-stat-card strong{font-size:23px}.account-quick-grid>button{grid-template-columns:32px 1fr 15px}.account-gallery-grid{grid-template-columns:1fr 1fr}.account-list-row{grid-template-columns:40px minmax(0,1fr)}.account-list-side{grid-column:2;justify-content:flex-start}.account-login-card,.account-empty-card{padding:26px 20px}.account-login-card h1,.account-empty-card h1{font-size:24px}}
+
+/* Visão geral: transformar o painel em guia de ação */
+.account-nav-section-label{display:block;padding:8px 10px 2px;margin-top:5px;color:#8b98a9;font-size:8px;font-weight:900;letter-spacing:1px}
+.account-nav-section-label-grow{margin-top:9px}
+.account-status-badge small{display:block;margin-left:3px;color:#7890a7;font-size:8px;font-weight:800}
+.account-next-step-card{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:14px;margin:0 0 16px;padding:18px 19px;border:1px solid #cfe0f6;border-radius:18px;background:linear-gradient(135deg,#eef6ff 0,#fff 68%);box-shadow:0 12px 30px rgba(31,109,242,.07)}
+.account-next-step-icon{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#fff;color:var(--aw-blue);border:1px solid #d7e5fa;box-shadow:0 7px 18px rgba(31,109,242,.08)}
+.account-next-step-copy>span{display:block;color:var(--aw-blue);font-size:8px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}
+.account-next-step-copy h2{margin:4px 0 4px;color:var(--aw-ink);font-size:17px;letter-spacing:-.35px}
+.account-next-step-copy p{margin:0;color:#6f8094;font-size:10px;line-height:1.45;max-width:660px}
+.account-next-step-card>button{display:inline-flex;align-items:center;gap:13px;border:1px solid var(--aw-blue);background:var(--aw-blue);color:#fff;border-radius:11px;padding:11px 13px;font-size:10px;font-weight:900;cursor:pointer;box-shadow:0 9px 20px rgba(31,109,242,.18);white-space:nowrap}
+.account-next-step-card>button:hover{filter:brightness(1.03);transform:translateY(-1px)}
+.account-next-step-card>button b{font-size:13px}
+.account-completion-inline-status{display:inline-flex;vertical-align:middle;margin-left:7px;padding:4px 7px;border-radius:999px;background:#edf8f2;color:#268457;font-size:7px;letter-spacing:.4px;font-weight:900}
+.account-overview-performance{margin-top:16px;padding:18px;border:1px solid var(--aw-border);border-radius:20px;background:#fff;box-shadow:var(--aw-shadow)}
+.account-performance-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:2px}
+.account-performance-head h2{margin:4px 0 4px;font-size:19px;letter-spacing:-.45px}
+.account-performance-head p{margin:0;color:var(--aw-muted);font-size:10px;line-height:1.45}
+.account-performance-head button{border:1px solid #d7e2ee;background:#fff;color:#1f6df2;border-radius:10px;padding:9px 11px;font-size:9px;font-weight:900;cursor:pointer;white-space:nowrap}
+.account-performance-head button:hover{background:#f5f9ff;border-color:#bed3f4}
+.account-overview-performance .account-stats-grid{margin-top:12px}
+.account-next-actions{margin-top:16px}
+.account-next-actions-title{display:block;margin:0 0 8px 2px;color:#718298;font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.account-next-actions .account-quick-grid{margin-top:0;grid-template-columns:repeat(4,minmax(0,1fr))}
+.account-next-actions .account-quick-grid>button{min-height:92px}
+.account-next-actions .account-quick-grid>button:nth-child(4)>span{background:#f2ecff;color:#7550bf}
+
+@media(max-width:900px){
+ .account-next-step-card{grid-template-columns:44px 1fr}
+ .account-next-step-icon{width:44px;height:44px;border-radius:13px}
+ .account-next-step-card>button{grid-column:2;justify-self:start}
+ .account-next-actions .account-quick-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+ .account-next-step-card{grid-template-columns:42px 1fr;padding:14px;gap:10px}
+ .account-next-step-icon{width:42px;height:42px;border-radius:12px}
+ .account-next-step-copy h2{font-size:15px}
+ .account-next-step-copy p{font-size:9px}
+ .account-next-step-card>button{grid-column:1/-1;width:100%;justify-content:center}
+ .account-performance-head{display:grid;gap:10px}
+ .account-performance-head button{justify-self:start}
+ .account-overview-performance{padding:15px;border-radius:17px}
+ .account-next-actions .account-quick-grid{grid-template-columns:1fr}
+ .account-next-actions .account-quick-grid>button{min-height:78px}
+}
