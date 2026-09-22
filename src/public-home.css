@@ -174,3 +174,11 @@
  .lvp-nav.is-open{justify-content:center;gap:16px;margin-left:0;padding:8px 0}
  .lvp-actions.is-open{justify-content:center;padding-bottom:4px}
 }
+
+/* Descoberta rápida no Hero */
+.lvp-discovery-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:11px}
+.lvp-discovery-actions>span{color:#9fc0d8;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.lvp-discovery-actions a{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);color:#eef7ff;font-size:8px;font-weight:850;text-decoration:none}
+.lvp-discovery-actions a:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28)}
+.lvp-discovery-actions a:last-child{border-color:rgba(102,182,255,.4);color:#bfe1ff}
+@media(max-width:760px){.lvp-discovery-actions{gap:6px}.lvp-discovery-actions>span{width:100%;margin-bottom:1px}.lvp-discovery-actions a{font-size:8px;padding:0 8px}}
