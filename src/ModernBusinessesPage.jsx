@@ -1,7 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
 import './search-featured.css'
-import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
@@ -28,6 +27,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const[q,setQ]=useState('')
  const[sort,setSort]=useState('relevancia')
  const[loading,setLoading]=useState(true)
+ const[loadError,setLoadError]=useState('')
 
  useEffect(()=>{let live=true;(async()=>{
   const params=new URLSearchParams(location.search)
@@ -36,6 +36,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   const initialSort=['relevancia','recentes','avaliacao'].includes(params.get('ordenar'))?params.get('ordenar'):'relevancia'
   setQ(initialQ);setSort(initialSort);setCat(initialCat)
   try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}
+  setLoadError('')
   if(!db){setCity({id:'fallback',name:'Laguna',state:'SC',slug:citySlug});setCategories(fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()})));setCat(initialCat);setLoading(false);return}
   const{data:c}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle()
   if(!live)return
@@ -47,10 +48,11 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   ])
   const loaded=cs.data?.length?cs.data:fallbackCats.map(([name,icon],i)=>({id:i,name,icon,slug:name.toLowerCase()}))
   const publicBusinesses=(b.data||[]).map(row=>({...row,categories:row.category_name?{name:row.category_name,slug:row.category_slug}:null}))
-  const reviewMap=await loadPublicBusinessReviewSummaries(db,publicBusinesses.map(row=>row.id))
+  let reviewMap={}
+  try{const ids=publicBusinesses.map(row=>row.id).filter(Boolean);if(ids.length){const reviewRes=await db.rpc('get_public_business_review_summaries',{p_business_ids:ids});if(!reviewRes.error)reviewMap=Object.fromEntries((reviewRes.data||[]).map(row=>[row.business_id,{avg:Number(row.avg_rating)||0,count:Number(row.review_count)||0}]))}}catch{}
   if(!live)return
   setBusinesses(publicBusinesses);setRatings(reviewMap);setCategories(loaded);setCat(initialCat&&loaded.some(x=>x.slug===initialCat)?initialCat:'');setLoading(false)
- })();return()=>{live=false}},[citySlug])
+ }catch(err){if(!live)return;console.error('[VitrineLocal] erro ao carregar empresas:',err);setLoadError(err?.message||'Não foi possível carregar as empresas.');setLoading(false)}})();return()=>{live=false}},[citySlug])
 
  useEffect(()=>{try{sessionStorage.setItem('vl_catalog_return_url',location.pathname+location.search)}catch{}},[cat,q,sort])
 
@@ -81,6 +83,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  const returnUrl=()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${city.slug}/empresas`)?stored:`/${city.slug}/empresas`}catch{return`/${city.slug}/empresas`}}
 
  if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
+ if(loadError)return <main className="mbl-shell"><div className="mbl-error"><h1>Não foi possível carregar as empresas.</h1><p>{loadError}</p><button type="button" onClick={()=>location.reload()}>Tentar novamente</button></div></main>
  if(!city)return <main className="mbl-shell"><div className="mbl-error"><h1>Cidade não encontrada.</h1><a href="/laguna">Voltar</a></div></main>
 
  return <div className="mbl-shell"><main className="mbl-page">
