@@ -54,3 +54,12 @@ test('fase 2.3 não exibe endpoint bruto na interface',()=>{
  const ui=read('src/PushNotificationSettings.jsx')
  assert.doesNotMatch(ui,/subscription\.endpoint/)
 })
+
+
+test('fase 2.5 oferece envio de teste somente com sessão autenticada',()=>{
+ const js=read('src/PushNotificationSettings.jsx')
+ assert.match(js,/supabase\.functions\.invoke\('send-push-test'/)
+ assert.match(js,/session\?\.user\?\.id/)
+ assert.match(js,/Enviar teste/)
+ assert.doesNotMatch(js,/VAPID_PRIVATE_KEY/)
+})
