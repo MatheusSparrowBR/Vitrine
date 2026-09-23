@@ -68,3 +68,14 @@ test('featured logo markup has inline intrinsic containment fallback',()=>{
  const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
  assert.match(page,/className='lvp-business-logo'[\s\S]*style=\{\{width:'auto',height:'auto',maxWidth:'100%',maxHeight:'100%',objectFit:'contain',objectPosition:'center',transform:'none'\}\}/)
 })
+
+
+test('featured logos use an isolated contained visual instead of img crop rules',()=>{
+ const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
+ const css=fs.readFileSync('src/public-home.css','utf8')
+ assert.match(page,/lvp-business-logo-visual/)
+ assert.match(page,/backgroundImage/)
+ assert.match(css,/\.lvp-business-logo-visual\{[\s\S]*background-size:contain!important/)
+ assert.match(css,/\.lvp-business-logo-visual\{[\s\S]*background-position:center!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*overflow:hidden!important/)
+})
