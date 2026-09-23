@@ -71,3 +71,5 @@
  .aa-action-grid{grid-template-columns:1fr 1fr;gap:8px}
  .aa-operational{grid-template-columns:1fr 1fr}
 }
+
+.aa-live-status{display:block;margin-top:6px;font-size:8px!important;font-weight:800;color:#8794a5!important}.aa-live-status.connected{color:#18a36a!important}
