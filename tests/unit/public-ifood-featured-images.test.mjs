@@ -6,7 +6,7 @@ test('homepage featured businesses loads profile logos and uses them before cove
  const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
  assert.match(page,/cover_url,logo_url,address,featured/)
  assert.match(page,/b\.logo_url\?/)
- assert.match(page,/className='lvp-business-logo'/)
+ assert.match(page,/lvp-business-logo-visual/)
 })
 
 test('featured business profile images are centered and fully visible',()=>{
@@ -45,29 +45,10 @@ test('public business directory exposes iFood URLs for active businesses',()=>{
 })
 
 
-test('mobile featured business logos use a fixed contain viewport',()=>{
- const css=fs.readFileSync('src/public-home.css','utf8')
- assert.match(css,/@media\(max-width:760px\)/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*height:170px!important/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*width:100%\!important/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*object-fit:contain\!important/)
- assert.match(css,/aspect-ratio:auto\!important/)
-})
 
 
-test('mobile featured logos preserve intrinsic image ratio',()=>{
- const css=fs.readFileSync('src/public-home.css','utf8')
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*width:auto!important/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*height:auto!important/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-width:100%!important/)
- assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-height:100%!important/)
-})
 
 
-test('featured logo markup has inline intrinsic containment fallback',()=>{
- const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
- assert.match(page,/className='lvp-business-logo'[\s\S]*style=\{\{width:'auto',height:'auto',maxWidth:'100%',maxHeight:'100%',objectFit:'contain',objectPosition:'center',transform:'none'\}\}/)
-})
 
 
 test('featured logos use an isolated contained visual instead of img crop rules',()=>{
