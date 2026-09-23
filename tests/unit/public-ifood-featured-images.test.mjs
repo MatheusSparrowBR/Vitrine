@@ -27,3 +27,10 @@ test('modern public business profile exposes iFood only when a link exists',()=>
  assert.match(page,/iFood/)
  assert.match(css,/\.mbp-ifood-action/)
 })
+
+
+test('public business directory keeps guest reads on the public view',()=>{
+ const migration=fs.readFileSync('supabase/migrations/20260923093000_fix_public_business_directory_guest_access.sql','utf8')
+ assert.match(migration,/public_business_directory set \(security_invoker = false\)/)
+ assert.match(migration,/grant select on public\.public_business_directory to anon, authenticated/)
+})
