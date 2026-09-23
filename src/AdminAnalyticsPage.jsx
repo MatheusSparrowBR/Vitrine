@@ -24,6 +24,8 @@ const dateKey=value=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paul
 export default function AdminAnalyticsPage(){
  const[s,setS]=useState({checking:true,allowed:false,session:null,events:[],previousEvents:[],businesses:[],plans:[],subs:[],range:30,error:''})
  const[range,setRange]=useState(30)
+ const[refreshTick,setRefreshTick]=useState(0)
+ const[realtimeStatus,setRealtimeStatus]=useState('connecting')
 
  useEffect(()=>{let live=true;(async()=>{
   if(!db){setS(x=>({...x,checking:false,error:'Supabase não está configurado.'}));return}
@@ -53,7 +55,25 @@ export default function AdminAnalyticsPage(){
   const previousEvents=allEvents.filter(e=>new Date(e.created_at)<currentStart)
   if(ee||b.error||pl.error||sub.error){setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],range,error:(ee||b.error||pl.error||sub.error)?.message||'Não foi possível carregar os analytics.'}));return}
   setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],range,error:''}))
- })();return()=>{live=false}},[s.allowed,s.session?.user?.id,range])
+ })();return()=>{live=false}},[s.allowed,s.session?.user?.id,range,refreshTick])
+
+ useEffect(()=>{
+  if(!db||!s.allowed)return
+  let timer=null
+  const channel=db.channel('admin-analytics-events')
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'analytics_events'},()=>{
+    if(timer)clearTimeout(timer)
+    timer=setTimeout(()=>setRefreshTick(v=>v+1),1200)
+   })
+   .subscribe(status=>{
+    if(status==='SUBSCRIBED')setRealtimeStatus('connected')
+    else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setRealtimeStatus('unavailable')
+   })
+  return()=>{
+   if(timer)clearTimeout(timer)
+   db.removeChannel(channel)
+  }
+ },[s.allowed])
 
  const m=useMemo(()=>{
   const views=eventCount(s.events,'profile_view')
@@ -121,7 +141,7 @@ export default function AdminAnalyticsPage(){
 
  return <AdminShell active="analytics" title="Analytics" description="Descoberta, contatos, desempenho comercial e receita estimada." email={s.session?.user?.email}>
    <div className="aa-toolbar">
-    <div><span className="admin-v2-kicker">PERÍODO ANALISADO</span><strong>{periodText}</strong><small>Compare desempenho recente com o período imediatamente anterior.</small></div>
+    <div><span className="admin-v2-kicker">PERÍODO ANALISADO</span><strong>{periodText}</strong><small>Compare desempenho recente com o período imediatamente anterior.</small><small className={realtimeStatus==='connected'?'aa-live-status connected':'aa-live-status'}>{realtimeStatus==='connected'?'● Atualização automática ativa':realtimeStatus==='unavailable'?'○ Atualização automática indisponível':'○ Conectando atualização automática…'}</small></div>
     <label>Período<select value={range} onChange={e=>setRange(Number(e.target.value))} aria-label="Período dos analytics"><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select></label>
    </div>
 
