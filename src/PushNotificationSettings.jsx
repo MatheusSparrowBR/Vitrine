@@ -18,6 +18,7 @@ export default function PushNotificationSettings(){
  const[busy,setBusy]=useState(false)
  const[message,setMessage]=useState('')
  const[error,setError]=useState(false)
+ const[userId,setUserId]=useState(null)
 
  async function refresh(){
   if(!isPushSupported()){setStatus('unsupported');return}
@@ -47,6 +48,19 @@ export default function PushNotificationSettings(){
   finally{setBusy(false)}
  }
 
+ async function sendTest(){
+  setBusy(true);setMessage('');setError(false)
+  try{
+   const{data:{session}}=await supabase.auth.getSession()
+   if(!session?.user?.id)throw new Error('Sua sessão expirou. Entre novamente para testar as notificações.')
+   const{data,error:invokeError}=await supabase.functions.invoke('send-push-test',{body:{}})
+   if(invokeError)throw invokeError
+   if(!data?.sent)throw new Error('Nenhuma subscription ativa foi encontrada neste dispositivo.')
+   setMessage('Notificação de teste enviada. Verifique seu dispositivo.')
+  }catch(err){setError(true);setMessage(err?.message||'Não foi possível enviar a notificação de teste.')}
+  finally{setBusy(false)}
+ }
+
  async function disable(){
   if(!userId)return
   setBusy(true);setMessage('');setError(false)
@@ -69,6 +83,6 @@ export default function PushNotificationSettings(){
    {status==='unsupported'&&<div className="push-settings-status is-muted" role="status">○ Este navegador não oferece suporte a notificações push</div>}
    {message&&<div className={'push-settings-message '+(error?'is-error':'')} role="status">{message}</div>}
   </div>
-  {status==='active'?<button className="account-secondary-btn push-settings-button" type="button" onClick={disable} disabled={busy}>{busy?'Desativando…':'Desativar neste dispositivo'}</button>:status==='unsupported'||status==='denied'?null:<button className="account-primary-btn push-settings-button" type="button" onClick={enable} disabled={busy}>{busy?'Ativando…':'Ativar notificações'}</button>}
+  {status==='active'?<div className="push-settings-actions"><button className="account-secondary-btn push-settings-button" type="button" onClick={sendTest} disabled={busy}>{busy?'Enviando…':'Enviar teste'}</button><button className="account-secondary-btn push-settings-button" type="button" onClick={disable} disabled={busy}>{busy?'Desativando…':'Desativar neste dispositivo'}</button></div>:status==='unsupported'||status==='denied'?null:<button className="account-primary-btn push-settings-button" type="button" onClick={enable} disabled={busy}>{busy?'Ativando…':'Ativar notificações'}</button>}
  </section>
 }
