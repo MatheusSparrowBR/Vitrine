@@ -9,7 +9,7 @@ test('fase 2.2 solicita permissão somente por ação explícita e salva subscri
  assert.match(js,/Notification\.requestPermission\(\)/)
  assert.match(js,/onClick=\{enable\}/)
  assert.match(js,/syncPushSubscription/)
- assert.match(js,/upsert\(/)
+ assert.match(js,/syncPushSubscription\(session\.user\.id\)/)
  assert.match(js,/user_id:session\.user\.id/)
 })
 
