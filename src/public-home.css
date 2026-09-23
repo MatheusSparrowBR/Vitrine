@@ -315,17 +315,21 @@
 .lvp-business-image .lvp-business-logo{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain!important;object-position:center!important;padding:0;transform:none!important}
 
 @media(max-width:760px){
-  /* Mobile featured cards use a fixed media viewport so the profile logo can be contained reliably. */
+  /* Mobile featured cards: scale each profile logo to its intrinsic ratio so the whole image remains visible. */
   .lvp-business-image.has-profile-logo{
     height:170px!important;
     min-height:170px!important;
     max-height:170px!important;
     aspect-ratio:auto!important;
     padding:14px!important;
+    display:grid!important;
+    place-items:center!important;
+    overflow:hidden!important;
   }
   .lvp-business-image.has-profile-logo .lvp-business-logo{
-    width:100%!important;
-    height:100%!important;
+    display:block!important;
+    width:auto!important;
+    height:auto!important;
     max-width:100%!important;
     max-height:100%!important;
     object-fit:contain!important;
