@@ -178,3 +178,5 @@
   .mbp-gallery-main{height:170px!important}
   .mbp-contact-card{min-height:52px!important}
 }
+
+.mbp-ifood-action{gap:7px}.mbp-ifood-mark{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:#ea1d2c;color:#fff;font-size:13px;font-weight:950;line-height:1;font-style:italic}.mbp-ifood-action:hover .mbp-ifood-mark{filter:brightness(.96)}
