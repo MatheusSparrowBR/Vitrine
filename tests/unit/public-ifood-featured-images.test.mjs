@@ -53,3 +53,12 @@ test('mobile featured business logos use a fixed contain viewport',()=>{
  assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*object-fit:contain\!important/)
  assert.match(css,/aspect-ratio:auto\!important/)
 })
+
+
+test('mobile featured logos preserve intrinsic image ratio',()=>{
+ const css=fs.readFileSync('src/public-home.css','utf8')
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*width:auto!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*height:auto!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-width:100%!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-height:100%!important/)
+})
