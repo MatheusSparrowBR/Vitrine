@@ -43,3 +43,13 @@ test('public business directory exposes iFood URLs for active businesses',()=>{
  assert.match(migration,/b\.ifood_url/)
  assert.match(migration,/create or replace view public\.public_business_directory/)
 })
+
+
+test('mobile featured business logos use a fixed contain viewport',()=>{
+ const css=fs.readFileSync('src/public-home.css','utf8')
+ assert.match(css,/@media\(max-width:760px\)/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*height:170px!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*width:100%\!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*object-fit:contain\!important/)
+ assert.match(css,/aspect-ratio:auto\!important/)
+})

@@ -311,5 +311,27 @@
 }
 
 /* Featured businesses: profile/logo image stays fully visible and centered. */
-.lvp-business-image.has-profile-logo{display:grid;place-items:center;background:#fff;padding:14px;box-sizing:border-box;aspect-ratio:auto!important}
-.lvp-business-image .lvp-business-logo{display:block;width:auto!important;height:auto!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;padding:0;transform:none!important;justify-self:center;align-self:center}
+.lvp-business-image.has-profile-logo{display:grid;place-items:center;background:#fff;padding:14px;box-sizing:border-box}
+.lvp-business-image .lvp-business-logo{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain!important;object-position:center!important;padding:0;transform:none!important}
+
+@media(max-width:760px){
+  /* Mobile featured cards use a fixed media viewport so the profile logo can be contained reliably. */
+  .lvp-business-image.has-profile-logo{
+    height:170px!important;
+    min-height:170px!important;
+    max-height:170px!important;
+    aspect-ratio:auto!important;
+    padding:14px!important;
+  }
+  .lvp-business-image.has-profile-logo .lvp-business-logo{
+    width:100%!important;
+    height:100%!important;
+    max-width:100%!important;
+    max-height:100%!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    padding:0!important;
+    margin:0!important;
+    transform:none!important;
+  }
+}
