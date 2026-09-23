@@ -1,3 +1,5 @@
+import{supabase}from'./supabase-client.js'
+
 const VAPID_PUBLIC_KEY=import.meta.env.VITE_VAPID_PUBLIC_KEY||''
 
 function base64UrlToUint8Array(value){
@@ -41,9 +43,9 @@ export async function syncPushSubscription(userId){
   if(!userId||!isPushSupported())return {status:'unsupported',subscription:null}
   const subscription=await getPushSubscription()
   if(!subscription)return {status:'none',subscription:null}
-  if(!supabaseClient())return {status:'unavailable',subscription}
+  if(!supabase)return {status:'unavailable',subscription}
   const json=subscription.toJSON()
-  const{error}=await supabaseClient().from('push_subscriptions').upsert({
+  const{error}=await supabase.from('push_subscriptions').upsert({
     user_id:userId,
     endpoint:json.endpoint,
     p256dh:json.keys?.p256dh||'',
@@ -64,15 +66,10 @@ export async function disablePushSubscription(userId){
   const endpoint=subscription.endpoint
   const unsubscribed=await subscription.unsubscribe()
   if(!unsubscribed)throw new Error('Não foi possível desativar as notificações neste dispositivo.')
-  if(!supabaseClient())return {status:'unsubscribed'}
-  const{error}=await supabaseClient().from('push_subscriptions').update({enabled:false,last_seen_at:new Date().toISOString()}).eq('user_id',userId).eq('endpoint',endpoint)
+  if(!supabase)return {status:'unsubscribed'}
+  const{error}=await supabase.from('push_subscriptions').update({enabled:false,last_seen_at:new Date().toISOString()}).eq('user_id',userId).eq('endpoint',endpoint)
   if(error)throw error
   return {status:'disabled'}
-}
-
-function supabaseClient(){
-  if(typeof window==='undefined')return null
-  return window.__vitrineSupabaseClient||null
 }
 
 function getPlatform(){
