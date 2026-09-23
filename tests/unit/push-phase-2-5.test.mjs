@@ -14,7 +14,7 @@ test('fase 2.5 exige autenticação de usuário e VAPID somente no servidor',()=
 
 test('fase 2.5 envia Push usando subscriptions ativas do usuário',()=>{
  assert.match(fn,/from\('push_subscriptions'\)/)
- assert.match(fn,/eq\('user_id', ctx\.userClaims\?\.sub\)/)
+ assert.match(fn,/eq\('user_id', ctx\.userClaims\?\.id\)/)
  assert.match(fn,/eq\('enabled', true\)/)
  assert.match(fn,/webpush\.sendNotification\(/)
  assert.match(fn,/title: 'VitrineLocal'/)
