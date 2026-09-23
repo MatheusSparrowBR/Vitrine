@@ -34,3 +34,10 @@ test('public business directory keeps guest reads on the public view',()=>{
  assert.match(migration,/public_business_directory set \(security_invoker = false\)/)
  assert.match(migration,/grant select on public\.public_business_directory to anon, authenticated/)
 })
+
+
+test('public business directory exposes iFood URLs for active businesses',()=>{
+ const migration=fs.readFileSync('supabase/migrations/20260923094500_expose_ifood_in_public_business_directory.sql','utf8')
+ assert.match(migration,/b\.ifood_url/)
+ assert.match(migration,/create or replace view public\.public_business_directory/)
+})
