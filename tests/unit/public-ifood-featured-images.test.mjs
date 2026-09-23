@@ -11,7 +11,7 @@ test('homepage featured businesses loads profile logos and uses them before cove
 
 test('featured business profile images are centered and fully visible',()=>{
  const css=fs.readFileSync('src/public-home.css','utf8')
- assert.match(page,/has-profile-logo/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo/)
  assert.match(css,/\.lvp-business-image\.has-profile-logo/)
  assert.match(css,/object-fit:contain/)
  assert.match(css,/max-width:100%/)
