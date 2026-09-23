@@ -311,5 +311,5 @@
 }
 
 /* Featured businesses: profile/logo image stays fully visible and centered. */
-.lvp-business-image:has(.lvp-business-logo){display:grid;place-items:center;background:#fff;padding:14px}
-.lvp-business-image .lvp-business-logo{width:100%;height:100%;object-fit:contain;object-position:center;padding:0;transform:none!important}
+.lvp-business-image.has-profile-logo{display:grid;place-items:center;background:#fff;padding:14px}
+.lvp-business-image .lvp-business-logo{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain!important;object-position:center!important;padding:0;transform:none!important}
