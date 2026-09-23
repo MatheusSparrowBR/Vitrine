@@ -1,5 +1,5 @@
 import React,{useEffect,useState}from'react'
-import{createPushSubscription,getPushSubscription,isPushSupported,getVapidPublicKey}from'./push-notifications.js'
+import{createPushSubscription,getPushSubscription,isPushSupported,getVapidPublicKey,syncPushSubscription,disablePushSubscription}from'./push-notifications.js'
 import{supabase}from'./supabase-client.js'
 import'./push-notification-settings.css'
 
@@ -26,7 +26,7 @@ export default function PushNotificationSettings(){
   catch{setStatus('idle')}
  }
 
- useEffect(()=>{refresh()},[])
+ useEffect(()=>{(async()=>{const{data}=await supabase.auth.getSession();const id=data.session?.user?.id||null;setUserId(id);if(id&&isPushSupported()&&Notification.permission==='granted'){try{const result=await syncPushSubscription(id);if(result.status==='active')setStatus('active');else await refresh()}catch{await refresh()}}else{await refresh()}})()},[])
 
  async function enable(){
   if(!supabase)return
@@ -39,22 +39,22 @@ export default function PushNotificationSettings(){
    if(permission!=='granted'){setStatus('idle');setMessage('Permissão não concedida. Você pode tentar novamente quando quiser.');return}
    const subscription=await createPushSubscription()
    if(!subscription)throw new Error('Não foi possível criar a inscrição de notificações.')
-   const json=subscription.toJSON()
    const{data:{session}}=await supabase.auth.getSession()
    if(!session?.user?.id)throw new Error('Sua sessão expirou. Entre novamente para ativar as notificações.')
-   const{error:saveError}=await supabase.from('push_subscriptions').upsert({
-    user_id:session.user.id,
-    endpoint:json.endpoint,
-    p256dh:json.keys?.p256dh||'',
-    auth:json.keys?.auth||'',
-    user_agent:navigator.userAgent||null,
-    platform:platform(),
-    enabled:true,
-   },{onConflict:'endpoint'})
-   if(saveError)throw saveError
-   setStatus('active')
-   setMessage('Notificações ativadas neste dispositivo.')
+   await syncPushSubscription(session.user.id)
+   setUserId(session.user.id);setStatus('active');setMessage('Notificações ativadas neste dispositivo.')
   }catch(err){setError(true);setMessage(err?.message||'Não foi possível ativar as notificações.')}
+  finally{setBusy(false)}
+ }
+
+ async function disable(){
+  if(!userId)return
+  setBusy(true);setMessage('');setError(false)
+  try{
+   await disablePushSubscription(userId)
+   setStatus('idle')
+   setMessage('Notificações desativadas neste dispositivo.')
+  }catch(err){setError(true);setMessage(err?.message||'Não foi possível desativar as notificações.')}
   finally{setBusy(false)}
  }
 
@@ -69,6 +69,6 @@ export default function PushNotificationSettings(){
    {status==='unsupported'&&<div className="push-settings-status is-muted" role="status">○ Este navegador não oferece suporte a notificações push</div>}
    {message&&<div className={'push-settings-message '+(error?'is-error':'')} role="status">{message}</div>}
   </div>
-  {status==='active'?<button className="account-secondary-btn push-settings-button" type="button" disabled>Ativadas</button>:status==='unsupported'||status==='denied'?null:<button className="account-primary-btn push-settings-button" type="button" onClick={enable} disabled={busy}>{busy?'Ativando…':'Ativar notificações'}</button>}
+  {status==='active'?<button className="account-secondary-btn push-settings-button" type="button" onClick={disable} disabled={busy}>{busy?'Desativando…':'Desativar neste dispositivo'}</button>:status==='unsupported'||status==='denied'?null:<button className="account-primary-btn push-settings-button" type="button" onClick={enable} disabled={busy}>{busy?'Ativando…':'Ativar notificações'}</button>}
  </section>
 }
