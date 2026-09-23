@@ -62,3 +62,9 @@ test('mobile featured logos preserve intrinsic image ratio',()=>{
  assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-width:100%!important/)
  assert.match(css,/\.lvp-business-image\.has-profile-logo \.lvp-business-logo\{[\s\S]*max-height:100%!important/)
 })
+
+
+test('featured logo markup has inline intrinsic containment fallback',()=>{
+ const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
+ assert.match(page,/className='lvp-business-logo'[\s\S]*style=\{\{width:'auto',height:'auto',maxWidth:'100%',maxHeight:'100%',objectFit:'contain',objectPosition:'center',transform:'none'\}\}/)
+})
