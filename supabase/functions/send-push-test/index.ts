@@ -19,14 +19,39 @@ function getVapidConfig() {
   return { publicKey, privateKey, subject }
 }
 
+function logSafeError(label: string, error: unknown) {
+  const value = error as { name?: unknown; message?: unknown; statusCode?: unknown }
+  console.error(label, {
+    name: typeof value?.name === 'string' ? value.name : 'Error',
+    message: typeof value?.message === 'string' ? value.message : 'Unknown error',
+    statusCode: Number(value?.statusCode || 0),
+  })
+}
+
 export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
     if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
 
     try {
-      const { publicKey, privateKey, subject } = getVapidConfig()
-      webpush.setVapidDetails(subject, publicKey, privateKey)
+      let vapidConfig
+      try {
+        vapidConfig = getVapidConfig()
+      } catch (error) {
+        logSafeError('vapid_not_configured', error)
+        return json({ error: 'vapid_not_configured' }, 503)
+      }
+
+      try {
+        webpush.setVapidDetails(
+          vapidConfig.subject,
+          vapidConfig.publicKey,
+          vapidConfig.privateKey,
+        )
+      } catch (error) {
+        logSafeError('vapid_configuration_invalid', error)
+        return json({ error: 'vapid_configuration_invalid' }, 500)
+      }
 
       const { data: subscriptions, error } = await ctx.supabase
         .from('push_subscriptions')
@@ -34,11 +59,21 @@ export default {
         .eq('user_id', ctx.userClaims?.sub)
         .eq('enabled', true)
 
-      if (error) return json({ error: 'subscription_lookup_failed' }, 500)
-      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, message: 'Nenhuma subscription ativa neste dispositivo.' })
+      if (error) {
+        logSafeError('subscription_lookup_failed', error)
+        return json({ error: 'subscription_lookup_failed' }, 500)
+      }
+      if (!subscriptions?.length) {
+        return json({
+          sent: 0,
+          invalid: 0,
+          message: 'Nenhuma subscription ativa neste dispositivo.',
+        })
+      }
 
       let sent = 0
       let invalid = 0
+
       for (const subscription of subscriptions) {
         try {
           await webpush.sendNotification(
@@ -56,19 +91,26 @@ export default {
           sent += 1
         } catch (error) {
           const statusCode = Number(error?.statusCode || 0)
+          logSafeError('push_delivery_failed', error)
+
           if (statusCode === 404 || statusCode === 410) {
             invalid += 1
             await ctx.supabase
               .from('push_subscriptions')
-              .update({ enabled: false, last_seen_at: new Date().toISOString() })
+              .update({
+                enabled: false,
+                last_seen_at: new Date().toISOString(),
+              })
               .eq('id', subscription.id)
+          } else {
+            return json({ error: 'push_delivery_failed' }, 502)
           }
         }
       }
 
       return json({ sent, invalid })
     } catch (error) {
-      if (error?.message === 'VAPID_NOT_CONFIGURED') return json({ error: 'vapid_not_configured' }, 503)
+      logSafeError('push_send_failed', error)
       return json({ error: 'push_send_failed' }, 500)
     }
   }),
