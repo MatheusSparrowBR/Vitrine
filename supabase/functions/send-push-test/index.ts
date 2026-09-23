@@ -56,7 +56,7 @@ export default {
       const { data: subscriptions, error } = await ctx.supabase
         .from('push_subscriptions')
         .select('id, endpoint, p256dh, auth')
-        .eq('user_id', ctx.userClaims?.sub)
+        .eq('user_id', ctx.userClaims?.id)
         .eq('enabled', true)
 
       if (error) {
