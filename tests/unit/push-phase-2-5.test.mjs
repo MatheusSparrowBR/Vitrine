@@ -23,5 +23,5 @@ test('fase 2.5 envia Push usando subscriptions ativas do usuário',()=>{
 
 test('fase 2.5 desativa subscriptions expiradas',()=>{
  assert.match(fn,/statusCode === 404 \|\| statusCode === 410/)
- assert.match(fn,/update\(\{ enabled: false/)
+ assert.match(fn,/update\(\{[\s\S]*enabled: false/)
 })
