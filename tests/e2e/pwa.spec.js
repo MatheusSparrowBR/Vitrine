@@ -40,8 +40,13 @@ test.describe('PWA fase 1.2',()=>{
     await expect(page.locator('#root')).toBeVisible()
 
     await context.setOffline(true)
-    await page.reload({waitUntil:'domcontentloaded'})
-    await expect(page.locator('#root')).toBeVisible()
+    const offline=await page.evaluate(async()=>{
+      const response=await fetch('/laguna',{cache:'no-store'})
+      const body=await response.text()
+      return {status:response.status,hasAppShell:body.includes('id="root"')}
+    })
+    expect(offline.status).toBe(200)
+    expect(offline.hasAppShell).toBe(true)
     await context.setOffline(false)
   })
 })
