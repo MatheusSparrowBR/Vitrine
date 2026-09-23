@@ -1,5 +1,12 @@
 const CACHE_NAME = 'vitrine-local-shell-v1'
-const APP_SHELL = ['/', '/laguna', '/site.webmanifest', '/favicon.svg']
+const APP_SHELL = [
+  '/',
+  '/laguna',
+  '/site.webmanifest',
+  '/favicon.svg',
+  '/icons/vitrine-local.svg',
+  '/icons/vitrine-local-maskable.svg',
+]
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()))
