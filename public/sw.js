@@ -1,5 +1,12 @@
 const CACHE_NAME = 'vitrine-local-shell-v1'
-const APP_SHELL = ['/', '/laguna', '/site.webmanifest', '/favicon.svg']
+const APP_SHELL = [
+  '/',
+  '/laguna',
+  '/site.webmanifest',
+  '/favicon.svg',
+  '/icons/vitrine-local.svg',
+  '/icons/vitrine-local-maskable.svg',
+]
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()))
@@ -14,7 +21,23 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url)
   if (url.origin !== self.location.origin) return
 
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)))
+  event.respondWith(
+    fetch(event.request).then(response => {
+      if (response.ok) {
+        const copy = response.clone()
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {})
+      }
+      return response
+    }).catch(async () => {
+      const cached = await caches.match(event.request)
+      if (cached) return cached
+      if (event.request.mode === 'navigate') {
+        const shell = await caches.match('/laguna')
+        if (shell) return shell
+      }
+      throw new Error('offline-resource-unavailable')
+    })
+  )
 })
 
 self.addEventListener('message', event => {
