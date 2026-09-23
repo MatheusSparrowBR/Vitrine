@@ -17,7 +17,7 @@ test('convite de instalacao usa beforeinstallprompt e appinstalled',()=>{
 test('convite de instalacao fica integrado somente nas areas publicas',()=>{
   const entry=read('src/app-entry.jsx')
   const css=read('src/pwa-install.css')
-  assert.match(entry,/{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<PwaInstallPrompt/>}/)
+  assert.ok(entry.includes('{!isAdmin&&!isStandalone&&!isPrelaunchPlans&&<PwaInstallPrompt/>}'))
   assert.match(css,/pwa-install-card/)
   assert.match(css,/prefers-reduced-motion/)
 })
@@ -25,7 +25,7 @@ test('convite de instalacao fica integrado somente nas areas publicas',()=>{
 test('convite de instalacao evita interrupcao imediata e oferece adiamento',()=>{
   const component=read('src/PwaInstallPrompt.jsx')
   assert.match(component,/SHOW_DELAY_MS=4000/)
-  assert.match(component,/DISMISS_MS=7*24*60*60*1000/)
+  assert.match(component,/DISMISS_MS=7\*24\*60\*60\*1000/)
   assert.match(component,/Agora não/)
   assert.match(component,/Leve a sua cidade com você/)
 })
