@@ -17,6 +17,7 @@ export default function PwaInstallPrompt(){
   const [state,setState]=React.useState({canInstall:false,installed:isPwaInstalled()})
   const [visible,setVisible]=React.useState(false)
   const [installing,setInstalling]=React.useState(false)
+  const ios=isIosDevice()
 
   React.useEffect(()=>{
     const unsubscribe=subscribePwaInstall(next=>{
@@ -28,14 +29,18 @@ export default function PwaInstallPrompt(){
   },[])
 
   React.useEffect(()=>{
+    if(!ios||state.installed||wasRecentlyDismissed())return
+    const timer=window.setTimeout(()=>setVisible(true),1200)
+    return()=>window.clearTimeout(timer)
+  },[ios,state.installed])
+
+  React.useEffect(()=>{
     if(!state.canInstall||state.installed||wasRecentlyDismissed())return
     const timer=window.setTimeout(()=>setVisible(true),900)
     return()=>window.clearTimeout(timer)
   },[state.canInstall,state.installed])
 
   if(state.installed||!visible)return null
-
-  const ios=isIosDevice()
 
   const close=()=>{
     dismissForLater()
