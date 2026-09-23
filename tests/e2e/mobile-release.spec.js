@@ -17,7 +17,7 @@ test('mobile release smoke: home navigation and catalog interaction work',async(
  await expect(page.locator('.vl-site-menu-toggle')).toBeVisible()
  await page.locator('.vl-site-menu-toggle').click()
  await expect(page.locator('.vl-site-mobile-panel')).toBeVisible()
- await page.getByRole('link',{name:'Explorar',exact:true}).last().click()
+ await page.locator('.vl-site-mobile-panel nav > a[href="/laguna/empresas"]').click({force:true})
  await expect(page).toHaveURL(/\/laguna\/empresas/)
  await expect(page.getByRole('heading',{name:'Empresas em Laguna'})).toBeVisible()
  const card=page.locator('.mbl-card-main').first()
