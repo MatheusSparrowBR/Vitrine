@@ -1,6 +1,7 @@
 import React,{lazy,Suspense} from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase-client.js'
+import { registerPwa } from './pwa-register.js'
 import SiteHeader from './SiteHeader.jsx'
 import AnalyticsTracker from './analytics-tracker.jsx'
 import AppErrorBoundary from './AppErrorBoundary.jsx'
