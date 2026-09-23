@@ -5,7 +5,7 @@ import fs from 'node:fs'
 test('admin business editing exposes and persists iFood',()=>{
  const content=fs.readFileSync('src/AdminBusinessesPage.jsx','utf8')
  assert.match(content,/ifood_url:'')
- assert.match(content,/ifood_url:b\.ifood_url\|\|' '/.source)
+ assert.match(content,/ifood_url:b\.ifood_url\|\|''/)
  assert.match(content,/label>iFood/)
  assert.match(content,/ifood_url:form\.ifood_url\.trim\(\)\|\|null/)
 })
