@@ -8,7 +8,7 @@ test('fase 2.2 solicita permissão somente por ação explícita e salva subscri
  const js=read('src/PushNotificationSettings.jsx')
  assert.match(js,/Notification\.requestPermission\(\)/)
  assert.match(js,/onClick=\{enable\}/)
- assert.match(js,/push_subscriptions/)
+ assert.match(js,/syncPushSubscription/)
  assert.match(js,/upsert\(/)
  assert.match(js,/user_id:session\.user\.id/)
 })
