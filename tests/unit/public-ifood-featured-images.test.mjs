@@ -59,4 +59,6 @@ test('featured logos use an isolated contained visual instead of img crop rules'
  assert.match(css,/\.lvp-business-logo-visual\{[\s\S]*background-size:contain!important/)
  assert.match(css,/\.lvp-business-logo-visual\{[\s\S]*background-position:center!important/)
  assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*overflow:hidden!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*width:100%!important/)
+ assert.match(css,/\.lvp-business-image\.has-profile-logo\{[\s\S]*aspect-ratio:auto!important/)
 })
