@@ -1,5 +1,5 @@
 /* Mobile-only complete UX audit: layout safety, touch targets, forms, cards, overlays and dense admin/account views. */
-@media(max-width:760px){
+@media(max-width:760px){.vl-site-mobile-panel{position:relative;z-index:3200}
   html,body,#root{width:100%;max-width:100%;overflow-x:clip}
   button,a,input,select,textarea{max-width:100%}
   input,select,textarea{font-size:16px}
