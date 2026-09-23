@@ -1,4 +1,4 @@
-import { withSupabase } from 'npm:@supabase/server@0.9.0'
+import { withSupabase } from 'npm:@supabase/server'
 import webpush from 'npm:web-push@3.6.7'
 
 const corsHeaders = {
