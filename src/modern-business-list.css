@@ -51,3 +51,44 @@
  .mbl-card-actions{padding:0 13px 13px}.mbl-quick-contact{min-height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px}
 }
 @media(max-width:480px){.mbl-hero h1{font-size:26px}.mbl-search-large input{font-size:11px}.mbl-clear{padding:0 9px}}
+
+
+/* Catálogo — barra de filtros fixa e compacta durante a rolagem */
+.mbl-toolbar{position:sticky;top:72px;z-index:1100;background:rgba(255,255,255,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 26px rgba(24,42,66,.08);padding:12px;margin-bottom:20px}
+.mbl-toolbar-sticky{display:grid;gap:8px}
+.mbl-toolbar-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.mbl-filters-toggle{height:48px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:1px solid #d6e1ec;background:#f8fafc;color:#36506d;border-radius:11px;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}
+.mbl-filters-toggle:hover{border-color:#b9cff0;background:#f4f8ff;color:#1f6df2}
+.mbl-filters-toggle svg{color:#1f6df2}
+.mbl-filters-toggle b{min-width:18px;height:18px;padding:0 5px;display:inline-grid;place-items:center;border-radius:999px;background:#1f6df2;color:#fff;font-size:8px}
+.mbl-sticky-label{margin-top:1px;padding-top:8px;border-top:1px solid #edf2f6}
+.mbl-sticky-categories{padding:6px 0 1px;scrollbar-width:none}
+.mbl-sticky-categories::-webkit-scrollbar{display:none}
+.mbl-active-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-top:5px}
+.mbl-active-filters::-webkit-scrollbar{display:none}
+.mbl-filter-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border:1px solid #cfe0f7;background:#eef5ff;border-radius:999px;color:#245a9c;font-size:8px;font-weight:850;white-space:nowrap}
+.mbl-filter-chip button{border:0;background:transparent;color:#245a9c;padding:0;line-height:1;cursor:pointer;font-size:12px}
+.mbl-filter-panel{margin-top:8px;padding:10px;border-top:1px solid #edf2f6;max-height:min(52vh,460px);overflow:auto;overscroll-behavior:contain}
+.mbl-filter-panel .mbl-filter-title:first-child{margin-top:0}
+.mbl-filter-panel .mbl-quick-filter-head{margin-top:12px;padding-top:10px;border-top:1px solid #eef2f6}
+@media(max-width:760px){
+ .mbl-toolbar{top:64px;padding:9px;margin-bottom:14px;border-radius:14px}
+ .mbl-toolbar-row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+ .mbl-search-large{height:44px;padding:0 10px}
+ .mbl-clear{height:44px;padding:0 10px}
+ .mbl-filters-toggle{height:44px;padding:0 11px;font-size:10px}
+ .mbl-filters-toggle span{display:none}
+ .mbl-filters-toggle b{min-width:16px;height:16px}
+ .mbl-sticky-label{padding-top:7px}
+ .mbl-sticky-label strong{font-size:8px}
+ .mbl-sticky-label span{font-size:8px}
+ .mbl-sticky-categories{padding:5px 0 0}
+ .mbl-sticky-categories button{min-height:34px;padding:7px 10px;font-size:9px}
+ .mbl-filter-panel{max-height:58vh;padding:8px 2px 2px}
+}
+@media(max-width:480px){
+ .mbl-toolbar-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"search filters";gap:6px}
+ .mbl-search-large{grid-area:search}
+ .mbl-clear{display:none}
+ .mbl-filters-toggle{grid-area:filters}
+}
