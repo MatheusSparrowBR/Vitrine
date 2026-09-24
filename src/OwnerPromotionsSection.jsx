@@ -39,7 +39,22 @@ export default function OwnerPromotionsSection({businessId,businessName,onChange
   const sent=Number(data?.sent||0),invalid=Number(data?.invalid||0),skipped=Number(data?.skipped||0)
   if(!sent&&!skipped)throw new Error('Nenhuma notificação foi enviada.')
   notify('Notificação enviada para '+sent+' dispositivo'+(sent===1?'':'s')+'.'+(invalid?' '+invalid+' subscription'+(invalid===1?'':'s')+' expirada'+(invalid===1?'':'s')+' foram desativadas.':'')+(skipped?' '+skipped+' já estava'+(skipped===1?'':'m')+' registrada'+(skipped===1?'':'s')+' e não foi reenviada.':''))
- }catch(err){notify(err?.message||'Não foi possível enviar a notificação.',true)}
+ }catch(err){
+  let handled=false
+  try{
+   const response=err?.context
+   if(response?.json){
+    const payload=await response.clone().json().catch(()=>null)
+    if(payload?.error==='notification_rate_limit'){
+     const retryAt=payload?.retry_at?new Date(payload.retry_at):null
+     const retryLabel=retryAt&&!Number.isNaN(retryAt.getTime())?retryAt.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'o fim do ciclo atual'
+     notify(`Limite de notificações atingido. Você poderá enviar novamente após ${retryLabel}.`,true)
+     handled=true
+    }
+   }
+  }catch{}
+  if(!handled)notify(err?.message||'Não foi possível enviar a notificação.',true)
+ }
  finally{setSendingId(null);setConfirmingId(null)}
 }
  async function submit(e){e.preventDefault();if(saving)return;if(!db||!businessId)return notify('Empresa indisponível.',true);const latest=await getPlanCycleFeatureUsage(businessId,'promotions');if(latest.error)return notify(latest.error.message,true);if(!latest.usage||latest.usage.limit===0)return notify('Promoções não estão disponíveis no plano atual.',true);if(latest.usage.limit>0&&!latest.usage.unlimited&&latest.usage.limit!==ADMIN_UNLIMITED_LIMIT&&latest.usage.used>=latest.usage.limit){setUsage(latest.usage);return notify(`Limite de ${latest.usage.limit} promoções neste ciclo atingido. Faça upgrade para criar mais.`,true)}const title=form.title.trim();if(!title)return notify('Informe o título da promoção.',true);const starts=toISO(form.starts_at),ends=toISO(form.ends_at);if(form.starts_at&&!starts)return notify('A data/hora inicial é inválida.',true);if(form.ends_at&&!ends)return notify('A data/hora final é inválida.',true);if(starts&&ends&&new Date(ends)<=new Date(starts))return notify('O encerramento deve ser posterior ao início.',true);const price=form.price===''?null:Number(form.price),original=form.original_price===''?null:Number(form.original_price);if(price!=null&&(!Number.isFinite(price)||price<0))return notify('Informe um preço promocional válido.',true);if(original!=null&&(!Number.isFinite(original)||original<0))return notify('Informe um preço original válido.',true);setSaving(true);setMessage({text:'',error:false});let uploadedPath=null;try{let imageUrl=null,imagePath=null;if(imageFile){const uploaded=await uploadImage(imageFile);imageUrl=uploaded.url;imagePath=uploaded.path;uploadedPath=uploaded.path}const{error}=await db.from('promotions').insert({business_id:businessId,title,description:form.description.trim()||null,price,original_price:original,starts_at:starts,ends_at:ends,status:'pending_review',image_url:imageUrl,image_path:imagePath});if(error)throw error;notify('Promoção enviada para análise administrativa.');close();await load();onChanged?.()}catch(err){if(uploadedPath)await db.storage.from(MEDIA_BUCKET).remove([uploadedPath]).catch(()=>{});notify(err.message||'Não foi possível criar a promoção.',true)}finally{setSaving(false)}}
