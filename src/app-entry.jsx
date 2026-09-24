@@ -23,7 +23,7 @@ const AdminReviewsPage=lazy(()=>import('./AdminReviewsPage.jsx'))
 const AdminUsersPage=lazy(()=>import('./AdminUsersPage.jsx'))
 const AdminOnboardingPage=lazy(()=>import('./AdminOnboardingPage.jsx'))
 const AdminNotificationsPage=lazy(()=>import('./AdminNotificationsPage.jsx'))
-const AdminInvitationsPage=lazy(()=>import('./AdminInvitationsPage.jsx'))
+import AdminInvitationsPage from './AdminInvitationsPage.jsx'
 const BusinessRegistrationPage=lazy(()=>import('./BusinessRegistrationPage.jsx'))
 const CityHomePage=lazy(()=>import('./CityHomePage.jsx'))
 const AccountPage=lazy(()=>import('./AccountWorkspacePage.jsx'))
