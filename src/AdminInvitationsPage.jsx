@@ -1,8 +1,9 @@
 import React,{useCallback,useEffect,useState}from'react'
 import AdminShell from './AdminShell.jsx'
+import { db } from './supabase-client.js'
 import './admin-invitations.css'
 
-const dateFormat=new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeStyle:'short'})
+function formatDate(value){try{const date=new Date(value);if(Number.isNaN(date.getTime()))return '—';return new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeStyle:'short'}).format(date)}catch{return '—'}}
 
 export default function AdminInvitationsPage(){
  const[state,setState]=useState({loading:true,pending:[],history:[],error:'',notice:'',busyId:null})
@@ -11,11 +12,10 @@ export default function AdminInvitationsPage(){
   try{
    const{data:{session}}=await (await import('./supabase-client.js')).db.auth.getSession()
    if(!session)throw new Error('Sessão administrativa não encontrada.')
-   const db=(await import('./supabase-client.js')).db
    const{data,error}=await db.functions.invoke('admin-invitations',{body:{action:'list'}})
    if(error)throw error
    if(data?.error)throw new Error(data.error)
-   setState(x=>({...x,loading:false,pending:data?.pending||[],history:data?.history||[],error:data?.history_error||''}))
+   setState(x=>({...x,loading:false,pending:Array.isArray(data?.pending)?data.pending:[],history:Array.isArray(data?.history)?data.history:[],error:data?.history_error||''}))
   }catch(error){
    setState(x=>({...x,loading:false,error:error?.message||'Não foi possível carregar os convites.'}))
   }
@@ -26,7 +26,7 @@ export default function AdminInvitationsPage(){
  const action=async(userId,type)=>{
   setState(x=>({...x,busyId:userId,error:'',notice:''}))
   try{
-   const db=(await import('./supabase-client.js')).db
+   if(!db)throw new Error('Banco indisponível.')
    const{data,error}=await db.functions.invoke('admin-invitations',{body:{action:type,user_id:userId}})
    if(error)throw error
    if(data?.error)throw new Error(data.error)
@@ -69,7 +69,7 @@ export default function AdminInvitationsPage(){
 
   <section className="ai-card">
    <div className="ai-card-head"><div><span className="ai-kicker">HISTÓRICO</span><h3>Últimas operações com convites</h3><p className="ai-history-help">Convites que ainda não foram concluídos mostram as ações de cancelar, reenviar e gerar um novo link.</p></div></div>
-   {state.history.length===0?<div className="ai-empty"><strong>Nenhum registro disponível.</strong></div>:<div className="ai-history">{state.history.map(item=><article className="ai-history-row" key={item.id}><div><strong>{item.email}</strong><small>{item.full_name}</small></div><div className="ai-history-status"><span className={'ai-history-badge '+(item.status==='pending'?'pending':item.status==='completed'?'completed':'cancelled')}>{item.status==='pending'?'Pendente':item.status==='completed'?'Concluído':'Cancelado'}</span><span className="ai-history-operation">{item.action==='user_created'?'Convite criado':item.action==='invite_resent'?'Convite reenviado':'Convite cancelado'}</span></div><div className="ai-history-meta"><time>{dateFormat.format(new Date(item.created_at))}</time>{item.can_manage&&item.entity_id&&<div className="ai-history-actions"><button disabled={state.busyId===item.entity_id} onClick={()=>action(item.entity_id,'generate_link')}>Gerar novo link</button><button disabled={state.busyId===item.entity_id} onClick={()=>resend({id:item.entity_id,email:item.email})}>Cancelar e reenviar</button><button className="danger" disabled={state.busyId===item.entity_id} onClick={()=>cancel({id:item.entity_id,email:item.email})}>Cancelar</button></div>}</div></article>)}</div>}
+   {state.history.length===0?<div className="ai-empty"><strong>Nenhum registro disponível.</strong></div>:<div className="ai-history">{state.history.map(item=><article className="ai-history-row" key={item.id}><div><strong>{item.email}</strong><small>{item.full_name}</small></div><div className="ai-history-status"><span className={'ai-history-badge '+(item.status==='pending'?'pending':item.status==='completed'?'completed':'cancelled')}>{item.status==='pending'?'Pendente':item.status==='completed'?'Concluído':'Cancelado'}</span><span className="ai-history-operation">{item.action==='user_created'?'Convite criado':item.action==='invite_resent'?'Convite reenviado':'Convite cancelado'}</span></div><div className="ai-history-meta"><time>{formatDate(item.created_at)}</time>{item.can_manage&&item.entity_id&&<div className="ai-history-actions"><button disabled={state.busyId===item.entity_id} onClick={()=>action(item.entity_id,'generate_link')}>Gerar novo link</button><button disabled={state.busyId===item.entity_id} onClick={()=>resend({id:item.entity_id,email:item.email})}>Cancelar e reenviar</button><button className="danger" disabled={state.busyId===item.entity_id} onClick={()=>cancel({id:item.entity_id,email:item.email})}>Cancelar</button></div>}</div></article>)}</div>}
   </section>
  </AdminShell>
 }
