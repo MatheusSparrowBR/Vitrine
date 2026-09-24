@@ -8,7 +8,7 @@ const shell=fs.readFileSync('src/AdminShell.jsx','utf8')
 const entry=fs.readFileSync('src/app-entry.jsx','utf8')
 
 test('gestão de convites lista usuários pendentes pelo Auth',()=>{
- assert.match(fn,/admin\.auth\.admin\.listUsers/)
+ assert.match(fn,/adminDb\.auth\.admin\.listUsers/)
  assert.match(fn,/invited_at/)
  assert.match(fn,/email_confirmed_at/)
  assert.match(fn,/action === 'list'/)
@@ -16,8 +16,8 @@ test('gestão de convites lista usuários pendentes pelo Auth',()=>{
 })
 
 test('admin pode gerar novo link, cancelar e cancelar+reenviar convite',()=>{
- assert.match(fn,/admin\.auth\.admin\.generateLink/)
- assert.match(fn,/admin\.auth\.admin\.deleteUser/)
+ assert.match(fn,/adminDb\.auth\.admin\.generateLink/)
+ assert.match(fn,/adminDb\.auth\.admin\.deleteUser/)
  assert.match(fn,/action === 'generate_link'/)
  assert.match(fn,/action === 'cancel'/)
  assert.match(fn,/action === 'cancel_and_resend'/)
