@@ -88,10 +88,9 @@ export default function AdminNotificationsPage({supabase}){
    const{data,error}=await supabase.functions.invoke('send-admin-notification',{body:{...form,title,body,image_data,image_type:imageFile?.type||''}})
    if(error)throw error
    if(data?.error)throw new Error(data.error)
+   setForm(EMPTY);setImageFile(null);setPreview('')
    setResult(data)
    setMessage({text:'Notificação processada: '+Number(data?.sent||0)+' envio(s) aceito(s) pelo Push. '+Number(data?.invalid||0)+' subscription(ões) inválida(s) foram desativadas.',error:false})
-   reset()
-   setResult(data)
   }catch(error){
    setMessage({text:await parseFunctionError(error,'Não foi possível enviar a notificação.'),error:true})
   }finally{setSending(false)}
