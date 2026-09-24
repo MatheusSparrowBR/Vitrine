@@ -20,6 +20,12 @@ function logSafeError(label: string, error: unknown) {
   })
 }
 
+async function hashToken(value: string) {
+  const bytes = new TextEncoder().encode(value)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
 function getVapidConfig() {
   const publicKey = Deno.env.get('VAPID_PUBLIC_KEY')?.trim()
   const privateKey = Deno.env.get('VAPID_PRIVATE_KEY')?.trim()
@@ -157,10 +163,12 @@ export default {
 
       for (const subscription of eligibleSubscriptions) {
         stage = 'notification_upsert'
+        const deliveryToken = crypto.randomUUID() + crypto.randomUUID()
+        const deliveryTokenHash = await hashToken(deliveryToken)
         const notification = await admin
           .from('notifications')
           .upsert(
-            { ...baseNotification, user_id: subscription.user_id, status: 'queued', sent_at: null, delivered_at: null, read_at: null, error_code: null, error_message: null },
+            { ...baseNotification, user_id: subscription.user_id, status: 'queued', sent_at: null, delivered_at: null, delivery_token_hash: deliveryTokenHash, read_at: null, error_code: null, error_message: null },
             { onConflict: 'user_id,promotion_id,type', ignoreDuplicates: !force },
           )
           .select('id')
@@ -186,6 +194,9 @@ export default {
               title: baseNotification.title,
               body: baseNotification.body,
               url: baseNotification.url,
+              notification_id: notification.data.id,
+              delivery_token: deliveryToken,
+              delivery_feedback_url: `${supabaseUrl}/functions/v1/ack-notification-delivery`,
             }),
           )
 

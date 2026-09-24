@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitrine-local-shell-v2'
+const CACHE_NAME = 'vitrine-local-shell-v3'
 const APP_SHELL = [
   '/',
   '/laguna',
@@ -81,15 +81,32 @@ self.addEventListener('push', event => {
       : DEFAULT_NOTIFICATION_BODY
   const url = getNotificationUrl(data.url || data.link)
   const tag = typeof data.tag === 'string' && data.tag.trim() ? data.tag.trim() : `vitrine-local-push-${Date.now()}`
+  const feedbackUrl = typeof data.delivery_feedback_url === 'string' ? data.delivery_feedback_url.trim() : ''
+  const notificationId = typeof data.notification_id === 'string' ? data.notification_id : ''
+  const deliveryToken = typeof data.delivery_token === 'string' ? data.delivery_token : ''
 
-  event.waitUntil(self.registration.showNotification(title, {
-    body,
-    icon: NOTIFICATION_ICON,
-    badge: NOTIFICATION_ICON,
-    tag,
-    renotify: true,
-    data: { url },
-  }))
+  event.waitUntil((async () => {
+    await self.registration.showNotification(title, {
+      body,
+      icon: NOTIFICATION_ICON,
+      badge: NOTIFICATION_ICON,
+      tag,
+      renotify: true,
+      data: { url },
+    })
+    if (feedbackUrl && notificationId && deliveryToken) {
+      try {
+        await fetch(feedbackUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notification_id: notificationId, token: deliveryToken }),
+          keepalive: true,
+        })
+      } catch {
+        // The notification was displayed locally; feedback can fail without blocking the push UI.
+      }
+    }
+  })())
 })
 
 self.addEventListener('notificationclick', event => {

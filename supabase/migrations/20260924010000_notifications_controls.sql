@@ -128,3 +128,25 @@ create index if not exists notifications_target_city_idx
 
 create index if not exists notifications_target_category_idx
   on public.notifications(target_category_id);
+
+
+alter table public.notifications
+  add column if not exists delivery_token_hash text;
+
+create index if not exists notifications_delivery_token_hash_idx
+  on public.notifications(delivery_token_hash)
+  where delivery_token_hash is not null;
+
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'notifications'
+  ) then
+    alter publication supabase_realtime add table public.notifications;
+  end if;
+end
+$$;
