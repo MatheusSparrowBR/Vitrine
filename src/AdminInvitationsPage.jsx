@@ -34,9 +34,9 @@ export default function AdminInvitationsPage(){
     await navigator.clipboard?.writeText(data.invite_link||'')
     setState(x=>({...x,busyId:null,notice:'Novo link de convite gerado e copiado para a área de transferência.'}))
    }else if(type==='cancel'){
-    setState(x=>({...x,busyId:null,notice:'Convite cancelado. O usuário não poderá mais usar aquele convite.',pending:x.pending.filter(item=>item.id!==userId)}))
+    setState(x=>({...x,busyId:null,notice:'Convite cancelado. A conta pendente foi removida e poderá ser convidada novamente.'}))
    }else{
-    setState(x=>({...x,busyId:null,notice:'Convite cancelado e reenviado com sucesso.',pending:x.pending.filter(item=>item.id!==userId)}))
+    setState(x=>({...x,busyId:null,notice:'Convite cancelado e reenviado com sucesso.'}))
    }
    await load()
   }catch(error){
@@ -68,8 +68,8 @@ export default function AdminInvitationsPage(){
   </section>
 
   <section className="ai-card">
-   <div className="ai-card-head"><div><span className="ai-kicker">HISTÓRICO</span><h3>Últimas operações com convites</h3></div></div>
-   {state.history.length===0?<div className="ai-empty"><strong>Nenhum registro disponível.</strong></div>:<div className="ai-history">{state.history.map(item=><article className="ai-history-row" key={item.id}><div><strong>{item.metadata?.email||'E-mail não informado'}</strong><small>{item.metadata?.full_name||'Usuário'}</small></div><span className={'ai-history-badge '+String(item.action).replace('invite_','')}>{item.action==='user_created'?'Convite criado':item.action==='invite_resent'?'Convite reenviado':'Convite cancelado'}</span><time>{dateFormat.format(new Date(item.created_at))}</time></article>)}</div>}
+   <div className="ai-card-head"><div><span className="ai-kicker">HISTÓRICO</span><h3>Últimas operações com convites</h3><p className="ai-history-help">Convites que ainda não foram concluídos mostram as ações de cancelar, reenviar e gerar um novo link.</p></div></div>
+   {state.history.length===0?<div className="ai-empty"><strong>Nenhum registro disponível.</strong></div>:<div className="ai-history">{state.history.map(item=><article className="ai-history-row" key={item.id}><div><strong>{item.email}</strong><small>{item.full_name}</small></div><div className="ai-history-status"><span className={'ai-history-badge '+(item.status==='pending'?'pending':item.status==='completed'?'completed':'cancelled')}>{item.status==='pending'?'Pendente':item.status==='completed'?'Concluído':'Cancelado'}</span><span className="ai-history-operation">{item.action==='user_created'?'Convite criado':item.action==='invite_resent'?'Convite reenviado':'Convite cancelado'}</span></div><div className="ai-history-meta"><time>{dateFormat.format(new Date(item.created_at))}</time>{item.can_manage&&item.entity_id&&<div className="ai-history-actions"><button disabled={state.busyId===item.entity_id} onClick={()=>action(item.entity_id,'generate_link')}>Gerar novo link</button><button disabled={state.busyId===item.entity_id} onClick={()=>resend({email:item.email})}>Cancelar e reenviar</button><button className="danger" disabled={state.busyId===item.entity_id} onClick={()=>cancel({email:item.email})}>Cancelar</button></div>}</div></article>)}</div>}
   </section>
  </AdminShell>
 }
