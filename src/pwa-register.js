@@ -1,4 +1,4 @@
-const SW_URL = '/sw.js?version=delivery-feedback-v5'
+const SW_URL = '/sw.js?version=delivery-feedback-v6'
 const UPDATE_INTERVAL_MS = 15 * 60 * 1000
 
 async function activateRegistrationUpdate(registration) {
