@@ -184,7 +184,7 @@ export default {
         image_url: typeof promotion.image_url === 'string' && promotion.image_url.trim() ? promotion.image_url : null,
         target_city_id: business.city_id || null,
         target_category_id: business.category_id || null,
-        url: `/laguna?promotion=${encodeURIComponent(promotion.id)}`,
+        url: `/${businessCity?.slug || 'laguna'}?promotion=${encodeURIComponent(promotion.id)}`,
         type: 'promotion',
       }
 
