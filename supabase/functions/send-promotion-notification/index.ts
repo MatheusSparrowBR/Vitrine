@@ -11,6 +11,15 @@ function json(data: unknown, status = 200) {
   return Response.json(data, { status, headers: corsHeaders })
 }
 
+function logSafeError(label: string, error: unknown) {
+  const value = error as { name?: unknown; message?: unknown; statusCode?: unknown }
+  console.error(label, {
+    name: typeof value?.name === 'string' ? value.name : 'Error',
+    message: typeof value?.message === 'string' ? value.message : 'Unknown error',
+    statusCode: Number(value?.statusCode || 0),
+  })
+}
+
 function getVapidConfig() {
   const publicKey = Deno.env.get('VAPID_PUBLIC_KEY')?.trim()
   const privateKey = Deno.env.get('VAPID_PRIVATE_KEY')?.trim()
@@ -39,40 +48,59 @@ export default {
     const { data: { user }, error: userError } = await admin.auth.getUser(token)
     if (userError || !user) return json({ error: 'unauthorized' }, 401)
 
+    let stage = 'request'
     try {
       const payload = await req.json().catch(() => ({}))
       const promotionId = typeof payload?.promotion_id === 'string' ? payload.promotion_id : ''
       if (!promotionId) return json({ error: 'promotion_id_required' }, 400)
 
+      stage = 'promotion_lookup'
       const { data: promotion, error: promotionError } = await admin
         .from('promotions')
-        .select('id,business_id,title,description,image_url,status,starts_at,ends_at,businesses(name)')
+        .select('id,business_id,title,description,image_url,status')
         .eq('id', promotionId)
         .maybeSingle()
 
-      if (promotionError) return json({ error: 'promotion_lookup_failed' }, 500)
+      if (promotionError) {
+        logSafeError('promotion_lookup_failed', promotionError)
+        return json({ error: 'promotion_lookup_failed' }, 500)
+      }
       if (!promotion) return json({ error: 'promotion_not_found' }, 404)
       if (promotion.status !== 'published') return json({ error: 'promotion_not_published' }, 409)
 
+      stage = 'business_lookup'
       const { data: business, error: businessError } = await admin
         .from('businesses')
         .select('id,name,owner_id,status')
         .eq('id', promotion.business_id)
         .maybeSingle()
 
-      if (businessError) return json({ error: 'business_lookup_failed' }, 500)
+      if (businessError) {
+        logSafeError('business_lookup_failed', businessError)
+        return json({ error: 'business_lookup_failed' }, 500)
+      }
       if (!business || business.owner_id !== user.id) return json({ error: 'forbidden' }, 403)
 
-      const { publicKey, privateKey, subject } = getVapidConfig()
-      webpush.setVapidDetails(subject, publicKey, privateKey)
+      stage = 'vapid_configuration'
+      try {
+        const vapidConfig = getVapidConfig()
+        webpush.setVapidDetails(vapidConfig.subject, vapidConfig.publicKey, vapidConfig.privateKey)
+      } catch (error) {
+        logSafeError('vapid_configuration_failed', error)
+        return json({ error: 'vapid_configuration_failed' }, 503)
+      }
 
+      stage = 'subscription_lookup'
       const { data: subscriptions, error: subscriptionError } = await admin
         .from('push_subscriptions')
         .select('id,user_id,endpoint,p256dh,auth')
         .eq('enabled', true)
 
-      if (subscriptionError) return json({ error: 'subscription_lookup_failed' }, 500)
-      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0 })
+      if (subscriptionError) {
+        logSafeError('subscription_lookup_failed', subscriptionError)
+        return json({ error: 'subscription_lookup_failed' }, 500)
+      }
+      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, skipped: 0 })
 
       let sent = 0
       let invalid = 0
@@ -82,14 +110,17 @@ export default {
       const baseNotification = {
         promotion_id: promotion.id,
         business_id: promotion.business_id,
-        title: promotion.title,
-        body: promotion.description?.trim() || `Nova promoção de ${business.name || 'uma empresa local'} no VitrineLocal.`,
-        image_url: promotion.image_url || null,
+        title: String(promotion.title || 'Nova promoção'),
+        body: typeof promotion.description === 'string' && promotion.description.trim()
+          ? promotion.description.trim()
+          : `Nova promoção de ${business.name || 'uma empresa local'} no VitrineLocal.`,
+        image_url: typeof promotion.image_url === 'string' && promotion.image_url.trim() ? promotion.image_url : null,
         url: `/laguna?promotion=${encodeURIComponent(promotion.id)}`,
         type: 'promotion',
       }
 
       for (const subscription of subscriptions) {
+        stage = 'notification_upsert'
         const notification = await admin
           .from('notifications')
           .upsert(
@@ -99,38 +130,46 @@ export default {
           .select('id')
           .maybeSingle()
 
-        if (notification.error) return json({ error: 'notification_create_failed' }, 500)
+        if (notification.error) {
+          logSafeError('notification_create_failed', notification.error)
+          return json({ error: 'notification_create_failed' }, 500)
+        }
         if (!notification.data?.id) {
           skipped += 1
           continue
         }
 
         try {
+          stage = 'push_delivery'
           await webpush.sendNotification(
             {
               endpoint: subscription.endpoint,
               keys: { p256dh: subscription.p256dh, auth: subscription.auth },
             },
             JSON.stringify({
-              title: promotion.title,
+              title: baseNotification.title,
               body: baseNotification.body,
-              image: promotion.image_url || undefined,
+              image: baseNotification.image_url || undefined,
               url: baseNotification.url,
               tag: `vitrine-promotion-${promotion.id}`,
             }),
           )
 
-          await admin.from('notifications').update({
+          stage = 'notification_update'
+          const { error: updateError } = await admin.from('notifications').update({
             status: 'sent',
             sent_at: new Date().toISOString(),
             error_code: null,
             error_message: null,
           }).eq('id', notification.data.id)
 
+          if (updateError) logSafeError('notification_update_failed', updateError)
           sent += 1
           created += 1
         } catch (error) {
           const statusCode = Number(error?.statusCode || 0)
+          logSafeError('push_delivery_failed', error)
+
           if (statusCode === 404 || statusCode === 410) {
             invalid += 1
             await admin.from('push_subscriptions').update({
@@ -149,8 +188,8 @@ export default {
 
       return json({ sent, invalid, created, skipped })
     } catch (error) {
-      if (error?.message === 'VAPID_NOT_CONFIGURED') return json({ error: 'vapid_not_configured' }, 503)
-      return json({ error: 'promotion_push_failed' }, 500)
+      logSafeError(`promotion_push_failed:${stage}`, error)
+      return json({ error: `promotion_push_failed_${stage}` }, 500)
     }
   },
 }
