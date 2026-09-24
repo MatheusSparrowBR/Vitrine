@@ -109,6 +109,26 @@ async function audit(actorId: string, action: string, entityId: string | null, m
   })
 }
 
+async function buildHistory(rows: any[], users: any[]) {
+  const userById = new Map((users || []).map(user => [user.id, user]))
+  return rows.map(row => {
+    const user = row.entity_id ? userById.get(row.entity_id) : null
+    const metadata = row.metadata || {}
+    const pending = Boolean(user && pendingInvite(user))
+    const status = user ? (pending ? 'pending' : (user.email_confirmed_at ? 'completed' : 'active')) : 'cancelled'
+    return {
+      id: row.id,
+      action: row.action,
+      entity_id: row.entity_id,
+      email: user?.email || metadata.email || 'E-mail não informado',
+      full_name: user?.user_metadata?.full_name || metadata.full_name || 'Usuário',
+      created_at: row.created_at,
+      status,
+      can_manage: pending,
+    }
+  })
+}
+
 async function cancelInvitation(userId: string, actorId: string) {
   const user = await requirePendingUser(userId)
   const businesses = await getOwnedBusinesses(userId)
@@ -197,18 +217,21 @@ Deno.serve(async req => {
 
   try {
     if (action === 'list') {
-      const [pending, historyResult] = await Promise.all([
+      const [pending, historyResult, allUsers] = await Promise.all([
         buildPendingUsers(),
         adminDb.from('admin_audit_logs')
           .select('id,action,entity_id,metadata,created_at')
           .in('action', ['user_created', 'invite_resent', 'invite_cancelled'])
           .order('created_at', { ascending: false })
           .limit(100),
+        listAllUsers(),
       ])
+
+      const history = buildHistory(historyResult.data || [], allUsers)
 
       return json({
         pending,
-        history: historyResult.data || [],
+        history,
         history_error: historyResult.error?.message || null,
       })
     }
