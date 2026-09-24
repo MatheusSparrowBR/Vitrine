@@ -33,11 +33,11 @@ export default function OwnerPromotionsSection({businessId,businessName,onChange
  if(confirmingId!==promotion.id)return
  setSendingId(promotion.id);setMessage({text:'',error:false})
  try{
-  const{data,error}=await db.functions.invoke('send-promotion-notification',{body:{promotion_id:promotion.id}})
+  const{data,error}=await db.functions.invoke('send-promotion-notification',{body:{promotion_id:promotion.id,force:true}})
   if(error)throw error
   const sent=Number(data?.sent||0),invalid=Number(data?.invalid||0),skipped=Number(data?.skipped||0)
   if(!sent&&!skipped)throw new Error('Nenhuma notificação foi enviada.')
-  notify('Notificação enviada para '+sent+' dispositivo'+(sent===1?'':'s')+'.'+(invalid?' '+invalid+' subscription'+(invalid===1?'':'s')+' expirada'+(invalid===1?'':'s')+' foram desativadas.':''))
+  notify('Notificação enviada para '+sent+' dispositivo'+(sent===1?'':'s')+'.'+(invalid?' '+invalid+' subscription'+(invalid===1?'':'s')+' expirada'+(invalid===1?'':'s')+' foram desativadas.':'')+(skipped?' '+skipped+' já estava'+(skipped===1?'':'m')+' registrada'+(skipped===1?'':'s')+' e não foi reenviada.':''))
  }catch(err){notify(err?.message||'Não foi possível enviar a notificação.',true)}
  finally{setSendingId(null);setConfirmingId(null)}
 }
