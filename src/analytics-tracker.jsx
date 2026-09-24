@@ -4,7 +4,7 @@ const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLIS
 const adCache=new Map()
 function sessionId(){try{let id=localStorage.getItem('vl_analytics_session');if(!id){id=crypto.randomUUID();localStorage.setItem('vl_analytics_session',id)}return id}catch{return null}}
 async function resolveAdvertisement({id,title,href,city_id}){if(!db)return null;const key=id||`${city_id||''}|${title||''}|${href||''}`;if(adCache.has(key))return adCache.get(key);let q=db.from('advertisements').select('id,business_id,city_id').eq('placement','home_banner');if(id)q=q.eq('id',id);else{if(title)q=q.eq('title',title);if(href)q=q.eq('target_url',href);if(city_id)q=q.eq('city_id',city_id)}const{data}=await q.limit(1).maybeSingle();adCache.set(key,data||null);return data||null}
-async function record(type,extra={}){if(!db)return;const p=location.pathname.split('/').filter(Boolean);const citySlug=p[0]&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha'].includes(p[0])?p[0]:null;let city_id=extra.city_id||null,business_id=extra.business_id||null,metadata={...extra};try{if(citySlug&&!city_id){const{data:c}=await db.from('cities').select('id').eq('slug',citySlug).maybeSingle();city_id=c?.id||null}if(citySlug&&p[1]==='empresa'&&p[2]&&!business_id){const{data:b}=await db.from('businesses').select('id,city_id').eq('slug',decodeURIComponent(p[2])).maybeSingle();business_id=b?.id||null;city_id=city_id||b?.city_id||null}if(type==='banner_impression'||type==='banner_click'){const ad=await resolveAdvertisement({id:metadata.advertisement_id,title:metadata.title,href:metadata.href,city_id});if(ad){metadata.advertisement_id=ad.id;business_id=business_id||ad.business_id;city_id=city_id||ad.city_id}}await db.from('analytics_events').insert({event_type:type,session_id:sessionId(),user_id:null,city_id,business_id,metadata})}catch{}}
+async function record(type,extra={}){if(!db)return false;const p=location.pathname.split('/').filter(Boolean);const citySlug=p[0]&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha'].includes(p[0])?p[0]:null;let city_id=extra.city_id||null,business_id=extra.business_id||null,metadata={...extra};try{if(citySlug&&!city_id){const{data:c}=await db.from('cities').select('id').eq('slug',citySlug).maybeSingle();city_id=c?.id||null}if(citySlug&&p[1]==='empresa'&&p[2]&&!business_id){const{data:b}=await db.from('businesses').select('id,city_id').eq('slug',decodeURIComponent(p[2])).maybeSingle();business_id=b?.id||null;city_id=city_id||b?.city_id||null}if(type==='banner_impression'||type==='banner_click'){const ad=await resolveAdvertisement({id:metadata.advertisement_id,title:metadata.title,href:metadata.href,city_id});if(ad){metadata.advertisement_id=ad.id;business_id=business_id||ad.business_id;city_id=city_id||ad.city_id}}const{error}=await db.from('analytics_events').insert({event_type:type,session_id:sessionId(),user_id:null,city_id,business_id,metadata});if(error)return false;return true}catch{return false}}
 function pwaInstallId(){
  try{
   let id=localStorage.getItem('vl_pwa_install_id')
@@ -28,13 +28,13 @@ async function recordPwaInstall(method){
   const marker='vl_pwa_install_tracked_v1'
   if(localStorage.getItem(marker))return
   const install_id=pwaInstallId()
-  await record('pwa_install',{
+  const recorded=await record('pwa_install',{
    install_id,
    detection_method:method,
    platform:pwaPlatform(),
    display_mode:isStandalonePwa()?'standalone':'browser'
   })
-  localStorage.setItem(marker,'1')
+  if(recorded)localStorage.setItem(marker,'1')
  }catch{}
 }
 export default function AnalyticsTracker(){useEffect(()=>{if(location.pathname.startsWith('/admin')||location.pathname==='/login'||location.pathname==='/atualizar-senha')return;const parts=location.pathname.split('/').filter(Boolean);record('page_view');if(parts[1]==='empresa')record('profile_view');const seen=new Set();const trackBanner=()=>document.querySelectorAll('[data-ad-id],.vl-premium-banner,.ad-card').forEach(el=>{const id=el.getAttribute('data-ad-id')||'';const title=el.querySelector('.vl-premium-copy strong')?.textContent?.trim()||el.querySelector('.ad-content h2')?.textContent?.trim()||'Banner Premium';const href=el.getAttribute('href')||el.querySelector('a')?.getAttribute('href')||'';const key=id||`${title}|${href}`;if(seen.has(key))return;seen.add(key);record('banner_impression',{advertisement_id:id||null,title,href})});trackBanner();
