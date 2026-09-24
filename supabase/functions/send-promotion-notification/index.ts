@@ -72,7 +72,7 @@ export default {
       stage = 'business_lookup'
       const { data: business, error: businessError } = await admin
         .from('businesses')
-        .select('id,name,owner_id,status')
+        .select('id,name,owner_id,status,city_id,category_id')
         .eq('id', promotion.business_id)
         .maybeSingle()
 
@@ -103,10 +103,43 @@ export default {
       }
       if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, skipped: 0, subscriptions: 0 })
 
+      const userIds = [...new Set(subscriptions.map(subscription => subscription.user_id).filter(Boolean))]
+      const { data: preferences, error: preferenceError } = await admin
+        .from('notification_preferences')
+        .select('user_id,promotions_enabled,city_id,category_ids')
+        .in('user_id', userIds)
+
+      if (preferenceError) {
+        logSafeError('notification_preferences_lookup_failed', preferenceError)
+        return json({ error: 'notification_preferences_lookup_failed' }, 500)
+      }
+
+      const preferenceByUser = new Map((preferences || []).map(row => [row.user_id, row]))
+      const eligibleSubscriptions = subscriptions.filter(subscription => {
+        const preference = preferenceByUser.get(subscription.user_id)
+        if (preference?.promotions_enabled === false) return false
+        if (preference?.city_id && preference.city_id !== business.city_id) return false
+        const categories = Array.isArray(preference?.category_ids) ? preference.category_ids : []
+        if (categories.length && !categories.includes(business.category_id)) return false
+        return true
+      })
+
+      if (!eligibleSubscriptions.length) return json({ sent: 0, invalid: 0, created: 0, skipped: subscriptions.length, subscriptions: subscriptions.length, eligible: 0 })
+
+      const { data: quota, error: quotaError } = await admin.rpc('consume_promotion_notification_quota', {
+        p_business_id: promotion.business_id,
+        p_limit: 5,
+      })
+      if (quotaError) {
+        logSafeError('notification_quota_failed', quotaError)
+        return json({ error: 'notification_quota_failed' }, 500)
+      }
+      if (!quota?.allowed) return json({ error: 'notification_rate_limit', remaining: 0, retry_at: quota?.retry_at || null }, 429)
+
       let sent = 0
       let invalid = 0
       let created = 0
-      let skipped = 0
+      let skipped = subscriptions.length - eligibleSubscriptions.length
 
       const baseNotification = {
         promotion_id: promotion.id,
@@ -116,11 +149,13 @@ export default {
           ? promotion.description.trim()
           : `Nova promoção de ${business.name || 'uma empresa local'} no VitrineLocal.`,
         image_url: typeof promotion.image_url === 'string' && promotion.image_url.trim() ? promotion.image_url : null,
+        target_city_id: business.city_id || null,
+        target_category_id: business.category_id || null,
         url: `/laguna?promotion=${encodeURIComponent(promotion.id)}`,
         type: 'promotion',
       }
 
-      for (const subscription of subscriptions) {
+      for (const subscription of eligibleSubscriptions) {
         stage = 'notification_upsert'
         const notification = await admin
           .from('notifications')
@@ -185,7 +220,7 @@ export default {
         }
       }
 
-      return json({ sent, invalid, created, skipped, subscriptions: subscriptions.length })
+      return json({ sent, invalid, created, skipped, subscriptions: subscriptions.length, eligible: eligibleSubscriptions.length, remaining: Number(quota?.remaining ?? 0) })
     } catch (error) {
       logSafeError(`promotion_push_failed:${stage}`, error)
       return json({ error: `promotion_push_failed_${stage}` }, 500)
