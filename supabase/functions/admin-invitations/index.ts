@@ -109,41 +109,24 @@ async function audit(actorId: string, action: string, entityId: string | null, m
   })
 }
 
-async function getInviteStatus(userId: string | null) {
-  if (!userId) return { status: 'cancelled', can_manage: false, user: null }
-  try {
-    const user = await getUser(userId)
-    const pending = pendingInvite(user)
-    return {
-      status: pending ? 'pending' : (user.email_confirmed_at ? 'completed' : 'active'),
-      can_manage: pending,
-      user,
-    }
-  } catch {
-    return { status: 'cancelled', can_manage: false, user: null }
-  }
-}
-
-async function buildHistory(rows: any[]) {
-  const enriched = []
-  for (const row of rows) {
-    const statusInfo = await getInviteStatus(row.entity_id)
-    const user = statusInfo.user
+async function buildHistory(rows: any[], users: any[]) {
+  const userById = new Map((users || []).map(user => [user.id, user]))
+  return rows.map(row => {
+    const user = row.entity_id ? userById.get(row.entity_id) : null
     const metadata = row.metadata || {}
-    const email = user?.email || metadata.email || 'E-mail não informado'
-    const fullName = user?.user_metadata?.full_name || metadata.full_name || 'Usuário'
-    enriched.push({
+    const pending = Boolean(user && pendingInvite(user))
+    const status = user ? (pending ? 'pending' : (user.email_confirmed_at ? 'completed' : 'active')) : 'cancelled'
+    return {
       id: row.id,
       action: row.action,
       entity_id: row.entity_id,
-      email,
-      full_name: fullName,
+      email: user?.email || metadata.email || 'E-mail não informado',
+      full_name: user?.user_metadata?.full_name || metadata.full_name || 'Usuário',
       created_at: row.created_at,
-      status: statusInfo.status,
-      can_manage: statusInfo.can_manage,
-    })
-  }
-  return enriched
+      status,
+      can_manage: pending,
+    }
+  })
 }
 
 async function cancelInvitation(userId: string, actorId: string) {
@@ -234,16 +217,17 @@ Deno.serve(async req => {
 
   try {
     if (action === 'list') {
-      const [pending, historyResult] = await Promise.all([
+      const [pending, historyResult, allUsers] = await Promise.all([
         buildPendingUsers(),
         adminDb.from('admin_audit_logs')
           .select('id,action,entity_id,metadata,created_at')
           .in('action', ['user_created', 'invite_resent', 'invite_cancelled'])
           .order('created_at', { ascending: false })
           .limit(100),
+        listAllUsers(),
       ])
 
-      const history = await buildHistory(historyResult.data || [])
+      const history = buildHistory(historyResult.data || [], allUsers)
 
       return json({
         pending,
