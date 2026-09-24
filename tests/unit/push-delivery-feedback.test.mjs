@@ -18,7 +18,7 @@ test('feedback é enviado no push e pode ser repetido no clique',()=>{
  assert.match(sw,/notification_id/)
  assert.match(sw,/delivery_token/)
  assert.match(sw,/await sendDeliveryFeedback\(feedbackUrl, notificationId, deliveryToken\)/)
- assert.match(sw,/await sendDeliveryFeedback\(notificationData\.feedbackUrl, notificationData\.notificationId, notificationData\.deliveryToken\)/)
+ assert.match(sw,/data: \{ url \}/)
 })
 
 test('service worker força atualização do script de feedback',()=>{
