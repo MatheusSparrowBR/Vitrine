@@ -52,6 +52,7 @@ export default {
     try {
       const payload = await req.json().catch(() => ({}))
       const promotionId = typeof payload?.promotion_id === 'string' ? payload.promotion_id : ''
+      const force = payload?.force === true
       if (!promotionId) return json({ error: 'promotion_id_required' }, 400)
 
       stage = 'promotion_lookup'
@@ -124,8 +125,8 @@ export default {
         const notification = await admin
           .from('notifications')
           .upsert(
-            { ...baseNotification, user_id: subscription.user_id, status: 'queued' },
-            { onConflict: 'user_id,promotion_id,type', ignoreDuplicates: true },
+            { ...baseNotification, user_id: subscription.user_id, status: 'queued', sent_at: null, delivered_at: null, read_at: null, error_code: null, error_message: null },
+            { onConflict: 'user_id,promotion_id,type', ignoreDuplicates: !force },
           )
           .select('id')
           .maybeSingle()
