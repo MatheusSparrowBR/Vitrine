@@ -128,3 +128,11 @@ create index if not exists notifications_target_city_idx
 
 create index if not exists notifications_target_category_idx
   on public.notifications(target_category_id);
+
+
+alter table public.notifications
+  add column if not exists delivery_token_hash text;
+
+create index if not exists notifications_delivery_token_hash_idx
+  on public.notifications(delivery_token_hash)
+  where delivery_token_hash is not null;
