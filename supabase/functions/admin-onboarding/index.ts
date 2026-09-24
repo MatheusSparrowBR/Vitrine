@@ -97,8 +97,15 @@ Deno.serve(async (req) => {
     const email = clean(body?.user?.email).toLowerCase()
     if (!fullName || !email) return json({ error: 'Nome e e-mail do usuário são obrigatórios.' }, 400)
     if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Informe um e-mail válido.' }, 400)
-    const { data: invited, error: inviteError } = await adminDb.auth.admin.inviteUserByEmail(email, { data: { full_name: fullName }, redirectTo: `${APP_URL}/atualizar-senha` })
-    if (inviteError || !invited.user) {
+    const { data: generated, error: inviteError } = await adminDb.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        data: { full_name: fullName },
+        redirectTo: `${APP_URL}/atualizar-senha`,
+      },
+    })
+    if (inviteError || !generated?.user) {
       const rawMessage = String(inviteError?.message || '')
       const normalized = rawMessage.toLowerCase()
       const alreadyExists = normalized.includes('already registered') || normalized.includes('already exists') || normalized.includes('user with this email')
@@ -106,10 +113,15 @@ Deno.serve(async (req) => {
         error: alreadyExists
           ? 'Este e-mail já possui uma conta no VitrineLocal. Use outro e-mail ou gerencie o usuário existente no painel.'
           : (rawMessage || 'Não foi possível criar o usuário.'),
-        code: alreadyExists ? 'user_already_exists' : 'invite_failed',
+        code: alreadyExists ? 'user_already_exists' : 'invite_generation_failed',
       }, 409)
     }
-    const newUser = invited.user
+    const newUser = generated.user
+    const inviteLink = generated.properties?.action_link || generated.properties?.actionLink || null
+    if (!inviteLink) {
+      await adminDb.auth.admin.deleteUser(newUser.id).catch(() => {})
+      return json({ error: 'Usuário criado, mas não foi possível gerar o link de convite.', code: 'invite_link_missing' }, 500)
+    }
     const { error: profileError } = await adminDb.from('profiles').upsert({ id: newUser.id, full_name: fullName, role: 'business_owner', account_status: 'active', updated_at: new Date().toISOString() }, { onConflict: 'id' })
     if (profileError) { await adminDb.auth.admin.deleteUser(newUser.id).catch(() => {}); return json({ error: profileError.message }, 500) }
     let business: any = null
@@ -119,7 +131,14 @@ Deno.serve(async (req) => {
       business = result.data
     }
     await adminDb.from('admin_audit_logs').insert({ actor_id: auth.user.id, action: 'user_created', entity_type: 'profile', entity_id: newUser.id, metadata: { role: 'business_owner', email, business_id: business?.id || null, source: 'admin_onboarding' } })
-    return json({ ok: true, user: { id: newUser.id, email, full_name: fullName, role: 'business_owner', account_status: 'active' }, business, access_url: `${APP_URL}/usuario/login` })
+    return json({
+      ok: true,
+      user: { id: newUser.id, email, full_name: fullName, role: 'business_owner', account_status: 'active' },
+      business,
+      access_url: `${APP_URL}/usuario/login`,
+      invite_link: inviteLink,
+      invite_email_sent: false,
+    })
   }
 
   if (action === 'create_business') {
