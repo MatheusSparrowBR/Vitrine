@@ -179,3 +179,15 @@
   .mbp-contact-card{min-height:52px!important}
 }
 
+
+.mbp-business-notification{display:grid;gap:10px;margin-top:12px;padding:13px 14px;border:1px solid #dce7f3;border-radius:14px;background:linear-gradient(135deg,#f8fbff,#fff)}
+.mbp-business-notification>div:first-child{display:flex;align-items:center;gap:10px;min-width:0}
+.mbp-business-notification>div:first-child>div{display:grid;gap:3px;min-width:0}
+.mbp-business-notification strong{font-size:13px;color:#20334c}
+.mbp-business-notification small{font-size:10px;line-height:1.4;color:#718096}
+.mbp-business-notification-icon{width:34px;height:34px;flex:0 0 34px;border-radius:10px;display:grid;place-items:center;background:#eef5ff;color:#216df3}
+.mbp-business-notification button{justify-self:start;min-height:36px;padding:0 13px;border:1px solid #a9c9f8;border-radius:10px;background:#edf5ff;color:#2163c4;font-size:10px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.mbp-business-notification button.active{background:#eaf8f0;border-color:#bfe8d0;color:#18824f}
+.mbp-business-notification button:disabled{opacity:.65;cursor:wait}
+.mbp-business-notification-message{color:#2163c4!important}
+@media(max-width:760px){.mbp-business-notification{margin-top:9px;padding:11px 12px;border-radius:12px}.mbp-business-notification strong{font-size:11px}.mbp-business-notification small{font-size:9px}.mbp-business-notification button{width:100%;justify-content:center;height:38px}}
