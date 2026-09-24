@@ -98,7 +98,17 @@ Deno.serve(async (req) => {
     if (!fullName || !email) return json({ error: 'Nome e e-mail do usuário são obrigatórios.' }, 400)
     if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Informe um e-mail válido.' }, 400)
     const { data: invited, error: inviteError } = await adminDb.auth.admin.inviteUserByEmail(email, { data: { full_name: fullName }, redirectTo: `${APP_URL}/atualizar-senha` })
-    if (inviteError || !invited.user) return json({ error: inviteError?.message || 'Não foi possível criar o usuário. Verifique se o e-mail já está cadastrado.' }, 409)
+    if (inviteError || !invited.user) {
+      const rawMessage = String(inviteError?.message || '')
+      const normalized = rawMessage.toLowerCase()
+      const alreadyExists = normalized.includes('already registered') || normalized.includes('already exists') || normalized.includes('user with this email')
+      return json({
+        error: alreadyExists
+          ? 'Este e-mail já possui uma conta no VitrineLocal. Use outro e-mail ou gerencie o usuário existente no painel.'
+          : (rawMessage || 'Não foi possível criar o usuário.'),
+        code: alreadyExists ? 'user_already_exists' : 'invite_failed',
+      }, 409)
+    }
     const newUser = invited.user
     const { error: profileError } = await adminDb.from('profiles').upsert({ id: newUser.id, full_name: fullName, role: 'business_owner', account_status: 'active', updated_at: new Date().toISOString() }, { onConflict: 'id' })
     if (profileError) { await adminDb.auth.admin.deleteUser(newUser.id).catch(() => {}); return json({ error: profileError.message }, 500) }
