@@ -22,5 +22,5 @@ test('feedback é enviado no push e pode ser repetido no clique',()=>{
 })
 
 test('service worker força atualização do script de feedback',()=>{
- assert.match(pwa,/sw\.js\?version=delivery-feedback-v4/)
+ assert.match(pwa,/sw\.js\?version=delivery-feedback-v5/)
 })

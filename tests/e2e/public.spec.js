@@ -120,6 +120,7 @@ test('catalogo moderno possui filtros e cards visuais',async({page})=>{
 
 test('perfil moderno abre a galeria completa de fotos',async({page})=>{
  await page.goto('/laguna/empresas')
+ await page.waitForTimeout(1500)
  await page.evaluate(()=>{const gallery=document.createElement('div');gallery.className='mbp-gallery';gallery.innerHTML='<div class="mbp-gallery-main"><img src="/laguna-hero.svg" alt="Capa de teste"></div><div class="mbp-gallery-side"><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 1"></div><div class="mbp-gallery-thumb"><img src="/laguna-hero.svg" alt="Foto 2"></div><div class="mbp-gallery-more"><strong>+2</strong><span>Ver todas as fotos</span></div></div>';document.body.appendChild(gallery)})
  const galleryMore=page.locator('.mbp-gallery-more').last()
  await expect(galleryMore).toBeVisible()
