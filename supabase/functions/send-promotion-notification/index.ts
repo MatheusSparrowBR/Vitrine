@@ -101,7 +101,7 @@ export default {
         logSafeError('subscription_lookup_failed', subscriptionError)
         return json({ error: 'subscription_lookup_failed' }, 500)
       }
-      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, skipped: 0 })
+      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, skipped: 0, subscriptions: 0 })
 
       let sent = 0
       let invalid = 0
@@ -150,9 +150,7 @@ export default {
             JSON.stringify({
               title: baseNotification.title,
               body: baseNotification.body,
-              image: baseNotification.image_url || undefined,
               url: baseNotification.url,
-              tag: `vitrine-promotion-${promotion.id}`,
             }),
           )
 
@@ -187,7 +185,7 @@ export default {
         }
       }
 
-      return json({ sent, invalid, created, skipped })
+      return json({ sent, invalid, created, skipped, subscriptions: subscriptions.length })
     } catch (error) {
       logSafeError(`promotion_push_failed:${stage}`, error)
       return json({ error: `promotion_push_failed_${stage}` }, 500)
