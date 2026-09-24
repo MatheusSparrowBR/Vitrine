@@ -14,6 +14,8 @@ test('fase 2.6.2 evita duplicar notificacao da mesma promocao para o usuario',()
  assert.match(fn,/deduplicated/)
  assert.match(fn,/\.eq\('id', notificationId\)/)
  assert.doesNotMatch(fn,/notification\.data\.id/)
+ assert.match(fn,/ineligible: subscriptions\.length/)
+ assert.doesNotMatch(fn,/skipped: subscriptions\.length/)
 })
 
 test('fase 2.6.2 exige promocao publicada e dono autenticado',()=>{
