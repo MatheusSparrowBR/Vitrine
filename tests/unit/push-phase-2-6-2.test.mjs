@@ -8,7 +8,8 @@ const fn=fs.readFileSync('supabase/functions/send-promotion-notification/index.t
 test('fase 2.6.2 evita duplicar notificacao da mesma promocao para o usuario',()=>{
  assert.match(migration,/unique index if not exists notifications_user_promotion_type_uidx/)
  assert.match(migration,/notifications\(user_id, promotion_id, type\)/)
- assert.match(fn,/onConflict: 'user_id,promotion_id,type'/)
+ assert.match(fn,/user_id.*promotion_id.*type/)
+ assert.match(fn,/deduplicated/)
 })
 
 test('fase 2.6.2 exige promocao publicada e dono autenticado',()=>{
