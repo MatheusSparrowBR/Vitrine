@@ -92,7 +92,7 @@ self.addEventListener('push', event => {
       badge: NOTIFICATION_ICON,
       tag,
       renotify: true,
-      data: { url, notificationId },
+      data: { url },
     })
     if (feedbackUrl && notificationId && deliveryToken) {
       try {
