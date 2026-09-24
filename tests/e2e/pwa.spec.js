@@ -3,6 +3,7 @@ import {test,expect} from '@playwright/test'
 test.describe('PWA fase 1.2',()=>{
   test('registra o service worker, expõe o manifest e controla a aplicação',async({page})=>{
     await page.goto('/laguna',{waitUntil:'domcontentloaded'})
+    await page.waitForTimeout(1500)
     const pwa=await page.evaluate(async()=>{
       const registration=await navigator.serviceWorker.ready
       return {
@@ -36,6 +37,7 @@ test.describe('PWA fase 1.2',()=>{
 
   test('mantém a rota principal disponível offline após o primeiro carregamento',async({page,context})=>{
     await page.goto('/laguna',{waitUntil:'domcontentloaded'})
+    await page.waitForTimeout(1500)
     await page.evaluate(()=>navigator.serviceWorker.ready)
     await expect(page.locator('#root')).toBeVisible()
 
