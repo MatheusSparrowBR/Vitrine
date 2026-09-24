@@ -45,17 +45,31 @@ export async function syncPushSubscription(userId){
   if(!subscription)return {status:'none',subscription:null}
   if(!supabase)return {status:'unavailable',subscription}
   const json=subscription.toJSON()
+  const endpoint=json.endpoint||''
+  const userAgent=typeof navigator!=='undefined'?navigator.userAgent||'':''
+  const platform=getPlatform()
+  if(!endpoint||!json.keys?.p256dh||!json.keys?.auth)throw new Error('Subscription Push inválida.')
   const{error}=await supabase.from('push_subscriptions').upsert({
     user_id:userId,
-    endpoint:json.endpoint,
-    p256dh:json.keys?.p256dh||'',
-    auth:json.keys?.auth||'',
-    user_agent:navigator.userAgent||null,
-    platform:getPlatform(),
+    endpoint,
+    p256dh:json.keys.p256dh,
+    auth:json.keys.auth,
+    user_agent:userAgent||null,
+    platform,
     enabled:true,
     last_seen_at:new Date().toISOString(),
   },{onConflict:'endpoint'})
   if(error)throw error
+
+  const{error:cleanupError}=await supabase.from('push_subscriptions')
+    .update({enabled:false,last_seen_at:new Date().toISOString()})
+    .eq('user_id',userId)
+    .eq('platform',platform)
+    .eq('user_agent',userAgent)
+    .neq('endpoint',endpoint)
+    .eq('enabled',true)
+  if(cleanupError)throw cleanupError
+
   return {status:'active',subscription}
 }
 
