@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitrine-local-shell-v1'
+const CACHE_NAME = 'vitrine-local-shell-v2'
 const APP_SHELL = [
   '/',
   '/laguna',
@@ -20,7 +20,6 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return
   const url = new URL(event.request.url)
   if (url.origin !== self.location.origin) return
-
   event.respondWith(
     fetch(event.request).then(response => {
       if (response.ok) {
@@ -81,13 +80,14 @@ self.addEventListener('push', event => {
       ? data.message.trim()
       : DEFAULT_NOTIFICATION_BODY
   const url = getNotificationUrl(data.url || data.link)
-  const tag = typeof data.tag === 'string' && data.tag.trim() ? data.tag.trim() : 'vitrine-local-push'
+  const tag = typeof data.tag === 'string' && data.tag.trim() ? data.tag.trim() : `vitrine-local-push-${Date.now()}`
 
   event.waitUntil(self.registration.showNotification(title, {
     body,
     icon: NOTIFICATION_ICON,
     badge: NOTIFICATION_ICON,
     tag,
+    renotify: true,
     data: { url },
   }))
 })
