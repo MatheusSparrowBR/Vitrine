@@ -87,6 +87,15 @@ export default {
         return json({ error: 'business_lookup_failed' }, 500)
       }
       if (!business || business.owner_id !== user.id) return json({ error: 'forbidden' }, 403)
+      const { data: businessCity, error: businessCityError } = await admin
+        .from('cities')
+        .select('slug')
+        .eq('id', business.city_id)
+        .maybeSingle()
+      if (businessCityError) {
+        logSafeError('business_city_lookup_failed', businessCityError)
+        return json({ error: 'business_city_lookup_failed' }, 500)
+      }
 
       stage = 'vapid_configuration'
       try {
