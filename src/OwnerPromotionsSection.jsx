@@ -2,6 +2,7 @@ import React,{useEffect,useState}from'react'
 import{createClient}from'@supabase/supabase-js'
 import{getPlanCycleFeatureUsage,ADMIN_UNLIMITED_LIMIT}from'./plan-cycle-usage.js'
 import{DEFAULT_PROMOTION_IMAGE}from'./promotion-service.js'
+import Icon from './ui-icons.jsx'
 import'./owner-promotions.css'
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
