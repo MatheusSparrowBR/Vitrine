@@ -17,7 +17,7 @@ test('admin notifications exige autenticação administrativa e valida conteúdo
  assert.match(notificationFn,/MAX_IMAGE_BYTES/)
  assert.match(notificationFn,/sendNotification/)
  assert.match(notificationFn,/delivery_feedback_url/)
-})
+ assert.match(notificationFn,/hashToken/)\n})
 
 test('admin notifications permite fontes personalizadas, promoções, eventos e empresas',()=>{
  assert.match(notificationFn,/sourceType === 'promotion'/)
