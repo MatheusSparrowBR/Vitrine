@@ -1,4 +1,4 @@
-const SW_URL = '/sw.js'
+const SW_URL = '/sw.js?version=delivery-feedback-v4'
 
 export function registerPwa() {
   if (!('serviceWorker' in navigator)) return null
