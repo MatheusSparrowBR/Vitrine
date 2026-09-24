@@ -109,6 +109,43 @@ async function audit(actorId: string, action: string, entityId: string | null, m
   })
 }
 
+async function getInviteStatus(userId: string | null) {
+  if (!userId) return { status: 'cancelled', can_manage: false, user: null }
+  try {
+    const user = await getUser(userId)
+    const pending = pendingInvite(user)
+    return {
+      status: pending ? 'pending' : (user.email_confirmed_at ? 'completed' : 'active'),
+      can_manage: pending,
+      user,
+    }
+  } catch {
+    return { status: 'cancelled', can_manage: false, user: null }
+  }
+}
+
+async function buildHistory(rows: any[]) {
+  const enriched = []
+  for (const row of rows) {
+    const statusInfo = await getInviteStatus(row.entity_id)
+    const user = statusInfo.user
+    const metadata = row.metadata || {}
+    const email = user?.email || metadata.email || 'E-mail não informado'
+    const fullName = user?.user_metadata?.full_name || metadata.full_name || 'Usuário'
+    enriched.push({
+      id: row.id,
+      action: row.action,
+      entity_id: row.entity_id,
+      email,
+      full_name: fullName,
+      created_at: row.created_at,
+      status: statusInfo.status,
+      can_manage: statusInfo.can_manage,
+    })
+  }
+  return enriched
+}
+
 async function cancelInvitation(userId: string, actorId: string) {
   const user = await requirePendingUser(userId)
   const businesses = await getOwnedBusinesses(userId)
@@ -206,9 +243,11 @@ Deno.serve(async req => {
           .limit(100),
       ])
 
+      const history = await buildHistory(historyResult.data || [])
+
       return json({
         pending,
-        history: historyResult.data || [],
+        history,
         history_error: historyResult.error?.message || null,
       })
     }
