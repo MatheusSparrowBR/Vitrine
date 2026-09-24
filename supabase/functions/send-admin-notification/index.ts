@@ -40,6 +40,12 @@ function logSafeError(label: string, error: unknown) {
   })
 }
 
+async function hashToken(value: string) {
+  const bytes = new TextEncoder().encode(value)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
 function getVapidConfig() {
   const publicKey = Deno.env.get('VAPID_PUBLIC_KEY')?.trim()
   const privateKey = Deno.env.get('VAPID_PRIVATE_KEY')?.trim()
