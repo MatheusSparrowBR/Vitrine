@@ -161,7 +161,9 @@ export default {
       let sent = 0
       let invalid = 0
       let created = 0
-      let skipped = subscriptions.length - eligibleSubscriptions.length
+      let ineligible = subscriptions.length - eligibleSubscriptions.length
+      let deduplicated = 0
+      let failed = 0
 
       const baseNotification = {
         promotion_id: promotion.id,
@@ -181,22 +183,60 @@ export default {
         stage = 'notification_upsert'
         const deliveryToken = crypto.randomUUID() + crypto.randomUUID()
         const deliveryTokenHash = await hashToken(deliveryToken)
-        const notification = await admin
+        let notificationId = ''
+        const existing = await admin
           .from('notifications')
-          .upsert(
-            { ...baseNotification, user_id: subscription.user_id, status: 'queued', sent_at: null, delivered_at: null, delivery_token_hash: deliveryTokenHash, read_at: null, error_code: null, error_message: null },
-            { onConflict: 'user_id,promotion_id,type', ignoreDuplicates: !force },
-          )
-          .select('id')
+          .select('id,status')
+          .eq('user_id', subscription.user_id)
+          .eq('promotion_id', promotion.id)
+          .eq('type', 'promotion')
           .maybeSingle()
 
-        if (notification.error) {
-          logSafeError('notification_create_failed', notification.error)
-          return json({ error: 'notification_create_failed' }, 500)
+        if (existing.error) {
+          logSafeError('notification_lookup_failed', existing.error)
+          return json({ error: 'notification_lookup_failed' }, 500)
         }
-        if (!notification.data?.id) {
-          skipped += 1
+
+        if (existing.data?.id && !force) {
+          deduplicated += 1
           continue
+        }
+
+        if (existing.data?.id) {
+          const updateQueued = await admin.from('notifications').update({
+            ...baseNotification,
+            status: 'queued',
+            sent_at: null,
+            delivered_at: null,
+            delivery_token_hash: deliveryTokenHash,
+            read_at: null,
+            error_code: null,
+            error_message: null,
+          }).eq('id', existing.data.id).select('id').maybeSingle()
+          if (updateQueued.error || !updateQueued.data?.id) {
+            logSafeError('notification_update_queue_failed', updateQueued.error || new Error('Notification id missing after update'))
+            failed += 1
+            continue
+          }
+          notificationId = updateQueued.data.id
+        } else {
+          const inserted = await admin.from('notifications').insert({
+            ...baseNotification,
+            user_id: subscription.user_id,
+            status: 'queued',
+            sent_at: null,
+            delivered_at: null,
+            delivery_token_hash: deliveryTokenHash,
+            read_at: null,
+            error_code: null,
+            error_message: null,
+          }).select('id').single()
+          if (inserted.error || !inserted.data?.id) {
+            logSafeError('notification_create_failed', inserted.error || new Error('Notification id missing after insert'))
+            failed += 1
+            continue
+          }
+          notificationId = inserted.data.id
         }
 
         try {
@@ -210,7 +250,7 @@ export default {
               title: baseNotification.title,
               body: baseNotification.body,
               url: baseNotification.url,
-              notification_id: notification.data.id,
+              notification_id: notificationId,
               delivery_token: deliveryToken,
               delivery_feedback_url: `${supabaseUrl}/functions/v1/ack-notification-delivery`,
             }),
@@ -222,7 +262,7 @@ export default {
             sent_at: new Date().toISOString(),
             error_code: null,
             error_message: null,
-          }).eq('id', notification.data.id)
+          }) .eq('id', notificationId)
 
           if (updateError) logSafeError('notification_update_failed', updateError)
           sent += 1
@@ -239,6 +279,7 @@ export default {
             }).eq('id', subscription.id)
           }
 
+          failed += 1
           await admin.from('notifications').update({
             status: 'failed',
             error_code: statusCode ? `HTTP_${statusCode}` : 'PUSH_SEND_FAILED',
@@ -247,7 +288,7 @@ export default {
         }
       }
 
-      return json({ sent, invalid, created, skipped, subscriptions: subscriptions.length, eligible: eligibleSubscriptions.length, remaining: Number(quota?.remaining ?? 0) })
+      return json({ sent, invalid, created, ineligible, deduplicated, failed, subscriptions: subscriptions.length, eligible: eligibleSubscriptions.length, remaining: Number(quota?.remaining ?? 0) })
     } catch (error) {
       logSafeError(`promotion_push_failed:${stage}`, error)
       return json({ error: `promotion_push_failed_${stage}` }, 500)
