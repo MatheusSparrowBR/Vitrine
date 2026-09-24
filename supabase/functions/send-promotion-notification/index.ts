@@ -78,7 +78,7 @@ export default {
       stage = 'business_lookup'
       const { data: business, error: businessError } = await admin
         .from('businesses')
-        .select('id,name,owner_id,status,city_id,category_id')
+        .select('id,name,owner_id,status,city_id,category_id,slug')
         .eq('id', promotion.business_id)
         .maybeSingle()
 
@@ -87,6 +87,15 @@ export default {
         return json({ error: 'business_lookup_failed' }, 500)
       }
       if (!business || business.owner_id !== user.id) return json({ error: 'forbidden' }, 403)
+      const { data: businessCity, error: businessCityError } = await admin
+        .from('cities')
+        .select('slug')
+        .eq('id', business.city_id)
+        .maybeSingle()
+      if (businessCityError) {
+        logSafeError('business_city_lookup_failed', businessCityError)
+        return json({ error: 'business_city_lookup_failed' }, 500)
+      }
 
       stage = 'vapid_configuration'
       try {
@@ -175,7 +184,7 @@ export default {
         image_url: typeof promotion.image_url === 'string' && promotion.image_url.trim() ? promotion.image_url : null,
         target_city_id: business.city_id || null,
         target_category_id: business.category_id || null,
-        url: `/laguna?promotion=${encodeURIComponent(promotion.id)}`,
+        url: `/${businessCity?.slug || 'laguna'}?promotion=${encodeURIComponent(promotion.id)}`,
         type: 'promotion',
       }
 

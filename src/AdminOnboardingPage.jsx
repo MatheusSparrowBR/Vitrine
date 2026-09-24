@@ -41,7 +41,11 @@ export default function AdminOnboardingPage({mode='partner'}){
   const serviceFields={has_delivery:Boolean(business.has_delivery),has_pickup:Boolean(business.has_pickup),has_dine_in:Boolean(business.has_dine_in)}
   const finalPayload=mode==='business'?{action,business:{...business,...serviceFields}}:{action,user,business:{...business,...serviceFields,create:mode==='partner'&&Boolean(business.name.trim())}}
   const{data,error}=await db.functions.invoke('admin-onboarding',{body:finalPayload})
-  if(error){setS(x=>({...x,busy:false,error:error.message||'Não foi possível concluir o cadastro.'}));return}
+  if(error){
+   let detail=error.message||'Não foi possível concluir o cadastro.'
+   try{const response=error?.context;if(response?.json){const payload=await response.clone().json().catch(()=>null);if(payload?.error)detail=payload.error}}catch{}
+   setS(x=>({...x,busy:false,error:detail}));return
+  }
   if(data?.error){setS(x=>({...x,busy:false,error:data.error}));return}
   setS(x=>({...x,busy:false,notice:mode==='partner'?'Parceiro criado com sucesso.':mode==='business'?'Empresa criada com sucesso.':'Usuário criado com sucesso.',created:data}))
   if(mode==='user')setUser({full_name:'',email:''})

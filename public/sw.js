@@ -113,10 +113,12 @@ self.addEventListener('push', event => {
   const { feedbackUrl, notificationId, deliveryToken } = getDeliveryFeedback(data)
 
   event.waitUntil((async () => {
+    const imageUrl = typeof data.image_url === 'string' && /^https:\/\//i.test(data.image_url.trim()) ? data.image_url.trim() : ''
     await self.registration.showNotification(title, {
       body,
       icon: NOTIFICATION_ICON,
       badge: NOTIFICATION_ICON,
+      ...(imageUrl ? { image: imageUrl } : {}),
       tag,
       renotify: true,
       data: { url },

@@ -10,5 +10,5 @@ test('PWA atualiza o Service Worker automaticamente',()=>{
   assert.match(source,/newWorker\.postMessage\(\{ type: 'SKIP_WAITING' \}\)/)
   assert.match(source,/navigator\.serviceWorker\.addEventListener\('controllerchange'/)
   assert.match(source,/setInterval\(update, UPDATE_INTERVAL_MS\)/)
-  assert.match(source,/version=delivery-feedback-v5/)
+  assert.match(source,/version=delivery-feedback-v6/)
 })
