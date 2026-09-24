@@ -60,6 +60,7 @@ function OwnerWorkspace({session}){
   setBusinessLoading(false)
  }
  useEffect(()=>{loadBusinesses()},[session.user.id])
+ useEffect(()=>{if(!db||!session.user.id)return;let live=true;db.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',session.user.id).is('read_at',null).then(({count})=>{if(live)setNotificationUnread(Number(count||0))});return()=>{live=false}},[session.user.id])
  useEffect(()=>{if(selected?.id){persistBusinessId(selected.id,{updateUrl:false});loadBusiness(selected.id)}},[selected?.id])
  const cityLabel=useMemo(()=>selected?.cities?`${selected.cities.name} - ${selected.cities.state}`:'Cidade não informada',[selected?.cities])
  const statusLabel={active:'Ativa',pending:'Em análise',suspended:'Suspensa',rejected:'Rejeitada'}[selected?.status]||selected?.status||'—'
