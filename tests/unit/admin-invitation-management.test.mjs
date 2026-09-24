@@ -44,3 +44,12 @@ test('rota e menu administrativo de convites existem',()=>{
  assert.match(shell,/Convites/)
  assert.match(shell,/\/admin\/convites/)
 })
+
+test('histórico distingue convites pendentes e concluídos e permite gerenciá-los',()=>{
+ assert.match(fn,/buildHistory/)
+ assert.match(fn,/can_manage: pending/)
+ assert.match(fn,/status === 'pending'|status/)
+ assert.match(page,/item\.can_manage/)
+ assert.match(page,/Gerar novo link/)
+ assert.match(page,/Cancelar e reenviar/)
+})
