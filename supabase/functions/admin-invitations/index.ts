@@ -202,7 +202,6 @@ Deno.serve(async req => {
         adminDb.from('admin_audit_logs')
           .select('id,action,entity_id,metadata,created_at')
           .in('action', ['user_created', 'invite_resent', 'invite_cancelled'])
-          .eq('entity_type', 'profile')
           .order('created_at', { ascending: false })
           .limit(100),
       ])
