@@ -140,7 +140,7 @@ export default {
         logSafeError('notification_quota_failed', quotaError)
         return json({ error: 'notification_quota_failed' }, 500)
       }
-      if (!quota?.allowed) return json({ error: 'notification_rate_limit', remaining: 0, retry_at: quota?.retry_at || null }, 429)
+      if (!quota?.allowed) return json({ error: 'notification_rate_limit', remaining: 0, limit: Number(quota?.limit ?? 0), used: Number(quota?.used ?? 0), retry_at: quota?.retry_at || null }, 429)
 
       let sent = 0
       let invalid = 0
