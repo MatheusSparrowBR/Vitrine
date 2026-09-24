@@ -6,7 +6,7 @@ const users=fs.readFileSync('src/AdminUsersPage.jsx','utf8')
 const onboarding=fs.readFileSync('src/AdminOnboardingPage.jsx','utf8')
 
 test('gestão de usuários lista todos os perfis e mostra o e-mail',()=>{
- assert.match(users,/db\.rpc\('admin_list_users'\)/)
+ assert.match(users,/db\.rpc\('admin_list_users_with_business'\)/)
  assert.match(users,/admin:'Administrador'/)
  assert.match(users,/u\.email/)
  assert.doesNotMatch(users,/\.neq\('role','admin'\)/)
