@@ -119,7 +119,7 @@ self.addEventListener('push', event => {
       badge: NOTIFICATION_ICON,
       tag,
       renotify: true,
-      data: { url, feedbackUrl, notificationId, deliveryToken },
+      data: { url },
     })
     await sendDeliveryFeedback(feedbackUrl, notificationId, deliveryToken)
   })())
@@ -127,10 +127,8 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  const notificationData = event.notification.data || {}
-  const targetUrl = getNotificationUrl(notificationData.url)
+  const targetUrl = getNotificationUrl(event.notification.data?.url)
   event.waitUntil((async () => {
-    await sendDeliveryFeedback(notificationData.feedbackUrl, notificationData.notificationId, notificationData.deliveryToken)
     const absoluteUrl = new URL(targetUrl, self.location.origin).href
     const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     for (const client of clientsList) {
