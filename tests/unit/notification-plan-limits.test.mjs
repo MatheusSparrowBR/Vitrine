@@ -9,14 +9,14 @@ const promo = fs.readFileSync(root + '/src/OwnerPromotionsSection.jsx', 'utf8')
 const plans = fs.readFileSync(root + '/src/AdminPlansPage.jsx', 'utf8')
 
 test('limite de notificações usa o limite de promoções do plano', () => {
-  assert.match(migration, /plan_limit\\(p_business_id, 'promotions'\\)/)
-  assert.match(migration, /private\\.get_business_plan_cycle/)
+  assert.match(migration, /plan_limit\(p_business_id, 'promotions'\)/)
+  assert.match(migration, /private\.get_business_plan_cycle/)
   assert.match(fn, /notification_rate_limit/)
   assert.match(fn, /retry_at/)
 })
 
 test('Bistrô Laguna - Teste possui envio ilimitado', () => {
-  assert.match(migration, /v_business\\.name = 'Bistrô Laguna - Teste'/)
+  assert.match(migration, /v_business\.name = 'Bistrô Laguna - Teste'/)
   assert.match(migration, /'unlimited', true/)
 })
 
