@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitrine-local-shell-v4'
+const CACHE_NAME = 'vitrine-local-shell-v5'
 const APP_SHELL = [
   '/',
   '/laguna',
