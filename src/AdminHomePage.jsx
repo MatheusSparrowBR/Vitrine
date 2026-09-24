@@ -6,6 +6,7 @@ import './admin-home.css'
 
 const actions=[
  ['notifications','Notificações','Envie Push personalizados e reutilize promoções, eventos ou empresas.','/admin/notificacoes'],
+ ['invitations','Convites','Acompanhe convites pendentes, gere novos links e reenvie acessos.','/admin/convites'],
  ['businesses','Empresas','Revise cadastros, status, destaque e verificação.','/admin/empresas'],
  ['promotions','Promoções','Edite ofertas, altere status e remova campanhas.','/admin/gestao?tab=promotions'],
  ['events','Eventos','Mantenha a agenda pública atualizada.','/admin/gestao?tab=events'],
