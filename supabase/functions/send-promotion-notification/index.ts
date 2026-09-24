@@ -78,7 +78,7 @@ export default {
       stage = 'business_lookup'
       const { data: business, error: businessError } = await admin
         .from('businesses')
-        .select('id,name,owner_id,status,city_id,category_id')
+        .select('id,name,owner_id,status,city_id,category_id,slug')
         .eq('id', promotion.business_id)
         .maybeSingle()
 
