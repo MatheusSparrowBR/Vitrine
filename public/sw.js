@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitrine-local-shell-v3'
+const CACHE_NAME = 'vitrine-local-shell-v4'
 const APP_SHELL = [
   '/',
   '/laguna',
@@ -71,6 +71,35 @@ function getNotificationUrl(value) {
   }
 }
 
+async function sendDeliveryFeedback(feedbackUrl, notificationId, deliveryToken) {
+  if (!feedbackUrl || !notificationId || !deliveryToken) return false
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(feedbackUrl, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notification_id: notificationId, token: deliveryToken }),
+      })
+      if (response.ok) return true
+    } catch {
+      // Retry while the service-worker event is alive.
+    }
+    if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)))
+  }
+  return false
+}
+
+function getDeliveryFeedback(data) {
+  return {
+    feedbackUrl: typeof data.delivery_feedback_url === 'string' ? data.delivery_feedback_url.trim() : '',
+    notificationId: typeof data.notification_id === 'string' ? data.notification_id : '',
+    deliveryToken: typeof data.delivery_token === 'string' ? data.delivery_token : '',
+  }
+}
+
 self.addEventListener('push', event => {
   const data = getPushPayload(event)
   const title = typeof data.title === 'string' && data.title.trim() ? data.title.trim() : DEFAULT_NOTIFICATION_TITLE
@@ -81,9 +110,7 @@ self.addEventListener('push', event => {
       : DEFAULT_NOTIFICATION_BODY
   const url = getNotificationUrl(data.url || data.link)
   const tag = typeof data.tag === 'string' && data.tag.trim() ? data.tag.trim() : `vitrine-local-push-${Date.now()}`
-  const feedbackUrl = typeof data.delivery_feedback_url === 'string' ? data.delivery_feedback_url.trim() : ''
-  const notificationId = typeof data.notification_id === 'string' ? data.notification_id : ''
-  const deliveryToken = typeof data.delivery_token === 'string' ? data.delivery_token : ''
+  const { feedbackUrl, notificationId, deliveryToken } = getDeliveryFeedback(data)
 
   event.waitUntil((async () => {
     await self.registration.showNotification(title, {
@@ -92,27 +119,18 @@ self.addEventListener('push', event => {
       badge: NOTIFICATION_ICON,
       tag,
       renotify: true,
-      data: { url },
+      data: { url, feedbackUrl, notificationId, deliveryToken },
     })
-    if (feedbackUrl && notificationId && deliveryToken) {
-      try {
-        await fetch(feedbackUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notification_id: notificationId, token: deliveryToken }),
-          keepalive: true,
-        })
-      } catch {
-        // The notification was displayed locally; feedback can fail without blocking the push UI.
-      }
-    }
+    await sendDeliveryFeedback(feedbackUrl, notificationId, deliveryToken)
   })())
 })
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  const targetUrl = getNotificationUrl(event.notification.data?.url)
+  const notificationData = event.notification.data || {}
+  const targetUrl = getNotificationUrl(notificationData.url)
   event.waitUntil((async () => {
+    await sendDeliveryFeedback(notificationData.feedbackUrl, notificationData.notificationId, notificationData.deliveryToken)
     const absoluteUrl = new URL(targetUrl, self.location.origin).href
     const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     for (const client of clientsList) {
