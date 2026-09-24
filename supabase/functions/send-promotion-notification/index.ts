@@ -284,7 +284,7 @@ export default {
             status: 'failed',
             error_code: statusCode ? `HTTP_${statusCode}` : 'PUSH_SEND_FAILED',
             error_message: 'Falha na entrega da notificação.',
-          }).eq('id', notification.data.id)
+          }).eq('id', notificationId)
         }
       }
 
