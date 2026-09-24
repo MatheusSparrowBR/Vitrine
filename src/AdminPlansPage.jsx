@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState}from'react'
 import'./admin-plans.css'
 
 const EMPTY={code:'pro',name:'',description:'',price_monthly:'',price_yearly:'',sort_order:0,active:true,features:{}}
-const LIMITS=[['photos','Mídias por ciclo'],['items','Produtos e serviços por ciclo'],['promotions','Promoções por ciclo']]
+const LIMITS=[['photos','Mídias por ciclo'],['items','Produtos e serviços por ciclo'],['promotions','Promoções por ciclo · limite de Push']]
 const TOGGLES=[
  ['business_profile','Perfil comercial'],
  ['analytics','Analytics comercial'],
