@@ -10,7 +10,8 @@ export default function AdminInvitationsPage(){
  const load=useCallback(async()=>{
   setState(x=>({...x,loading:true,error:''}))
   try{
-   const{data:{session}}=await (await import('./supabase-client.js')).db.auth.getSession()
+   if(!db)throw new Error('Banco indisponível.')
+   const{data:{session}}=await db.auth.getSession()
    if(!session)throw new Error('Sessão administrativa não encontrada.')
    const{data,error}=await db.functions.invoke('admin-invitations',{body:{action:'list'}})
    if(error)throw error
@@ -64,7 +65,7 @@ export default function AdminInvitationsPage(){
 
   <section className="ai-card">
    <div className="ai-card-head"><div><span className="ai-kicker">PENDENTES</span><h3>Convites que ainda podem ser gerenciados</h3></div><button className="admin-v2-btn" type="button" onClick={load} disabled={state.loading}>{state.loading?'Atualizando…':'Atualizar'}</button></div>
-   {state.loading&&!state.pending.length?<div className="ai-empty">Carregando convites…</div>:!state.pending.length?<div className="ai-empty"><strong>Nenhum convite pendente.</strong><span>Quando um usuário for convidado e ainda não criar o acesso, ele aparecerá aqui.</span></div>:<div className="ai-table-wrap"><table className="ai-table"><thead><tr><th>Usuário</th><th>Convite enviado</th><th>Empresa</th><th>Ações</th></tr></thead><tbody>{state.pending.map(item=><tr key={item.id}><td><strong>{item.full_name||'Usuário sem nome'}</strong><small>{item.email}</small></td><td>{item.invited_at?dateFormat.format(new Date(item.invited_at)):'—'}</td><td>{item.business?<><strong>{item.business.name}</strong><small>{item.business.status}</small></>:<span className="ai-muted">Sem empresa vinculada</span>}</td><td><div className="ai-actions"><button disabled={state.busyId===item.id} onClick={()=>action(item.id,'generate_link')}>Novo link</button><button disabled={state.busyId===item.id} onClick={()=>resend(item)}>Cancelar e reenviar</button><button className="danger" disabled={state.busyId===item.id} onClick={()=>cancel(item)}>Cancelar</button></div></td></tr>)}</tbody></table></div>}
+   {state.loading&&!state.pending.length?<div className="ai-empty">Carregando convites…</div>:!state.pending.length?<div className="ai-empty"><strong>Nenhum convite pendente.</strong><span>Quando um usuário for convidado e ainda não criar o acesso, ele aparecerá aqui.</span></div>:<div className="ai-table-wrap"><table className="ai-table"><thead><tr><th>Usuário</th><th>Convite enviado</th><th>Empresa</th><th>Ações</th></tr></thead><tbody>{state.pending.map(item=><tr key={item.id}><td><strong>{item.full_name||'Usuário sem nome'}</strong><small>{item.email}</small></td><td>{item.invited_at?formatDate(item.invited_at):'—'}</td><td>{item.business?<><strong>{item.business.name}</strong><small>{item.business.status}</small></>:<span className="ai-muted">Sem empresa vinculada</span>}</td><td><div className="ai-actions"><button disabled={state.busyId===item.id} onClick={()=>action(item.id,'generate_link')}>Novo link</button><button disabled={state.busyId===item.id} onClick={()=>resend(item)}>Cancelar e reenviar</button><button className="danger" disabled={state.busyId===item.id} onClick={()=>cancel(item)}>Cancelar</button></div></td></tr>)}</tbody></table></div>}
   </section>
 
   <section className="ai-card">
