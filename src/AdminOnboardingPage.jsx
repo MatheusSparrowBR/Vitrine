@@ -22,7 +22,7 @@ export default function AdminOnboardingPage({mode='partner'}){
   let owners=[]
    let ownerError=null
    if(mode==='business'){
-    const{o,error:oErr}=await db.rpc('admin_list_business_owners')
+    const{data:o,error:oErr}=await db.rpc('admin_list_business_owners')
     ownerError=oErr
     if(!oErr)owners=o||[]
    }
