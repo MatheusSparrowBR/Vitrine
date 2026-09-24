@@ -36,9 +36,9 @@ export default function OwnerPromotionsSection({businessId,businessName,onChange
  try{
   const{data,error}=await db.functions.invoke('send-promotion-notification',{body:{promotion_id:promotion.id,force:true}})
   if(error)throw error
-  const sent=Number(data?.sent||0),invalid=Number(data?.invalid||0),skipped=Number(data?.skipped||0)
-  if(!sent&&!skipped)throw new Error('Nenhuma notificação foi enviada.')
-  notify('Notificação enviada para '+sent+' dispositivo'+(sent===1?'':'s')+'.'+(invalid?' '+invalid+' subscription'+(invalid===1?'':'s')+' expirada'+(invalid===1?'':'s')+' foram desativadas.':'')+(skipped?' '+skipped+' já estava'+(skipped===1?'':'m')+' registrada'+(skipped===1?'':'s')+' e não foi reenviada.':''))
+  const sent=Number(data?.sent||0),invalid=Number(data?.invalid||0),ineligible=Number(data?.ineligible||0),deduplicated=Number(data?.deduplicated||0),failed=Number(data?.failed||0)
+  if(!sent&&!ineligible&&!deduplicated&&!failed)throw new Error('Nenhuma notificação elegível foi processada.')
+  notify('Notificação: '+sent+' enviada'+(sent===1?'':'s')+'.'+(invalid?' '+invalid+' subscription'+(invalid===1?'':'s')+' expirada'+(invalid===1?'':'s')+' desativada'+(invalid===1?'':'s')+'.':'')+(ineligible?' '+ineligible+' dispositivo'+(ineligible===1?' não era':'s não eram')+' elegível'+(ineligible===1?'':'eis')+'.':'')+(deduplicated?' '+deduplicated+' já estava registrada e foi ignorada para evitar duplicidade.':'')+(failed?' '+failed+' falhou no processamento.':''))
  }catch(err){
   let handled=false
   try{
