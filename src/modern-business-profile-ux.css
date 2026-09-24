@@ -191,3 +191,126 @@
 .mbp-business-notification button:disabled{opacity:.65;cursor:wait}
 .mbp-business-notification-message{color:#2163c4!important}
 @media(max-width:760px){.mbp-business-notification{margin-top:9px;padding:11px 12px;border-radius:12px}.mbp-business-notification strong{font-size:11px}.mbp-business-notification small{font-size:9px}.mbp-business-notification button{width:100%;justify-content:center;height:38px}}
+
+/* CTA de notificações — compacto, alinhado e subordinado ao contato principal. */
+.mbp-business-notification{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:10px;
+  padding:10px 12px;
+  min-height:52px;
+  border:1px solid #dfe8f3;
+  border-radius:12px;
+  background:#fbfdff;
+  box-shadow:0 3px 12px rgba(25,52,80,.035);
+}
+.mbp-business-notification>div:first-child{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.mbp-business-notification>div:first-child>div{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  column-gap:7px;
+  row-gap:1px;
+  min-width:0;
+}
+.mbp-business-notification strong{
+  font-size:11px;
+  line-height:1.2;
+  color:#213651;
+  white-space:nowrap;
+}
+.mbp-business-notification small{
+  font-size:9px;
+  line-height:1.3;
+  color:#748397;
+}
+.mbp-business-notification-icon{
+  width:31px;
+  height:31px;
+  flex:0 0 31px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:#eef5ff;
+  color:#216df3;
+}
+.mbp-business-notification button{
+  flex:0 0 auto;
+  min-height:34px;
+  height:34px;
+  padding:0 12px;
+  border:1px solid #a9c9f8;
+  border-radius:9px;
+  background:#edf5ff;
+  color:#2163c4;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.mbp-business-notification button.active{
+  background:#eaf8f0;
+  border-color:#bfe8d0;
+  color:#18824f;
+}
+.mbp-business-notification button:disabled{opacity:.65;cursor:wait}
+.mbp-business-notification-message{
+  position:absolute;
+  margin-top:2px;
+  transform:translateY(30px);
+  color:#2163c4!important;
+  font-size:8px!important;
+}
+@media(max-width:760px){
+  .mbp-business-notification{
+    gap:9px;
+    margin-top:8px;
+    padding:9px 10px;
+    min-height:48px;
+    border-radius:11px;
+  }
+  .mbp-business-notification>div:first-child>div{
+    display:grid;
+    gap:2px;
+  }
+  .mbp-business-notification strong{
+    font-size:10px;
+  }
+  .mbp-business-notification small{
+    font-size:8px;
+  }
+  .mbp-business-notification button{
+    min-height:32px;
+    height:32px;
+    padding:0 10px;
+    font-size:8px;
+  }
+  .mbp-business-notification-message{
+    position:static;
+    margin-left:40px;
+    margin-top:0;
+    transform:none;
+  }
+}
+@media(max-width:480px){
+  .mbp-business-notification{
+    align-items:flex-start;
+  }
+  .mbp-business-notification>div:first-child{
+    align-items:flex-start;
+  }
+  .mbp-business-notification button{
+    min-width:92px;
+  }
+}
