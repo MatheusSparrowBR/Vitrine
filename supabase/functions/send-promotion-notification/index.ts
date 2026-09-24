@@ -112,13 +112,27 @@ export default {
       const userIds = [...new Set(subscriptions.map(subscription => subscription.user_id).filter(Boolean))]
       const { data: preferences, error: preferenceError } = await admin
         .from('notification_preferences')
-        .select('user_id,promotions_enabled,city_id,category_ids')
+        .select('user_id,promotions_enabled,business_enabled,city_id,category_ids')
         .in('user_id', userIds)
 
       if (preferenceError) {
         logSafeError('notification_preferences_lookup_failed', preferenceError)
         return json({ error: 'notification_preferences_lookup_failed' }, 500)
       }
+
+      const followedUserIds = new Set<string>()
+      const { data: businessFollows, error: businessFollowError } = await admin
+        .from('business_notification_subscriptions')
+        .select('user_id')
+        .eq('business_id', business.id)
+        .eq('enabled', true)
+        .in('user_id', userIds)
+
+      if (businessFollowError) {
+        logSafeError('business_notification_subscriptions_lookup_failed', businessFollowError)
+        return json({ error: 'business_notification_subscriptions_lookup_failed' }, 500)
+      }
+      for (const row of businessFollows || []) followedUserIds.add(row.user_id)
 
       const preferenceByUser = new Map((preferences || []).map(row => [row.user_id, row]))
       const eligibleSubscriptions = subscriptions.filter(subscription => {
@@ -127,6 +141,8 @@ export default {
         if (preference?.city_id && preference.city_id !== business.city_id) return false
         const categories = Array.isArray(preference?.category_ids) ? preference.category_ids : []
         if (categories.length && !categories.includes(business.category_id)) return false
+        const globalBusinessNotifications = preference?.business_enabled !== false
+        if (!globalBusinessNotifications && !followedUserIds.has(subscription.user_id)) return false
         return true
       })
 
