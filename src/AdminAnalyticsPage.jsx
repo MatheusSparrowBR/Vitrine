@@ -22,7 +22,7 @@ const contactsFrom=events=>eventCount(events,'whatsapp_click')+eventCount(events
 const dateKey=value=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo'}).format(new Date(value))
 
 export default function AdminAnalyticsPage(){
- const[s,setS]=useState({checking:true,allowed:false,session:null,events:[],previousEvents:[],businesses:[],plans:[],subs:[],range:30,error:''})
+ const[s,setS]=useState({checking:true,allowed:false,session:null,events:[],previousEvents:[],businesses:[],plans:[],subs:[],pwaTotal:0,pwaCurrent:0,pwaPrevious:0,range:30,error:''})
  const[range,setRange]=useState(30)
  const[refreshTick,setRefreshTick]=useState(0)
  const[realtimeStatus,setRealtimeStatus]=useState('connecting')
@@ -44,7 +44,10 @@ export default function AdminAnalyticsPage(){
   const currentStart=new Date(now);currentStart.setDate(currentStart.getDate()-range)
   const previousStart=new Date(currentStart);previousStart.setDate(previousStart.getDate()-range)
   const{data:events,error:ee}=await db.from('analytics_events').select('event_type,business_id,created_at').gte('created_at',previousStart.toISOString()).lt('created_at',now.toISOString())
-  const[b,pl,sub]=await Promise.all([
+  const[pwaAll,pwaCur,pwaPrev,b,pl,sub]=await Promise.all([
+   db.from('analytics_events').select('id',{count:'exact',head:true}).eq('event_type','pwa_install'),
+   db.from('analytics_events').select('id',{count:'exact',head:true}).eq('event_type','pwa_install').gte('created_at',currentStart.toISOString()).lt('created_at',now.toISOString()),
+   db.from('analytics_events').select('id',{count:'exact',head:true}).eq('event_type','pwa_install').gte('created_at',previousStart.toISOString()).lt('created_at',currentStart.toISOString()),
    db.from('businesses').select('id,name,status'),
    db.from('plans').select('id,code,name,price_monthly,price_yearly').eq('active',true),
    db.from('subscriptions').select('id,business_id,plan_id,status,billing_interval').in('status',['active','trialing'])
@@ -53,8 +56,11 @@ export default function AdminAnalyticsPage(){
   const allEvents=events||[]
   const currentEvents=allEvents.filter(e=>new Date(e.created_at)>=currentStart)
   const previousEvents=allEvents.filter(e=>new Date(e.created_at)<currentStart)
-  if(ee||b.error||pl.error||sub.error){setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],range,error:(ee||b.error||pl.error||sub.error)?.message||'Não foi possível carregar os analytics.'}));return}
-  setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],range,error:''}))
+  if(ee||pwaAll.error||pwaCur.error||pwaPrev.error||b.error||pl.error||sub.error){
+   setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],pwaTotal:pwaAll.count||0,pwaCurrent:pwaCur.count||0,pwaPrevious:pwaPrev.count||0,range,error:(ee||pwaAll.error||pwaCur.error||pwaPrev.error||b.error||pl.error||sub.error)?.message||'Não foi possível carregar os analytics.'}))
+   return
+  }
+  setS(x=>({...x,events:currentEvents,previousEvents,businesses:b.data||[],plans:pl.data||[],subs:sub.data||[],pwaTotal:pwaAll.count||0,pwaCurrent:pwaCur.count||0,pwaPrevious:pwaPrev.count||0,range,error:''}))
  })();return()=>{live=false}},[s.allowed,s.session?.user?.id,range,refreshTick])
 
  useEffect(()=>{
@@ -150,6 +156,7 @@ export default function AdminAnalyticsPage(){
     <K label="Contatos" v={fmt(m.contacts)} n="WhatsApp + Instagram + site" c="green" trend={summary.contactDelta} trendClass={deltaClass(m.contacts,m.previousContacts)}/>
     <K label="Taxa de contato" v={pct(m.contacts,m.views)+'%'} n="contatos ÷ visualizações" c="purple"/>
     <K label="MRR estimado" v={money(m.mrr)} n={s.subs.length+' assinatura(s) ativa(s)'} c="amber"/>
+    <K label="Instalações PWA" v={fmt(s.pwaTotal)} n={fmt(s.pwaCurrent)+' nos últimos '+range+' dias'} c="purple" trend={delta(s.pwaCurrent,s.pwaPrevious)} trendClass={deltaClass(s.pwaCurrent,s.pwaPrevious)}/>
    </section>
 
    <section className="aa-insight">
