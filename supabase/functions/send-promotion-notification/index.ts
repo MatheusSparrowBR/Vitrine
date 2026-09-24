@@ -107,7 +107,7 @@ export default {
         logSafeError('subscription_lookup_failed', subscriptionError)
         return json({ error: 'subscription_lookup_failed' }, 500)
       }
-      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, skipped: 0, subscriptions: 0 })
+      if (!subscriptions?.length) return json({ sent: 0, invalid: 0, created: 0, ineligible: 0, deduplicated: 0, failed: 0, subscriptions: 0, eligible: 0, remaining: 0 })
 
       const userIds = [...new Set(subscriptions.map(subscription => subscription.user_id).filter(Boolean))]
       const { data: preferences, error: preferenceError } = await admin
@@ -146,7 +146,7 @@ export default {
         return true
       })
 
-      if (!eligibleSubscriptions.length) return json({ sent: 0, invalid: 0, created: 0, skipped: subscriptions.length, subscriptions: subscriptions.length, eligible: 0 })
+      if (!eligibleSubscriptions.length) return json({ sent: 0, invalid: 0, created: 0, ineligible: subscriptions.length, deduplicated: 0, failed: 0, subscriptions: subscriptions.length, eligible: 0, remaining: 0 })
 
       const { data: quota, error: quotaError } = await admin.rpc('consume_promotion_notification_quota', {
         p_business_id: promotion.business_id,
