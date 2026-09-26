@@ -38,3 +38,9 @@ test('home mobile reduz a altura do hero e mantém busca utilizável',()=>{
  assert.match(c,/\.lvp-quick\{display:none\}/)
  assert.match(c,/\.lvp-note\{display:none\}/)
 })
+
+
+test('hero CTA mantém contraste do texto sobre fundo branco',()=>{
+ const c=css()
+ assert.match(c,/\.lvp-page \.lvp-mini-cta\{[^}]*background:#fff;[^}]*color:var\(--lvp-ink\)/)
+})
