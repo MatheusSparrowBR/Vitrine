@@ -34,7 +34,7 @@
 .lvp-mini-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.11);font-size:19px}
 .lvp-mini-stat b{display:block;font-size:13px}
 .lvp-mini-stat small{display:block;margin-top:4px;color:#bfd5e7;font-size:10px;line-height:1.4}
-.lvp-mini-cta{display:flex;justify-content:center;align-items:center;min-height:44px;margin-top:16px;border-radius:13px;background:#fff;color:var(--lvp-ink);font-size:11px;font-weight:900}
+.lvp-page .lvp-mini-cta{display:flex;justify-content:center;align-items:center;min-height:44px;margin-top:16px;border-radius:13px;background:#fff;color:var(--lvp-ink);font-size:11px;font-weight:900}
 .lvp-wrap{width:min(1180px,100%);margin:auto;padding:0 24px}
 .lvp-categories{padding-top:70px}
 .lvp-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
