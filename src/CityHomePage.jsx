@@ -82,7 +82,7 @@ export default function CityHomePage({citySlug='laguna'}){
  useEffect(()=>{if(bannerIndex>=banners.length&&banners.length)setBannerIndex(0)},[banners.length,bannerIndex])
  const filtered=businesses.filter(b=>{const x=q.trim().toLowerCase();return !x||[b.name,b.short_description,b.description,b.address,b.categories?.name].filter(Boolean).join(' ').toLowerCase().includes(x)})
  const featuredBusinesses=filtered.filter(b=>b.featured===true)
- const businessCount=Math.min(featuredBusinesses.length,4)
+ const featuredBusinessCount=Math.min(featuredBusinesses.length,4)
  const promoCount=Math.min(promotions.length,3)
  const eventCount=Math.min(events.length,3)
  const banner=banners[bannerIndex]||null
