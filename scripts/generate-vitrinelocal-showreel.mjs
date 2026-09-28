@@ -425,17 +425,13 @@ body{background:radial-gradient(circle at 50% 28%,#123a68 0,#091d34 38%,#06111f 
 .light{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(68,157,255,.22),transparent 70%);filter:blur(10px);opacity:0}.l1{left:-80px;top:780px}.l2{right:-80px;top:1020px}
 </style></head>
 <body><div id="stage"><div class="bg"></div><div class="grid"></div><div class="orb"></div><div class="light l1"></div><div class="light l2"></div>
-<img class="logo" id="logo" src="\${logoData || ''}" alt="VitrineLocal"><div class="word" id="word"></div><div class="categories" id="categories">\${categoryHtml}</div>
-<div class="phone" id="phone"><div class="screen"><img id="screenA" class="active" src="\${images.home || ''}"><img id="screenB" src=""></div></div>
+<img class="logo" id="logo" src="__LOGO__" alt="VitrineLocal"><div class="word" id="word"></div><div class="categories" id="categories">__CATS__</div>
+<div class="phone" id="phone"><div class="screen"><img id="screenA" class="active" src="__HOME_IMAGE__"><img id="screenB" src=""></div></div>
 <div class="callout ca1" id="ca1">Descubra<small>negócios locais</small></div><div class="callout ca2" id="ca2">Compare<small>informações reais</small></div><div class="callout ca3" id="ca3">Veja ofertas<small>conteúdo real</small></div><div class="callout ca4" id="ca4">Conecte-se<small>com a empresa</small></div><div class="kicker" id="kicker"></div>
-<div class="final" id="final"><img src="\${logoData || ''}" alt="VitrineLocal"><h2>Para quem procura.<br>Para quem empreende.</h2><p>Sua cidade em uma única vitrine.</p><div class="url">vitrinelocal.net</div></div></div>
+<div class="final" id="final"><img src="__LOGO__" alt="VitrineLocal"><h2>Para quem procura.<br>Para quem empreende.</h2><p>Sua cidade em uma única vitrine.</p><div class="url">vitrinelocal.net</div></div></div>
 <script>
-const images=\${JSON.stringify({
-  home:images.home||'', catalog:images.catalog||'', profileHero:images.profileHero||'', profileContact:images.profileContact||'',
-  profileOffer:images.profileOffer||'', profileNotification:images.profileNotification||'', promo:images.promo||'',
-  promotionsPage:images.promotionsPage||'', eventsPage:images.eventsPage||'', merchantPush:images.merchantPush||''
-})};
-const flags={promos:\${JSON.stringify(hasPromotions)},events:\${JSON.stringify(hasEvents)},merchant:\${JSON.stringify(hasMerchantPush)},notification:\${JSON.stringify(hasBusinessNotification)}};
+const images=__IMAGES__;
+const flags=__FLAGS__;
 const $=id=>document.getElementById(id);const els={logo:$('logo'),word:$('word'),cats:$('categories'),phone:$('phone'),a:$('screenA'),b:$('screenB'),final:$('final'),kicker:$('kicker'),l1:document.querySelector('.l1'),l2:document.querySelector('.l2')};
 const cats=[...document.querySelectorAll('.category')],calls=[...document.querySelectorAll('.callout')];let layer='a',current='home';
 function visible(){return layer==='a'?els.a:els.b}function hidden(){return layer==='a'?els.b:els.a}
@@ -501,7 +497,8 @@ requestAnimationFrame(tick);
     .replaceAll('__LOGO__', logoData || '')
     .replaceAll('__CATS__', categoryHtml)
     .replaceAll('__IMAGES__', runtimeImages)
-    .replaceAll('__FLAGS__', runtimeFlags);
+    .replaceAll('__FLAGS__', runtimeFlags)
+    .replaceAll('__HOME_IMAGE__', images.home || '');
   await fs.writeFile(COMPOSITION_HTML, finalHtml, 'utf8');
 }
 async function renderComposition() {
