@@ -399,7 +399,7 @@ async function buildComposition(real, logoData, categories) {
   const hasMerchantPush = Boolean(real.merchantPush && images.merchantPush);
   const hasBusinessNotification = Boolean(images.profileNotification);
 
-  const html = \`<!doctype html>
+  const html = `<!doctype html>
 <html lang="pt-BR">
 <head><meta charset="utf-8"><meta name="viewport" content="width=__WIDTH__, initial-scale=1"><title>VitrineLocal Showreel</title>
 <style>
@@ -470,7 +470,7 @@ const DURATION=__DURATION__;
 const START_TIME=performance.now();
 function tick(now){const t=Math.min(DURATION,now-START_TIME);scene(t);if(t<DURATION)requestAnimationFrame(tick)}
 requestAnimationFrame(tick);
-</script></body></html>\`;
+</script></body></html>`;
 
   const runtimeImages = JSON.stringify({
     home: images.home || '',
