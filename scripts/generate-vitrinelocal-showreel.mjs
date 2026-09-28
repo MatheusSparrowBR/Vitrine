@@ -189,8 +189,8 @@ async function scoreBusiness(context, candidate) {
 
     const score =
       logo * 2 + cover * 2 + gallery * 2 + Math.min(galleryThumbs, 3) * 1 +
-      contacts * 1 + Math.min(items, 4) * 2 + reviews * 2 + promo * 6 +
-      push * 2 + actions * 1 + instagram * 1 + whatsapp * 2 + (hasDescription ? 1 : 0);
+      contacts * 1 + Math.min(items, 6) * 5 + reviews * 3 + promo * 12 +
+      push * 3 + actions * 1 + instagram * 1 + whatsapp * 2 + (hasDescription ? 1 : 0);
 
     return {
       ...candidate,
@@ -215,12 +215,23 @@ async function chooseBusiness(context, candidates) {
     }
   }
   scored.sort((a, b) => b.score - a.score);
-  const selected = scored.find((x) => x.features.promo > 0 && (x.features.items > 0 || x.features.whatsapp > 0)) || scored[0];
+  const rich = scored.filter((x) =>
+    x.features.promo > 0 ||
+    x.features.items > 0 ||
+    x.features.reviews > 0 ||
+    x.features.galleryThumbs >= 2
+  );
+  const ranked = rich.length ? rich : scored;
+  console.log('[business] top candidates:', ranked.slice(0, 5).map((x) => ({
+    name: x.name, score: x.score, promo: x.features.promo,
+    items: x.features.items, reviews: x.features.reviews,
+    galleryThumbs: x.features.galleryThumbs
+  })));
+  const selected = ranked[0];
   if (!selected) throw new Error('Nenhuma empresa elegível foi encontrada no catálogo público.');
   console.log('[business] selected:', JSON.stringify(selected, null, 2));
   return selected;
 }
-
 async function screenshotViewport(page, file) {
   await page.screenshot({ path: file, type: 'png', fullPage: false, animations: 'disabled' });
   return file;
@@ -230,49 +241,53 @@ async function captureRealScreens(context, selected) {
   const page = await context.newPage();
   page.setDefaultTimeout(15_000);
   const files = {};
+
+  async function scrollToSelector(selector, offset = 150) {
+    const locator = page.locator(selector).first();
+    if (!(await locator.count())) return false;
+    const y = await locator.evaluate((el) => el.getBoundingClientRect().top + window.scrollY).catch(() => null);
+    if (typeof y !== 'number') return false;
+    await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), Math.max(0, y - offset));
+    await page.waitForTimeout(220);
+    return true;
+  }
+
+  async function snap(name, file) {
+    files[name] = path.join(CAPTURE_DIR, file);
+    await screenshotViewport(page, files[name]);
+  }
+
   try {
     const homeUrl = `${BASE_URL}/${CITY}`;
     const catalogUrl = `${BASE_URL}/${CITY}/empresas?q=${encodeURIComponent(selected.name)}`;
-    const profileUrl = selected.url;
+
     await page.goto(homeUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
     await waitForReady(page);
-    files.home = path.join(CAPTURE_DIR, 'home-real.png');
-    await screenshotViewport(page, files.home);
+    await snap('home', 'home-real.png');
 
     await page.goto(catalogUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
     await waitForReady(page, { selector: '.mbl-grid' });
-    files.catalog = path.join(CAPTURE_DIR, 'catalog-real.png');
-    await screenshotViewport(page, files.catalog);
+    await snap('catalog', 'catalog-real.png');
 
-    await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
+    await page.goto(selected.url, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
     await waitForReady(page, { selector: '.mbp-main-card' });
-    files.profileHero = path.join(CAPTURE_DIR, 'profile-hero-real.png');
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await page.waitForTimeout(250);
-    await screenshotViewport(page, files.profileHero);
+    await page.waitForTimeout(220);
+    await snap('profileHero', 'profile-hero-real.png');
 
-    const contact = page.locator('.mbp-contact-grid').first();
-    if (await contact.count()) {
-      await contact.scrollIntoViewIfNeeded().catch(() => {});
-      await page.waitForTimeout(250);
+    await scrollToSelector('.mbp-contact-grid', 145);
+    await snap('profileContact', 'profile-contact-real.png');
+
+    await scrollToSelector('.mbp-offer-section', 125);
+    await snap('profileOffer', 'profile-offer-real.png');
+
+    if (await scrollToSelector('.mbp-business-notification', 150)) {
+      await snap('profileNotification', 'profile-notification-real.png');
     }
-    files.profileContact = path.join(CAPTURE_DIR, 'profile-contact-real.png');
-    await screenshotViewport(page, files.profileContact);
 
-    const offer = page.locator('.mbp-offer-section').first();
-    if (await offer.count()) {
-      await offer.scrollIntoViewIfNeeded().catch(() => {});
-      await page.waitForTimeout(250);
-    }
-    files.profileOffer = path.join(CAPTURE_DIR, 'profile-offer-real.png');
-    await screenshotViewport(page, files.profileOffer);
-
-    const promo = page.locator('.mbp-promo-grid').first();
-    if (await promo.count()) {
-      await promo.scrollIntoViewIfNeeded().catch(() => {});
-      await page.waitForTimeout(250);
-      files.promo = path.join(CAPTURE_DIR, 'promotion-real.png');
-      await screenshotViewport(page, files.promo);
+    const promoFound = await scrollToSelector('.mbp-promo-grid', 125);
+    if (promoFound) {
+      await snap('promo', 'promotion-real.png');
     }
 
     const promoData = await page.locator('.mbp-promo-card').evaluateAll((cards) => cards.slice(0, 3).map((card) => ({
@@ -281,12 +296,23 @@ async function captureRealScreens(context, selected) {
       price: (card.querySelector('b')?.textContent || '').trim(),
     }))).catch(() => []);
 
-    return { ...files, promoData, profileUrl };
+    await page.goto(`${BASE_URL}/${CITY}/promocoes`, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
+    await waitForReady(page);
+    if (await page.locator('.promotion-card').count().catch(() => 0)) {
+      await snap('promotionsPage', 'promotions-page-real.png');
+    }
+
+    await page.goto(`${BASE_URL}/${CITY}/eventos`, { waitUntil: 'domcontentloaded', timeout: 30_000 }).catch(() => {});
+    await waitForReady(page);
+    if (await page.locator('.vl-event').count().catch(() => 0)) {
+      await snap('eventsPage', 'events-page-real.png');
+    }
+
+    return { ...files, promoData, profileUrl: selected.url };
   } finally {
     await page.close().catch(() => {});
   }
 }
-
 async function captureMerchantPushIfAuthenticated(context, selected) {
   if (!STORAGE_STATE) return null;
   const statePath = path.resolve(STORAGE_STATE);
@@ -326,21 +352,26 @@ function dataUrl(file) {
   return fs.readFile(file).then((buf) => `data:image/png;base64,${buf.toString('base64')}`);
 }
 
-function svgIcon(name, size = 28) {
-  const common = `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
+function svgIcon(name, size = 30) {
+  const common = `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"`;
   const icons = {
-    store: `<svg ${common}><path d="M3 9h18"/><path d="M5 9l1-5h12l1 5"/><path d="M5 9v10h14V9"/><path d="M9 19v-6h6v6"/></svg>`,
-    bag: `<svg ${common}><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>`,
-    heart: `<svg ${common}><path d="M20.8 8.9c0 5.5-8.8 10-8.8 10s-8.8-4.5-8.8-10A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.5Z"/></svg>`,
-    pin: `<svg ${common}><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>`,
-    wrench: `<svg ${common}><path d="M14.7 6.3a4.2 4.2 0 0 0-5.4 5.4L4 17a2.1 2.1 0 1 0 3 3l5.3-5.3a4.2 4.2 0 0 0 5.4-5.4l-2.8 2.8-2.2-2.2 2.8-2.8Z"/></svg>`,
-    car: `<svg ${common}><path d="M5 17h14l-1-6H6l-1 6Z"/><path d="M8 11l1-3h6l1 3"/><circle cx="8" cy="18" r="1.3"/><circle cx="16" cy="18" r="1.3"/></svg>`,
-    utensils: `<svg ${common}><path d="M7 3v7"/><path d="M5 3v4a2 2 0 0 0 4 0V3"/><path d="M7 9v12"/><path d="M15 3c-1 2-1 5 1 7v11"/><path d="M15 10h4"/></svg>`,
-    star: `<svg ${common}><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>`,
+    store: `<svg ${common}><path d="M4 10.5h16"/><path d="M5 10.5V20h14v-9.5"/><path d="M3.5 10.5 5 5h14l1.5 5.5"/><path d="M8 20v-5h8v5"/></svg>`,
+    bag: `<svg ${common}><path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>`,
+    shoppingCart: `<svg ${common}><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/><path d="M3 4h2l2.2 10.5h10.7L20 8H7"/></svg>`,
+    heart: `<svg ${common}><path d="M20.8 8.7c0 5.2-8.8 10.2-8.8 10.2S3.2 13.9 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg>`,
+    medical: `<svg ${common}><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>`,
+    star: `<svg ${common}><path d="m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-4 5.6-.8Z"/></svg>`,
+    scissors: `<svg ${common}><circle cx="7" cy="7" r="2"/><circle cx="7" cy="17" r="2"/><path d="m8.5 8.5 11 11M8.5 15.5 14 10"/></svg>`,
+    pin: `<svg ${common}><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>`,
+    hotel: `<svg ${common}><path d="M4 20V6h16v14M7 9h3v3H7zM14 9h3v3h-3zM7 15h3v3H7zM14 15h3v3h-3z"/></svg>`,
+    home: `<svg ${common}><path d="m3 11 9-7 9 7"/><path d="M5.5 10.5V20h13v-9.5M10 20v-5h4v5"/></svg>`,
+    briefcase: `<svg ${common}><rect x="4" y="6.5" width="16" height="12.5" rx="2"/><path d="M9 6.5V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M4 11h16M10 11v2h4v-2"/></svg>`,
+    wrench: `<svg ${common}><path d="M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5l-2.2 2.2-2.6-.7-.7-2.6Z"/></svg>`,
+    utensils: `<svg ${common}><path d="M7 3v7.5a2.5 2.5 0 0 0 5 0V3"/><path d="M9.5 3v18M15 3v18"/><path d="M15 3c2.7 1.3 4 3.5 4 6.5v3.5h-4"/></svg>`,
+    grid: `<svg ${common}><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>`
   };
-  return icons[name] || icons.store;
+  return icons[name] || icons.grid;
 }
-
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 }
@@ -352,135 +383,102 @@ async function buildComposition(real, logoData, categories) {
   }
 
   const categoryIconMap = {
-    restaurantes: 'store',
-    alimentação: 'utensils',
-    lojas: 'bag',
-    compras: 'bag',
-    serviços: 'wrench',
-    saúde: 'heart',
-    beleza: 'star',
-    turismo: 'pin',
-    automóveis: 'car',
+    restaurantes: 'utensils', alimentação: 'utensils', lojas: 'shoppingCart',
+    compras: 'bag', serviços: 'wrench', saúde: 'medical', beleza: 'scissors',
+    turismo: 'hotel', automóveis: 'briefcase', imóveis: 'home', pets: 'heart'
   };
+
   const categoryHtml = categories.slice(0, 6).map((cat, i) => {
     const key = normalize(cat);
-    const icon = categoryIconMap[key] || (key.includes('saud') ? 'heart' : key.includes('loj') || key.includes('compr') ? 'bag' : key.includes('serv') ? 'wrench' : 'store');
-    return `<div class="category c${i}"><span class="category-icon">${svgIcon(icon, 28)}</span><strong>${escapeHtml(cat)}</strong></div>`;
+    const icon = categoryIconMap[key] || (key.includes('saud') ? 'medical' : key.includes('loj') ? 'shoppingCart' : key.includes('serv') ? 'wrench' : key.includes('tur') ? 'hotel' : 'grid');
+    return \`<div class="category c\${i}"><span class="category-no">0\${i + 1}</span><span class="category-icon">\${svgIcon(icon, 30)}</span><strong>\${escapeHtml(cat)}</strong></div>\`;
   }).join('');
 
-  const title = escapeHtml(real.selected?.name || 'Empresa local');
-  const promoTitle = escapeHtml(real.promoData?.[0]?.title || 'Nova promoção');
+  const hasPromotions = Boolean(images.promotionsPage || images.promo);
+  const hasEvents = Boolean(images.eventsPage);
+  const hasMerchantPush = Boolean(real.merchantPush && images.merchantPush);
+  const hasBusinessNotification = Boolean(images.profileNotification);
 
-  const html = `<!doctype html>
+  const html = \`<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=${WIDTH}, initial-scale=1, viewport-fit=cover">
-<title>VitrineLocal Showreel</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=__WIDTH__, initial-scale=1"><title>VitrineLocal Showreel</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:${WIDTH}px;height:${HEIGHT}px;overflow:hidden;background:#07182a;font-family:Manrope,Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#07182a}
-body{background:radial-gradient(circle at 50% 35%,#18385d 0,#0a1d32 40%,#061220 100%)}
+html,body{margin:0;width:__WIDTH__px;height:__HEIGHT__px;overflow:hidden;background:#061426;font-family:Inter,Manrope,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#fff}
+body{background:radial-gradient(circle at 50% 28%,#123a68 0,#091d34 38%,#06111f 100%)}
 #stage{position:relative;width:100%;height:100%;overflow:hidden}
-.bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(45,125,255,.18),transparent 35%),linear-gradient(180deg,#071b30,#061220)}
-.grid{position:absolute;inset:-10%;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:80px 80px;transform:perspective(700px) rotateX(58deg) translateY(220px) scale(1.25)}
-.orb{position:absolute;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(37,130,255,.2),transparent 68%);filter:blur(8px);left:310px;top:500px}
-.logo{position:absolute;top:560px;left:160px;width:760px;height:auto;filter:drop-shadow(0 18px 45px rgba(0,0,0,.25));opacity:0;transform:scale(.88)}
-.word{position:absolute;left:70px;right:70px;top:220px;text-align:center;color:#fff;font-weight:900;letter-spacing:-3px;line-height:.95;font-size:108px;opacity:0;transform:translateY(40px);text-transform:uppercase}
-.subword{position:absolute;left:110px;right:110px;top:1420px;text-align:center;color:#cfe3ff;font-size:30px;font-weight:700;letter-spacing:.2px;opacity:0;transform:translateY(25px)}
+.bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 34%,rgba(67,151,255,.18),transparent 28%),radial-gradient(circle at 20% 75%,rgba(30,105,245,.12),transparent 32%),linear-gradient(180deg,#071b30,#061220)}
+.grid{position:absolute;inset:-15%;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:72px 72px;transform:perspective(700px) rotateX(58deg) translateY(240px) scale(1.25)}
+.orb{position:absolute;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(46,136,255,.17),transparent 68%);filter:blur(14px);left:230px;top:470px}
+.logo{position:absolute;top:585px;left:160px;width:760px;filter:drop-shadow(0 24px 60px rgba(0,0,0,.3));opacity:0;transform:scale(.86)}
+.word{position:absolute;left:55px;right:55px;top:160px;text-align:center;color:#fff;font-weight:950;letter-spacing:-4px;line-height:.9;font-size:96px;opacity:0;transform:translateY(35px) scale(.96);text-transform:uppercase;text-shadow:0 16px 50px rgba(0,0,0,.26)}
 .categories{position:absolute;inset:0;opacity:0}
-.category{position:absolute;display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.96);padding:18px 24px;border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.24);color:#0b2037;font-size:29px;letter-spacing:-.5px;white-space:nowrap;opacity:0;transform:translateY(60px) scale(.94)}
-.category-icon{display:grid;place-items:center;color:#156eff}
-.c0{left:70px;top:440px}.c1{right:64px;top:590px}.c2{left:90px;top:810px}.c3{right:80px;top:920px}.c4{left:120px;top:1140px}.c5{right:70px;top:1260px}
-.phone{position:absolute;left:170px;top:300px;width:740px;height:1320px;background:#030a12;border-radius:74px;padding:18px;box-shadow:0 50px 120px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.08);opacity:0;transform:translateY(90px) scale(.92)}
-.phone::before{content:"";position:absolute;left:50%;top:24px;transform:translateX(-50%);width:180px;height:44px;border-radius:30px;background:#000;z-index:5;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.screen{position:absolute;inset:18px;border-radius:58px;overflow:hidden;background:#fff}
-.screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .65s ease,transform .8s ease;transform:scale(1.02)}
-.screen img.active{opacity:1;transform:scale(1)}
-.phone.glow{box-shadow:0 50px 120px rgba(0,0,0,.5),0 0 60px rgba(42,122,255,.22)}
-.callout{position:absolute;padding:14px 18px;background:rgba(255,255,255,.95);border:1px solid rgba(20,65,110,.08);border-radius:17px;box-shadow:0 16px 40px rgba(0,0,0,.14);font-size:22px;font-weight:850;color:#102944;opacity:0;transform:translateY(24px)}
-.callout small{display:block;font-size:12px;color:#74859a;margin-top:5px;font-weight:700}
-.ca1{left:44px;top:700px}.ca2{right:40px;top:880px}.ca3{left:45px;top:1120px}.ca4{right:40px;top:1290px}
-.section-word{position:absolute;left:55px;right:55px;top:180px;color:#fff;text-align:center;font-size:104px;line-height:.92;font-weight:900;letter-spacing:-4px;text-transform:uppercase;opacity:0;transform:translateY(45px)}
-.promo-shell{position:absolute;left:95px;right:95px;top:500px;border:1px solid rgba(255,255,255,.14);border-radius:32px;padding:28px;background:linear-gradient(180deg,rgba(15,44,74,.92),rgba(8,25,42,.92));box-shadow:0 30px 80px rgba(0,0,0,.35);opacity:0;transform:translateY(60px) scale(.96)}
-.promo-shell .eyebrow{color:#8dc1ff;font-size:13px;font-weight:900;letter-spacing:1.8px}.promo-shell h2{margin:10px 0 8px;color:#fff;font-size:42px;line-height:1.02;letter-spacing:-1.4px}.promo-shell p{margin:0;color:#bbcee3;font-size:20px;line-height:1.4}.send-btn{margin-top:22px;display:inline-flex;align-items:center;gap:10px;padding:14px 18px;border-radius:14px;background:#2a78ff;color:#fff;font-weight:900;font-size:18px;box-shadow:0 10px 28px rgba(42,120,255,.3)}
-.push-card{position:absolute;left:70px;right:70px;top:280px;background:#fff;border-radius:30px;padding:26px 28px;box-shadow:0 30px 90px rgba(0,0,0,.3);display:grid;grid-template-columns:58px 1fr auto;gap:18px;align-items:center;opacity:0;transform:translateY(-40px)}
-.push-icon{width:58px;height:58px;border-radius:17px;background:#1671ff;color:#fff;display:grid;place-items:center;font-size:28px}.push-text strong{display:block;color:#11283f;font-size:14px;letter-spacing:.5px;text-transform:uppercase}.push-text b{display:block;color:#0b1f35;font-size:23px;letter-spacing:-.5px;margin-top:4px}.push-text span{display:block;color:#74869a;font-size:15px;margin-top:4px}.push-action{color:#1267e8;font-size:15px;font-weight:900;white-space:nowrap}
-.final{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.97);color:#fff}.final img{width:680px;filter:drop-shadow(0 20px 55px rgba(0,0,0,.3));}.final h2{font-size:47px;letter-spacing:-1.5px;margin:36px 0 12px;text-align:center;line-height:1.05}.final p{font-size:26px;color:#bfd5ef;font-weight:700;margin:0}.final .url{margin-top:25px;color:#68a8ff;font-weight:900;font-size:28px}
-.motion-line{position:absolute;height:2px;background:linear-gradient(90deg,transparent,#5ea3ff,transparent);filter:blur(.2px);opacity:0}
-#line1{left:30px;right:30px;top:480px}.#line2{left:70px;right:70px;top:1240px}
+.category{position:absolute;display:grid;grid-template-columns:40px 58px 1fr;align-items:center;gap:14px;min-width:420px;background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(245,249,255,.96));padding:16px 20px;border:1px solid rgba(255,255,255,.8);border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.26),0 0 0 1px rgba(36,119,255,.07);color:#0b2037;font-size:27px;letter-spacing:-.6px;opacity:0;transform:translateY(55px) scale(.92);white-space:nowrap}
+.category-no{font-size:12px;font-weight:900;color:#6f88a4;letter-spacing:1px}.category-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#1268ff,#46a0ff);color:#fff;box-shadow:0 12px 28px rgba(22,103,255,.32),inset 0 1px 0 rgba(255,255,255,.34)}
+.c0{left:45px;top:420px}.c1{right:45px;top:565px}.c2{left:68px;top:765px}.c3{right:54px;top:885px}.c4{left:88px;top:1080px}.c5{right:45px;top:1200px}
+.phone{position:absolute;left:170px;top:300px;width:740px;height:1320px;background:#030911;border-radius:76px;padding:16px;box-shadow:0 50px 120px rgba(0,0,0,.56),0 0 0 2px rgba(255,255,255,.09);opacity:0;transform:translateY(90px) scale(.92)}
+.phone::before{content:"";position:absolute;left:50%;top:22px;transform:translateX(-50%);width:180px;height:42px;border-radius:28px;background:#000;z-index:5}.screen{position:absolute;inset:16px;border-radius:61px;overflow:hidden;background:#fff}.screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0}.screen img.active{opacity:1}
+.callout{position:absolute;padding:13px 17px;background:rgba(255,255,255,.97);border:1px solid rgba(20,65,110,.08);border-radius:18px;box-shadow:0 18px 46px rgba(0,0,0,.18);font-size:21px;font-weight:900;color:#102944;opacity:0;transform:translateY(20px) scale(.95)}.callout small{display:block;font-size:12px;color:#74859a;margin-top:5px;font-weight:750}
+.ca1{left:42px;top:705px}.ca2{right:36px;top:855px}.ca3{left:40px;top:1085px}.ca4{right:34px;top:1275px}
+.kicker{position:absolute;left:60px;right:60px;top:1260px;text-align:center;color:#86baff;font-size:14px;font-weight:900;letter-spacing:2px;text-transform:uppercase;opacity:0}
+.final{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.97)}.final img{width:680px;filter:drop-shadow(0 20px 55px rgba(0,0,0,.3))}.final h2{font-size:47px;letter-spacing:-1.8px;margin:36px 0 12px;text-align:center;line-height:1.03}.final p{font-size:26px;color:#bfd5ef;font-weight:700;margin:0}.final .url{margin-top:25px;color:#68a8ff;font-weight:900;font-size:28px}
+.light{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(68,157,255,.22),transparent 70%);filter:blur(10px);opacity:0}.l1{left:-80px;top:780px}.l2{right:-80px;top:1020px}
 </style></head>
-<body>
-<div id="stage">
-  <div class="bg"></div><div class="grid"></div><div class="orb"></div>
-  <img class="logo" id="logo" src="${logoData || ''}" alt="VitrineLocal">
-  <div class="word" id="word"></div>
-  <div class="subword" id="subword"></div>
-  <div class="categories" id="categories">${categoryHtml}</div>
-  <div class="phone" id="phone">
-    <div class="screen">
-      <img id="screenA" class="active" src="${images.home || ''}" alt="Home real VitrineLocal">
-      <img id="screenB" src="${images.catalog || ''}" alt="Tela real de empresas">
-    </div>
-  </div>
-  <div class="callout ca1" id="ca1">Avaliação<small>informação real</small></div>
-  <div class="callout ca2" id="ca2">Localização<small>informação real</small></div>
-  <div class="callout ca3" id="ca3">Produtos &amp; Serviços<small>catálogo real</small></div>
-  <div class="callout ca4" id="ca4">Contato<small>WhatsApp / Instagram</small></div>
-  <div class="section-word" id="sectionWord"></div>
-  <div class="promo-shell" id="promoShell"><div class="eyebrow">PROMOÇÃO REAL</div><h2>${promoTitle}</h2><p>Uma oferta publicada pela empresa no VitrineLocal.</p><div class="send-btn">↗ Enviar notificação</div></div>
-  <div class="push-card" id="pushCard"><div class="push-icon">♧</div><div class="push-text"><strong>Nova promoção</strong><b>${escapeHtml(real.selected?.name || 'Empresa local')}</b><span>${promoTitle}</span></div><div class="push-action">Ver oferta →</div></div>
-  <div class="final" id="final"><img src="${logoData || ''}" alt="VitrineLocal"><h2>Para quem procura.<br>Para quem empreende.</h2><p>Sua cidade em uma única vitrine.</p><div class="url">vitrinelocal.net</div></div>
-</div>
+<body><div id="stage"><div class="bg"></div><div class="grid"></div><div class="orb"></div><div class="light l1"></div><div class="light l2"></div>
+<img class="logo" id="logo" src="\${logoData || ''}" alt="VitrineLocal"><div class="word" id="word"></div><div class="categories" id="categories">\${categoryHtml}</div>
+<div class="phone" id="phone"><div class="screen"><img id="screenA" class="active" src="\${images.home || ''}"><img id="screenB" src=""></div></div>
+<div class="callout ca1" id="ca1">Descubra<small>negócios locais</small></div><div class="callout ca2" id="ca2">Compare<small>informações reais</small></div><div class="callout ca3" id="ca3">Veja ofertas<small>conteúdo real</small></div><div class="callout ca4" id="ca4">Conecte-se<small>com a empresa</small></div><div class="kicker" id="kicker"></div>
+<div class="final" id="final"><img src="\${logoData || ''}" alt="VitrineLocal"><h2>Para quem procura.<br>Para quem empreende.</h2><p>Sua cidade em uma única vitrine.</p><div class="url">vitrinelocal.net</div></div></div>
 <script>
-const START={
- logo:0, cats:3200, home:7000, catalog:12000, profile:16000, offer:22000, contact:26000, promo:30000, push:34000, final:37000
-};
-const images=${JSON.stringify({home:images.home||'',catalog:images.catalog||'',profileHero:images.profileHero||'',profileContact:images.profileContact||'',profileOffer:images.profileOffer||'',promo:images.promo||''})};
-const els={logo:document.getElementById('logo'),word:document.getElementById('word'),subword:document.getElementById('subword'),cats:document.getElementById('categories'),phone:document.getElementById('phone'),screenA:document.getElementById('screenA'),screenB:document.getElementById('screenB'),sectionWord:document.getElementById('sectionWord'),promo:document.getElementById('promoShell'),push:document.getElementById('pushCard'),final:document.getElementById('final')};
-const categoryEls=[...document.querySelectorAll('.category')];
-const callouts=[...document.querySelectorAll('.callout')];
-let currentScreen='home'; let activeLayer='A';
-function showScreen(key){if(!images[key]||key===currentScreen)return; const hidden=activeLayer==='A'?els.screenB:els.screenA; const visible=activeLayer==='A'?els.screenA:els.screenB; hidden.src=images[key]; hidden.classList.add('active'); visible.classList.remove('active'); activeLayer=activeLayer==='A'?'B':'A'; currentScreen=key;}
-function fade(el,show,x=0,y=0,scale=1){el.style.opacity=show?'1':'0';el.style.transform=show?'translate('+x+'px,'+y+'px) scale('+scale+')':'translate(0,30px) scale(.98)';}
-function setText(text,sub=''){els.word.textContent=text;els.subword.textContent=sub;}
+const images=\${JSON.stringify({
+  home:images.home||'', catalog:images.catalog||'', profileHero:images.profileHero||'', profileContact:images.profileContact||'',
+  profileOffer:images.profileOffer||'', profileNotification:images.profileNotification||'', promo:images.promo||'',
+  promotionsPage:images.promotionsPage||'', eventsPage:images.eventsPage||'', merchantPush:images.merchantPush||''
+})};
+const flags={promos:\${JSON.stringify(hasPromotions)},events:\${JSON.stringify(hasEvents)},merchant:\${JSON.stringify(hasMerchantPush)},notification:\${JSON.stringify(hasBusinessNotification)}};
+const $=id=>document.getElementById(id);const els={logo:$('logo'),word:$('word'),cats:$('categories'),phone:$('phone'),a:$('screenA'),b:$('screenB'),final:$('final'),kicker:$('kicker'),l1:document.querySelector('.l1'),l2:document.querySelector('.l2')};
+const cats=[...document.querySelectorAll('.category')],calls=[...document.querySelectorAll('.callout')];let layer='a',current='home';
+function visible(){return layer==='a'?els.a:els.b}function hidden(){return layer==='a'?els.b:els.a}
+function show(key,m=0){if(!images[key])return;if(key!==current){const h=hidden(),v=visible();h.src=images[key];h.classList.add('active');v.classList.remove('active');layer=layer==='a'?'b':'a';current=key}const im=visible();im.style.transform='translate('+Math.sin(m*.7)*8+'px,'+Math.cos(m*.55)*9+'px) scale('+(1.018+Math.sin(m*.8)*.018)+')'}
+function fade(e,on,x=0,y=0,s=1){e.style.opacity=on?'1':'0';e.style.transform=on?'translate('+x+'px,'+y+'px) scale('+s+')':'translate(0,26px) scale(.98)'}
+function clearCalls(){calls.forEach(x=>x.style.opacity='0')}
 function scene(t){
-  if(t<3200){
-    fade(els.logo,true,0,0,.92+Math.min(t/3200,.08));
-    fade(els.phone,false); fade(els.sectionWord,false); fade(els.promo,false); fade(els.push,false); fade(els.final,false); fade(els.cats,false);
-    setText('', '');
-  } else if(t<7000){
-    fade(els.logo,true,0,-180,.62); fade(els.phone,false); fade(els.cats,true);
-    categoryEls.forEach((el,i)=>{const local=Math.max(0,Math.min(1,(t-(3200+i*180))/900));el.style.opacity=String(local);el.style.transform='translateY('+((1-local)*35)+'px) scale('+(.94+local*.06)+')';});
-    fade(els.word,true,0,108,.75); els.word.textContent='DESCUBRA.'; els.word.style.top='1350px'; els.word.style.fontSize='88px';
-  } else if(t<12000){
-    fade(els.logo,false); fade(els.cats,false); fade(els.phone,true,0,0,1); els.phone.classList.add('glow'); fade(els.word,true,0,130,.8); els.word.textContent='TUDO EM UM SÓ LUGAR.'; els.word.style.top='160px'; els.word.style.fontSize='72px'; showScreen('home');
-  } else if(t<16000){
-    fade(els.phone,true,0,0,1.01); fade(els.word,true,0,130,.82); els.word.textContent='ENCONTRE.'; els.word.style.top='160px'; els.word.style.fontSize='96px'; showScreen('catalog');
-  } else if(t<22000){
-    fade(els.word,true,0,130,.75); els.word.textContent='CONHEÇA ANTES DE ESCOLHER.'; els.word.style.top='150px'; els.word.style.fontSize='70px'; showScreen('profileHero');
-    callouts.forEach((el,i)=>{const local=Math.max(0,Math.min(1,(t-(16000+i*300))/900));el.style.opacity=String(local);el.style.transform='translateY('+((1-local)*18)+'px)';});
-  } else if(t<26000){
-    callouts.forEach((el)=>el.style.opacity='0'); fade(els.word,true,0,130,.82); els.word.textContent='VEJA O QUE ELA OFERECE.'; els.word.style.top='160px'; els.word.style.fontSize='70px'; showScreen('profileOffer');
-  } else if(t<30000){
-    fade(els.word,true,0,135,.84); els.word.textContent='CONECTE-SE.'; els.word.style.top='165px'; els.word.style.fontSize='92px'; showScreen('profileContact');
+  fade(els.l1,t>6200&&t<35000);fade(els.l2,t>12500&&t<35000);
+  if(t<2600){fade(els.logo,true,0,0,.9+Math.min(.1,t/2600));fade(els.phone,false);fade(els.cats,false);fade(els.final,false);fade(els.kicker,false);clearCalls()}
+  else if(t<5700){
+    fade(els.logo,true,0,-185,.6);fade(els.phone,false);fade(els.cats,true);fade(els.final,false);clearCalls();
+    cats.forEach((e,i)=>{const p=Math.max(0,Math.min(1,(t-(2600+i*135))/650));e.style.opacity=p;e.style.transform='translateY('+((1-p)*38)+'px) translateX('+Math.sin(i*1.1)*8+'px) scale('+(0.92+p*.08)+')'})
+    fade(els.word,true,0,98,.72);els.word.textContent='DESCUBRA.';els.word.style.top='1370px';els.word.style.fontSize='82px'
+  } else if(t<9700){
+    fade(els.logo,false);fade(els.cats,false);fade(els.phone,true);fade(els.word,true,0,128,.72);els.word.textContent='TUDO EM UM SÓ LUGAR.';els.word.style.top='145px';els.word.style.fontSize='66px';show('home',(t-5700)/4000)
+  } else if(t<13500){
+    fade(els.phone,true,0,0,1.01);fade(els.word,true,0,128,.82);els.word.textContent='ENCONTRE.';els.word.style.top='145px';els.word.style.fontSize='96px';show('catalog',(t-9700)/3800)
+  } else if(t<17300){
+    fade(els.phone,true,0,0,1.02);fade(els.word,true,0,126,.76);els.word.textContent='CONHEÇA.';els.word.style.top='145px';els.word.style.fontSize='92px';show('profileHero',(t-13500)/3800)
+    clearCalls();calls[0].style.opacity='1';calls[1].style.opacity='1'
+  } else if(t<20500){
+    fade(els.phone,true,0,0,1.02);fade(els.word,true,0,126,.82);els.word.textContent='VEJA MAIS.';els.word.style.top='148px';els.word.style.fontSize='88px';show('profileContact',(t-17300)/3200)
+    clearCalls();calls[2].style.opacity='1';calls[3].style.opacity='1'
+  } else if(t<23500){
+    fade(els.phone,true,0,0,1.02);fade(els.word,true,0,128,.8);els.word.textContent='O QUE ELA OFERECE.';els.word.style.top='148px';els.word.style.fontSize='64px';show('profileOffer',(t-20500)/3000);clearCalls()
+  } else if(t<27000){
+    const key=flags.promos?'promotionsPage':(flags.notification?'profileNotification':'profileOffer');fade(els.phone,true);fade(els.word,true,0,130,.8);els.word.textContent=flags.promos?'PROMOÇÕES.':'FIQUE POR PERTO.';els.word.style.top='150px';els.word.style.fontSize='78px';show(key,(t-23500)/3500);fade(els.kicker,true);els.kicker.textContent=flags.promos?'OFERTAS LOCAIS':'NOTIFICAÇÕES DA EMPRESA';clearCalls()
+  } else if(t<30500){
+    const key=flags.merchant?'merchantPush':(flags.notification?'profileNotification':'home');fade(els.phone,true,0,0,1.01);fade(els.word,true,0,125,.8);els.word.textContent=flags.merchant?'ENVIE.':'CONECTE-SE.';els.word.style.top='155px';els.word.style.fontSize='88px';show(key,(t-27000)/3500);fade(els.kicker,true);els.kicker.textContent=flags.merchant?'PAINEL DO EMPREENDEDOR':'NOTIFICAÇÃO REAL';clearCalls()
   } else if(t<34000){
-    fade(els.phone,false); fade(els.word,true,0,0,.72); els.word.style.top='185px'; els.word.style.fontSize='98px'; els.word.textContent='PUBLIQUE.'; fade(els.promo,true,0,70,.98);
-  } else if(t<37000){
-    fade(els.word,true,0,-410,.62); els.word.textContent='AVISE.'; els.word.style.top='210px'; els.word.style.fontSize='110px'; fade(els.promo,false); fade(els.push,true); 
-  } else {
-    fade(els.word,false); fade(els.promo,false); fade(els.push,false); fade(els.logo,false); fade(els.final,true,0,0,1);
-  }
+    const key=flags.events?'eventsPage':'home';fade(els.phone,true,0,45,.97);fade(els.word,true,0,135,.58);els.word.textContent=flags.events?'AGENDA.':'SUA CIDADE.';els.word.style.top='205px';els.word.style.fontSize='98px';show(key,(t-30500)/3500);fade(els.kicker,true);els.kicker.textContent=flags.events?'EVENTOS EM LAGUNA':'UMA CIDADE EM MOVIMENTO';clearCalls()
+  } else if(t<37000){fade(els.phone,false);fade(els.word,true,0,-430,.58);els.word.textContent='VITRINE LOCAL';els.word.style.top='210px';els.word.style.fontSize='92px';fade(els.kicker,false);fade(els.logo,false);clearCalls()}
+  else {fade(els.word,false);fade(els.phone,false);fade(els.logo,false);fade(els.kicker,false);fade(els.final,true)}
 }
-let last=-1; function tick(now){const t=Math.min(DURATION,now-START_TIME); scene(t); last=t; if(t<DURATION+200) requestAnimationFrame(tick);}
-const DURATION=${DURATION_MS};
+const DURATION=__DURATION__;
 const START_TIME=performance.now();
+function tick(now){const t=Math.min(DURATION,now-START_TIME);scene(t);if(t<DURATION)requestAnimationFrame(tick)}
 requestAnimationFrame(tick);
-</script></body></html>`;
+</script></body></html>\`;
 
-  await fs.writeFile(COMPOSITION_HTML, html, 'utf8');
+  const finalHtml = html.replaceAll('__WIDTH__', String(WIDTH)).replaceAll('__HEIGHT__', String(HEIGHT)).replaceAll('__DURATION__', String(DURATION_MS));
+  await fs.writeFile(COMPOSITION_HTML, finalHtml, 'utf8');
 }
-
 async function renderComposition() {
   console.log('[render] starting Chromium video render');
 
@@ -552,13 +550,13 @@ async function transcode(raw) {
   await execFileAsync('ffmpeg', [
     '-y', '-i', raw,
     '-vf', `fps=${FPS},scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2:color=0x07182a`,
-    '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+    '-an', '-t', String(DURATION_MS / 1000), '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
     FINAL_MP4,
   ], { maxBuffer: 20 * 1024 * 1024 });
   await execFileAsync('ffmpeg', [
     '-y', '-i', raw,
     '-vf', `fps=${FPS},scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2:color=0x07182a`,
-    '-an', '-c:v', 'libvpx-vp9', '-b:v', '8M', '-deadline', 'good',
+    '-an', '-t', String(DURATION_MS / 1000), '-c:v', 'libvpx-vp9', '-b:v', '8M', '-deadline', 'good',
     FINAL_WEBM,
   ], { maxBuffer: 20 * 1024 * 1024 });
 }
@@ -601,7 +599,7 @@ async function main() {
     const selected = await chooseBusiness(captureContext, candidates);
     const real = await captureRealScreens(captureContext, selected);
     real.selected = selected;
-    await captureMerchantPushIfAuthenticated(captureContext, selected);
+    real.merchantPush = await captureMerchantPushIfAuthenticated(captureContext, selected);
     await buildComposition(real, logoData, categories);
   } finally {
     await captureContext.close().catch(() => {});
