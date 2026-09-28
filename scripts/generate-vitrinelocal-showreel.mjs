@@ -476,7 +476,32 @@ function tick(now){const t=Math.min(DURATION,now-START_TIME);scene(t);if(t<DURAT
 requestAnimationFrame(tick);
 </script></body></html>\`;
 
-  const finalHtml = html.replaceAll('__WIDTH__', String(WIDTH)).replaceAll('__HEIGHT__', String(HEIGHT)).replaceAll('__DURATION__', String(DURATION_MS));
+  const runtimeImages = JSON.stringify({
+    home: images.home || '',
+    catalog: images.catalog || '',
+    profileHero: images.profileHero || '',
+    profileContact: images.profileContact || '',
+    profileOffer: images.profileOffer || '',
+    profileNotification: images.profileNotification || '',
+    promo: images.promo || '',
+    promotionsPage: images.promotionsPage || '',
+    eventsPage: images.eventsPage || '',
+    merchantPush: images.merchantPush || ''
+  });
+  const runtimeFlags = JSON.stringify({
+    promos: hasPromotions,
+    events: hasEvents,
+    merchant: hasMerchantPush,
+    notification: hasBusinessNotification
+  });
+  const finalHtml = html
+    .replaceAll('__WIDTH__', String(WIDTH))
+    .replaceAll('__HEIGHT__', String(HEIGHT))
+    .replaceAll('__DURATION__', String(DURATION_MS))
+    .replaceAll('__LOGO__', logoData || '')
+    .replaceAll('__CATS__', categoryHtml)
+    .replaceAll('__IMAGES__', runtimeImages)
+    .replaceAll('__FLAGS__', runtimeFlags);
   await fs.writeFile(COMPOSITION_HTML, finalHtml, 'utf8');
 }
 async function renderComposition() {
