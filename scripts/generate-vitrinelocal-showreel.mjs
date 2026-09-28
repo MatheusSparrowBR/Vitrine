@@ -482,20 +482,68 @@ requestAnimationFrame(tick);
 }
 
 async function renderComposition() {
-  const browser = await chromium.launch({ headless: HEADLESS, args: ['--disable-gpu', '--force-color-profile=srgb'] });
+  console.log('[render] starting Chromium video render');
+
+  const browser = await chromium.launch({
+    headless: HEADLESS,
+    args: ['--disable-gpu', '--force-color-profile=srgb'],
+  });
+
   const context = await browser.newContext({
     viewport: { width: WIDTH, height: HEIGHT },
     deviceScaleFactor: 1,
-    recordVideo: { dir: OUT_DIR, size: { width: WIDTH, height: HEIGHT } },
+    recordVideo: {
+      dir: OUT_DIR,
+      size: { width: WIDTH, height: HEIGHT },
+      fps: FPS,
+    },
   });
+
   const page = await context.newPage();
-  await page.goto(pathToFileURL(COMPOSITION_HTML).toString(), { waitUntil: 'load' });
-  await page.waitForTimeout(DURATION_MS + 250);
-  const videoPath = await page.video().path();
-  await page.close();
-  await context.close();
-  await browser.close();
+  const video = page.video();
+
+  let crashed = false;
+  page.on('crash', () => {
+    crashed = true;
+    console.error('[render] Chromium page crashed');
+  });
+  page.on('pageerror', (error) => {
+    console.warn('[render] pageerror:', error.message);
+  });
+  browser.on('disconnected', () => {
+    console.warn('[render] browser disconnected');
+  });
+
+  try {
+    await page.goto(pathToFileURL(COMPOSITION_HTML).toString(), { waitUntil: 'domcontentloaded' });
+    console.log('[render] composition loaded');
+
+    // Do not use page.waitForTimeout here: if Chromium tears down the target,
+    // Playwright throws "Target page, context or browser has been closed".
+    // A Node timer keeps the render clock independent from the page lifecycle.
+    await new Promise((resolve) => setTimeout(resolve, DURATION_MS + 500));
+
+    if (crashed) {
+      throw new Error('Chromium encerrou a página durante a renderização.');
+    }
+    if (page.isClosed()) {
+      throw new Error('A página da composição foi fechada antes do fim da renderização.');
+    }
+
+    console.log('[render] duration elapsed, finalizing video');
+  } finally {
+    await page.close().catch(() => {});
+    await context.close().catch(() => {});
+    await browser.close().catch(() => {});
+  }
+
+  if (!video) throw new Error('Playwright não criou o objeto de vídeo.');
+
+  // Playwright guarantees the video file after the page/context is closed.
+  const videoPath = await video.path();
   await fs.copyFile(videoPath, RAW_WEBM);
+
+  console.log('[render] raw video:', RAW_WEBM);
   return RAW_WEBM;
 }
 
