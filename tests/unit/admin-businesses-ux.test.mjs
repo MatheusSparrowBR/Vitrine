@@ -38,3 +38,14 @@ test('empresa sem proprietário pode ser vinculada diretamente pela fila',()=>{
  assert.match(page,/startEdit\(b\)/)
  assert.match(page,/Vincular proprietário/)
 })
+
+
+test('admin empresas filtra a fila por cidade',()=>{
+ const page=read('src/AdminBusinessesPage.jsx')
+ const css=read('src/admin-v2.css')
+ assert.match(page,/cityFilter/)
+ assert.match(page,/Filtrar por cidade/)
+ assert.match(page,/Todas as cidades/)
+ assert.match(page,/cityFilter==='all'\|\|b\.city_id===cityFilter/)
+ assert.match(css,/\.admin-business-toolbar-city-filter/)
+})
