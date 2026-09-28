@@ -28,3 +28,10 @@ test('Página de empresas possui filtros rápidos orientados à decisão',()=>{
  assert.ok(listCss.includes('.mbl-quick-filters'))
  assert.ok(listCss.includes('.mbl-card-statuses'))
 })
+
+test('Home exibe o total de empresas da cidade sem limitar o contador aos cards carregados',()=>{
+ assert.match(home,/select\('id,name,slug,short_description,cover_url,logo_url,address,featured,verified,category_name,created_at',\{count:'exact'\}\)/)
+ assert.match(home,/\.limit\(8\)/)
+ assert.match(home,/setBusinessCount\(Number\.isFinite\(r\.count\)\?r\.count:rows\.length\)/)
+ assert.match(home,/<b>\{businessCount\} empresas cadastradas<\/b>/)
+})
