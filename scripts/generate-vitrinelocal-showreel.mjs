@@ -391,7 +391,7 @@ async function buildComposition(real, logoData, categories) {
   const categoryHtml = categories.slice(0, 6).map((cat, i) => {
     const key = normalize(cat);
     const icon = categoryIconMap[key] || (key.includes('saud') ? 'medical' : key.includes('loj') ? 'shoppingCart' : key.includes('serv') ? 'wrench' : key.includes('tur') ? 'hotel' : 'grid');
-    return \`<div class="category c${i}"><span class="category-no">0${i + 1}</span><span class="category-icon">${svgIcon(icon, 30)}</span><strong>${escapeHtml(cat)}</strong></div>\`;
+    return `<div class="category c${i}"><span class="category-no">0${i + 1}</span><span class="category-icon">${svgIcon(icon, 30)}</span><strong>${escapeHtml(cat)}</strong></div>`;
   }).join('');
 
   const hasPromotions = Boolean(images.promotionsPage || images.promo);
