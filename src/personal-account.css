@@ -73,3 +73,27 @@
  .personal-account-preferences-actions{display:grid;grid-template-columns:1fr}
  .personal-account-preferences-actions .personal-account-save{width:100%}
 }
+
+
+/* Perfil pessoal — avatar customizado com fallback padrão VitrineLocal. */
+.personal-account-avatar-large{width:86px;height:86px;border-radius:50%;flex:0 0 86px;border:1px solid #d9e4ef;box-shadow:0 0 0 4px #f7faff}
+.personal-account-avatar-large img{width:100%;height:100%;object-fit:cover;display:block}
+.personal-account-avatar-editor{display:flex;align-items:center;gap:16px;padding:14px;border:1px solid #dfe7f1;border-radius:16px;background:#fbfdff;margin-bottom:2px}
+.personal-account-avatar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.personal-account-upload,.personal-account-remove-avatar{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border-radius:10px;font:800 10px inherit;cursor:pointer;text-decoration:none}
+.personal-account-upload{border:1px solid #c8d8eb;background:#fff;color:#35506c}
+.personal-account-upload:hover{border-color:#9fbbec;color:#1677ff;background:#f8fbff}
+.personal-account-upload input{display:none}
+.personal-account-remove-avatar{border:1px solid #e4ccd0;background:#fff8f8;color:#a24a55}
+.personal-account-remove-avatar:hover{border-color:#e5b5bc;background:#fff3f4}
+.personal-account-avatar-editor>div:last-child{min-width:0}
+.personal-account-avatar-note{margin:7px 0 0!important;font-size:10px!important;line-height:1.45!important;color:#74869a!important}
+@media(max-width:800px){
+ .personal-account-avatar-editor{align-items:flex-start}
+}
+@media(max-width:520px){
+ .personal-account-avatar-editor{gap:12px;padding:12px}
+ .personal-account-avatar-large{width:72px;height:72px;flex-basis:72px}
+ .personal-account-avatar-actions{display:grid;grid-template-columns:1fr 1fr}
+ .personal-account-upload,.personal-account-remove-avatar{min-height:34px;padding:0 9px}
+}
