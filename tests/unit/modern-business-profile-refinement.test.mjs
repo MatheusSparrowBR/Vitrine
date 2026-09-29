@@ -17,6 +17,6 @@ test('refinamento visual do perfil define hierarquia para galeria, contato e aç
  assert.match(css,/\.mbp-gallery-main\{height:330px/)
  assert.match(css,/\.mbp-rating-summary/)
  assert.match(css,/\.mbp-contact-grid\{grid-template-columns:repeat\(4/)
- assert.match(css,/\.mbp-profile-shortcuts\{grid-template-columns:repeat\(3,minmax\(0,1fr\))/
+ assert.ok(css.includes('.mbp-profile-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));'))
  assert.match(css,/\.mbp-primary-cta/)
 })
