@@ -35,3 +35,12 @@ test('cadastro registra a preferência de experiência sem transformar preferên
  assert.ok(auth.includes('experience_mode:experienceMode'))
  assert.ok(auth.includes('next=')||auth.includes('safeNext'))
 })
+
+
+test('navegação pessoal mobile não corta as opções da conta',()=>{
+ const css=read('src/personal-account.css')
+ assert.match(css,/@media\(max-width:600px\)/)
+ assert.match(css,/\.personal-account-page \.personal-account-nav\{display:grid!important/)
+ assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr)\)!important/)
+ assert.match(css,/overflow:visible!important/)
+})
