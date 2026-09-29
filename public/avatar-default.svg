@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Avatar padrão VitrineLocal</title>
+  <desc id="desc">Avatar padrão com silhueta de usuário em azul.</desc>
+  <rect width="256" height="256" rx="64" fill="#EEF5FF"/>
+  <circle cx="128" cy="128" r="94" fill="#FFFFFF"/>
+  <circle cx="128" cy="100" r="34" fill="#1677FF"/>
+  <path d="M68 190c12-34 34-52 60-52s48 18 60 52" fill="#1677FF"/>
+  <circle cx="128" cy="128" r="92" fill="none" stroke="#C7DBFF" stroke-width="4"/>
+</svg>
