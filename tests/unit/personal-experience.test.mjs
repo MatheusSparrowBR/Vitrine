@@ -107,3 +107,21 @@ test('ações rápidas da empresa usam cartões compactos e separados do compart
  assert.match(css,/\.mbp-profile-shortcuts\{display:grid/)
  assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/)
 })
+
+
+test('perfil pessoal permite foto customizada e fallback de avatar padrão',()=>{
+ const page=read('src/PersonalAccountPage.jsx')
+ const css=read('src/personal-account.css')
+ assert.match(page,/type="file" accept="image\/jpeg,image\/png,image\/webp"/)
+ assert.match(page,/storage\.from\('avatars'\)/)
+ assert.match(page,/avatar-default\.svg/)
+ assert.match(page,/Remover foto/)
+ assert.match(css,/\.personal-account-avatar-editor/)
+})
+
+test('avaliações públicas usam a foto do perfil ou o avatar padrão',()=>{
+ const reviews=read('src/BusinessReviews.jsx')
+ assert.match(reviews,/reviewer_avatar_url/)
+ assert.match(reviews,/avatar-default\.svg/)
+ assert.match(reviews,/onError=/)
+})
