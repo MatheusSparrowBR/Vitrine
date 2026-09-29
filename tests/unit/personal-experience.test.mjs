@@ -73,7 +73,7 @@ test('ações secundárias da empresa têm largura uniforme em mobile e desktop'
 test('preferências pessoais salvam modo de experiência e preferências de notificação',()=>{
  const page=read('src/PersonalAccountPage.jsx')
  assert.match(page,/const settingsDirty=/)
- assert.match(page,/profiles').update\(\{experience_mode:form\.experience_mode\}\)/)
+ assert.ok(page.includes("profiles').update({experience_mode:form.experience_mode}"))
  assert.match(page,/notification_preferences/)
  assert.match(page,/Preferências salvas com sucesso/)
 })
