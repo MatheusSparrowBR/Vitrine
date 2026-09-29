@@ -125,3 +125,19 @@ test('avaliações públicas usam a foto do perfil ou o avatar padrão',()=>{
  assert.match(reviews,/avatar-default\.svg/)
  assert.match(reviews,/onError=/)
 })
+
+
+test('central de notificações tem cards responsivos, estados de leitura e ações de entrada',()=>{
+ const page=read('src/PersonalAccountPage.jsx')
+ const css=read('src/personal-account.css')
+ assert.match(page,/personal-account-notifications-head/)
+ assert.match(page,/Marcar todas como lidas/)
+ assert.match(page,/personal-account-notification-card/)
+ assert.match(page,/personal-account-notification-empty/)
+ assert.match(page,/notification\.url/)
+ assert.match(page,/notificationMeta/)
+ assert.match(css,/\.personal-account-notifications-list\{display:grid/)
+ assert.match(css,/\.personal-account-notification-card\{appearance:none;width:100%/)
+ assert.match(css,/\.personal-account-notification-card\.is-unread/)
+ assert.match(css,/@media\(max-width:520px\)/)
+})
