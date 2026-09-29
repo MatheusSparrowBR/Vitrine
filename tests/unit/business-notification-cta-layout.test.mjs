@@ -8,7 +8,7 @@ const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
 test('CTA de notificações permanece após o contato principal',()=>{
  assert.match(page,/mbp-primary-cta/)
  assert.match(page,/mbp-business-notification/)
- assert.match(page,/mbp-action-row/)
+ assert.match(page,/mbp-profile-shortcuts/)
 })
 
 test('CTA de notificações tem layout compacto e responsivo',()=>{
