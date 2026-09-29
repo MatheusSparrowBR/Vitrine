@@ -27,7 +27,7 @@ test('modern public business profile exposes iFood only when a link exists',()=>
  assert.match(page,/iFood/)
  assert.doesNotMatch(page,/mbp-ifood-mark/)
  assert.doesNotMatch(page,/data-track="save"/)
- assert.match(page,/className="mbp-secondary-action" data-track="ifood"/)
+ assert.match(page,/className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood"/)
 })
 
 
