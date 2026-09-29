@@ -334,3 +334,116 @@
 @media(max-width:390px){
  .mbp-action-row a,.mbp-action-row button{font-size:8.5px!important;gap:4px!important}
 }
+
+
+/* Quick business actions: compact cards matching the contact-card language. */
+.mbp-profile-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}
+.mbp-profile-shortcuts .mbp-relationship-row{display:contents}
+.mbp-profile-shortcuts .mbp-relationship-row button,
+.mbp-profile-shortcuts .mbp-shortcut-action{
+  width:100%;
+  min-width:0;
+  min-height:60px;
+  height:60px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:9px;
+  padding:10px 12px;
+  border:1px solid #dbe5ee;
+  border-radius:12px;
+  background:#fff;
+  color:#1b3858;
+  text-decoration:none;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.mbp-profile-shortcuts .mbp-relationship-row button:hover,
+.mbp-profile-shortcuts .mbp-shortcut-action:hover{
+  border-color:#a9c6ec;
+  background:#f8fbff;
+  color:#1677ff;
+}
+.mbp-profile-shortcuts .mbp-relationship-row button.is-active{
+  border-color:#bfe3cc;
+  background:#f0faf4;
+  color:#17764a;
+}
+.mbp-profile-shortcuts .mbp-relationship-row button:disabled{opacity:.65;cursor:wait}
+.mbp-profile-shortcuts .mbp-relationship-icon{
+  width:32px;
+  height:32px;
+  flex:0 0 32px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:#eef5ff;
+  color:#1677ff;
+  font-size:14px;
+}
+.mbp-profile-shortcuts .mbp-relationship-row button.is-active .mbp-relationship-icon{
+  background:#e4f6ea;
+  color:#17814f;
+}
+.mbp-profile-shortcuts .mbp-shortcut-action>svg{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  padding:8px;
+  box-sizing:content-box;
+  border-radius:9px;
+  background:#eef5ff;
+  color:#1677ff;
+}
+.mbp-profile-shortcuts .mbp-shortcut-instagram>svg{
+  background:#f2ebff;
+  color:#7b35db;
+}
+.mbp-share-row{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:8px}
+.mbp-share-row .mbp-shortcut-action{
+  width:100%;
+  min-height:48px;
+  height:48px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 12px;
+  border:1px solid #dbe5ee;
+  border-radius:11px;
+  background:#fff;
+  color:#203b5a;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.mbp-share-row .mbp-shortcut-action:hover{
+  border-color:#b8cdec;
+  background:#f8fbff;
+  color:#1677ff;
+}
+.mbp-share-row .mbp-shortcut-ifood{
+  background:#fff7f3;
+  border-color:#f2d5ca;
+  color:#bd5837;
+  text-decoration:none;
+}
+.mbp-share-row .mbp-shortcut-share{background:#fff}
+@media(max-width:760px){
+ .mbp-profile-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}
+ .mbp-profile-shortcuts .mbp-relationship-row button,
+ .mbp-profile-shortcuts .mbp-shortcut-action{min-height:54px;height:54px;padding:8px 9px;font-size:9px;border-radius:11px}
+ .mbp-profile-shortcuts .mbp-relationship-icon{width:28px;height:28px;flex-basis:28px;font-size:13px}
+ .mbp-profile-shortcuts .mbp-shortcut-action>svg{width:16px;height:16px;padding:6px;border-radius:8px}
+ .mbp-share-row{margin-top:7px}
+}
+@media(max-width:480px){
+ .mbp-profile-shortcuts{grid-template-columns:1fr 1fr}
+ .mbp-profile-shortcuts .mbp-relationship-row button,
+ .mbp-profile-shortcuts .mbp-shortcut-action{min-height:50px;height:50px;font-size:8.5px}
+}
