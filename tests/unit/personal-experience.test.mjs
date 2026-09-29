@@ -65,6 +65,6 @@ test('ações da empresa mantêm Favoritar separado do acompanhamento por Push',
 test('ações secundárias da empresa têm largura uniforme em mobile e desktop',()=>{
  const css=read('src/modern-business-profile-ux.css')
  assert.match(css,/\.mbp-action-row\{display:grid!important/)
- assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\))!important/)
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'))
  assert.match(css,/\.mbp-action-row a,.mbp-action-row button\{width:100%!important/)
 })
