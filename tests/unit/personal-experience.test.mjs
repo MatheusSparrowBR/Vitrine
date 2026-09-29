@@ -13,7 +13,9 @@ test('experiência pessoal separa favoritos, seguindo e workspace empresarial',(
  assert.ok(page.includes('notification_preferences'))
  assert.ok(page.includes("href={profile?.role==='business_owner'?'/conta':'/conta?new=business'}"))
  assert.ok(profile.includes('Salvar empresa'))
- assert.ok(profile.includes('Acompanhar novidades'))
+ assert.ok(profile.includes('Ativar notificações'))
+ assert.ok(profile.includes('Receba novidades desta empresa'))
+ assert.ok(!profile.includes('>Acompanhar novidades</button>'))
  assert.ok(relation.includes("business_favorites"))
  assert.ok(relation.includes("business_notification_subscriptions"))
 })
@@ -32,4 +34,13 @@ test('cadastro registra a preferência de experiência sem transformar preferên
  assert.ok(auth.includes('Como você pretende usar o VitrineLocal?'))
  assert.ok(auth.includes('experience_mode:experienceMode'))
  assert.ok(auth.includes('next=')||auth.includes('safeNext'))
+})
+
+
+test('navegação pessoal mobile não corta as opções da conta',()=>{
+ const css=read('src/personal-account.css')
+ assert.match(css,/@media\(max-width:600px\)/)
+ assert.match(css,/\.personal-account-page \.personal-account-nav\{display:grid!important/)
+ assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important'))
+ assert.match(css,/overflow:visible!important/)
 })

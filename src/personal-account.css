@@ -24,3 +24,13 @@
 .personal-account-message{border-radius:10px;padding:10px 12px;font-size:13px;background:#eef8f2;color:#13834f}.personal-account-message.error{background:#fff1f0;color:#b42318}
 @media(max-width:800px){.personal-account-page{padding:26px 14px 50px}.personal-account-top{display:block}.personal-account-context{margin-top:18px}.personal-account-layout{grid-template-columns:1fr}.personal-account-card{padding:19px}.personal-account-nav{overflow:auto;flex-wrap:nowrap;padding-bottom:4px}.personal-account-nav button{white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){.personal-account-page *{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Mobile account navigation: prevent clipped tabs and keep every section readable. */
+@media(max-width:600px){
+ .personal-account-page .personal-account-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;overflow:visible!important;padding:0!important;width:100%!important;box-sizing:border-box!important}
+ .personal-account-page .personal-account-nav button{width:100%!important;min-width:0!important;min-height:44px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.2!important;padding:9px 7px!important}
+}
+@media(max-width:390px){
+ .personal-account-page .personal-account-nav{grid-template-columns:1fr 1fr!important}
+}
