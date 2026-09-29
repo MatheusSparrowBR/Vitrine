@@ -68,3 +68,30 @@ test('ações secundárias da empresa têm largura uniforme em mobile e desktop'
  assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'))
  assert.match(css,/\.mbp-action-row a,.mbp-action-row button\{width:100%!important/)
 })
+
+
+test('preferências pessoais salvam modo de experiência e preferências de notificação',()=>{
+ const page=read('src/PersonalAccountPage.jsx')
+ assert.match(page,/const settingsDirty=/)
+ assert.ok(page.includes("profiles').update({experience_mode:form.experience_mode}"))
+ assert.match(page,/notification_preferences/)
+ assert.match(page,/Preferências salvas com sucesso/)
+})
+
+test('minha experiência mostra o estado real das notificações Push do dispositivo',()=>{
+ const page=read('src/PersonalAccountPage.jsx')
+ assert.match(page,/PersonalPushSettings/)
+ assert.match(page,/getPushSubscription/)
+ assert.match(page,/Ativadas neste dispositivo/)
+ assert.match(page,/Bloqueadas pelo navegador/)
+ assert.match(page,/Ativar notificações/)
+})
+
+test('preferências pessoais têm hierarquia desktop dedicada sem alterar a estrutura mobile',()=>{
+ const css=read('src/personal-account.css')
+ assert.match(css,/\.personal-account-preferences-layout\{display:grid/)
+ assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'))
+ assert.match(css,/\.personal-account-preferences-actions/)
+ assert.match(css,/\.personal-account-push-card/)
+ assert.match(css,/@media\(max-width:800px\)/)
+})
