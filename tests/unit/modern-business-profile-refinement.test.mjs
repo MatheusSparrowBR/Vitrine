@@ -13,7 +13,7 @@ test('perfil público mantém ações organizadas em uma única barra de utilida
 })
 
 test('refinamento visual do perfil define hierarquia para galeria, contato e ações',()=>{
- const css=read('src/modern-business-profile-refinement.css')
+ const css=read('src/modern-business-profile-refinement.css')+read('src/modern-business-profile-ux.css')
  assert.match(css,/\.mbp-gallery-main\{height:330px/)
  assert.match(css,/\.mbp-rating-summary/)
  assert.match(css,/\.mbp-contact-grid\{grid-template-columns:repeat\(4/)
