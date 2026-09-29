@@ -95,3 +95,15 @@ test('preferências pessoais têm hierarquia desktop dedicada sem alterar a estr
  assert.match(css,/\.personal-account-push-card/)
  assert.match(css,/@media\(max-width:800px\)/)
 })
+
+
+test('ações rápidas da empresa usam cartões compactos e separados do compartilhamento',()=>{
+ const page=read('src/ModernBusinessProfilePage.jsx')
+ const css=read('src/modern-business-profile-ux.css')
+ assert.match(page,/mbp-profile-shortcuts/)
+ assert.match(page,/mbp-shortcut-action/)
+ assert.match(page,/mbp-shortcut-instagram/)
+ assert.match(page,/mbp-share-row/)
+ assert.match(css,/\.mbp-profile-shortcuts\{display:grid/)
+ assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/)
+})
