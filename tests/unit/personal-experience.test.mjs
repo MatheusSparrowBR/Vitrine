@@ -90,7 +90,7 @@ test('minha experiência mostra o estado real das notificações Push do disposi
 test('preferências pessoais têm hierarquia desktop dedicada sem alterar a estrutura mobile',()=>{
  const css=read('src/personal-account.css')
  assert.match(css,/\.personal-account-preferences-layout\{display:grid/)
- assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr)\)/)
+ assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'))
  assert.match(css,/\.personal-account-preferences-actions/)
  assert.match(css,/\.personal-account-push-card/)
  assert.match(css,/@media\(max-width:800px\)/)
