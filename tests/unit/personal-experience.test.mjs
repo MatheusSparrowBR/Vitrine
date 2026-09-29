@@ -44,3 +44,27 @@ test('navegação pessoal mobile não corta as opções da conta',()=>{
  assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important'))
  assert.match(css,/overflow:visible!important/)
 })
+
+
+test('favorito da empresa usa insert/delete e não exige update no relacionamento',()=>{
+ const relation=read('src/business-relationship.js')
+ assert.match(relation,/type==='favorite'/)
+ assert.match(relation,/db\.from\(table\)\.insert\(key\)/)
+ assert.match(relation,/db\.from\(table\)\.delete\(\)\.match\(key\)/)
+})
+
+test('ações da empresa mantêm Favoritar separado do acompanhamento por Push',()=>{
+ const page=read('src/ModernBusinessProfilePage.jsx')
+ assert.match(page,/mbp-relationship-row/)
+ assert.match(page,/Empresa salva/)
+ assert.match(page,/Receba novidades desta empresa/)
+ assert.match(page,/Ativar notificações/)
+ assert.doesNotMatch(page,/>Acompanhar novidades<\/button>/)
+})
+
+test('ações secundárias da empresa têm largura uniforme em mobile e desktop',()=>{
+ const css=read('src/modern-business-profile-ux.css')
+ assert.match(css,/\.mbp-action-row\{display:grid!important/)
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'))
+ assert.match(css,/\.mbp-action-row a,.mbp-action-row button\{width:100%!important/)
+})

@@ -314,3 +314,23 @@
     min-width:92px;
   }
 }
+
+
+/* Business profile actions — consistent sizing and clear personal favorite affordance. */
+.mbp-relationship-row{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:9px}
+.mbp-relationship-row button{width:100%;min-height:44px;height:44px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;border:1px solid #c8daf5;border-radius:11px;background:#fff;color:#1b4f88;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap}
+.mbp-relationship-row button:hover{background:#f5f9ff;border-color:#9fbbec;color:#1677ff}
+.mbp-relationship-row button.is-active{background:#eef8f1;border-color:#bfe3cc;color:#17764a}
+.mbp-relationship-row button:disabled{opacity:.65;cursor:wait}
+.mbp-relationship-icon{font-size:16px;line-height:1}
+.mbp-action-row{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-top:8px!important;width:100%!important}
+.mbp-action-row a,.mbp-action-row button{width:100%!important;min-width:0!important;box-sizing:border-box!important;height:44px!important;padding:0 8px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:760px){
+ .mbp-relationship-row{margin-top:8px}
+ .mbp-relationship-row button{min-height:42px;height:42px;font-size:10px}
+ .mbp-action-row{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ .mbp-action-row a,.mbp-action-row button{height:42px!important;font-size:9px!important;padding:0 5px!important}
+}
+@media(max-width:390px){
+ .mbp-action-row a,.mbp-action-row button{font-size:8.5px!important;gap:4px!important}
+}
