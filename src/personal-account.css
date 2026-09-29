@@ -1,0 +1,26 @@
+.personal-account-page{min-height:calc(100vh - 76px);background:#f5f8fc;padding:40px 22px 72px;color:#082b52}
+.personal-account-shell{max-width:1180px;margin:0 auto}
+.personal-account-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
+.personal-account-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:#1677ff}
+.personal-account-top h1{margin:7px 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.05;letter-spacing:-.04em}
+.personal-account-top p{max-width:650px;margin:0;color:#5f7287;line-height:1.6}
+.personal-account-context{display:inline-flex;align-items:center;gap:8px;border:1px solid #c8d8eb;border-radius:12px;background:#fff;color:#082b52;padding:11px 14px;font-weight:750;text-decoration:none;white-space:nowrap}
+.personal-account-context:hover{border-color:#1677ff;color:#1677ff}
+.personal-account-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);gap:18px;align-items:start}
+.personal-account-card{background:#fff;border:1px solid #dfe7f1;border-radius:20px;padding:24px;box-shadow:0 12px 34px rgba(8,43,82,.05)}
+.personal-account-card h2{margin:0 0 6px;font-size:20px;color:#082b52}.personal-account-card>p{margin:0 0 18px;color:#6b7e92;font-size:14px;line-height:1.5}
+.personal-account-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.personal-account-nav button{border:1px solid #dfe7f1;border-radius:999px;background:#fff;color:#577089;padding:9px 13px;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.personal-account-nav button.active,.personal-account-nav button:hover{border-color:#1677ff;background:#eef5ff;color:#1677ff}
+.personal-account-profile{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid #edf2f7}
+.personal-account-avatar{width:64px;height:64px;border-radius:18px;overflow:hidden;display:grid;place-items:center;background:#eef5ff;color:#1677ff;font-size:24px;font-weight:850}.personal-account-avatar img{width:100%;height:100%;object-fit:cover}
+.personal-account-profile strong{display:block;font-size:20px}.personal-account-profile small{display:block;margin-top:4px;color:#73869a}
+.personal-account-form{display:grid;gap:14px}.personal-account-form label{display:grid;gap:7px;color:#496279;font-size:13px;font-weight:750}.personal-account-form input,.personal-account-form textarea,.personal-account-form select{width:100%;box-sizing:border-box;border:1px solid #d5e0ec;border-radius:11px;padding:11px 12px;color:#082b52;background:#fff;font:inherit;font-weight:500}.personal-account-form textarea{resize:vertical;min-height:88px}.personal-account-form input:focus,.personal-account-form textarea:focus,.personal-account-form select:focus{outline:3px solid #dceaff;border-color:#1677ff}
+.personal-account-save{justify-self:start;border:0;border-radius:11px;background:#1677ff;color:#fff;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer}.personal-account-save:disabled{opacity:.6;cursor:wait}
+.personal-account-side{display:grid;gap:18px}.personal-account-side .personal-account-card{padding:20px}
+.personal-account-mode{display:grid;gap:10px;margin-top:12px}.personal-account-mode label{display:flex;align-items:flex-start;gap:10px;border:1px solid #dfe7f1;border-radius:12px;padding:11px;color:#496279;font-size:13px;cursor:pointer}.personal-account-mode label:has(input:checked){border-color:#1677ff;background:#eef5ff;color:#082b52}.personal-account-mode input{accent-color:#1677ff;margin-top:3px}
+.personal-account-list{display:grid;gap:10px}.personal-account-list-item{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e4ebf3;border-radius:13px;padding:13px;text-decoration:none;color:#082b52}.personal-account-list-item:hover{border-color:#a9c8f2;background:#f9fbff}.personal-account-list-item strong{font-size:14px}.personal-account-list-item small{display:block;color:#73869a;margin-top:3px}.personal-account-empty{border:1px dashed #c7d6e6;border-radius:14px;padding:22px;text-align:center;color:#71849a;font-size:14px;line-height:1.5}.personal-account-empty a{color:#1677ff;font-weight:800}
+.personal-account-notification{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:13px 0;border-bottom:1px solid #edf2f7}.personal-account-notification:last-child{border-bottom:0}.personal-account-notification.unread strong{color:#1677ff}.personal-account-notification p{margin:5px 0 0;color:#63778b;font-size:13px;line-height:1.45}.personal-account-notification time{color:#8da0b2;font-size:11px;white-space:nowrap}
+.personal-account-message{border-radius:10px;padding:10px 12px;font-size:13px;background:#eef8f2;color:#13834f}.personal-account-message.error{background:#fff1f0;color:#b42318}
+@media(max-width:800px){.personal-account-page{padding:26px 14px 50px}.personal-account-top{display:block}.personal-account-context{margin-top:18px}.personal-account-layout{grid-template-columns:1fr}.personal-account-card{padding:19px}.personal-account-nav{overflow:auto;flex-wrap:nowrap;padding-bottom:4px}.personal-account-nav button{white-space:nowrap}}
+@media(prefers-reduced-motion:reduce){.personal-account-page *{scroll-behavior:auto!important;transition:none!important}}
