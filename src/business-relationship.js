@@ -27,9 +27,13 @@ export async function setBusinessRelationship(businessId,type,value){
  if(!session?.user?.id)return {session:null,requiresAuth:true}
  const table=type==='favorite'?'business_favorites':'business_notification_subscriptions'
  const key={user_id:session.user.id,business_id:businessId}
- const result=value
-  ? await db.from(table).upsert(type==='favorite'?key:{...key,enabled:true},{onConflict:'user_id,business_id'})
-  : await db.from(table).delete().match(key)
+ const result=type==='favorite'
+  ? (value
+    ? await db.from(table).insert(key)
+    : await db.from(table).delete().match(key))
+  : (value
+    ? await db.from(table).upsert({...key,enabled:true},{onConflict:'user_id,business_id'})
+    : await db.from(table).delete().match(key))
  if(result.error)throw result.error
  return {session,value}
 }
