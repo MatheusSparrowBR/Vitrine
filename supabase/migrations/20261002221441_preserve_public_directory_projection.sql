@@ -1,0 +1,2 @@
+alter view public.public_business_directory set (security_invoker = false);
+comment on view public.public_business_directory is 'Intentional public projection of active business directory fields. Security-definer behavior is retained because the client relies on this narrow view instead of direct access to the full businesses table; keep the projection limited to public-safe columns and active rows.';
