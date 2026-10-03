@@ -101,3 +101,13 @@ test('sitemap avanÃ§ado inclui apenas categorias ativas presentes em empresas pÃ
  assert.match(sitemap,/business\.category_slug/)
  assert.match(sitemap,/daily','0\.85'/)
 })
+
+
+test('GUIA LOCAL permanece abaixo da agenda e antes do CTA final',()=>{
+ const app=read('src/CityHomePage.jsx')
+ const guide=app.indexOf("className='lvp-wrap lvp-local-guide'")
+ const events=app.indexOf("id='eventos'")
+ const cta=app.indexOf("className='lvp-business-cta-section'")
+ assert.ok(guide>events)
+ assert.ok(guide<cta)
+})
