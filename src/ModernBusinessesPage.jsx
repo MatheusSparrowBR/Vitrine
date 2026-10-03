@@ -103,9 +103,13 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
  if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
  if(!city)return <main className="mbl-shell"><div className="mbl-error"><h1>Cidade não encontrada.</h1><a href="/laguna">Voltar</a></div></main>
 
+ const selectedCategory=categories.find(item=>item.slug===cat)||null
+ const catalogHeading=selectedCategory?`${selectedCategory.name} em ${city.name}`:`Empresas em ${city.name}`
+ const catalogDescription=selectedCategory?`Encontre ${selectedCategory.name.toLowerCase()} em ${city.name}. Veja empresas locais, contatos, serviços e informações atualizadas.`:'Encontre negócios e serviços da cidade.'
+
  return <div className="mbl-shell"><main className="mbl-page">
-  <div className="mbl-breadcrumb"><a href={`/${city.slug}`}>Voltar para {city.name}</a><span>{city.name}</span><span>›</span><strong>Empresas</strong></div>
-  <section className="mbl-hero"><div><span className="mbl-kicker">CATÁLOGO LOCAL</span><h1>Empresas em {city.name}</h1><p>Encontre negócios e serviços da cidade.</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
+  <div className="mbl-breadcrumb"><a href={`/${city.slug}`}>Voltar para {city.name}</a><span>{city.name}</span><span>›</span><strong>{selectedCategory?.name||'Empresas'}</strong></div>
+  <section className="mbl-hero"><div><span className="mbl-kicker">{selectedCategory?'CATEGORIA LOCAL':'CATÁLOGO LOCAL'}</span><h1>{catalogHeading}</h1><p>{catalogDescription}</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
   <section className="mbl-toolbar" aria-label="Filtros do catálogo">
    <div className="mbl-toolbar-sticky">
     <div className="mbl-toolbar-row">

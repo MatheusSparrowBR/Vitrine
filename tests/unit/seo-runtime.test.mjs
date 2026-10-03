@@ -57,3 +57,28 @@ test('URLs internas do JSON-LD usam a mesma origem canônica',()=>{
  const seo=read('src/seo-runtime.js')
  assert.doesNotMatch(seo,/location\.href/)
 })
+
+
+test('SEO de categorias cria página indexável específica com CollectionPage e ItemList',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/requestedCategorySlug/)
+ assert.match(seo,/CollectionPage/)
+ assert.match(seo,/'@type':'DefinedTerm'/)
+ assert.match(seo,/'@type':'ItemList'/)
+ assert.match(seo,/category_slug:'eq.'/)
+ assert.match(seo,/categoria=/)
+})
+
+test('Combinações de filtros do catálogo não são indexadas como páginas SEO',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/noindex,follow,max-image-preview:large/)
+ assert.match(seo,/isCleanCategoryRoute/)
+})
+
+
+test('Catálogo público apresenta contexto textual específico quando uma categoria está selecionada',()=>{
+ const app=read('src/ModernBusinessesPage.jsx')
+ assert.match(app,/selectedCategory/)
+ assert.match(app,/catalogHeading/)
+ assert.match(app,/CATEGORIA LOCAL/)
+})
