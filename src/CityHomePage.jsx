@@ -90,8 +90,8 @@ export default function CityHomePage({citySlug='laguna'}){
  const visibleCats=categories.slice(catStart,catStart+catVisibleCount)
  const maxCatStart=Math.max(0,categories.length-catVisibleCount)
  const go=path=>location.href=path
- const categoryHref=c=>base+'/empresas?categoria='+encodeURIComponent(c.slug)
- const needFallbackHref=names=>{const found=categories.find(c=>names.some(name=>String(c.name||'').toLowerCase()===name.toLowerCase()));return found?base+'/empresas?categoria='+encodeURIComponent(found.slug):base+'/empresas'}
+ const categoryHref=c=>base+'/empresas/categoria/'+encodeURIComponent(c.slug)
+ const needFallbackHref=names=>{const found=categories.find(c=>names.some(name=>String(c.name||'').toLowerCase()===name.toLowerCase()));return found?base+'/empresas/categoria/'+encodeURIComponent(found.slug):base+'/empresas'}
  const needHref=need=>need?.slug?base+'/empresas?necessidade='+encodeURIComponent(need.slug):base+'/empresas'
  const visibleNeeds=needs.filter(need=>need?.active!==false)
  const quickCategories=categories.slice(0,4)

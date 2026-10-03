@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Redirect legacy indexable category query URLs to the clean SEO route.
+RewriteCond %{QUERY_STRING} ^categoria=([^&]+)$ [NC]
+RewriteRule ^([^/]+)/empresas$ /$1/empresas/categoria/%1? [R=301,L,NE]
+
 # Preserve real files and directories (JS, CSS, images, sitemap assets, etc.).
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

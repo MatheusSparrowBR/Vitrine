@@ -21,7 +21,7 @@ function syncQuery(values){
  history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))
 }
 
-export default function ModernBusinessesPage({citySlug='laguna'}){
+export default function ModernBusinessesPage({citySlug='laguna',categorySlug=''}){
  const[city,setCity]=useState(null)
  const[businesses,setBusinesses]=useState([])
  const[categories,setCategories]=useState([])
@@ -38,7 +38,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
 
  useEffect(()=>{let live=true;(async()=>{
   const params=new URLSearchParams(location.search)
-  const initialCat=params.get('categoria')||params.get('category')||''
+  const initialCat=categorySlug||params.get('categoria')||params.get('category')||''
   const initialNeed=params.get('necessidade')||params.get('need')||''
   const initialQ=params.get('q')||''
   const initialSort=['relevancia','recentes','avaliacao'].includes(params.get('ordenar'))?params.get('ordenar'):'relevancia'
@@ -92,12 +92,23 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
   })
  },[businesses,q,cat,need,needCategorySlugs,sort,ratings,quickFilters])
 
- const setCategory=next=>{setCat(next);syncQuery({cat:next})}
+ const setCategory=next=>{
+  setCat(next)
+  if(next){
+    const target=`/${citySlug}/empresas/categoria/${encodeURIComponent(next)}`
+    const currentQuery=new URLSearchParams(location.search)
+    const preserved=[]
+    ;['q','necessidade','ordenar','aberto','delivery','retirada','consumo','verificada','busca_destaque'].forEach(key=>{const value=currentQuery.get(key);if(value)preserved.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)})
+    location.href=target+(preserved.length?'?'+preserved.join('&'):'')
+    return
+  }
+  location.href=`/${citySlug}/empresas`
+}
  const setNeedFilter=next=>{setNeed(next);syncQuery({need:next})}
  const setSearch=value=>{setQ(value);syncQuery({q:value})}
  const setSortValue=value=>{setSort(value);syncQuery({sort:value})}
  const updateQuickFilter=(key)=>{const next={...quickFilters,[key]:!quickFilters[key]};setQuickFilters(next);const params={};Object.entries(next).forEach(([k,v])=>{if(v)params[{open:'aberto',delivery:'delivery',pickup:'retirada',dine:'consumo',verified:'verificada',searchFeatured:'busca_destaque'}[k]]='1'});const url=new URL(location.href);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));['aberto','delivery','retirada','consumo','verificada','busca_destaque'].filter(k=>!Object.values(params).includes('1')).forEach(k=>url.searchParams.delete(k));history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))}
- const clearFilters=()=>{setQ('');setCat('');setNeed('');setSort('relevancia');const reset={open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false};setQuickFilters(reset);history.replaceState(null,'',`/${city.slug}/empresas`)}
+ const clearFilters=()=>{setQ('');setCat('');setNeed('');setSort('relevancia');const reset={open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false};setQuickFilters(reset);location.href=`/${city.slug}/empresas`}
  const returnUrl=()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${city.slug}/empresas`)?stored:`/${city.slug}/empresas`}catch{return`/${city.slug}/empresas`}}
 
  if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
