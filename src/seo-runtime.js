@@ -233,22 +233,22 @@ async function enrichCityMetadata(){
     const businesses=Array.isArray(businessRows)?businessRows:[]
     const itemList=businesses.filter(item=>item?.name&&item?.slug).map((business,index)=>{
       const businessUrl=CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/empresa/'+encodeURIComponent(business.slug)
-      const image=absoluteUrl(business.cover_url||business.logo_url)
-      const item={
-        '@type':'LocalBusiness',
-        '@id':businessUrl+'#business',
+      return {
+        '@type':'ListItem',
+        position:index+1,
         name:business.name,
-        url:businessUrl,
-        description:truncate(business.short_description||business.description||('Conheça '+business.name+' em '+cityName+'.'),200)
+        url:businessUrl
       }
-      if(image)item.image=[image]
-      return {'@type':'ListItem',position:index+1,item:item}
     })
 
     applyHead()
-    if(itemList[0]?.item?.image?.[0]){
-      firstMeta('property','og:image',itemList[0].item.image[0])
-      firstMeta('name','twitter:image',itemList[0].item.image[0])
+    const firstBusiness=businesses.find(item=>item?.cover_url||item?.logo_url)
+    if(firstBusiness){
+      const image=absoluteUrl(firstBusiness.cover_url||firstBusiness.logo_url)
+      if(image){
+        firstMeta('property','og:image',image)
+        firstMeta('name','twitter:image',image)
+      }
     }
     setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
       {...baseWebsite},
