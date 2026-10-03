@@ -233,6 +233,19 @@ async function enrichCityMetadata(){
       limit:'100'
     })
     const businesses=Array.isArray(businessRows)?businessRows:[]
+
+    if(businesses.length===0){
+      robots='noindex,follow,max-image-preview:large'
+      title=category.name+' em '+cityName+' | VitrineLocal'
+      description='Ainda não há empresas cadastradas nesta categoria em '+cityName+'. Explore outras categorias e negócios locais no VitrineLocal.'
+      canonicalUrl=isPathCategoryRoute
+        ?CANONICAL_ORIGIN+path
+        :CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/empresas/categoria/'+encodeURIComponent(category.slug)
+      applyHead()
+      setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite,createBreadcrumbs(cityName,category.name)]})
+      return
+    }
+
     const itemList=businesses.filter(item=>item?.name&&item?.slug).map((business,index)=>{
       const businessUrl=CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/empresa/'+encodeURIComponent(business.slug)
       return {

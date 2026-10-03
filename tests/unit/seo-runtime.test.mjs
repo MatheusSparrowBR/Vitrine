@@ -135,3 +135,17 @@ test('catálogo e home usam links de categoria no caminho limpo',()=>{
  assert.match(catalog,/empresas\/categoria/)
  assert.match(home,/empresas\/categoria/)
 })
+
+
+test('categorias sem empresas em uma cidade ficam noindex',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/businesses\.length===0/)
+ assert.match(seo,/robots='noindex,follow,max-image-preview:large'/)
+ assert.match(seo,/Ainda não há empresas cadastradas nesta categoria/)
+})
+
+test('catálogo diferencia categoria vazia de busca sem resultados',()=>{
+ const app=read('src/ModernBusinessesPage.jsx')
+ assert.match(app,/Ainda não há/)
+ assert.match(app,/selectedCategory/)
+})
