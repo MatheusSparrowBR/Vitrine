@@ -55,6 +55,12 @@ const parts=path.split('/').filter(Boolean).map(value=>{
 })
 const citySlug=parts[0]&&!RESERVED_CITY_PARTS.includes(parts[0].toLowerCase())?parts[0].toLowerCase():''
 const fallbackCityName=CITY_NAMES[citySlug]||humanize(citySlug)||'sua cidade'
+const searchParams=new URLSearchParams(location.search)
+const catalogQueryKeys=[...searchParams.keys()]
+const requestedCategorySlug=searchParams.get('categoria')||''
+const isCatalogRoute=Boolean(citySlug&&parts[1]==='empresas')
+const isCleanCategoryRoute=Boolean(isCatalogRoute&&requestedCategorySlug&&catalogQueryKeys.length===1&&catalogQueryKeys[0]==='categoria')
+let canonicalUrl=CANONICAL_ORIGIN+path
 
 const siteTitle='VitrineLocal | Empresas, promoções e eventos locais'
 const siteDescription='Encontre empresas, serviços, promoções e eventos perto de você no VitrineLocal.'
@@ -90,6 +96,8 @@ if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){
   title=path.startsWith('/admin')?'Administração | VitrineLocal':
     path==='/login'?'Entrar | VitrineLocal':
     path.startsWith('/usuario')?'Conta do usuário | VitrineLocal':'Minha conta | VitrineLocal'
+}else if(isCatalogRoute&&catalogQueryKeys.length&&!isCleanCategoryRoute){
+  robots='noindex,follow,max-image-preview:large'
 }
 
 const applyHead=()=>{
@@ -100,14 +108,14 @@ const applyHead=()=>{
   firstMeta('property','og:title',title)
   firstMeta('property','og:description',description)
   firstMeta('property','og:type','website')
-  firstMeta('property','og:url',CANONICAL_ORIGIN+path)
+  firstMeta('property','og:url',canonicalUrl)
   firstMeta('property','og:image',absoluteUrl('/laguna-hero.svg'))
   firstMeta('property','og:site_name','VitrineLocal')
   firstMeta('name','twitter:card','summary_large_image')
   firstMeta('name','twitter:title',title)
   firstMeta('name','twitter:description',description)
   firstMeta('name','twitter:image',absoluteUrl('/laguna-hero.svg'))
-  linkRel('canonical',CANONICAL_ORIGIN+path)
+  linkRel('canonical',canonicalUrl)
 }
 
 const baseWebsite={
@@ -123,7 +131,7 @@ const baseWebsite={
   }
 }
 
-const createBreadcrumbs=cityName=>{
+const createBreadcrumbs=(cityName,categoryName='')=>{
   const items=[{'@type':'ListItem',position:1,name:'Início',item:CANONICAL_ORIGIN}]
   if(citySlug){
     items.push({'@type':'ListItem',position:2,name:cityName,item:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)})
@@ -133,12 +141,14 @@ const createBreadcrumbs=cityName=>{
         parts[1]==='promocoes'?'Promoções':
         parts[1]==='eventos'?'Eventos':humanize(parts[1])
       items.push({'@type':'ListItem',position:3,name:label,item:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/'+encodeURIComponent(parts[1])})
-      if(parts[1]==='empresa'&&parts[2]){
+      if(parts[1]==='empresas'&&categoryName){
+        items.push({'@type':'ListItem',position:4,name:categoryName,item:canonicalUrl})
+      }else if(parts[1]==='empresa'&&parts[2]){
         items.push({'@type':'ListItem',position:4,name:decodeURIComponent(parts[2]),item:CANONICAL_ORIGIN+path})
       }
     }
   }
-  return {'@type':'BreadcrumbList','@id':CANONICAL_ORIGIN+path+'#breadcrumb',itemListElement:items}
+  return {'@type':'BreadcrumbList','@id':canonicalUrl+'#breadcrumb',itemListElement:items}
 }
 
 setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite]})
@@ -183,7 +193,7 @@ const parseOpeningHours=openingHours=>{
 async function enrichCityMetadata(){
   if(!citySlug||!canReadPublicApi)return
   const rows=await supabasePublic('cities',{
-    select:'name,slug,state',
+    select:'id,name,slug,state',
     slug:'eq.'+citySlug,
     active:'eq.true',
     limit:'1'
@@ -191,6 +201,64 @@ async function enrichCityMetadata(){
   const city=Array.isArray(rows)?rows[0]:null
   if(!city?.name)return
   const cityName=city.name
+
+  if(parts[1]==='empresas'&&requestedCategorySlug){
+    const categoryRows=await supabasePublic('categories',{
+      select:'id,name,slug,icon',
+      slug:'eq.'+requestedCategorySlug,
+      active:'eq.true',
+      limit:'1'
+    })
+    const category=Array.isArray(categoryRows)?categoryRows[0]:null
+    if(!category){
+      robots='noindex,follow,max-image-preview:large'
+      canonicalUrl=CANONICAL_ORIGIN+path
+      title='Categoria não encontrada | VitrineLocal'
+      description='A categoria solicitada não foi encontrada no VitrineLocal.'
+      applyHead()
+      setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite]})
+      return
+    }
+
+    canonicalUrl=CANONICAL_ORIGIN+path+'?categoria='+encodeURIComponent(category.slug)
+    title=category.name+' em '+cityName+' | VitrineLocal'
+    description='Encontre '+category.name.toLowerCase()+' em '+cityName+'. Veja empresas locais, contatos, serviços e informações atualizadas no VitrineLocal.'
+
+    const businessRows=await supabasePublic('public_business_directory',{
+      select:'id,name,slug,short_description,description,cover_url,logo_url,address,neighborhood,category_name,category_slug',
+      city_id:'eq.'+city.id,
+      category_slug:'eq.'+category.slug,
+      limit:'100'
+    })
+    const businesses=Array.isArray(businessRows)?businessRows:[]
+    const itemList=businesses.filter(item=>item?.name&&item?.slug).map((business,index)=>{
+      const businessUrl=CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/empresa/'+encodeURIComponent(business.slug)
+      const image=absoluteUrl(business.cover_url||business.logo_url)
+      const item={
+        '@type':'LocalBusiness',
+        '@id':businessUrl+'#business',
+        name:business.name,
+        url:businessUrl,
+        description:truncate(business.short_description||business.description||('Conheça '+business.name+' em '+cityName+'.'),200)
+      }
+      if(image)item.image=[image]
+      return {'@type':'ListItem',position:index+1,item:item}
+    })
+
+    applyHead()
+    if(itemList[0]?.item?.image?.[0]){
+      firstMeta('property','og:image',itemList[0].item.image[0])
+      firstMeta('name','twitter:image',itemList[0].item.image[0])
+    }
+    setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
+      {...baseWebsite},
+      {'@type':'CollectionPage','@id':canonicalUrl+'#webpage',url:canonicalUrl,name:title,description:description,inLanguage:'pt-BR',about:{'@type':'DefinedTerm',name:category.name,termCode:category.slug},mainEntity:{'@id':canonicalUrl+'#businesses'}},
+      {'@type':'ItemList','@id':canonicalUrl+'#businesses',name:title,itemListElement:itemList},
+      createBreadcrumbs(cityName,category.name)
+    ]})
+    return
+  }
+
   if(parts.length===1){
     title='VitrineLocal '+cityName+' | Empresas, promoções e eventos'
     description='Descubra empresas, serviços, promoções e eventos em '+cityName+'. Encontre tudo o que a cidade tem de melhor.'
@@ -207,10 +275,11 @@ async function enrichCityMetadata(){
     title='Empresa em '+cityName+' | VitrineLocal'
     description='Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.'
   }
+  canonicalUrl=CANONICAL_ORIGIN+path
   applyHead()
   setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
     {...baseWebsite},
-    {'@type':'WebPage','@id':CANONICAL_ORIGIN+path+'#webpage',url:CANONICAL_ORIGIN+path,name:title,description:description,inLanguage:'pt-BR'},
+    {'@type':'WebPage','@id':canonicalUrl+'#webpage',url:canonicalUrl,name:title,description:description,inLanguage:'pt-BR'},
     createBreadcrumbs(cityName)
   ]})
 }
