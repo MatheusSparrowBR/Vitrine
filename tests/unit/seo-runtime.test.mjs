@@ -111,3 +111,26 @@ test('GUIA LOCAL permanece abaixo da agenda e antes do CTA final',()=>{
  assert.ok(guide>events)
  assert.ok(guide<cta)
 })
+
+
+test('rota limpa de categoria evita o 404 da URL com querystring',()=>{
+ const app=read('src/app-entry.jsx')
+ const seo=read('src/seo-runtime.js')
+ const sitemap=read('scripts/generate-sitemap.mjs')
+ const ht=read('public/.htaccess')
+ assert.match(app,/categorySlug/)
+ assert.match(app,/p\[2\]\.toLowerCase\(\)==='categoria'/)
+ assert.match(seo,/pathCategorySlug/)
+ assert.match(seo,/isPathCategoryRoute/)
+ assert.match(seo,/empresas\/categoria/)
+ assert.match(sitemap,/empresas\/categoria/)
+ assert.match(ht,/QUERY_STRING\} \^categoria=/)
+})
+
+
+test('catálogo e home usam links de categoria no caminho limpo',()=>{
+ const catalog=read('src/ModernBusinessesPage.jsx')
+ const home=read('src/CityHomePage.jsx')
+ assert.match(catalog,/empresas\/categoria/)
+ assert.match(home,/empresas\/categoria/)
+})
