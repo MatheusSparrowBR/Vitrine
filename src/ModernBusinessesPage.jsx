@@ -109,7 +109,7 @@ export default function ModernBusinessesPage({citySlug='laguna'}){
 
  return <div className="mbl-shell"><main className="mbl-page">
   <div className="mbl-breadcrumb"><a href={`/${city.slug}`}>Voltar para {city.name}</a><span>{city.name}</span><span>›</span><strong>{selectedCategory?.name||'Empresas'}</strong></div>
-  <section className="mbl-hero"><div><span className="mbl-kicker">CATÁLOGO LOCAL</span><h1>{catalogHeading}</h1><p>{catalogDescription}</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
+  <section className="mbl-hero"><div><span className="mbl-kicker">{selectedCategory?'CATEGORIA LOCAL':'CATÁLOGO LOCAL'}</span><h1>{catalogHeading}</h1><p>{catalogDescription}</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
   <section className="mbl-toolbar" aria-label="Filtros do catálogo">
    <div className="mbl-toolbar-sticky">
     <div className="mbl-toolbar-row">
