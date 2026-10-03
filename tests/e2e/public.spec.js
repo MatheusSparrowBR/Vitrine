@@ -86,7 +86,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  expect(count).toBeLessThanOrEqual(7)
  const next=box.locator('.lvp-arrow').last()
  if(total>7){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
- if(count)await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\?categoria=/)
+ if(count)await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\/categoria\/.+/)
 })
 
 test('categoria da home aponta para o catálogo da categoria',async({page})=>{
@@ -94,7 +94,7 @@ test('categoria da home aponta para o catálogo da categoria',async({page})=>{
  const category=page.locator('.lvp-cat-grid a').first()
  if(await category.count()){
   await expect(category).toBeVisible()
-  await expect(category).toHaveAttribute('href',/\/laguna\/empresas\?categoria=.+/)
+  await expect(category).toHaveAttribute('href',/\/laguna\/empresas\/categoria\/.+/)
  }
 })
 
@@ -186,4 +186,12 @@ test('home principal traz necessidades com links funcionais',async({page})=>{
  await expect(needs).toHaveCount(4)
  await expect(needs.nth(0)).toHaveAttribute('href',/\/laguna\/empresas\?necessidade=quero-comer/)
  await expect(needs.nth(1)).toHaveAttribute('href',/\/laguna\/empresas\?necessidade=quero-comprar/)
+})
+
+
+test('rota limpa de categoria carrega diretamente',async({page})=>{
+ const response=await page.goto('/laguna/empresas/categoria/restaurantes')
+ expect(response?.status()).toBe(200)
+ await expect(page.getByRole('heading',{name:/Restaurantes em Laguna/i})).toBeVisible()
+ await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://vitrinelocal.net/laguna/empresas/categoria/restaurantes')
 })
