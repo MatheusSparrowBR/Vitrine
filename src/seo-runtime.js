@@ -57,9 +57,11 @@ const citySlug=parts[0]&&!RESERVED_CITY_PARTS.includes(parts[0].toLowerCase())?p
 const fallbackCityName=CITY_NAMES[citySlug]||humanize(citySlug)||'sua cidade'
 const searchParams=new URLSearchParams(location.search)
 const catalogQueryKeys=[...searchParams.keys()]
-const requestedCategorySlug=searchParams.get('categoria')||''
+const pathCategorySlug=parts[1]==='empresas'&&parts[2]==='categoria'&&parts[3]?parts[3]:''
+const requestedCategorySlug=pathCategorySlug||searchParams.get('categoria')||''
 const isCatalogRoute=Boolean(citySlug&&parts[1]==='empresas')
-const isCleanCategoryRoute=Boolean(isCatalogRoute&&requestedCategorySlug&&catalogQueryKeys.length===1&&catalogQueryKeys[0]==='categoria')
+const isPathCategoryRoute=Boolean(isCatalogRoute&&pathCategorySlug)
+const isCleanCategoryRoute=Boolean(isPathCategoryRoute&&catalogQueryKeys.length===0)
 let canonicalUrl=CANONICAL_ORIGIN+path
 
 const siteTitle='VitrineLocal | Empresas, promoções e eventos locais'
@@ -220,7 +222,7 @@ async function enrichCityMetadata(){
       return
     }
 
-    canonicalUrl=CANONICAL_ORIGIN+path+'?categoria='+encodeURIComponent(category.slug)
+    canonicalUrl=isPathCategoryRoute?CANONICAL_ORIGIN+path:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/empresas/categoria/'+encodeURIComponent(category.slug)
     title=category.name+' em '+cityName+' | VitrineLocal'
     description='Encontre '+category.name.toLowerCase()+' em '+cityName+'. Veja empresas locais, contatos, serviços e informações atualizadas no VitrineLocal.'
 
