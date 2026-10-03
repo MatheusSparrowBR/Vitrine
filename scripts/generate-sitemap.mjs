@@ -44,6 +44,15 @@ async function buildUrls() {
   add('/', 'weekly', '0.8')
   add('/planos', 'monthly', '0.7')
 
+  if (!supabaseUrl || !publishableKey) {
+    console.warn('[sitemap] Supabase public configuration is unavailable; generating the safe public fallback for Laguna.')
+    add('/laguna', 'daily', '1.0')
+    add('/laguna/empresas', 'daily', '0.9')
+    add('/laguna/promocoes', 'daily', '0.8')
+    add('/laguna/eventos', 'daily', '0.8')
+    return rowsToUrls([...urls.values()])
+  }
+
   try {
     const cities = await supabasePublic('cities?select=id,slug,name,updated_at&active=eq.true&order=name.asc&limit=5000')
     const cityById = Object.fromEntries(cities.map(city => [city.id, city.slug]))
