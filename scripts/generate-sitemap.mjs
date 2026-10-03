@@ -2,7 +2,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const origin = (process.env.SITE_URL || 'https://vitrinelocal.net').replace(/\\/$/, '')
+const origin = (process.env.SITE_URL || 'https://vitrinelocal.net').replace(/\/$/, '')
 const supabaseUrl = String(process.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '')
 const publishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
 
@@ -91,7 +91,7 @@ const body = [
   }),
   '</urlset>',
   '',
-].join('\\n')
+].join('\n')
 
 await mkdir('public', { recursive: true })
 await writeFile(join('public', 'sitemap.xml'), body, 'utf8')
