@@ -143,7 +143,7 @@ const createBreadcrumbs=cityName=>{
 setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite]})
 applyHead()
 
-const supabaseUrl=String(import.meta.env.VITE_SUPABASE_URL||'').replace(/\\/$/,'')
+const supabaseUrl=String(import.meta.env.VITE_SUPABASE_URL||'').replace(/\/$/,'')
 const publishableKey=String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'')
 const canReadPublicApi=Boolean(supabaseUrl&&publishableKey)
 
