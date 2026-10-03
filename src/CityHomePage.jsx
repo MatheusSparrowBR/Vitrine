@@ -132,6 +132,24 @@ export default function CityHomePage({citySlug='laguna'}){
     </div>
     <div className='lvp-category-count'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
    </section>
+   <section className='lvp-wrap lvp-local-guide'>
+    <div className='lvp-section-head'>
+     <div>
+      <span className='lvp-eyebrow'>GUIA LOCAL</span>
+      <h2>VitrineLocal em {city?.name||'sua cidade'}</h2>
+      <p>Encontre informações e negócios locais organizados em um só lugar.</p>
+     </div>
+    </div>
+    <div className='lvp-local-guide-copy'>
+     <p>O VitrineLocal reúne {businessCount} {businessCount===1?'empresa':'empresas'} cadastradas em {city?.name||'sua cidade'}, com categorias como {localCategoryText}. Consulte perfis de empresas, serviços, contatos, horários, promoções e eventos publicados para a cidade.</p>
+     <p>Use o catálogo para explorar negócios por categoria ou necessidade. A programação local e as ofertas ativas são atualizadas conforme novas informações são publicadas pelas empresas participantes.</p>
+    </div>
+    <div className='lvp-local-guide-links'>
+     <a href={base+'/empresas'}>Explorar empresas em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+     <a href={base+'/promocoes'}>Ver promoções em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+     <a href={base+'/eventos'}>Ver eventos em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+    </div>
+   </section>
    <section id='explorar' className='lvp-wrap lvp-featured'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
     {featuredBusinesses.length?<div className={`lvp-business-grid ${featuredBusinesses.length===1?'lvp-business-grid-single':''}`}>{featuredBusinesses.slice(0,4).map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
