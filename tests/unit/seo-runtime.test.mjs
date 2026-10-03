@@ -26,7 +26,7 @@ test('robots e sitemap apontam para o catálogo público',()=>{
  assert.match(sitemap,/lastmod/)
  assert.match(sitemap,/public_business_directory\?select=slug,city_id,updated_at,category_slug/)
  assert.match(sitemap,/categories\?select=slug&active=eq.true/)
- assert.match(sitemap,/empresas\?categoria=/)
+ assert.match(sitemap,/empresas\/categoria\//)
 })
 
 
@@ -68,7 +68,8 @@ test('SEO de categorias cria página indexável específica com CollectionPage e
  assert.match(seo,/'@type':'DefinedTerm'/)
  assert.match(seo,/'@type':'ItemList'/)
  assert.match(seo,/category_slug:'eq.'/)
- assert.match(seo,/categoria=/)
+ assert.match(seo,/pathCategorySlug/)
+ assert.match(seo,/empresas\/categoria/)
 })
 
 test('Combinações de filtros do catálogo não são indexadas como páginas SEO',()=>{
