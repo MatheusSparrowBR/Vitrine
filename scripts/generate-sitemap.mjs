@@ -66,7 +66,13 @@ async function buildUrls() {
       add(`/${slug}/eventos`, 'daily', '0.8', lastmod)
     }
 
-    const businesses = await supabasePublic('public_business_directory?select=slug,city_id,updated_at&limit=5000')
+    const [businesses,categories] = await Promise.all([
+      supabasePublic('public_business_directory?select=slug,city_id,updated_at,category_slug&limit=5000'),
+      supabasePublic('categories?select=slug&active=eq.true&limit=5000'),
+    ])
+    const activeCategorySlugs = new Set((categories||[]).map(category => String(category.slug||'').trim()).filter(Boolean))
+    const categoryLastmod = new Map()
+
     for (const business of businesses) {
       const citySlug = cityById[business.city_id]
       if (citySlug && business.slug) {
@@ -77,6 +83,19 @@ async function buildUrls() {
           validDate(business.updated_at),
         )
       }
+      const categorySlug = String(business.category_slug||'').trim()
+      const lastmod = validDate(business.updated_at)
+      if (citySlug && activeCategorySlugs.has(categorySlug) && categorySlug) {
+        const key = `${citySlug}::${categorySlug}`
+        const previous = categoryLastmod.get(key)||''
+        if (lastmod && (!previous || new Date(lastmod).getTime()>new Date(previous).getTime())) categoryLastmod.set(key,lastmod)
+        else if (!previous) categoryLastmod.set(key,'')
+      }
+    }
+
+    for (const [key,lastmod] of categoryLastmod) {
+      const [citySlug,categorySlug] = key.split('::')
+      add(`/${encodePath(citySlug)}/empresas?categoria=${encodePath(categorySlug)}`,'daily','0.85',lastmod)
     }
   } catch (error) {
     console.warn(`[sitemap] ${error instanceof Error ? error.message : String(error)}`)
