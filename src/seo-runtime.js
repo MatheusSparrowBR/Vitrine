@@ -98,7 +98,7 @@ const applyHead=()=>{
   firstMeta('name','theme-color','#1677ff')
   firstMeta('property','og:title',title)
   firstMeta('property','og:description',description)
-  firstMeta('property','og:type',parts[1]==='empresa'?'profile':'website')
+  firstMeta('property','og:type','website')
   firstMeta('property','og:url',location.origin+path)
   firstMeta('property','og:image',absoluteUrl('/laguna-hero.svg'))
   firstMeta('property','og:site_name','VitrineLocal')
@@ -214,6 +214,105 @@ async function enrichCityMetadata(){
   ]})
 }
 
+async function enrichEventsMetadata(){
+  if(!citySlug||parts[1]!=='eventos'||!canReadPublicApi)return
+  const cityRows=await supabasePublic('cities',{
+    select:'id,name,state,slug',
+    slug:'eq.'+citySlug,
+    active:'eq.true',
+    limit:'1'
+  })
+  const city=Array.isArray(cityRows)?cityRows[0]:null
+  if(!city?.id||!city?.name)return
+
+  const today=new Date().toISOString().slice(0,10)
+  const eventRows=await supabasePublic('events',{
+    select:'id,title,description,image_url,event_date,event_end_date,start_time,end_time,location,address,category,price,external_url',
+    city_id:'eq.'+city.id,
+    active:'eq.true',
+    event_end_date:'gte.'+today,
+    order:'event_date.asc',
+    limit:'50'
+  })
+  const events=Array.isArray(eventRows)?eventRows:[]
+
+  const toDateTime=(date,time,fallback)=>{
+    if(!date)return ''
+    const value=String(time||fallback||'').trim()
+    if(!value)return String(date)
+    const normalized=value.length===5?value+':00':value
+    return String(date)+'T'+normalized+'-03:00'
+  }
+
+  const eventSchemas=events.filter(event=>event?.title&&event?.event_date).map(event=>{
+    const startDate=toDateTime(event.event_date,event.start_time)
+    const endDate=toDateTime(event.event_end_date||event.event_date,event.end_time||'23:59:59')
+    const image=absoluteUrl(event.image_url)
+    const locationName=event.location||city.name
+    const addressValue=event.address||''
+    const place={
+      '@type':'Place',
+      name:locationName,
+      address:{
+        '@type':'PostalAddress',
+        ...(addressValue?{streetAddress:addressValue}:{}),
+        addressLocality:city.name,
+        addressRegion:city.state||'SC',
+        addressCountry:'BR'
+      }
+    }
+    const schema={
+      '@type':'Event',
+      '@id':location.origin+'/'+encodeURIComponent(citySlug)+'/eventos#event-'+encodeURIComponent(String(event.id)),
+      name:event.title,
+      description:truncate(event.description||event.title,300),
+      startDate:startDate,
+      endDate:endDate,
+      eventStatus:'https://schema.org/EventScheduled',
+      eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',
+      location:place
+    }
+    if(image)schema.image=[image]
+    if(event.category)schema.about={'@type':'Thing',name:event.category}
+    if(event.external_url){
+      const external=absoluteUrl(event.external_url)
+      if(external)schema.sameAs=[external]
+    }
+    if(event.price!=null){
+      const numericPrice=Number(event.price)
+      if(Number.isFinite(numericPrice)){
+        schema.offers={
+          '@type':'Offer',
+          price:numericPrice,
+          priceCurrency:'BRL',
+          availability:'https://schema.org/InStock',
+          url:location.href
+        }
+      }
+    }
+    return schema
+  })
+
+  title='Eventos em '+city.name+' | VitrineLocal'
+  description='Veja os próximos eventos e o que está acontecendo em '+city.name+'.'
+  applyHead()
+  const eventList={
+    '@type':'ItemList',
+    '@id':location.href+'#events',
+    itemListElement:eventSchemas.map((event,index)=>({
+      '@type':'ListItem',
+      position:index+1,
+      item:event
+    }))
+  }
+  setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
+    {...baseWebsite},
+    {'@type':'WebPage','@id':location.href+'#webpage',url:location.href,name:title,description:description,inLanguage:'pt-BR',mainEntity:{'@id':location.href+'#events'}},
+    eventList,
+    createBreadcrumbs(city.name)
+  ]})
+}
+
 async function enrichBusinessMetadata(){
   if(!citySlug||parts[1]!=='empresa'||!parts[2]||!canReadPublicApi)return
   const cityRows=await supabasePublic('cities',{
@@ -260,7 +359,7 @@ async function enrichBusinessMetadata(){
       addressRegion:business.city_state||city.state||'SC',
       addressCountry:'BR'
     }:undefined,
-    telephone:business.whatsapp||business.phone||undefined,
+    telephone:business.phone||undefined,
     sameAs:[business.website_url,business.instagram_url].map(absoluteUrl).filter(Boolean),
     category:category,
     openingHoursSpecification:parseOpeningHours(business.opening_hours)
@@ -285,6 +384,10 @@ const enrich=async()=>{
   if(robots.startsWith('noindex'))return
   if(parts[1]==='empresa'){
     await enrichBusinessMetadata()
+    return
+  }
+  if(parts[1]==='eventos'){
+    await enrichEventsMetadata()
     return
   }
   await enrichCityMetadata()

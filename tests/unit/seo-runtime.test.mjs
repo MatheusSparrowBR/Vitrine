@@ -26,3 +26,20 @@ test('robots e sitemap apontam para o catálogo público',()=>{
  assert.match(sitemap,/lastmod/)
  assert.match(sitemap,/public_business_directory\?select=slug,city_id,updated_at/)
 })
+
+
+test('SEO de eventos publica Event e ItemList para a agenda da cidade',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/parts\[1\]==='eventos'/)
+ assert.match(seo,/'@type':'Event'/)
+ assert.match(seo,/'@type':'ItemList'/)
+ assert.match(seo,/eventAttendanceMode/)
+ assert.match(seo,/OfflineEventAttendanceMode/)
+})
+
+test('sitemap mantém fallback público mínimo quando Supabase não está configurado',()=>{
+ const sitemap=read('scripts/generate-sitemap.mjs')
+ assert.match(sitemap,/Supabase public configuration is unavailable/)
+ assert.match(sitemap,/\/laguna\/empresas/)
+ assert.match(sitemap,/\/laguna\/eventos/)
+})
