@@ -95,7 +95,7 @@ async function buildUrls() {
 
     for (const [key,lastmod] of categoryLastmod) {
       const [citySlug,categorySlug] = key.split('::')
-      add(`/${encodePath(citySlug)}/empresas?categoria=${encodePath(categorySlug)}`,'daily','0.85',lastmod)
+      add(`/${encodePath(citySlug)}/empresas/categoria/${encodePath(categorySlug)}`,'daily','0.85',lastmod)
     }
   } catch (error) {
     console.warn(`[sitemap] ${error instanceof Error ? error.message : String(error)}`)
