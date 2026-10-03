@@ -1,8 +1,9 @@
+
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const origin = (process.env.SITE_URL || 'https://vitrinelocal.net').replace(/\/$/, '')
-const supabaseUrl = String(process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
+const origin = (process.env.SITE_URL || 'https://vitrinelocal.net').replace(/\\/$/, '')
+const supabaseUrl = String(process.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '')
 const publishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
 
 const esc = value => String(value ?? '')
@@ -13,9 +14,14 @@ const esc = value => String(value ?? '')
   .replace(/'/g, '&apos;')
 
 const encodePath = value => encodeURIComponent(String(value || ''))
+const validDate = value => {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) ? date.toISOString() : ''
+}
 const rowsToUrls = rows => rows
   .filter(Boolean)
-  .map(({ path, changefreq = 'weekly', priority = '0.7' }) => ({ path, changefreq, priority }))
+  .map(({ path, changefreq = 'weekly', priority = '0.7', lastmod = '' }) => ({ path, changefreq, priority, lastmod }))
 
 async function supabasePublic(path) {
   if (!supabaseUrl || !publishableKey) return []
@@ -31,30 +37,36 @@ async function supabasePublic(path) {
 
 async function buildUrls() {
   const urls = new Map()
-  const add = (path, changefreq = 'weekly', priority = '0.7') => {
-    urls.set(path, { path, changefreq, priority })
+  const add = (path, changefreq = 'weekly', priority = '0.7', lastmod = '') => {
+    urls.set(path, { path, changefreq, priority, lastmod })
   }
 
   add('/', 'weekly', '0.8')
   add('/planos', 'monthly', '0.7')
 
   try {
-    const cities = await supabasePublic('cities?select=id,slug&active=eq.true&order=name.asc&limit=5000')
+    const cities = await supabasePublic('cities?select=id,slug,name,updated_at&active=eq.true&order=name.asc&limit=5000')
     const cityById = Object.fromEntries(cities.map(city => [city.id, city.slug]))
 
     for (const city of cities) {
       const slug = encodePath(city.slug)
-      add(`/${slug}`, 'daily', '1.0')
-      add(`/${slug}/empresas`, 'daily', '0.9')
-      add(`/${slug}/promocoes`, 'daily', '0.8')
-      add(`/${slug}/eventos`, 'daily', '0.8')
+      const lastmod = validDate(city.updated_at)
+      add(`/${slug}`, 'daily', '1.0', lastmod)
+      add(`/${slug}/empresas`, 'daily', '0.9', lastmod)
+      add(`/${slug}/promocoes`, 'daily', '0.8', lastmod)
+      add(`/${slug}/eventos`, 'daily', '0.8', lastmod)
     }
 
-    const businesses = await supabasePublic('public_business_directory?select=slug,city_id&limit=5000')
+    const businesses = await supabasePublic('public_business_directory?select=slug,city_id,updated_at&limit=5000')
     for (const business of businesses) {
       const citySlug = cityById[business.city_id]
       if (citySlug && business.slug) {
-        add(`/${encodePath(citySlug)}/empresa/${encodePath(business.slug)}`, 'weekly', '0.8')
+        add(
+          `/${encodePath(citySlug)}/empresa/${encodePath(business.slug)}`,
+          'weekly',
+          '0.8',
+          validDate(business.updated_at),
+        )
       }
     }
   } catch (error) {
@@ -73,10 +85,13 @@ const urls = await buildUrls()
 const body = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-  ...urls.map(item => `<url><loc>${esc(origin + (item.path.startsWith('/') ? item.path : `/${item.path}`))}</loc><changefreq>${item.changefreq}</changefreq><priority>${item.priority}</priority></url>`),
+  ...urls.map(item => {
+    const lastmod = item.lastmod ? `<lastmod>${esc(item.lastmod)}</lastmod>` : ''
+    return `<url><loc>${esc(origin + (item.path.startsWith('/') ? item.path : `/${item.path}`))}</loc><changefreq>${item.changefreq}</changefreq><priority>${item.priority}</priority>${lastmod}</url>`
+  }),
   '</urlset>',
   '',
-].join('\n')
+].join('\\n')
 
 await mkdir('public', { recursive: true })
 await writeFile(join('public', 'sitemap.xml'), body, 'utf8')
