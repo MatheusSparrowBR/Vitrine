@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const origin = (process.env.SITE_URL || 'https://vitrinelocal.net').replace(/\/$/, '')
-const supabaseUrl = String(process.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '')
+const supabaseUrl = String(process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
 const publishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
 
 const esc = value => String(value ?? '')
