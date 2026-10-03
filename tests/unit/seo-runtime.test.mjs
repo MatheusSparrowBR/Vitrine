@@ -43,3 +43,17 @@ test('sitemap mantém fallback público mínimo quando Supabase não está confi
  assert.match(sitemap,/\/laguna\/empresas/)
  assert.match(sitemap,/\/laguna\/eventos/)
 })
+
+
+test('SEO usa uma origem canônica única para evitar duplicidade entre www e domínio raiz',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/CANONICAL_ORIGIN='https:\/\/vitrinelocal\.net'/)
+ assert.doesNotMatch(seo,/linkRel\('canonical',location\.origin/)
+ assert.doesNotMatch(seo,/firstMeta\('property','og:url',location\.origin/)
+})
+
+
+test('URLs internas do JSON-LD usam a mesma origem canônica',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.doesNotMatch(seo,/location\.href/)
+})
