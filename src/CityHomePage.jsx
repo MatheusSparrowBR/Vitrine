@@ -134,24 +134,6 @@ export default function CityHomePage({citySlug='laguna'}){
     </div>
     <div className='lvp-category-count'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
    </section>
-   <section className='lvp-wrap lvp-local-guide'>
-    <div className='lvp-section-head'>
-     <div>
-      <span className='lvp-eyebrow'>GUIA LOCAL</span>
-      <h2>VitrineLocal em {city?.name||'sua cidade'}</h2>
-      <p>Encontre informações e negócios locais organizados em um só lugar.</p>
-     </div>
-    </div>
-    <div className='lvp-local-guide-copy'>
-     <p>O VitrineLocal reúne {businessCount} {businessCount===1?'empresa':'empresas'} cadastradas em {city?.name||'sua cidade'}, com categorias como {localCategoryText}. Consulte perfis de empresas, serviços, contatos, horários, promoções e eventos publicados para a cidade.</p>
-     <p>Use o catálogo para explorar negócios por categoria ou necessidade. A programação local e as ofertas ativas são atualizadas conforme novas informações são publicadas pelas empresas participantes.</p>
-    </div>
-    <div className='lvp-local-guide-links'>
-     <a href={base+'/empresas'}>Explorar empresas em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
-     <a href={base+'/promocoes'}>Ver promoções em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
-     <a href={base+'/eventos'}>Ver eventos em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
-    </div>
-   </section>
    <section id='explorar' className='lvp-wrap lvp-featured'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS CADASTRADOS</span><h2>Empresas em destaque</h2><p>Veja apenas empresas reais cadastradas no catálogo desta cidade.</p></div><a href={base+'/empresas'}>Ver todas →</a></div>
     {featuredBusinesses.length?<div className={`lvp-business-grid ${featuredBusinesses.length===1?'lvp-business-grid-single':''}`}>{featuredBusinesses.slice(0,4).map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <a href={base+'/empresa/'+encodeURIComponent(b.slug)} className='lvp-business-card' key={b.id}>
@@ -183,6 +165,24 @@ export default function CityHomePage({citySlug='laguna'}){
    <section id='eventos' className='lvp-wrap lvp-events'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>AGENDA LOCAL</span><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Eventos publicados e ainda válidos para a cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
     {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda <Icon name="arrowRight" size={14}/></a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className='lvp-date'><b>{d.day}</b><span>{d.month}</span></div><div><h3>{e.title}</h3><p><Icon name="pin" size={11}/> {e.location||'Local a confirmar'}{formatEventRange(e.event_date,e.event_end_date)}{e.start_time?<> <Icon name="clock" size={11}/> {String(e.start_time).slice(0,5)}</>:null}</p></div><span className='lvp-event-arrow'><Icon name="arrowRight" size={16}/></span></a>})}</div>:<div className='lvp-empty-panel'><h3>A agenda está tranquila por enquanto.</h3><p>Novos eventos publicados para a cidade aparecerão aqui automaticamente.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
+   </section>
+   <section className='lvp-wrap lvp-local-guide'>
+    <div className='lvp-section-head'>
+     <div>
+      <span className='lvp-eyebrow'>GUIA LOCAL</span>
+      <h2>VitrineLocal em {city?.name||'sua cidade'}</h2>
+      <p>Encontre informações e negócios locais organizados em um só lugar.</p>
+     </div>
+    </div>
+    <div className='lvp-local-guide-copy'>
+     <p>O VitrineLocal reúne {businessCount} {businessCount===1?'empresa':'empresas'} cadastradas em {city?.name||'sua cidade'}, com categorias como {localCategoryText}. Consulte perfis de empresas, serviços, contatos, horários, promoções e eventos publicados para a cidade.</p>
+     <p>Use o catálogo para explorar negócios por categoria ou necessidade. A programação local e as ofertas ativas são atualizadas conforme novas informações são publicadas pelas empresas participantes.</p>
+    </div>
+    <div className='lvp-local-guide-links'>
+     <a href={base+'/empresas'}>Explorar empresas em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+     <a href={base+'/promocoes'}>Ver promoções em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+     <a href={base+'/eventos'}>Ver eventos em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+    </div>
    </section>
    <section className='lvp-business-cta-section'>
     <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
