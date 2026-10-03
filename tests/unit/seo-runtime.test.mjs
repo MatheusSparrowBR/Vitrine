@@ -51,3 +51,9 @@ test('SEO usa uma origem canônica única para evitar duplicidade entre www e do
  assert.doesNotMatch(seo,/linkRel\('canonical',location\.origin/)
  assert.doesNotMatch(seo,/firstMeta\('property','og:url',location\.origin/)
 })
+
+
+test('URLs internas do JSON-LD usam a mesma origem canônica',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.doesNotMatch(seo,/location\.href/)
+})

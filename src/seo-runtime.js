@@ -134,11 +134,11 @@ const createBreadcrumbs=cityName=>{
         parts[1]==='eventos'?'Eventos':humanize(parts[1])
       items.push({'@type':'ListItem',position:3,name:label,item:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/'+encodeURIComponent(parts[1])})
       if(parts[1]==='empresa'&&parts[2]){
-        items.push({'@type':'ListItem',position:4,name:decodeURIComponent(parts[2]),item:location.href})
+        items.push({'@type':'ListItem',position:4,name:decodeURIComponent(parts[2]),item:CANONICAL_ORIGIN+path})
       }
     }
   }
-  return {'@type':'BreadcrumbList','@id':location.href+'#breadcrumb',itemListElement:items}
+  return {'@type':'BreadcrumbList','@id':CANONICAL_ORIGIN+path+'#breadcrumb',itemListElement:items}
 }
 
 setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite]})
@@ -210,7 +210,7 @@ async function enrichCityMetadata(){
   applyHead()
   setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
     {...baseWebsite},
-    {'@type':'WebPage','@id':location.href+'#webpage',url:location.href,name:title,description:description,inLanguage:'pt-BR'},
+    {'@type':'WebPage','@id':CANONICAL_ORIGIN+path+'#webpage',url:CANONICAL_ORIGIN+path,name:title,description:description,inLanguage:'pt-BR'},
     createBreadcrumbs(cityName)
   ]})
 }
@@ -287,7 +287,7 @@ async function enrichEventsMetadata(){
           price:numericPrice,
           priceCurrency:'BRL',
           availability:'https://schema.org/InStock',
-          url:location.href
+          url:CANONICAL_ORIGIN+path
         }
       }
     }
@@ -299,7 +299,7 @@ async function enrichEventsMetadata(){
   applyHead()
   const eventList={
     '@type':'ItemList',
-    '@id':location.href+'#events',
+    '@id':CANONICAL_ORIGIN+path+'#events',
     itemListElement:eventSchemas.map((event,index)=>({
       '@type':'ListItem',
       position:index+1,
@@ -308,7 +308,7 @@ async function enrichEventsMetadata(){
   }
   setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
     {...baseWebsite},
-    {'@type':'WebPage','@id':location.href+'#webpage',url:location.href,name:title,description:description,inLanguage:'pt-BR',mainEntity:{'@id':location.href+'#events'}},
+    {'@type':'WebPage','@id':CANONICAL_ORIGIN+path+'#webpage',url:CANONICAL_ORIGIN+path,name:title,description:description,inLanguage:'pt-BR',mainEntity:{'@id':CANONICAL_ORIGIN+path+'#events'}},
     eventList,
     createBreadcrumbs(city.name)
   ]})
