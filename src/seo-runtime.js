@@ -1,46 +1,292 @@
+
 const PRIVATE_PREFIXES=['/admin','/conta','/login','/atualizar-senha','/usuario']
+const RESERVED_CITY_PARTS=['login','planos','conta','admin','privacidade','termos','atualizar-senha','usuario','preview-lancamento']
 const CITY_NAMES={laguna:'Laguna'}
-const humanize=v=>String(v||'').split('-').filter(Boolean).map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ')
-const firstMeta=(attr,value,content)=>{let el=document.head.querySelector(`meta[${attr}="${value}"]`);if(!el){el=document.createElement('meta');el.setAttribute(attr,value);document.head.appendChild(el)}el.setAttribute('content',content)}
-const linkRel=(rel,href)=>{let el=document.head.querySelector(`link[rel="${rel}"]`);if(!el){el=document.createElement('link');el.rel=rel;document.head.appendChild(el)}el.href=href}
-const path=location.pathname.replace(/\/+$/,'')||'/'
-const parts=path.split('/').filter(Boolean).map(v=>decodeURIComponent(v))
-const citySlug=parts[0]&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha','usuario'].includes(parts[0].toLowerCase())?parts[0].toLowerCase():''
-const cityName=CITY_NAMES[citySlug]||humanize(citySlug)||'sua cidade'
-let title='VitrineLocal | Empresas, promoções e eventos locais'
-let description='Encontre empresas, serviços, promoções e eventos perto de você no VitrineLocal.'
-let robots='index,follow,max-image-preview:large'
-if(path==='/'){title='VitrineLocal | Descubra o melhor da sua cidade';description='A vitrine digital da cidade: empresas, serviços, promoções e eventos em um só lugar.'}
-else if(parts.length===1&&citySlug){title=`VitrineLocal ${cityName} | Empresas, promoções e eventos`;description=`Descubra empresas, serviços, promoções e eventos em ${cityName}. Encontre tudo o que a cidade tem de melhor.`}
-else if(citySlug&&parts[1]==='empresas'){title=`Empresas em ${cityName} | VitrineLocal`;description=`Encontre empresas, serviços, categorias e negócios locais em ${cityName}.`}
-else if(citySlug&&parts[1]==='promocoes'){title=`Promoções em ${cityName} | VitrineLocal`;description=`Confira ofertas e promoções publicadas por empresas de ${cityName}.`}
-else if(citySlug&&parts[1]==='eventos'){title=`Eventos em ${cityName} | VitrineLocal`;description=`Veja os próximos eventos e o que está acontecendo em ${cityName}.`}
-else if(citySlug&&parts[1]==='empresa'){title=`Empresa em ${cityName} | VitrineLocal`;description=`Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.`}
-else if(path==='/planos'){title='Planos para empresas | VitrineLocal';description='Escolha o plano VitrineLocal que melhor ajuda sua empresa a ganhar presença e destaque.'}
-if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){robots='noindex,nofollow,noarchive';title=path.startsWith('/admin')?'Administração | VitrineLocal':path==='/login'?'Entrar | VitrineLocal':path.startsWith('/usuario')?'Conta do usuário | VitrineLocal':'Minha conta | VitrineLocal'}
-document.title=title
-firstMeta('name','description',description)
-firstMeta('name','robots',robots)
-firstMeta('name','theme-color','#1677ff')
-firstMeta('property','og:title',title)
-firstMeta('property','og:description',description)
-firstMeta('property','og:type','website')
-firstMeta('property','og:url',location.origin+path)
-firstMeta('property','og:image',location.origin+'/laguna-hero.svg')
-firstMeta('property','og:site_name','VitrineLocal')
-firstMeta('name','twitter:card','summary_large_image')
-firstMeta('name','twitter:title',title)
-firstMeta('name','twitter:description',description)
-firstMeta('name','twitter:image',location.origin+'/laguna-hero.svg')
-linkRel('canonical',location.origin+path)
-const schemaId='vl-seo-schema'
-let schema=document.getElementById(schemaId)
-if(!schema){schema=document.createElement('script');schema.id=schemaId;schema.type='application/ld+json';document.head.appendChild(schema)}
-schema.textContent=JSON.stringify({
- '@context':'https://schema.org',
- '@type':'WebSite',
- name:'VitrineLocal',
- url:location.origin,
- inLanguage:'pt-BR',
- potentialAction:{'@type':'SearchAction',target:`${location.origin}/${citySlug||'laguna'}/empresas?q={search_term_string}`, 'query-input':'required name=search_term_string'}
+
+const humanize=value=>String(value||'')
+  .split('-')
+  .filter(Boolean)
+  .map(part=>part.charAt(0).toUpperCase()+part.slice(1))
+  .join(' ')
+const normalizeText=value=>String(value||'').replace(/\\s+/g,' ').trim()
+const truncate=(value,max=165)=>{
+  const text=normalizeText(value)
+  if(text.length<=max)return text
+  return text.slice(0,max-1).trimEnd()+'…'
+}
+const absoluteUrl=value=>{
+  const raw=String(value||'').trim()
+  if(!raw)return ''
+  try{return new URL(raw,location.origin).href}catch{return ''}
+}
+const firstMeta=(attr,value,content)=>{
+  let el=document.head.querySelector('meta['+attr+'="'+value+'"]')
+  if(!el){
+    el=document.createElement('meta')
+    el.setAttribute(attr,value)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content',content)
+}
+const linkRel=(rel,href)=>{
+  let el=document.head.querySelector('link[rel="'+rel+'"]')
+  if(!el){
+    el=document.createElement('link')
+    el.rel=rel
+    document.head.appendChild(el)
+  }
+  el.href=href
+}
+const setJsonLd=(id,payload)=>{
+  let el=document.getElementById(id)
+  if(!el){
+    el=document.createElement('script')
+    el.id=id
+    el.type='application/ld+json'
+    document.head.appendChild(el)
+  }
+  el.textContent=JSON.stringify(payload)
+}
+
+const path=location.pathname.replace(/\\/+$/,'')||'/'
+const parts=path.split('/').filter(Boolean).map(value=>{
+  try{return decodeURIComponent(value)}catch{return value}
 })
+const citySlug=parts[0]&&!RESERVED_CITY_PARTS.includes(parts[0].toLowerCase())?parts[0].toLowerCase():''
+const fallbackCityName=CITY_NAMES[citySlug]||humanize(citySlug)||'sua cidade'
+
+const siteTitle='VitrineLocal | Empresas, promoções e eventos locais'
+const siteDescription='Encontre empresas, serviços, promoções e eventos perto de você no VitrineLocal.'
+let title=siteTitle
+let description=siteDescription
+let robots='index,follow,max-image-preview:large'
+
+if(path==='/'){
+  title='VitrineLocal | Descubra o melhor da sua cidade'
+  description='A vitrine digital da cidade: empresas, serviços, promoções e eventos em um só lugar.'
+}else if(parts.length===1&&citySlug){
+  title='VitrineLocal '+fallbackCityName+' | Empresas, promoções e eventos'
+  description='Descubra empresas, serviços, promoções e eventos em '+fallbackCityName+'. Encontre tudo o que a cidade tem de melhor.'
+}else if(citySlug&&parts[1]==='empresas'){
+  title='Empresas em '+fallbackCityName+' | VitrineLocal'
+  description='Encontre empresas, serviços, categorias e negócios locais em '+fallbackCityName+'.'
+}else if(citySlug&&parts[1]==='promocoes'){
+  title='Promoções em '+fallbackCityName+' | VitrineLocal'
+  description='Confira ofertas e promoções publicadas por empresas de '+fallbackCityName+'.'
+}else if(citySlug&&parts[1]==='eventos'){
+  title='Eventos em '+fallbackCityName+' | VitrineLocal'
+  description='Veja os próximos eventos e o que está acontecendo em '+fallbackCityName+'.'
+}else if(citySlug&&parts[1]==='empresa'){
+  title='Empresa em '+fallbackCityName+' | VitrineLocal'
+  description='Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.'
+}else if(path==='/planos'){
+  title='Planos para empresas | VitrineLocal'
+  description='Escolha o plano VitrineLocal que melhor ajuda sua empresa a ganhar presença e destaque.'
+}
+
+if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){
+  robots='noindex,nofollow,noarchive'
+  title=path.startsWith('/admin')?'Administração | VitrineLocal':
+    path==='/login'?'Entrar | VitrineLocal':
+    path.startsWith('/usuario')?'Conta do usuário | VitrineLocal':'Minha conta | VitrineLocal'
+}
+
+const applyHead=()=>{
+  document.title=title
+  firstMeta('name','description',description)
+  firstMeta('name','robots',robots)
+  firstMeta('name','theme-color','#1677ff')
+  firstMeta('property','og:title',title)
+  firstMeta('property','og:description',description)
+  firstMeta('property','og:type',parts[1]==='empresa'?'profile':'website')
+  firstMeta('property','og:url',location.origin+path)
+  firstMeta('property','og:image',absoluteUrl('/laguna-hero.svg'))
+  firstMeta('property','og:site_name','VitrineLocal')
+  firstMeta('name','twitter:card','summary_large_image')
+  firstMeta('name','twitter:title',title)
+  firstMeta('name','twitter:description',description)
+  firstMeta('name','twitter:image',absoluteUrl('/laguna-hero.svg'))
+  linkRel('canonical',location.origin+path)
+}
+
+const baseWebsite={
+  '@type':'WebSite',
+  '@id':location.origin+'/#website',
+  name:'VitrineLocal',
+  url:location.origin,
+  inLanguage:'pt-BR',
+  potentialAction:{
+    '@type':'SearchAction',
+    target:location.origin+'/'+(citySlug||'laguna')+'/empresas?q={search_term_string}',
+    'query-input':'required name=search_term_string'
+  }
+}
+
+const createBreadcrumbs=cityName=>{
+  const items=[{'@type':'ListItem',position:1,name:'Início',item:location.origin}]
+  if(citySlug){
+    items.push({'@type':'ListItem',position:2,name:cityName,item:location.origin+'/'+encodeURIComponent(citySlug)})
+    if(parts[1]){
+      const label=parts[1]==='empresa'?'Empresas':
+        parts[1]==='empresas'?'Empresas':
+        parts[1]==='promocoes'?'Promoções':
+        parts[1]==='eventos'?'Eventos':humanize(parts[1])
+      items.push({'@type':'ListItem',position:3,name:label,item:location.origin+'/'+encodeURIComponent(citySlug)+'/'+encodeURIComponent(parts[1])})
+      if(parts[1]==='empresa'&&parts[2]){
+        items.push({'@type':'ListItem',position:4,name:decodeURIComponent(parts[2]),item:location.href})
+      }
+    }
+  }
+  return {'@type':'BreadcrumbList','@id':location.href+'#breadcrumb',itemListElement:items}
+}
+
+setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[baseWebsite]})
+applyHead()
+
+const supabaseUrl=String(import.meta.env.VITE_SUPABASE_URL||'').replace(/\\/$/,'')
+const publishableKey=String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'')
+const canReadPublicApi=Boolean(supabaseUrl&&publishableKey)
+
+async function supabasePublic(resource,params={}){
+  if(!canReadPublicApi)return null
+  const url=new URL(supabaseUrl+'/rest/v1/'+resource)
+  Object.entries(params).forEach(([key,value])=>url.searchParams.set(key,String(value)))
+  const controller=new AbortController()
+  const timer=setTimeout(()=>controller.abort(),2500)
+  try{
+    const response=await fetch(url.href,{headers:{apikey:publishableKey,Authorization:'Bearer '+publishableKey},signal:controller.signal})
+    if(!response.ok)return null
+    return await response.json()
+  }catch{
+    return null
+  }finally{
+    clearTimeout(timer)
+  }
+}
+
+const parseOpeningHours=openingHours=>{
+  if(!openingHours||typeof openingHours!=='object')return []
+  const labels={monday:'Monday',tuesday:'Tuesday',wednesday:'Wednesday',thursday:'Thursday',friday:'Friday',saturday:'Saturday',sunday:'Sunday'}
+  return Object.entries(labels).flatMap(([key,dayOfWeek])=>{
+    const day=openingHours[key]
+    if(!day||day.closed||!day.open||!day.close)return []
+    return [{
+      '@type':'OpeningHoursSpecification',
+      dayOfWeek:'https://schema.org/'+dayOfWeek,
+      opens:String(day.open),
+      closes:String(day.close)
+    }]
+  })
+}
+
+async function enrichCityMetadata(){
+  if(!citySlug||!canReadPublicApi)return
+  const rows=await supabasePublic('cities',{
+    select:'name,slug,state',
+    slug:'eq.'+citySlug,
+    active:'eq.true',
+    limit:'1'
+  })
+  const city=Array.isArray(rows)?rows[0]:null
+  if(!city?.name)return
+  const cityName=city.name
+  if(parts.length===1){
+    title='VitrineLocal '+cityName+' | Empresas, promoções e eventos'
+    description='Descubra empresas, serviços, promoções e eventos em '+cityName+'. Encontre tudo o que a cidade tem de melhor.'
+  }else if(parts[1]==='empresas'){
+    title='Empresas em '+cityName+' | VitrineLocal'
+    description='Encontre empresas, serviços, categorias e negócios locais em '+cityName+'.'
+  }else if(parts[1]==='promocoes'){
+    title='Promoções em '+cityName+' | VitrineLocal'
+    description='Confira ofertas e promoções publicadas por empresas de '+cityName+'.'
+  }else if(parts[1]==='eventos'){
+    title='Eventos em '+cityName+' | VitrineLocal'
+    description='Veja os próximos eventos e o que está acontecendo em '+cityName+'.'
+  }else if(parts[1]==='empresa'){
+    title='Empresa em '+cityName+' | VitrineLocal'
+    description='Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.'
+  }
+  applyHead()
+  setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
+    {...baseWebsite},
+    {'@type':'WebPage','@id':location.href+'#webpage',url:location.href,name:title,description:description,inLanguage:'pt-BR'},
+    createBreadcrumbs(cityName)
+  ]})
+}
+
+async function enrichBusinessMetadata(){
+  if(!citySlug||parts[1]!=='empresa'||!parts[2]||!canReadPublicApi)return
+  const cityRows=await supabasePublic('cities',{
+    select:'id,name,state,slug',
+    slug:'eq.'+citySlug,
+    active:'eq.true',
+    limit:'1'
+  })
+  const city=Array.isArray(cityRows)?cityRows[0]:null
+  if(!city?.id)return
+  const businessRows=await supabasePublic('public_business_directory',{
+    select:'id,name,slug,short_description,description,logo_url,cover_url,phone,whatsapp,website_url,instagram_url,address,neighborhood,latitude,longitude,verified,category_name,category_slug,opening_hours,city_name,city_state,updated_at',
+    city_id:'eq.'+city.id,
+    slug:'eq.'+decodeURIComponent(parts[2]),
+    limit:'1'
+  })
+  const business=Array.isArray(businessRows)?businessRows[0]:null
+  if(!business)return
+
+  const cityName=business.city_name||city.name
+  const category=business.category_name||'Empresa local'
+  const businessDescription=truncate(business.short_description||business.description||'Conheça '+business.name+' em '+cityName+'. Consulte serviços, contatos, localização, horários e novidades.')
+  const image=absoluteUrl(business.cover_url||business.logo_url||'/laguna-hero.svg')
+  const businessUrl=location.origin+'/'+encodeURIComponent(citySlug)+'/empresa/'+encodeURIComponent(business.slug)
+
+  title=business.name+' em '+cityName+' | VitrineLocal'
+  description=businessDescription
+  applyHead()
+  firstMeta('property','og:image',image)
+  firstMeta('name','twitter:image',image)
+
+  const localBusiness={
+    '@type':'LocalBusiness',
+    '@id':businessUrl+'#business',
+    name:business.name,
+    url:businessUrl,
+    description:businessDescription,
+    image:[image],
+    areaServed:{'@type':'City',name:cityName},
+    address:business.address||business.neighborhood?{
+      '@type':'PostalAddress',
+      ...(business.address?{streetAddress:business.address}:{}),
+      addressLocality:cityName,
+      addressRegion:business.city_state||city.state||'SC',
+      addressCountry:'BR'
+    }:undefined,
+    telephone:business.whatsapp||business.phone||undefined,
+    sameAs:[business.website_url,business.instagram_url].map(absoluteUrl).filter(Boolean),
+    category:category,
+    openingHoursSpecification:parseOpeningHours(business.opening_hours)
+  }
+  if(Number.isFinite(Number(business.latitude))&&Number.isFinite(Number(business.longitude))){
+    localBusiness.geo={
+      '@type':'GeoCoordinates',
+      latitude:Number(business.latitude),
+      longitude:Number(business.longitude)
+    }
+  }
+
+  setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
+    {...baseWebsite},
+    {'@type':'WebPage','@id':businessUrl+'#webpage',url:businessUrl,name:title,description:description,inLanguage:'pt-BR',mainEntity:{'@id':businessUrl+'#business'}},
+    localBusiness,
+    createBreadcrumbs(cityName)
+  ]})
+}
+
+const enrich=async()=>{
+  if(robots.startsWith('noindex'))return
+  if(parts[1]==='empresa'){
+    await enrichBusinessMetadata()
+    return
+  }
+  await enrichCityMetadata()
+}
+void enrich()
