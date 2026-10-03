@@ -10,7 +10,7 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8')
 test('SEO público mantém metadados base e enriquecimento de empresas',()=>{
  const seo=read('src/seo-runtime.js')
  assert.match(seo,/noindex,nofollow,noarchive/)
- assert.match(seo,/rel="canonical"|link[rel=/)
+ assert.match(seo,/canonical/)
  assert.match(seo,/application\/ld\+json/)
  assert.match(seo,/'@type':'LocalBusiness'/)
  assert.match(seo,/'@type':'BreadcrumbList'/)
