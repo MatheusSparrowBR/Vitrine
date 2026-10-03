@@ -24,7 +24,9 @@ test('robots e sitemap apontam para o catálogo público',()=>{
  assert.match(robots,/Disallow: \/usuario/)
  assert.match(robots,/Sitemap: https:\/\/vitrinelocal\.net\/sitemap\.xml/)
  assert.match(sitemap,/lastmod/)
- assert.match(sitemap,/public_business_directory\?select=slug,city_id,updated_at/)
+ assert.match(sitemap,/public_business_directory\?select=slug,city_id,updated_at,category_slug/)
+ assert.match(sitemap,/categories\?select=slug&active=eq.true/)
+ assert.match(sitemap,/empresas\?categoria=/)
 })
 
 
@@ -81,4 +83,21 @@ test('Catálogo público apresenta contexto textual específico quando uma categ
  assert.match(app,/selectedCategory/)
  assert.match(app,/catalogHeading/)
  assert.match(app,/CATEGORIA LOCAL/)
+})
+
+
+test('página pública da cidade contém conteúdo local específico e links de descoberta',()=>{
+ const app=read('src/CityHomePage.jsx')
+ assert.match(app,/GUIA LOCAL/)
+ assert.match(app,/localCategoryNames/)
+ assert.match(app,/lvp-local-guide/)
+ assert.match(app,/Explorar empresas em/)
+})
+
+test('sitemap avançado inclui apenas categorias ativas presentes em empresas públicas',()=>{
+ const sitemap=read('scripts/generate-sitemap.mjs')
+ assert.match(sitemap,/activeCategorySlugs/)
+ assert.match(sitemap,/categoryLastmod/)
+ assert.match(sitemap,/business\.category_slug/)
+ assert.match(sitemap,/daily','0\.85'/)
 })
