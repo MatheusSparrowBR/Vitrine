@@ -5,4 +5,7 @@ Disallow: /admin
 Disallow: /conta
 Disallow: /login
 Disallow: /atualizar-senha
+Disallow: /usuario
 Disallow: /api/
+
+Sitemap: https://vitrinelocal.net/sitemap.xml
