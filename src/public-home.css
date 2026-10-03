@@ -352,3 +352,88 @@
     transform:none!important;
   }
 }
+
+
+/* Phase 3 — local guide: keep the new SEO content visually consistent with the public home. */
+.lvp-local-guide{
+  padding-top:58px!important;
+  padding-bottom:58px!important;
+}
+.lvp-local-guide .lvp-section-head{
+  margin-bottom:18px;
+}
+.lvp-local-guide-copy{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  padding:24px 26px;
+  border:1px solid var(--lvp-line);
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 10px 26px rgba(16,48,81,.045);
+}
+.lvp-local-guide-copy p{
+  margin:0;
+  color:var(--lvp-muted);
+  font-size:12px;
+  line-height:1.7;
+}
+.lvp-local-guide-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:14px;
+}
+.lvp-local-guide-links a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:42px;
+  padding:0 14px;
+  border:1px solid #d8e4ef;
+  border-radius:12px;
+  background:#fff;
+  color:var(--lvp-blue);
+  font-size:10px;
+  font-weight:900;
+  box-shadow:0 6px 16px rgba(16,48,81,.035);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+.lvp-local-guide-links a:hover{
+  transform:translateY(-2px);
+  border-color:#bfd4ec;
+  background:#f7fbff;
+  box-shadow:0 12px 22px rgba(16,48,81,.07);
+}
+@media(max-width:760px){
+  .lvp-local-guide{
+    padding-top:28px!important;
+    padding-bottom:30px!important;
+  }
+  .lvp-local-guide .lvp-section-head{
+    margin-bottom:12px;
+  }
+  .lvp-local-guide-copy{
+    grid-template-columns:1fr;
+    gap:11px;
+    padding:16px;
+    border-radius:17px;
+  }
+  .lvp-local-guide-copy p{
+    font-size:10px;
+    line-height:1.55;
+  }
+  .lvp-local-guide-links{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+    margin-top:10px;
+  }
+  .lvp-local-guide-links a{
+    width:100%;
+    min-height:40px;
+    box-sizing:border-box;
+    font-size:10px;
+  }
+}
