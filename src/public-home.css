@@ -200,6 +200,8 @@
 .lvp-mobile-bottom-nav{display:none}
 @media(max-width:760px){
   .lvp-page{padding-bottom:76px}
+  .lvp-page main>.lvp-local-guide{order:8}
+  .lvp-page main>.lvp-business-cta-section{order:9}
   .lvp-page main{display:flex;flex-direction:column}
   .lvp-page main>.lvp-hero{order:1}
   .lvp-page main>.lvp-needs{order:2}
