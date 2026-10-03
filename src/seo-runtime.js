@@ -48,7 +48,7 @@ const setJsonLd=(id,payload)=>{
   el.textContent=JSON.stringify(payload)
 }
 
-const path=location.pathname.replace(/\\/+$/,'')||'/'
+const path=location.pathname.replace(/\/+$/,'')||'/'
 const parts=path.split('/').filter(Boolean).map(value=>{
   try{return decodeURIComponent(value)}catch{return value}
 })
