@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react'
+import React,{useEffect,useRef,useState} from 'react'
 import './company-profile-test.css'
 
 const b={
@@ -50,6 +50,7 @@ const Stars=()=> <span className="cpl-stars">{[0,1,2,3,4].map(i=><I key={i} n="s
 
 export default function CompanyProfileTestPage(){
  const[saved,setSaved]=useState(false),[gallery,setGallery]=useState(false),[photo,setPhoto]=useState(0)
+ const touchStartX=useRef(null)
  useEffect(()=>{
   const title=document.title
   const canonical=document.querySelector('link[rel="canonical"]')
@@ -62,6 +63,18 @@ export default function CompanyProfileTestPage(){
   robots.setAttribute('content','noindex,nofollow,noarchive')
   return()=>{document.title=title;if(canonical){if(previousCanonical)canonical.setAttribute('href',previousCanonical);else canonical.removeAttribute('href')}if(robots){if(created)robots.remove();else if(previousRobots)robots.setAttribute('content',previousRobots)}}
  },[])
+ useEffect(()=>{
+  if(!gallery)return
+  const previousOverflow=document.body.style.overflow
+  const onKeyDown=e=>{
+   if(e.key==='Escape')setGallery(false)
+   if(e.key==='ArrowLeft')setPhoto(i=>(i-1+b.photos.length)%b.photos.length)
+   if(e.key==='ArrowRight')setPhoto(i=>(i+1)%b.photos.length)
+  }
+  document.addEventListener('keydown',onKeyDown)
+  document.body.style.overflow='hidden'
+  return()=>{document.removeEventListener('keydown',onKeyDown);document.body.style.overflow=previousOverflow}
+ },[gallery])
  const wa='https://wa.me/5548999999999?text='+encodeURIComponent('Olá! Encontrei o '+b.name+' na VitrineLocal e gostaria de saber mais.')
  const share=async()=>{
   try{
@@ -155,6 +168,6 @@ export default function CompanyProfileTestPage(){
 
   <nav className="cpl-bottom" aria-label="Ações rápidas"><a href="#topo"><I n="grid" s={17}/><span>Perfil</span></a><button className={saved?'active':''} onClick={()=>setSaved(v=>!v)}><I n="heart" s={17} fill={saved}/><span>{saved?'Salvo':'Salvar'}</span></button><a className="wa" href={wa}><I n="phone" s={17}/><span>WhatsApp</span></a><a href="https://www.google.com/maps/search/?api=1&query=Rua+Gustavo+Richard+245+Laguna+SC"><I n="pin" s={17}/><span>Mapa</span></a></nav>
 
-  {gallery&&<div className="cpl-modal" role="dialog" aria-modal="true" onClick={()=>setGallery(false)}><button type="button" aria-label="Fechar" onClick={()=>setGallery(false)}>×</button><img src={b.photos[photo]} alt="" onClick={e=>e.stopPropagation()}/><button className="prev" type="button" aria-label="Foto anterior" onClick={e=>{e.stopPropagation();setPhoto(i=>(i-1+b.photos.length)%b.photos.length)}}>‹</button><button className="next" type="button" aria-label="Próxima foto" onClick={e=>{e.stopPropagation();setPhoto(i=>(i+1)%b.photos.length)}}>›</button></div>}
+  {gallery&&<div className="cpl-modal" role="dialog" aria-modal="true" aria-label="Galeria de fotos de Bistrô Laguna" onClick={()=>setGallery(false)} onTouchStart={e=>{touchStartX.current=e.changedTouches[0].clientX}} onTouchEnd={e=>{if(touchStartX.current===null)return;const delta=touchStartX.current-e.changedTouches[0].clientX;if(Math.abs(delta)>50)setPhoto(i=>(i+(delta>0?1:-1)+b.photos.length)%b.photos.length);touchStartX.current=null}}><div className="cpl-modal-top"><span>{photo+1} / {b.photos.length}</span><button type="button" aria-label="Fechar galeria" onClick={()=>setGallery(false)}>×</button></div><div className="cpl-modal-stage"><button className="prev" type="button" aria-label="Foto anterior" onClick={e=>{e.stopPropagation();setPhoto(i=>(i-1+b.photos.length)%b.photos.length)}}>‹</button><img src={b.photos[photo]} alt={'Foto ampliada de '+b.name} onClick={e=>e.stopPropagation()}/><button className="next" type="button" aria-label="Próxima foto" onClick={e=>{e.stopPropagation();setPhoto(i=>(i+1)%b.photos.length)}}>›</button></div><p className="cpl-modal-hint"><span>Deslize para navegar</span><span>← → para navegar · ESC para fechar</span></p></div>}
  </div>
 }
