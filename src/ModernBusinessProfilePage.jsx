@@ -43,14 +43,14 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
  const hours=useMemo(()=>business?formatHours(business.opening_hours):[],[business])
  const toggleBusinessNotifications=async()=>{if(businessNotificationLoading||!business)return;if(!db)return;setBusinessNotificationLoading(true);setBusinessNotificationMessage('');try{const{data:{user}}=await db.auth.getUser();if(!user){setBusinessNotificationMessage('Entre na sua conta para ativar as notificações desta empresa.');return}if(businessNotifications){const{error:removeError}=await db.from('business_notification_subscriptions').update({enabled:false}).eq('user_id',user.id).eq('business_id',business.id);if(removeError)throw removeError;setBusinessNotifications(false);setBusinessNotificationMessage('Notificações desta empresa desativadas.');return}if(!isPushSupported()){setBusinessNotificationMessage('Seu navegador não oferece notificações Push.');return}if(Notification.permission==='denied'){setBusinessNotificationMessage('As notificações estão bloqueadas no navegador. Libere a permissão nas configurações do navegador.');return}if(Notification.permission!=='granted'){const permission=await Notification.requestPermission();if(permission!=='granted'){setBusinessNotificationMessage('Permissão para notificações não concedida.');return}}let subscription=await navigator.serviceWorker.ready.then(reg=>reg.pushManager.getSubscription());if(!subscription)subscription=await createPushSubscription();if(!subscription)throw new Error('Não foi possível ativar as notificações neste dispositivo.');await syncPushSubscription(user.id);const{error:upsertError}=await db.from('business_notification_subscriptions').upsert({user_id:user.id,business_id:business.id,enabled:true},{onConflict:'user_id,business_id'});if(upsertError)throw upsertError;setBusinessNotifications(true);setBusinessNotificationMessage('Pronto! Você receberá notificações desta empresa.')}catch(err){setBusinessNotificationMessage(err?.message||'Não foi possível ativar as notificações.')}finally{setBusinessNotificationLoading(false)}}
  const status=useMemo(()=>business?getOpenStatus(business.opening_hours):{open:false,label:'Horário',detail:'Consulte os horários'},[business])
- const mapsUrl=business?.address?\`https://www.google.com/maps/search/?api=1&query=\${encodeURIComponent(business.address)}\`:''
- const returnUrl=useMemo(()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(\`/\${citySlug}/empresas\`)?stored:\`/\${citySlug}/empresas\`}catch{return\`/\${citySlug}/empresas\`}},[citySlug])
- const profileLocation=business?(business.neighborhood?\`\${business.neighborhood}, \${city?.name} - \${city?.state||'SC'}\`:business.address||\`\${city?.name} - \${city?.state||'SC'}\`):''
+ const mapsUrl=business?.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`:''
+ const returnUrl=useMemo(()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${citySlug}/empresas`)?stored:`/${citySlug}/empresas`}catch{return`/${citySlug}/empresas`}},[citySlug])
+ const profileLocation=business?(business.neighborhood?`${business.neighborhood}, ${city?.name} - ${city?.state||'SC'}`:business.address||`${city?.name} - ${city?.state||'SC'}`):''
  const wa=business?.whatsapp||business?.phone
- const waUrl=business?.whatsapp?\`https://wa.me/\${phoneDigits(business.whatsapp)}\`:(business?.phone?\`tel:\${phoneDigits(business.phone)}\`:'')
+ const waUrl=business?.whatsapp?`https://wa.me/${phoneDigits(business.whatsapp)}`:(business?.phone?`tel:${phoneDigits(business.phone)}`:'')
  const contactLabel=business?.whatsapp?'Falar no WhatsApp':business?.phone?'Entrar em contato':'Contato indisponível'
  const services=[business?.has_dine_in&&'Consumo no local',business?.has_delivery&&'Delivery',business?.has_pickup&&'Retirada no local'].filter(Boolean)
- const share=async()=>{const data={title:business?.name||'VitrineLocal',text:\`Confira \${business?.name||'esta empresa'} no VitrineLocal.\`,url:window.location.href};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard)await navigator.clipboard.writeText(data.url)}catch{}}
+ const share=async()=>{const data={title:business?.name||'VitrineLocal',text:`Confira ${business?.name||'esta empresa'} no VitrineLocal.`,url:window.location.href};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard)await navigator.clipboard.writeText(data.url)}catch{}}
  if(loading)return <main className="mbp-shell"><div className="mbp-loading">Carregando empresa…</div></main>
  if(error||!business||!city)return <main className="mbp-shell"><div className="mbp-error"><h1>{error||'Empresa não encontrada.'}</h1><a href={returnUrl}>Voltar para o catálogo</a></div></main>
  return <div className="mbp-shell">
@@ -61,7 +61,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <header className="mbp-profile-head">
      <div>
       <div className="mbp-name-row"><h1>{business.name}</h1>{business.verified&&<span className="mbp-verified"><Icon name="check" size={11}/> Verificada</span>}</div>
-      <p><strong>{business.categories?.name||'Empresa'}</strong><span>·</span><span>{business.neighborhood?\`\${business.neighborhood}, \${city.name} - \${city.state||'SC'}\`:city.name+' - '+(city.state||'SC')}</span></p>
+      <p><strong>{business.categories?.name||'Empresa'}</strong><span>·</span><span>{business.neighborhood?`${business.neighborhood}, ${city.name} - ${city.state||'SC'}`:city.name+' - '+(city.state||'SC')}</span></p>
      </div>
      <span className={status.open?'mbp-status-pill':'mbp-status-pill is-closed'}><i/>{status.label} · {status.detail}</span>
     </header>
@@ -69,14 +69,14 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <Gallery business={business} photos={photos}/>
 
     <div className="mbp-identity">
-     <div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt={\`\${business.name} logo\`}/>:<span>V</span>}</div>
+     <div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt={`${business.name} logo`}/>:<span>V</span>}</div>
      <div className="mbp-identity-copy">
       <span className="mbp-kicker">EMPRESA LOCAL</span>
       <p className="mbp-identity-description">{business.short_description||business.description||'Conheça esta empresa local.'}</p>
-      <div className="mbp-rating-line" aria-label={rating.count?\`\${rating.avg.toFixed(1)} de 5, \${rating.count} avaliações\`:'Ainda sem avaliações'}>
+      <div className="mbp-rating-line" aria-label={rating.count?`${rating.avg.toFixed(1)} de 5, ${rating.count} avaliações`:'Ainda sem avaliações'}>
        <span className="mbp-rating-stars">{Array.from({length:5},(_,i)=><Icon key={i} name="star" size={13} filled={Boolean(rating.count&&i<Math.round(rating.avg))}/>)}</span>
        <strong>{rating.count?rating.avg.toFixed(1):'—'}</strong>
-       <span>{rating.count?\`\${rating.count} \${rating.count===1?'avaliação':'avaliações'}\`:'Ainda sem avaliações'}</span>
+       <span>{rating.count?`${rating.count} ${rating.count===1?'avaliação':'avaliações'}`:'Ainda sem avaliações'}</span>
       </div>
       <div className="mbp-badges mbp-identity-badges mbp-tags">{services.length?services.map(x=><span className="mbp-service-badge" key={x}>{x}</span>):<span>{business.categories?.name||'Empresa'}</span>}</div>
      </div>
@@ -134,7 +134,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
       <h3>Resolva a dúvida antes de sair da página.</h3>
       <p>Confirme horário, disponibilidade, entrega ou peça informações diretamente pelo contato da empresa.</p>
       {waUrl&&<a className="mbp-side-wa" data-track="whatsapp" href={waUrl} target={business.whatsapp?'_blank':undefined} rel={business.whatsapp?'noreferrer':undefined}><Icon name="phone" size={15}/> {business.whatsapp?'Pedir pelo WhatsApp':'Ligar para a empresa'}</a>}
-      {business.phone&&<a className="mbp-side-phone" href={\`tel:\${phoneDigits(business.phone)}\`}><Icon name="phone" size={13}/> {business.phone}</a>}
+      {business.phone&&<a className="mbp-side-phone" href={`tel:${phoneDigits(business.phone)}`}><Icon name="phone" size={13}/> {business.phone}</a>}
      </div>
 
      <div className="mbp-side">
@@ -146,7 +146,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      <div className="mbp-side mbp-reputation-card">
       <small>REPUTAÇÃO</small>
       <div className="mbp-reputation-row"><strong>{rating.count?rating.avg.toFixed(1):'0.0'}</strong><span>{Array.from({length:5},(_,i)=><Icon key={i} name="star" size={13} filled/>)}</span></div>
-      <p>{rating.count?\`\${rating.count} \${rating.count===1?'avaliação publicada':'avaliações publicadas'}\`:'Ainda não há avaliações publicadas.'}</p>
+      <p>{rating.count?`${rating.count} ${rating.count===1?'avaliação publicada':'avaliações publicadas'}`:'Ainda não há avaliações publicadas.'}</p>
      </div>
     </aside>
    </div>
