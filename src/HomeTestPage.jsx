@@ -89,7 +89,7 @@ export default function HomeTestPage(){
  const clear=()=>{setQuery('');setLocation('');setSubmittedSearch('');setSubmittedLocation('');setActiveFilter('all')}
 
  return <div className="home-lab-page">
-  <div className="home-lab-labbar"><div className="home-lab-container home-lab-labbar-inner"><span className="home-lab-labtag">HOME LAB</span><strong>Protótipo isolado de Design & UX</strong><span className="home-lab-labnote">Dados simulados · sem banco de dados · sem alterações na Home oficial</span><a href="/laguna">← Home oficial</a></div></div>
+  <div className="home-lab-labbar"><div className="home-lab-container home-lab-labbar-inner"><span className="home-lab-labtag">HOME LAB</span><strong>Protótipo isolado de Design & UX</strong><span className="home-lab-labnote">Dados simulados · sem banco de dados · sem alterações na Home oficial</span><a href="/">← Home oficial</a></div></div>
   <header className="home-lab-header"><div className="home-lab-container home-lab-header-inner">
    <HomeLabLogo/>
    <div className="home-lab-city-switcher"><span className="home-lab-location-icon"><Icon name="map" size={16}/></span><select value={citySlug} onChange={e=>setCitySlug(e.target.value)} aria-label="Cidade"><option value="laguna">Laguna - SC</option><option value="tubarao">Tubarão - SC</option></select></div>
@@ -124,6 +124,6 @@ export default function HomeTestPage(){
    <section id="anunciar" className="home-lab-merchant-cta"><div className="home-lab-container home-lab-merchant-inner"><div><span className="home-lab-section-kicker">PARA COMERCIANTES</span><h2>Quer colocar sua empresa diante de quem já está procurando?</h2><p>Cadastre o negócio, destaque serviços e transforme busca local em contato.</p></div><a href="/usuario/cadastro" className="home-lab-primary-button">Cadastrar empresa <Icon name="arrow" size={15}/></a></div></section>
   </main>
   <nav className="home-lab-bottom-nav"><a href="#" className={mobileNav==='home'?'active':''} onClick={()=>setMobileNav('home')}><Icon name="home"/><span>Início</span></a><a href="#categorias" className={mobileNav==='explore'?'active':''} onClick={()=>setMobileNav('explore')}><Icon name="compass"/><span>Explorar</span></a><a href="#salvos" className={mobileNav==='saved'?'active':''} onClick={()=>setMobileNav('saved')}><Icon name="heart"/><span>Salvos</span></a><a href="#anunciar" className={mobileNav==='announce'?'active':''} onClick={()=>setMobileNav('announce')}><Icon name="sparkle"/><span>Anunciar</span></a></nav>
-  <footer className="home-lab-footer"><div className="home-lab-container home-lab-footer-inner"><HomeLabLogo/><span>Home Lab · Dados simulados · Nenhum acesso ao banco nesta página</span><a href="/laguna">Ir para a Home oficial</a></div></footer>
+  <footer className="home-lab-footer"><div className="home-lab-container home-lab-footer-inner"><HomeLabLogo/><span>Home Lab · Dados simulados · Nenhum acesso ao banco nesta página</span><a href="/">Ir para a Home oficial</a></div></footer>
  </div>
 }
