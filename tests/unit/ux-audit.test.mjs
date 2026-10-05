@@ -102,3 +102,13 @@ test('Home Lab usa hero compacto e navegação mobile app-like',()=>{
  assert.match(css,/safe-area-inset-bottom/)
  assert.match(css,/@media\(max-width:767px\)/)
 })
+
+test('Home Lab usa grade minimalista de categorias',()=>{
+ const page=read('src/HomeTestPage.jsx'),css=read('src/home-test.css')
+ assert.match(page,/Categorias Principais/)
+ assert.match(page,/Ver todas \(22\)/)
+ assert.match(page,/city\.categories\.slice\(0,8\)/)
+ assert.match(css,/grid-template-columns:repeat\(8,minmax\(0,1fr\)\)/)
+ assert.match(css,/scroll-snap-type:x mandatory/)
+ assert.match(css,/min-width:84px/)
+})
