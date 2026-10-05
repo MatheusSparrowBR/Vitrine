@@ -143,3 +143,12 @@ test('Perfil Lab usa galeria compacta e conversão prioritária',()=>{
  assert.ok(css.includes('safe-area-inset-bottom'))
  assert.doesNotMatch(css,/linear-gradient\(/)
 })
+
+
+test('Perfil Lab usa a paleta cromática oficial',()=>{
+ const css=read('src/company-profile-test.css')
+ assert.match(css,/--cpl-primary:#082b52;--cpl-brand:#216df3/)
+ assert.match(css,/#f6f8fc/)
+ assert.match(css,/#216df3/)
+ assert.match(css,/#71859b/)
+})
