@@ -118,7 +118,7 @@ test('Perfil da Empresa Lab é isolado e não toca no banco',()=>{
  const app=read('src/app-entry.jsx')
  const page=read('src/CompanyProfileTestPage.jsx')
  const css=read('src/company-profile-test.css')
- assert.match(app,/path==='\\/perfil-teste'/)
+ assert.ok(app.includes("path==='/perfil-teste'"))
  assert.match(app,/isProfileLab/)
  assert.match(page,/noindex,nofollow,noarchive/)
  assert.match(page,/Dados simulados/)
