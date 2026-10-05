@@ -80,7 +80,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
       </div>
       <div className="mbp-badges mbp-identity-badges mbp-tags">{services.length?services.map(x=><span className="mbp-service-badge" key={x}>{x}</span>):<span>{business.categories?.name||'Empresa'}</span>}</div>
      </div>
-     <div className="mbp-identity-actions mbp-profile-shortcuts">
+     <div className="mbp-profile-shortcuts">
       <BusinessPersonalActions businessId={business.id}/>
       <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
      </div>
@@ -106,8 +106,8 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
    <div className="mbp-layout">
     <div className="mbp-main-column">
      <section className="mbp-panel" id="sobre">
-      <div className="mbp-title"><span>SOBRE O ESTABELECIMENTO</span><h2>Informações essenciais</h2></div>
-      <p className="mbp-about-description mbp-about-text">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
+      <div className="mbp-title"><span>SOBRE O ESTABELECIMENTO</span><h2>Informações essenciaisInformações essenciais</h2></div>
+      <p className="mbp-about-description">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
       <div className="mbp-info-grid">
        <div><span className="mbp-info-icon"><Icon name="pin" size={16}/></span><strong>Localização</strong><small>{business.address||profileLocation||'Laguna - SC'}</small></div>
        <div><span className="mbp-info-icon"><Icon name="clock" size={16}/></span><strong>Funcionamento</strong><small>{status.detail}</small></div>
