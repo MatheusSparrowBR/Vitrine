@@ -41,10 +41,10 @@ const WhatsAppIcon=()=> <svg className="home-lab-icon" width="17" height="17" vi
 
 function HomeLabLogo(){return <a href="/home-teste" className="home-lab-logo" aria-label="VitrineLocal Home Lab"><span className="home-lab-mark">V</span><span className="home-lab-wordmark">VitrineLocal</span><small>LAB</small></a>}
 
-function BusinessCard({item}){
+function BusinessCard({item,animationKey}){
  const [name,category,label,neighborhood,rating,status,statusLabel,description,whatsapp,delivery,image]=item
  const message=encodeURIComponent('Olá! Encontrei '+name+' na VitrineLocal e gostaria de saber mais.')
- return <article className="home-lab-business-card">
+ return <article key={animationKey} className="home-lab-business-card home-lab-card-enter">
   <div className="home-lab-image-wrap">
    <img src={image} alt={name} loading="lazy" decoding="async"/>
    <span className="home-lab-photo-badge">{label}</span>
@@ -62,6 +62,7 @@ function BusinessCard({item}){
 
 export default function HomeTestPage(){
  const [citySlug,setCitySlug]=useState('laguna'),[query,setQuery]=useState(''),[location,setLocation]=useState(''),[submittedSearch,setSubmittedSearch]=useState(''),[submittedLocation,setSubmittedLocation]=useState(''),[activeFilter,setActiveFilter]=useState('all'),[mobileNav,setMobileNav]=useState('home')
+ const resultsKey=[citySlug,submittedSearch,submittedLocation,activeFilter].join('|')
  const city=cityData[citySlug]
  useEffect(()=>{
   const previousTitle=document.title
@@ -129,8 +130,8 @@ export default function HomeTestPage(){
 
    <section id="categorias" className="home-lab-categories-section"><div className="home-lab-container"><div className="home-lab-category-head"><h2>Categorias Principais</h2><a href="#categorias">Ver todas (22) <span aria-hidden="true">→</span></a></div><div className="home-lab-category-scroller">{city.categories.slice(0,8).map(c=><button type="button" className="home-lab-category-card" key={c[0]} onClick={()=>categorySearch(c[1])} aria-label={'Explorar categoria '+c[1]}><span className="home-lab-category-icon"><Icon name={c[3]} size={20}/></span><strong>{c[1]}</strong><small>{c[2]}</small></button>)}</div></div></section>
 
-   <section id="empresas" className="home-lab-section"><div className="home-lab-container"><div className="home-lab-results-head"><div><span className="home-lab-section-kicker">NEGÓCIOS LOCAIS</span><h2>Empresas em destaque</h2><p>{filteredBusinesses.length?'Resultados simulados para testar descoberta, confiança e conversão em '+city.name+'.':'Tente outra busca ou remova um filtro para continuar explorando.'}</p></div><span className="home-lab-results-context"><Icon name="map" size={15}/>{city.name} - {city.state}</span></div>
-    {filteredBusinesses.length?<div className="home-lab-business-grid">{filteredBusinesses.map((item,i)=><React.Fragment key={item[0]}><BusinessCard item={item}/>{i===7&&filteredBusinesses.length>8?<aside className="home-lab-b2b-banner"><div className="home-lab-b2b-icon"><Icon name="sparkle" size={20}/></div><div><span>PARA EMPRESAS</span><strong>Possui um negócio em {city.name}?</strong><p>Apareça para quem busca seus produtos e serviços hoje.</p></div><a href="#anunciar">Cadastrar empresa <Icon name="arrow" size={14}/></a></aside>:null}</React.Fragment>)}</div>:<div className="home-lab-empty-state"><strong>Nenhum resultado nesta simulação.</strong><span>Experimente outra busca, bairro ou filtro.</span><button type="button" onClick={clear}>Limpar filtros</button></div>}
+   <section id="empresas" className="home-lab-section"><div className="home-lab-container"><div className="home-lab-results-head"><div><span className="home-lab-section-kicker">NEGÓCIOS LOCAIS</span><h2>Empresas em destaque</h2><p>{filteredBusinesses.length?'Resultados simulados para testar descoberta, confiança e conversão em '+city.name+'.':'Tente outra busca ou remova um filtro para continuar explorando.'}</p></div><div className="home-lab-results-context-wrap"><span className="home-lab-results-counter" aria-live="polite">{filteredBusinesses.length} {filteredBusinesses.length===1?'estabelecimento encontrado':'estabelecimentos encontrados'}</span><span className="home-lab-results-context"><Icon name="map" size={15}/>{city.name} - {city.state}</span></div></div>
+    {filteredBusinesses.length?<div className="home-lab-business-grid">{filteredBusinesses.map((item,i)=><React.Fragment key={item[0]+'-'+resultsKey}><BusinessCard item={item} animationKey={item[0]+'-'+resultsKey}/>{i===7&&filteredBusinesses.length>8?<aside className="home-lab-b2b-banner"><div className="home-lab-b2b-icon"><Icon name="sparkle" size={20}/></div><div><span>PARA EMPRESAS</span><strong>Possui um negócio em {city.name}?</strong><p>Apareça para quem busca seus produtos e serviços hoje.</p></div><a href="#anunciar">Cadastrar empresa <Icon name="arrow" size={14}/></a></aside>:null}</React.Fragment>)}</div>:<div className="home-lab-empty-state"><strong>Nenhum resultado nesta simulação.</strong><span>Experimente outra busca, bairro ou filtro.</span><button type="button" onClick={clear}>Limpar filtros</button></div>}
    </div></section>
 
    <section id="descobertas" className="home-lab-section home-lab-discovery-section"><div className="home-lab-container"><div className="home-lab-section-head"><span className="home-lab-section-kicker">DESCOBRIR</span><h2>Mais motivos para abrir o VitrineLocal</h2><p>Áreas de conteúdo pensadas para recorrência, utilidade e intenção local.</p></div><div className="home-lab-discovery-grid">
@@ -149,6 +150,10 @@ export default function HomeTestPage(){
   <a href="#anunciar" className={mobileNav==='announce'?'active':''} onClick={()=>setMobileNav('announce')}><Icon name="sparkle"/><span>Anunciar</span></a>
  </div>
 </nav>
+  <aside className="home-lab-floating-wa" aria-label="Atendimento rápido">
+   <div className="home-lab-floating-wa-label"><span className="home-lab-floating-wa-dot"/>Dúvidas locais? Fale conosco</div>
+   <a className="home-lab-floating-wa-button" href={'https://wa.me/5548999999999?text='+encodeURIComponent('Olá! Preciso de ajuda para encontrar um serviço no VitrineLocal.')} target="_blank" rel="noreferrer" aria-label="Conversar com o VitrineLocal no WhatsApp"><WhatsAppIcon/></a>
+  </aside>
   <footer className="home-lab-footer"><div className="home-lab-container home-lab-footer-inner"><HomeLabLogo/><span>Home Lab · Dados simulados · Nenhum acesso ao banco nesta página</span><a href="/">Ir para a Home oficial</a></div></footer>
  </div>
 }

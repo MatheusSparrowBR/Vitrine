@@ -171,3 +171,29 @@ test('Perfil Lab usa a paleta cromática oficial',()=>{
  assert.match(css,/#216df3/)
  assert.match(css,/#71859b/)
 })
+
+
+test('Home Lab anima resultados filtrados e informa o contador',()=>{
+ const page=read('src/HomeTestPage.jsx'),css=read('src/home-test.css')
+ assert.match(page,/resultsKey/)
+ assert.match(page,/estabelecimentos encontrados/)
+ assert.match(page,/home-lab-floating-wa/)
+ assert.match(css,/homeLabCardFadeIn/)
+ assert.match(css,/home-lab-card-enter/)
+ assert.match(css,/home-lab-results-counter/)
+ assert.match(css,/bottom:calc\(76px \+ env\(safe-area-inset-bottom\)\)/)
+})
+
+test('Perfil Lab aprimora o lightbox existente sem criar uma segunda galeria',()=>{
+ const page=read('src/CompanyProfileTestPage.jsx'),css=read('src/company-profile-test.css')
+ assert.match(page,/useRef/)
+ assert.match(page,/ArrowLeft/)
+ assert.match(page,/ArrowRight/)
+ assert.match(page,/Escape/)
+ assert.match(page,/changedTouches/)
+ assert.match(page,/{photo\+1} \/ {b\.photos\.length}/)
+ assert.match(page,/Deslize para navegar/)
+ assert.match(css,/cpl-modal-top/)
+ assert.match(css,/cpl-modal-hint/)
+ assert.match(css,/cpl-modal-stage/)
+})
