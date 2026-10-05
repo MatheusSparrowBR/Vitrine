@@ -1,4 +1,4 @@
-.mbp-identity-actions.mbp-profile-shortcuts{display:flex;grid-template-columns:none;gap:7px}
+.mbp-profile-shortcuts{display:flex;grid-template-columns:none;gap:7px;align-items:flex-start}
 .mbp-legacy-compat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 :root{
   --mbp-lab-bg:#f6f8fc;
