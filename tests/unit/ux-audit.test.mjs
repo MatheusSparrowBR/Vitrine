@@ -143,3 +143,22 @@ test('Perfil Lab usa galeria compacta e conversão prioritária',()=>{
  assert.ok(css.includes('safe-area-inset-bottom'))
  assert.doesNotMatch(css,/linear-gradient\(/)
 })
+
+
+test('Home Lab mantém navegação mobile em quatro colunas sem compressão do container',()=>{
+ const page=read('src/HomeTestPage.jsx'),css=read('src/home-test.css')
+ assert.match(page,/home-lab-bottom-nav-inner/)
+ assert.match(css,/\.home-lab-bottom-nav-inner\{width:100%;height:64px;display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)/)
+ assert.match(css,/\.home-lab-bottom-nav\{position:fixed;[^}]*display:block/)
+ assert.match(css,/\.home-lab-bottom-nav a\{[^}]*min-width:0/)
+ assert.match(css,/font-size:10px;line-height:1\.15/)
+})
+
+
+test('Home Lab usa a paleta cromática oficial',()=>{
+ const css=read('src/home-test.css')
+ assert.match(css,/--hlab-primary:#082b52;--hlab-brand:#216df3/)
+ assert.match(css,/#f6f8fc/)
+ assert.match(css,/#216df3/)
+ assert.match(css,/#71859b/)
+})
