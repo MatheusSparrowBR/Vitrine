@@ -129,24 +129,10 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     </div>
 
     <aside className="mbp-sidebar">
-     <div className="mbp-side mbp-side-sticky">
-      <small>FALAR COM A EMPRESA</small>
-      <h3>Resolva a dúvida antes de sair da página.</h3>
-      <p>Confirme horário, disponibilidade, entrega ou peça informações diretamente pelo contato da empresa.</p>
-      {waUrl&&<a className="mbp-side-wa" data-track="whatsapp" href={waUrl} target={business.whatsapp?'_blank':undefined} rel={business.whatsapp?'noreferrer':undefined}><Icon name="phone" size={15}/> {business.whatsapp?'Pedir pelo WhatsApp':'Ligar para a empresa'}</a>}
-      {business.phone&&<a className="mbp-side-phone" href={`tel:${phoneDigits(business.phone)}`}><Icon name="phone" size={13}/> {business.phone}</a>}
-     </div>
-
-     <div className="mbp-side">
+     <div className="mbp-side mbp-side-sticky mbp-hours-card-only">
       <div className="mbp-side-title"><small>HORÁRIOS</small><span className={status.open?'open':'closed'}>{status.open?'Aberto agora':'Fechado agora'}</span></div>
       <ul className="mbp-hours">{hours.map(day=><li key={day.key}><strong>{day.label}</strong><span>{day.text}</span></li>)}</ul>
       <small className="mbp-note"><Icon name="clock" size={12}/> Horários podem mudar em feriados. Confirme pelo contato da empresa.</small>
-     </div>
-
-     <div className="mbp-side mbp-reputation-card">
-      <small>REPUTAÇÃO</small>
-      <div className="mbp-reputation-row"><strong>{rating.count?rating.avg.toFixed(1):'0.0'}</strong><span>{Array.from({length:5},(_,i)=><Icon key={i} name="star" size={13} filled/>)}</span></div>
-      <p>{rating.count?`${rating.count} ${rating.count===1?'avaliação publicada':'avaliações publicadas'}`:'Ainda não há avaliações publicadas.'}</p>
      </div>
     </aside>
    </div>
