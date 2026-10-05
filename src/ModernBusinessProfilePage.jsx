@@ -106,7 +106,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
    <div className="mbp-layout">
     <div className="mbp-main-column">
      <section className="mbp-panel" id="sobre">
-      <div className="mbp-title"><span>SOBRE O ESTABELECIMENTO</span><h2>Informações essenciaisInformações essenciais</h2></div>
+      <div className="mbp-title"><span>SOBRE O ESTABELECIMENTO</span><h2>Informações essenciais</h2></div>
       <p className="mbp-about-description">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
       <div className="mbp-info-grid">
        <div><span className="mbp-info-icon"><Icon name="pin" size={16}/></span><strong>Localização</strong><small>{business.address||profileLocation||'Laguna - SC'}</small></div>
