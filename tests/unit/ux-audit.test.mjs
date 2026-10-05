@@ -85,3 +85,20 @@ test('Home Lab é isolada da Home oficial e não deve ser indexada',()=>{
  assert.doesNotMatch(css,/linear-gradient\(/)
  assert.doesNotMatch(css,/backdrop-filter/)
 })
+
+
+test('Home Lab usa hero compacto e navegação mobile app-like',()=>{
+ const page=read('src/HomeTestPage.jsx')
+ const css=read('src/home-test.css')
+ assert.match(page,/GUIA COMERCIAL REGIONAL/)
+ assert.match(page,/Comércios e serviços locais/)
+ assert.match(page,/O que procura\?/)
+ assert.match(page,/Bairro \/ Região/)
+ assert.match(page,/Gastronomia &amp; Pizzas/)
+ assert.match(page,/Pousadas &amp; Hotéis/)
+ assert.match(page,/Navegação móvel/)
+ assert.match(page,/Categorias/)
+ assert.match(css,/home-lab-bottom-nav/)
+ assert.match(css,/safe-area-inset-bottom/)
+ assert.match(css,/@media\(max-width:767px\)/)
+})

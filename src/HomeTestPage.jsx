@@ -85,26 +85,44 @@ export default function HomeTestPage(){
  const search=e=>{e.preventDefault();setSubmittedSearch(query);setSubmittedLocation(location)}
  const categorySearch=name=>{setQuery(name);setSubmittedSearch(name);setSubmittedLocation('')}
  const quickSearch=name=>{setQuery(name);setSubmittedSearch(name);setSubmittedLocation('')}
+ const quickAction=action=>{
+  if(action==='open'||action==='whatsapp'){setActiveFilter(action);setSubmittedSearch('');setSubmittedLocation('');return}
+  if(action==='food'){quickSearch('Alimentação');return}
+  if(action==='hotel'){quickSearch('Hospedagem')}
+ }
  const filter=id=>setActiveFilter(activeFilter===id?'all':id)
  const clear=()=>{setQuery('');setLocation('');setSubmittedSearch('');setSubmittedLocation('');setActiveFilter('all')}
 
  return <div className="home-lab-page">
-  <div className="home-lab-labbar"><div className="home-lab-container home-lab-labbar-inner"><span className="home-lab-labtag">HOME LAB</span><strong>Protótipo isolado de Design & UX</strong><span className="home-lab-labnote">Dados simulados · sem banco de dados · sem alterações na Home oficial</span><a href="/">← Home oficial</a></div></div>
+  <div id="topo" className="home-lab-labbar"><div className="home-lab-container home-lab-labbar-inner"><span className="home-lab-labtag">HOME LAB</span><strong>Protótipo isolado de Design & UX</strong><span className="home-lab-labnote">Dados simulados · sem banco de dados · sem alterações na Home oficial</span><a href="/">← Home oficial</a></div></div>
   <header className="home-lab-header"><div className="home-lab-container home-lab-header-inner">
    <HomeLabLogo/>
-   <div className="home-lab-city-switcher"><span className="home-lab-location-icon"><Icon name="map" size={16}/></span><select value={citySlug} onChange={e=>setCitySlug(e.target.value)} aria-label="Cidade"><option value="laguna">Laguna - SC</option><option value="tubarao">Tubarão - SC</option></select></div>
    <nav className="home-lab-desktop-nav"><a href="#categorias">Categorias</a><a href="#empresas">Empresas</a><a href="#descobertas">Descobrir</a></nav>
    <div className="home-lab-header-actions"><a href="#anunciar" className="home-lab-outline-button">Cadastrar empresa</a><a href="/usuario/login" className="home-lab-login">Entrar</a></div>
   </div></header>
   <main>
    <section className="home-lab-hero"><div className="home-lab-container home-lab-hero-inner">
-    <div className="home-lab-hero-copy"><span className="home-lab-kicker">CATÁLOGO LOCAL · {city.name.toUpperCase()} - {city.state}</span><h1>Encontre empresas, serviços e lugares em {city.name}.</h1><p>{city.subtitle} Pesquise por atividade e refine por bairro para chegar mais rápido ao que precisa.</p></div>
+    <div className="home-lab-hero-top">
+     <div className="home-lab-hero-copy"><span className="home-lab-kicker"><Icon name="map" size={13}/> GUIA COMERCIAL REGIONAL</span><h1>Comércios e serviços locais</h1></div>
+     <div className="home-lab-city-switcher" aria-label="Selecionar cidade">
+      <button type="button" className={citySlug==='laguna'?'active':''} onClick={()=>setCitySlug('laguna')}><Icon name="map" size={14}/> Laguna - SC</button>
+      <button type="button" className={citySlug==='tubarao'?'active':''} onClick={()=>setCitySlug('tubarao')}>Tubarão - SC</button>
+     </div>
+    </div>
+    <p className="home-lab-hero-subtitle">Encontre empresas, serviços, lugares e ofertas em <strong>{city.name}</strong>. Pesquise por atividade e refine por bairro para chegar mais rápido ao que precisa.</p>
     <form className="home-lab-search-shell" onSubmit={search}>
      <label className="home-lab-search-field"><span className="home-lab-search-icon"><Icon name="search"/></span><span><small>O que procura?</small><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="padaria, eletricista, hotel..." aria-label="O que procura"/></span></label>
      <label className="home-lab-search-field"><span className="home-lab-search-icon"><Icon name="map"/></span><span><small>Bairro / Região</small><select value={location} onChange={e=>setLocation(e.target.value)} aria-label="Bairro ou Região"><option value="">Toda a cidade</option>{city.neighborhoods.map(n=><option key={n}>{n}</option>)}</select></span></label>
      <button className="home-lab-search-button" type="submit"><Icon name="search" size={17}/> Buscar</button>
     </form>
-    <div className="home-lab-hero-context"><div><span>Pesquisas rápidas</span><div className="home-lab-quick-links">{['Restaurantes','Hotéis','Farmácias','Oficinas'].map(n=><button key={n} type="button" onClick={()=>quickSearch(n)}>{n}</button>)}</div></div><div className="home-lab-city-note"><Icon name="map" size={16}/><span>Explorando <strong>{city.name}</strong> · {city.neighborhoods.slice(0,3).join(' · ')}</span></div></div>
+    <div className="home-lab-hero-context"><div className="home-lab-quick-wrap"><span>Atalhos:</span><div className="home-lab-quick-links">
+  <button type="button" onClick={()=>quickAction('open')}><i className="home-lab-quick-dot"/>Aberto agora</button>
+  <button type="button" onClick={()=>quickAction('whatsapp')}><Icon name="message" size={13}/>WhatsApp Direto</button>
+  <button type="button" onClick={()=>quickAction('food')}>Gastronomia &amp; Pizzas</button>
+  <button type="button" onClick={()=>quickAction('hotel')}>Pousadas &amp; Hotéis</button>
+ </div></div>
+ <div className="home-lab-city-note"><Icon name="map" size={16}/><span>Explorando <strong>{city.name}</strong> · {city.neighborhoods.slice(0,3).join(' · ')}</span></div>
+</div>
    </div></section>
 
    <section className="home-lab-filter-strip"><div className="home-lab-container home-lab-filter-inner"><span className="home-lab-filter-label">Filtrar</span>{[['open','Aberto agora','check'],['whatsapp','Com WhatsApp','message'],['rating','Mais bem avaliados','star'],['delivery','Com Delivery','arrow']].map(f=><button key={f[0]} type="button" className={'home-lab-filter-chip '+(activeFilter===f[0]?'active':'')} onClick={()=>filter(f[0])}><Icon name={f[2]} size={14}/>{f[1]}</button>)}</div></section>
@@ -123,7 +141,14 @@ export default function HomeTestPage(){
 
    <section id="anunciar" className="home-lab-merchant-cta"><div className="home-lab-container home-lab-merchant-inner"><div><span className="home-lab-section-kicker">PARA COMERCIANTES</span><h2>Quer colocar sua empresa diante de quem já está procurando?</h2><p>Cadastre o negócio, destaque serviços e transforme busca local em contato.</p></div><a href="/usuario/cadastro" className="home-lab-primary-button">Cadastrar empresa <Icon name="arrow" size={15}/></a></div></section>
   </main>
-  <nav className="home-lab-bottom-nav"><a href="#" className={mobileNav==='home'?'active':''} onClick={()=>setMobileNav('home')}><Icon name="home"/><span>Início</span></a><a href="#categorias" className={mobileNav==='explore'?'active':''} onClick={()=>setMobileNav('explore')}><Icon name="compass"/><span>Explorar</span></a><a href="#salvos" className={mobileNav==='saved'?'active':''} onClick={()=>setMobileNav('saved')}><Icon name="heart"/><span>Salvos</span></a><a href="#anunciar" className={mobileNav==='announce'?'active':''} onClick={()=>setMobileNav('announce')}><Icon name="sparkle"/><span>Anunciar</span></a></nav>
+  <nav className="home-lab-bottom-nav" aria-label="Navegação móvel">
+ <div className="home-lab-bottom-nav-inner">
+  <a href="#topo" className={mobileNav==='home'?'active':''} onClick={()=>setMobileNav('home')} aria-current={mobileNav==='home'?'page':undefined}><Icon name="home"/><span>Início</span></a>
+  <a href="#categorias" className={mobileNav==='explore'?'active':''} onClick={()=>setMobileNav('explore')}><Icon name="compass"/><span>Categorias</span></a>
+  <a href="#empresas" className={mobileNav==='saved'?'active':''} onClick={()=>setMobileNav('saved')}><Icon name="heart"/><span>Salvos</span></a>
+  <a href="#anunciar" className={mobileNav==='announce'?'active':''} onClick={()=>setMobileNav('announce')}><Icon name="sparkle"/><span>Anunciar</span></a>
+ </div>
+</nav>
   <footer className="home-lab-footer"><div className="home-lab-container home-lab-footer-inner"><HomeLabLogo/><span>Home Lab · Dados simulados · Nenhum acesso ao banco nesta página</span><a href="/">Ir para a Home oficial</a></div></footer>
  </div>
 }
