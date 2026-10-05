@@ -25,6 +25,7 @@ const PATHS={
   snow:<><path d="M7 14a4 4 0 0 1 .4-8 5 5 0 0 1 9.4 1.2A3.8 3.8 0 0 1 17 14H7Z"/><path d="M9 17h.01M12 19h.01M15 17h.01"/></>,
   storm:<><path d="M7 14a4 4 0 0 1 .4-8 5 5 0 0 1 9.4 1.2A3.8 3.8 0 0 1 17 14H7Z"/><path d="m13 15-2 4h2l-1 3 4-5h-2l1-2Z"/></>,
   phone:<path d="M7.5 4.5 10 4l1.5 4-2 1.5c1 2.2 2.8 4 5 5l1.5-2 4 1.5-.5 2.5c-.3 1.5-1.7 2.5-3.2 2.2C10.9 17.8 6.2 13.1 4.3 7.7 3.8 6.2 4.9 4.8 7.5 4.5Z"/>,
+  bell:<><path d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M10 21h4"/></>,
   instagram:<><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor" stroke="none"/></>,
   share:<><circle cx="18" cy="5.5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="18.5" r="2"/><path d="m8 11 8-4.5M8 13l8 4.5"/></>,
   bookmark:<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3-6 3Z"/>,
