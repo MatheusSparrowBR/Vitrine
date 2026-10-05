@@ -248,3 +248,141 @@
 @media(prefers-reduced-motion:reduce){
  .mbp-profile-top .mbp-gallery-main img{transition:none!important}
 }
+
+/* Final visual pass: primary contact CTA, quick actions and review flow. */
+.mbp-profile-top .mbp-primary-row .mbp-primary-cta{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-height:43px!important;
+  height:43px!important;
+  padding:0 14px!important;
+  border:1px solid #25d366!important;
+  border-radius:8px!important;
+  background:#25d366!important;
+  color:#fff!important;
+  text-decoration:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  box-shadow:0 8px 18px rgba(37,211,102,.16)!important;
+  font-weight:900!important;
+}
+.mbp-profile-top .mbp-primary-row .mbp-primary-cta:hover{
+  background:#20bf5a!important;
+  border-color:#20bf5a!important;
+  color:#fff!important;
+  filter:none!important;
+}
+.mbp-profile-top .mbp-primary-row .mbp-secondary-cta{
+  background:#f8fbff!important;
+  border-color:#d7e4f2!important;
+  color:#155baf!important;
+  box-shadow:none!important;
+}
+.mbp-profile-top .mbp-primary-row .mbp-secondary-cta:hover{
+  background:#f2f7ff!important;
+  border-color:#b9d0ed!important;
+  color:#155baf!important;
+}
+
+.mbp-profile-top .mbp-business-notification{
+  background:linear-gradient(135deg,#f7fbff,#fff)!important;
+  border-color:#d7e6f6!important;
+  box-shadow:0 4px 12px rgba(25,52,80,.035)!important;
+}
+.mbp-profile-top .mbp-business-notification button{
+  min-width:132px!important;
+  background:#216df3!important;
+  border-color:#216df3!important;
+  color:#fff!important;
+  box-shadow:0 6px 14px rgba(33,109,243,.14)!important;
+}
+.mbp-profile-top .mbp-business-notification button:hover:not(:disabled){
+  background:#1764e8!important;
+  border-color:#1764e8!important;
+  color:#fff!important;
+}
+.mbp-profile-top .mbp-business-notification button.active{
+  background:#eaf8f0!important;
+  border-color:#bfe8d0!important;
+  color:#18824f!important;
+  box-shadow:none!important;
+}
+
+/* Instagram/iFood actions stay compact instead of stretching to a full-width bar. */
+.mbp-profile-top .mbp-extra-actions.mbp-share-row{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin-top:0!important;
+  padding:0 20px 15px!important;
+}
+.mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-action{
+  width:auto!important;
+  min-width:112px!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 12px!important;
+  border-radius:9px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  background:#fff!important;
+  border:1px solid #e0d8ee!important;
+  color:#7042ad!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  text-decoration:none!important;
+}
+.mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-action:hover{
+  background:#faf7ff!important;
+  border-color:#cbb8e6!important;
+  color:#63359f!important;
+}
+.mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-action>svg{
+  width:16px!important;
+  height:16px!important;
+  padding:6px!important;
+  border-radius:7px!important;
+  background:#f3ecfb!important;
+  color:#7b35db!important;
+}
+.mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-ifood{
+  min-width:92px!important;
+  background:#fff8f5!important;
+  border-color:#f1d8cf!important;
+  color:#bd5837!important;
+}
+.mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-ifood:hover{
+  background:#fff2ed!important;
+  border-color:#ebc4b6!important;
+  color:#a94b2d!important;
+}
+
+@media(max-width:760px){
+  .mbp-profile-top .mbp-primary-row .mbp-primary-cta,
+  .mbp-profile-top .mbp-primary-row .mbp-secondary-cta{
+    min-height:42px!important;
+    height:42px!important;
+  }
+  .mbp-profile-top .mbp-business-notification button{min-width:0!important}
+  .mbp-profile-top .mbp-extra-actions.mbp-share-row{
+    gap:7px!important;
+    padding:0 14px 10px!important;
+  }
+  .mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-action{
+    flex:1 1 0!important;
+    min-width:0!important;
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 9px!important;
+    font-size:8px!important;
+  }
+}
+@media(max-width:480px){
+  .mbp-profile-top .mbp-extra-actions.mbp-share-row{padding-left:11px!important;padding-right:11px!important}
+  .mbp-profile-top .mbp-extra-actions.mbp-share-row .mbp-shortcut-action{height:35px!important;min-height:35px!important}
+}
