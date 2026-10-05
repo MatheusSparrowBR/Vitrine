@@ -71,3 +71,14 @@ test('rodapé usa a logo original sem filtro que a transforme em bloco branco',(
  assert.match(css,/\.lvp-footer-grid>div:first-child img\{width:210px;height:auto;display:block;opacity:1\}/)
  assert.doesNotMatch(css,/\.lvp-footer-grid>div:first-child img\{[^}]*filter:/)
 })
+
+
+test('Home Lab é isolada da Home oficial e não deve ser indexada',()=>{
+ const app=read('src/app-entry.jsx')
+ const page=read('src/HomeTestPage.jsx')
+ assert.match(app,/path==='\/home-teste'/)
+ assert.match(app,/isHomeLab/)
+ assert.match(page,/noindex,nofollow,noarchive/)
+ assert.match(page,/Home de teste/)
+ assert.match(page,/\/laguna/)
+})
