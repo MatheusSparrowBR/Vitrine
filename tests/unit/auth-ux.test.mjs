@@ -29,3 +29,11 @@ test('auth desktop usa layout de formulário mais compacto e mantém mobile em u
  assert.match(css,/\.auth-field input\{[\s\S]*?height:54px/)
  assert.match(css,/@media\(max-width:650px\)[\s\S]*?grid-template-columns:1fr/)
 })
+
+
+test('auth footer keeps account action grouped and return link separated',()=>{
+ const css=read('src/auth-page.css')
+ assert.match(css,/\.auth-switch\{[\s\S]*?width:max-content/)
+ assert.match(css,/\.auth-back\{[\s\S]*?margin:10px auto 0/)
+ assert.match(css,/@media\(max-width:520px\)[\s\S]*?\.auth-switch\{/)
+})
