@@ -188,3 +188,51 @@
     min-height:50px;
   }
 }
+
+
+/* Auth footer refinement — keep account switch and site return visually connected. */
+.auth-switch{
+  width:max-content;
+  max-width:100%;
+  margin:22px auto 0;
+  padding:11px 15px;
+  gap:7px;
+  justify-content:center;
+  border:1px solid #e3eaf2;
+  border-radius:12px;
+  background:#fbfdff;
+  color:#6d8095;
+  line-height:1.35;
+  box-shadow:0 5px 16px rgba(16,48,81,.035);
+}
+.auth-switch .text-button{
+  white-space:nowrap;
+}
+.auth-back{
+  margin:10px auto 0;
+  padding:5px 8px;
+  border-radius:8px;
+  color:#718399;
+  font-size:10px;
+  transition:color .18s ease,background .18s ease;
+}
+.auth-back:hover{
+  color:#1677ff;
+  background:#f3f7fd;
+  text-decoration:none;
+}
+@media(max-width:520px){
+  .auth-switch{
+    width:100%;
+    padding:11px 12px;
+    gap:6px;
+    font-size:10px;
+    text-align:center;
+  }
+  .auth-switch .text-button{
+    font-size:10px;
+  }
+  .auth-back{
+    margin-top:9px;
+  }
+}
