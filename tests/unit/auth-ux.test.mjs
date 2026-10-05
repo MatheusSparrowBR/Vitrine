@@ -20,3 +20,12 @@ test('login e cadastro do comerciante mantêm fluxo seguro e UX enxuta',()=>{
  assert.match(css,/\.auth-spinner/)
  assert.match(css,/@media\(max-width:650px\)/)
 })
+
+
+test('auth desktop usa layout de formulário mais compacto e mantém mobile em uma coluna',()=>{
+ const css=read('src/auth-page.css')
+ assert.match(css,/\.vl-auth-card\.is-signup \.auth-form/)
+ assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/)
+ assert.match(css,/\.auth-field input\{height:54px/)
+ assert.match(css,/@media\(max-width:650px\)[\s\S]*?grid-template-columns:1fr/)
+})
