@@ -150,6 +150,10 @@ export default function HomeTestPage(){
   <a href="#anunciar" className={mobileNav==='announce'?'active':''} onClick={()=>setMobileNav('announce')}><Icon name="sparkle"/><span>Anunciar</span></a>
  </div>
 </nav>
+  <aside className="home-lab-floating-wa" aria-label="Atendimento rápido">
+   <div className="home-lab-floating-wa-label"><span className="home-lab-floating-wa-dot"/>Dúvidas locais? Fale conosco</div>
+   <a className="home-lab-floating-wa-button" href={'https://wa.me/5548999999999?text='+encodeURIComponent('Olá! Preciso de ajuda para encontrar um serviço no VitrineLocal.')} target="_blank" rel="noreferrer" aria-label="Conversar com o VitrineLocal no WhatsApp"><WhatsAppIcon/></a>
+  </aside>
   <footer className="home-lab-footer"><div className="home-lab-container home-lab-footer-inner"><HomeLabLogo/><span>Home Lab · Dados simulados · Nenhum acesso ao banco nesta página</span><a href="/">Ir para a Home oficial</a></div></footer>
  </div>
 }
