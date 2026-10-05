@@ -80,9 +80,15 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
       </div>
       <div className="mbp-badges mbp-identity-badges mbp-tags">{services.length?services.map(x=><span className="mbp-service-badge" key={x}>{x}</span>):<span>{business.categories?.name||'Empresa'}</span>}</div>
      </div>
-     <div className="mbp-profile-shortcuts">
+     <div className="mbp-profile-shortcuts" aria-label="Ações da empresa">
       <BusinessPersonalActions businessId={business.id}/>
+      {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer"><Icon name="instagram" size={14}/> Instagram</a>}
+      <button type="button" className={'mbp-shortcut-action mbp-shortcut-notifications '+(businessNotifications?'active':'')} onClick={toggleBusinessNotifications} disabled={businessNotificationLoading} aria-pressed={businessNotifications} title={businessNotifications?'Desativar notificações desta empresa':'Ativar notificações desta empresa'}>
+       <span className="mbp-inline-action-icon"><Icon name="bell" size={14}/></span>
+       <span>{businessNotificationLoading?'Ativando…':businessNotifications?'Notificações ativadas':'Ativar notificação da empresa'}</span>
+      </button>
       <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
+      {businessNotificationMessage&&<small className="mbp-inline-action-message">{businessNotificationMessage}</small>}
      </div>
     </div>
 
@@ -91,14 +97,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      {mapsUrl&&<a className="mbp-secondary-cta" data-track="maps" href={mapsUrl} target="_blank" rel="noreferrer"><Icon name="pin" size={16}/> Como chegar</a>}
     </div>
 
-    <div className="mbp-business-notification">
-     <div><span className="mbp-business-notification-icon"><Icon name="bell" size={16}/></span><div><strong>{businessNotifications?'Notificações ativadas':'Receba novidades desta empresa'}</strong><small>{businessNotifications?'Você receberá avisos de novas promoções.':'Ative para receber promoções e novidades no seu celular.'}</small></div></div>
-     <button type="button" className={businessNotifications?'active':''} onClick={toggleBusinessNotifications} disabled={businessNotificationLoading}><Icon name="bell" size={13}/>{businessNotificationLoading?'Ativando…':businessNotifications?'Desativar':'Ativar notificações'}</button>
-     {businessNotificationMessage&&<small className="mbp-business-notification-message">{businessNotificationMessage}</small>}
-    </div>
-
     <div className="mbp-extra-actions mbp-share-row">
-     {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer"><Icon name="instagram" size={14}/> Instagram</a>}
      {business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer">iFood</a>}
     </div>
    </section>
