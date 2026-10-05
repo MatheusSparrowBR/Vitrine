@@ -35,7 +35,7 @@ function ItemCard({item}){const type=normalizeItemType(item)||'product';const ha
 function ItemsSection({items,tab,setTab}){if(!items.length)return null;const normalized=items.map(item=>({...item,__normalizedType:normalizeItemType(item)}));const products=normalized.filter(i=>i.__normalizedType==='product'),services=normalized.filter(i=>i.__normalizedType==='service');const visible=tab==='products'?products:tab==='services'?services:normalized;const tabs=[['all','Todos',normalized.length],['products','Produtos',products.length],['services','Serviços',services.length]].filter(t=>t[2]>0||t[0]==='all');return <section id="mbp-catalogo" className="mbp-section mbp-offer-section"><div className="mbp-section-title"><span>CATÁLOGO</span><div className="mbp-section-heading-row"><h2>O que esta empresa oferece</h2><small>{normalized.length} {normalized.length===1?'item':'itens'}</small></div></div><div className="mbp-offer-tabs" role="tablist">{tabs.map(([id,label,count])=><button type="button" key={id} className={tab===id?'active':''} role="tab" aria-selected={tab===id} onClick={()=>setTab(id)}>{label} <small>{count}</small></button>)}</div><div className="mbp-items">{visible.slice(0,6).map(i=><ItemCard item={i} key={i.id}/>)}</div></section>}
 
 function MobileProfileNav({businessId,wa,mapsUrl}){return <nav className="mbp-mobile-bottom" aria-label="Ações rápidas"><a href="#mbp-top"><Icon name="grid" size={17}/><span>Perfil</span></a><BusinessPersonalActions businessId={businessId} compact/><a className="mbp-mobile-wa" data-track="whatsapp" href={wa||undefined} target={wa?'_blank':undefined} rel={wa?'noreferrer':undefined}><Icon name="phone" size={17}/><span>WhatsApp</span></a><a className="mbp-mobile-map" data-track="maps" href={mapsUrl||undefined} target={mapsUrl?'_blank':undefined} rel={mapsUrl?'noreferrer':undefined}><Icon name="pin" size={17}/><span>Mapa</span></a></nav>}
-function BusinessPersonalActions({businessId,compact=false}){const[relationship,setRelationship]=useState({favorite:false}),[busy,setBusy]=useState(false);useEffect(()=>{let live=true;(async()=>{const next=await getBusinessRelationship(businessId);if(live)setRelationship({favorite:Boolean(next.favorite)})})();return()=>{live=false}},[businessId]);const toggleFavorite=async()=>{if(busy)return;const nextValue=!relationship.favorite;setBusy(true);try{const result=await setBusinessRelationship(businessId,'favorite',nextValue);if(result.requiresAuth){location.assign(loginPathForIntent('favorite'));return}setRelationship({favorite:nextValue})}finally{setBusy(false)}};return compact?<div className="mbp-relationship-row-compact"><button type="button" className={relationship.favorite?'is-active':''} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Salvo':'Salvar'}</span></button></div>:<div className="mbp-relationship-row" aria-label="Ações pessoais"><button type="button" className={relationship.favorite?'is-active':''} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Empresa salva':'Salvar empresa'}</span></button></div>}
+function BusinessPersonalActions({businessId,compact=false}){const[relationship,setRelationship]=useState({favorite:false}),[busy,setBusy]=useState(false);useEffect(()=>{let live=true;(async()=>{const next=await getBusinessRelationship(businessId);if(live)setRelationship({favorite:Boolean(next.favorite)})})();return()=>{live=false}},[businessId]);const toggleFavorite=async()=>{if(busy)return;const nextValue=!relationship.favorite;setBusy(true);try{const result=await setBusinessRelationship(businessId,'favorite',nextValue);if(result.requiresAuth){location.assign(loginPathForIntent('favorite'));return}setRelationship({favorite:nextValue})}finally{setBusy(false)}};return compact?<div className="mbp-relationship-row-compact"><button type="button" className={`mbp-shortcut-action ${relationship.favorite?'is-active':''}`} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Salvo':'Salvar'}</span></button></div>:<div className="mbp-relationship-row" aria-label="Ações pessoais"><button type="button" className={relationship.favorite?'is-active':''} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Empresa salva':'Salvar empresa'}</span></button></div>}
 
 export default function ModernBusinessProfilePage({citySlug='laguna',businessSlug=''}){ 
  const[city,setCity]=useState(null),[business,setBusiness]=useState(null),[photos,setPhotos]=useState([]),[items,setItems]=useState([]),[promotions,setPromotions]=useState([]),[rating,setRating]=useState({avg:0,count:0}),[offerTab,setOfferTab]=useState('all'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[businessNotifications,setBusinessNotifications]=useState(false),[businessNotificationLoading,setBusinessNotificationLoading]=useState(false),[businessNotificationMessage,setBusinessNotificationMessage]=useState('')
@@ -49,7 +49,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
  const wa=business?.whatsapp||business?.phone
  const waUrl=business?.whatsapp?\`https://wa.me/\${phoneDigits(business.whatsapp)}\`:(business?.phone?\`tel:\${phoneDigits(business.phone)}\`:'')
  const contactLabel=business?.whatsapp?'Falar no WhatsApp':business?.phone?'Entrar em contato':'Contato indisponível'
- const services=[business?.has_dine_in&&'Consumo no local',business?.has_delivery&&'Delivery',business?.has_pickup&&'Retirada'].filter(Boolean)
+ const services=[business?.has_dine_in&&'Consumo no local',business?.has_delivery&&'Delivery',business?.has_pickup&&'Retirada no local'].filter(Boolean)
  const share=async()=>{const data={title:business?.name||'VitrineLocal',text:\`Confira \${business?.name||'esta empresa'} no VitrineLocal.\`,url:window.location.href};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard)await navigator.clipboard.writeText(data.url)}catch{}}
  if(loading)return <main className="mbp-shell"><div className="mbp-loading">Carregando empresa…</div></main>
  if(error||!business||!city)return <main className="mbp-shell"><div className="mbp-error"><h1>{error||'Empresa não encontrada.'}</h1><a href={returnUrl}>Voltar para o catálogo</a></div></main>
@@ -82,7 +82,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      </div>
      <div className="mbp-identity-actions mbp-profile-shortcuts">
       <BusinessPersonalActions businessId={business.id}/>
-      <button type="button" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
+      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
      </div>
     </div>
 
@@ -97,9 +97,9 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      {businessNotificationMessage&&<small className="mbp-business-notification-message">{businessNotificationMessage}</small>}
     </div>
 
-    <div className="mbp-extra-actions">
-     {business.instagram_url&&<a data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer"><Icon name="instagram" size={14}/> Instagram</a>}
-     {business.ifood_url&&<a className="mbp-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer">iFood</a>}
+    <div className="mbp-extra-actions mbp-share-row">
+     {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer"><Icon name="instagram" size={14}/> Instagram</a>}
+     {business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer">iFood</a>}
     </div>
    </section>
 
@@ -107,7 +107,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <div className="mbp-main-column">
      <section className="mbp-panel" id="sobre">
       <div className="mbp-title"><span>SOBRE O ESTABELECIMENTO</span><h2>Informações essenciais</h2></div>
-      <p className="mbp-about-text">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
+      <p className="mbp-about-description mbp-about-text">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
       <div className="mbp-info-grid">
        <div><span className="mbp-info-icon"><Icon name="pin" size={16}/></span><strong>Localização</strong><small>{business.address||profileLocation||'Laguna - SC'}</small></div>
        <div><span className="mbp-info-icon"><Icon name="clock" size={16}/></span><strong>Funcionamento</strong><small>{status.detail}</small></div>
