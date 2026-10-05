@@ -777,3 +777,48 @@
     font-size:8px!important;
   }
 }
+
+
+/* Fix identity grid collapse caused by the 4-column action group. */
+.mbp-profile-top .mbp-identity{
+  grid-template-columns:82px minmax(0,1fr) minmax(500px,520px)!important;
+  gap:15px!important;
+}
+.mbp-profile-top .mbp-identity-copy{
+  min-width:0!important;
+  width:auto!important;
+}
+.mbp-profile-top .mbp-profile-shortcuts{
+  min-width:0!important;
+  width:100%!important;
+  max-width:520px!important;
+}
+
+@media(max-width:1050px){
+  .mbp-profile-top .mbp-identity{
+    grid-template-columns:72px minmax(0,1fr)!important;
+    gap:12px!important;
+  }
+  .mbp-profile-top .mbp-profile-shortcuts{
+    grid-column:1/-1!important;
+    max-width:none!important;
+    margin-top:4px!important;
+  }
+}
+
+@media(max-width:760px){
+  .mbp-profile-top .mbp-identity{
+    grid-template-columns:58px minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+  .mbp-profile-top .mbp-profile-shortcuts{
+    grid-column:1/-1!important;
+    max-width:none!important;
+    width:100%!important;
+  }
+}
+@media(max-width:480px){
+  .mbp-profile-top .mbp-identity{
+    grid-template-columns:54px minmax(0,1fr)!important;
+  }
+}
