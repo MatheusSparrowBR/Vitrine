@@ -78,15 +78,15 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
        <strong>{rating.count?rating.avg.toFixed(1):'—'}</strong>
        <span>{rating.count?\`\${rating.count} \${rating.count===1?'avaliação':'avaliações'}\`:'Ainda sem avaliações'}</span>
       </div>
-      <div className="mbp-tags">{services.length?services.map(x=><span key={x}>{x}</span>):<span>{business.categories?.name||'Empresa'}</span>}</div>
+      <div className="mbp-badges mbp-identity-badges mbp-tags">{services.length?services.map(x=><span className="mbp-service-badge" key={x}>{x}</span>):<span>{business.categories?.name||'Empresa'}</span>}</div>
      </div>
-     <div className="mbp-identity-actions">
+     <div className="mbp-identity-actions mbp-profile-shortcuts">
       <BusinessPersonalActions businessId={business.id}/>
       <button type="button" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
      </div>
     </div>
 
-    <div className="mbp-primary-row">
+    <div className="mbp-primary-row" data-mbp-action-bar="true">
      {waUrl&&<a className="mbp-primary-cta" data-track="whatsapp" href={waUrl} target={business.whatsapp?'_blank':undefined} rel={business.whatsapp?'noreferrer':undefined}><Icon name="phone" size={16}/> {contactLabel}</a>}
      {mapsUrl&&<a className="mbp-secondary-cta" data-track="maps" href={mapsUrl} target="_blank" rel="noreferrer"><Icon name="pin" size={16}/> Como chegar</a>}
     </div>
