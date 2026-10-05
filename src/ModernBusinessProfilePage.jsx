@@ -83,10 +83,12 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      <div className="mbp-profile-shortcuts" aria-label="Ações da empresa">
       <BusinessPersonalActions businessId={business.id}/>
       {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer"><Icon name="instagram" size={14}/> Instagram</a>}
-      <button type="button" className={'mbp-shortcut-action mbp-shortcut-notifications '+(businessNotifications?'active':'')} onClick={toggleBusinessNotifications} disabled={businessNotificationLoading} aria-pressed={businessNotifications} title={businessNotifications?'Desativar notificações desta empresa':'Ativar notificações desta empresa'}>
-       <span className="mbp-inline-action-icon"><Icon name="bell" size={14}/></span>
-       <span>{businessNotificationLoading?'Ativando…':businessNotifications?'Notificações ativadas':'Ativar notificação da empresa'}</span>
-      </button>
+      <div className="mbp-business-notification mbp-inline-business-notification" aria-label="Notificações da empresa">
+       <button type="button" className={'mbp-shortcut-action mbp-shortcut-notifications '+(businessNotifications?'active':'')} onClick={toggleBusinessNotifications} disabled={businessNotificationLoading} aria-pressed={businessNotifications} aria-label="Ativar notificações" title={businessNotifications?'Desativar notificações desta empresa':'Ativar notificações desta empresa'}>
+        <span className="mbp-inline-action-icon"><Icon name="bell" size={14}/></span>
+        <span>{businessNotificationLoading?'Ativando…':businessNotifications?'Notificações ativadas':'Ativar notificação da empresa'}</span>
+       </button>
+      </div>
       <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
       {businessNotificationMessage&&<small className="mbp-inline-action-message">{businessNotificationMessage}</small>}
      </div>
