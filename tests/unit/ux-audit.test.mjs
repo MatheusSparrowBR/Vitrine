@@ -141,5 +141,5 @@ test('Perfil Lab usa galeria compacta e conversão prioritária',()=>{
  assert.match(css,/grid-template-columns:minmax\\(0,2fr\\) minmax\\(180px,1fr\\)/)
  assert.match(css,/\\.cpl-side-sticky\\{position:sticky/)
  assert.match(css,/safe-area-inset-bottom/)
- assert.doesNotMatch(css,/linear-gradient\\(/)
+ assert.doesNotMatch(css,/linear-gradient\(/)
 })
