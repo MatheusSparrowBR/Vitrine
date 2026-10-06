@@ -199,7 +199,7 @@
 /* Mobile home UX overhaul: compact discovery, touch-first browsing and stable bottom navigation. */
 .lvp-mobile-bottom-nav{display:none}
 @media(max-width:760px){
-  .lvp-page{padding-bottom:76px}
+  .lvp-page{padding-bottom:86px}
   .lvp-page main>.lvp-local-guide{order:8}
   .lvp-page main>.lvp-business-cta-section{order:9}
   .lvp-page main{display:flex;flex-direction:column}
@@ -298,18 +298,53 @@
   .lvp-footer-bottom{padding-bottom:10px}
 
   .lvp-mobile-bottom-nav{
-    position:fixed;left:10px;right:10px;bottom:10px;z-index:1100;
-    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
-    padding:7px;border:1px solid rgba(215,226,238,.95);border-radius:18px;
-    background:rgba(255,255,255,.96);box-shadow:0 14px 34px rgba(9,41,77,.16);
-    backdrop-filter:blur(12px)
+    position:fixed;left:0;right:0;bottom:0;z-index:1100;
+    display:none;
+    padding:5px 8px calc(5px + env(safe-area-inset-bottom));
+    border-top:1px solid #dce6f0;
+    background:#fff;
+    box-shadow:0 -4px 12px rgba(15,23,42,.06);
+  }
+  .lvp-mobile-bottom-nav-inner{
+    width:100%;
+    min-height:64px;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    align-items:center;
+    gap:4px;
   }
   .lvp-mobile-bottom-nav a{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    min-height:46px;border-radius:12px;color:#6e8194;text-decoration:none;font-size:7px;font-weight:900
+    display:flex;
+    min-width:0;
+    min-height:54px;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:4px;
+    padding:3px 4px;
+    border:0;
+    border-radius:16px;
+    background:transparent;
+    color:#71859b;
+    text-decoration:none;
+    font-size:10px;
+    line-height:1.1;
+    font-weight:800;
+    text-align:center;
+    white-space:nowrap;
+    transition:background .18s ease,color .18s ease,transform .12s ease;
   }
-  .lvp-mobile-bottom-nav a.is-active{background:#edf5ff;color:#216df3}
+  .lvp-mobile-bottom-nav a .home-icon{
+    flex:none;
+  }
+  .lvp-mobile-bottom-nav a.is-active{
+    background:#eef5ff;
+    color:#216df3;
+  }
   .lvp-mobile-bottom-nav a:active{transform:scale(.98)}
+  @media(max-width:760px){
+    .lvp-mobile-bottom-nav{display:block}
+  }
 }
 
 /* Featured businesses: profile/logo image stays fully visible and centered. */
