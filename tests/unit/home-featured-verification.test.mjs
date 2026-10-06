@@ -1,6 +1,7 @@
 import{test}from'node:test'
 import assert from'node:assert/strict'
 import fs from'node:fs'
+// CI regression guard for featured-card verification and controls.
 
 const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
 
