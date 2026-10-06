@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState}from'react'
 import{createClient}from'@supabase/supabase-js'
 import{getActiveBusinessPromotions}from'./promotion-service.js'
-import{formatHours}from'./BusinessHoursEditor.jsx'
+import{formatHours,getOpenStatus}from'./business-hours-utils.js'
 import{loadPublicBusinessReviewSummaries}from'./public-review-summary.js'
 import Icon from'./ui-icons.jsx'
 import{createPushSubscription,syncPushSubscription,isPushSupported}from'./push-notifications.js'
@@ -20,17 +20,6 @@ const db=U&&K?createClient(U,K):null
 const phoneDigits=v=>String(v||'').replace(/\D/g,'')
 const fmt=v=>{const n=Number(v);return Number.isFinite(n)?`R$ ${n.toFixed(2).replace('.',',')}`:''}
 const normalizeItemType=item=>{const raw=String(item?.type??item?.item_type??item?.kind??'').trim().toLowerCase();if(['service','services','servico','serviço','servicos','serviços'].includes(raw))return'service';if(['product','products','produto','produtos'].includes(raw))return'product';return null}
-const DAY_KEYS=['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
-function minutes(v){const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return null;const h=Number(m[1]),n=Number(m[2]);return h<=23&&n<=59?h*60+n:null}
-function currentDayIndex(date=new Date()){return(date.getDay()+6)%7}
-function getOpenStatus(value,date=new Date()){
- const source=value&&typeof value==='object'?value:{};const index=currentDayIndex(date);const now=date.getHours()*60+date.getMinutes()
- const parse=key=>{const d=source[key];if(!d||d.closed)return null;const open=minutes(d.open),closeRaw=minutes(d.close);if(open==null||closeRaw==null||open===closeRaw)return null;return{open,close:closeRaw<=open?closeRaw+1440:closeRaw,closeLabel:d.close,openLabel:d.open}}
- const today=parse(DAY_KEYS[index]);if(today&&today.open<1440&&now>=today.open&&now<today.close)return{open:true,label:'Aberto agora',detail:`Fecha às ${today.closeLabel}`}
- const prev=parse(DAY_KEYS[(index+6)%7]);if(prev&&prev.close>1440&&now<prev.close-1440)return{open:true,label:'Aberto agora',detail:`Fecha às ${prev.closeLabel}`}
- for(let offset=0;offset<7;offset+=1){const target=(index+offset)%7;const d=parse(DAY_KEYS[target]);if(!d)continue;if(offset===0&&now>=d.open)continue;return{open:false,label:'Fechado agora',detail:`Abre às ${d.openLabel}`}}
- return{open:false,label:'Fechado agora',detail:'Consulte os horários'}
-}
 function Gallery({business,photos,coverPositionDesktop,coverPositionMobile,canEditCover,onEditCover}){const cover=business.cover_url||'';const media=photos.filter(p=>p.url&&p.url!==cover);const images=media.filter(p=>p.media_type!=='video');const main=cover||images[0]?.url;const thumbs=media.filter(p=>p.media_type!=='video').slice(0,2);const total=(cover?1:0)+media.length;const extra=Math.max(0,total-3);const hasThumbs=thumbs.length>0;const coverStyle={...coverPositionCssVars(coverPositionDesktop,'desktop'),...coverPositionCssVars(coverPositionMobile,'mobile')};return <div className={`mbp-gallery ${hasThumbs?'has-media':'is-empty'}`} data-gallery-total={total}><button className="mbp-gallery-main" type="button" data-gallery-open aria-label="Abrir galeria de fotos">{main?<img className="mbp-cover-positioned" src={main} alt={`${business.name} capa`} loading="eager" style={coverStyle}/>:<div className="mbp-gallery-placeholder">VitrineLocal</div>}<span className="mbp-gallery-caption">▣ {business.short_description||'Conheça esta empresa local.'}</span></button>{canEditCover&&<button type="button" className="mbp-cover-edit-button" onClick={onEditCover} aria-label="Editar posicionamento da capa" title="Editar capa"><Icon name="camera" size={15}/><span>Editar capa</span></button>}<div className="mbp-gallery-side">{thumbs.map((p,i)=><button className="mbp-gallery-thumb" type="button" key={p.id||i} data-gallery-open aria-label={`Abrir foto ${i+2}`}><img src={p.url} alt="" loading="lazy"/></button>)}<button className="mbp-gallery-more" type="button" data-gallery-open aria-label="Ver todas as fotos">{extra>0&&<strong>+{extra}</strong>}<span>{total>0?'Ver todas as fotos':'Adicionar fotos'}</span></button></div></div>}
 function ContactCard({icon,title,value,link,state}){const content=<><span className="mbp-contact-icon"><Icon name={icon} size={17}/></span><span><strong>{title}</strong><small>{value}</small></span></>;if(!link)return <div className={`mbp-contact-card ${state?`is-${state}`:''}`} data-contact-state={state||''}>{content}</div>;return <a className="mbp-contact-card" href={link} target="_blank" rel="noreferrer">{content}</a>}
 function ItemCard({item}){const type=normalizeItemType(item)||'product';const hasPrice=item.price!==null&&item.price!==undefined&&item.price!==''&&Number.isFinite(Number(item.price));return <article className="mbp-item-card" data-item-type={type}>{item.image_url&&<div className="mbp-item-image"><img src={item.image_url} alt={item.name||'Item'} loading="lazy"/></div>}<div className="mbp-item-body"><span className="mbp-item-type">{type==='service'?'SERVIÇO':'PRODUTO'}</span><h3>{item.name}</h3>{item.description&&<p>{item.description}</p>}{hasPrice?<div className="mbp-item-price"><small>{type==='service'?'A partir de':'Por'}</small><strong>{fmt(item.price)}</strong></div>:<span className="mbp-item-no-price">Consulte o preço</span>}</div></article>}
