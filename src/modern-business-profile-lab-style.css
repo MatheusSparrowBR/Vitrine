@@ -979,3 +979,27 @@
     width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;flex-basis:14px!important;
   }
 }
+
+
+/* Mobile reading order: operating hours before customer reviews. */
+@media(max-width:760px){
+  .mbp-layout{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  .mbp-main-column{
+    display:contents!important;
+  }
+  .mbp-layout>.mbp-sidebar{
+    order:2!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin-top:8px!important;
+  }
+  .mbp-layout>.mbp-main-column>.vl-profile-reviews-host,
+  .mbp-layout>.vl-profile-reviews-host{
+    order:3!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+}
