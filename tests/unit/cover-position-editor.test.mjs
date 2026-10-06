@@ -19,7 +19,7 @@ test('editor permite alongamento independente de largura e altura',()=>{
  assert.ok(page.includes('scaleY'))
  assert.match(page,/aria-label="Largura da capa"/)
  assert.match(page,/aria-label="Altura da capa"/)
- assert.match(page,/scale\(\'+current\.zoom\+\'\) scaleX/)
+ assert.ok(page.includes("scale('+current.zoom+') scaleX('+current.scaleX+') scaleY('+current.scaleY+')"))
 })
 
 test('perfil público usa exatamente o mesmo transform salvo pelo editor',()=>{
