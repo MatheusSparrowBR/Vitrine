@@ -1,56 +1,10 @@
+import { getOpenStatus } from './business-hours-utils.js'
 import { createClient } from '@supabase/supabase-js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db=URL&&KEY?createClient(URL,KEY):null
-const DAY_NAMES=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo']
-const DAY_KEYS=['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
-
-let currentStatus=null
-let observer=null
-let refreshTimer=null
-
-function toMinutes(value){
-  const match=String(value||'').match(/^(\d{1,2}):(\d{2})$/)
-  if(!match)return null
-  const h=Number(match[1]),m=Number(match[2])
-  return h<=23&&m<=59?h*60+m:null
-}
-
-function parseDay(day){
-  if(!day||day.closed)return null
-  const open=toMinutes(day.open),closeRaw=toMinutes(day.close)
-  if(open==null||closeRaw==null||open===closeRaw)return null
-  return {open,close:closeRaw<=open?closeRaw+1440:closeRaw,openLabel:day.open,closeLabel:day.close}
-}
-
-function dayIndex(date){return(date.getDay()+6)%7}
-
-function calculateStatus(hours,date=new Date()){
-  if(!hours||typeof hours!=='object')return{state:'unknown',label:'Horário',detail:'Consulte os horários'}
-  const index=dayIndex(date)
-  const now=date.getHours()*60+date.getMinutes()
-  const schedule= parseDay(hours[DAY_KEYS[index]])
-
-  if(schedule&&schedule.open<1440&&now>=schedule.open&&now<schedule.close){
-    return{state:'open',label:'Aberto agora',detail:`Fecha às ${schedule.closeLabel}`}
-  }
-
-  const previous=(index+6)%7
-  const previousSchedule=parseDay(hours[DAY_KEYS[previous]])
-  if(previousSchedule&&previousSchedule.close>1440&&now<previousSchedule.close-1440){
-    return{state:'open',label:'Aberto agora',detail:`Fecha às ${previousSchedule.closeLabel}`}
-  }
-
-  for(let offset=0;offset<7;offset+=1){
-    const target=(index+offset)%7
-    const candidate=parseDay(hours[DAY_KEYS[target]])
-    if(!candidate)continue
-    if(offset===0&&now>=candidate.open)continue
-    return{state:'closed',label:'Fechado agora',detail:`Abre às ${candidate.openLabel}`,nextDay:offset?DAY_NAMES[target]:null}
-  }
-  return{state:'closed',label:'Fechado agora',detail:'Consulte os horários'}
-}
+function calculateStatus(hours,date=new Date()){const status=getOpenStatus(hours,date);return{state:status.open?'open':'closed',label:status.label,detail:status.detail}}
 
 function installBadgeStandard(){
   if(document.getElementById('vl-profile-badge-standard'))return
