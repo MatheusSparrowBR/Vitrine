@@ -78,3 +78,6 @@
 .account-business-refresh-spinner{width:11px;height:11px;border:2px solid #d6e1eb;border-top-color:#17304f;border-radius:50%;animation:account-business-spin .7s linear infinite}
 @keyframes account-business-spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){.account-business-refresh{width:calc(100% - 24px);font-size:9px}}
+
+
+.account-cover-preview-actions{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}.account-cover-preview-actions button{min-height:32px;padding:0 9px;border:1px solid #c8dcfb;border-radius:8px;background:#eef5ff;color:#216df3;font-size:9px;font-weight:900;cursor:pointer}.account-cover-preview-actions button:hover{background:#e4efff}.account-cover-preview-actions label{margin:0!important}@media(max-width:760px){.account-cover-preview-actions{gap:5px}.account-cover-preview-actions button{font-size:8px}}
