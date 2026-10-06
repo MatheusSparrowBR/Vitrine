@@ -13,7 +13,7 @@
 .lvp-actions>a{font-size:11px;font-weight:900;color:#58718a}
 .lvp-actions .lvp-business{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 15px;border-radius:11px;background:var(--lvp-blue);color:#fff;box-shadow:0 8px 18px rgba(33,109,243,.18)}
 .lvp-hero{position:relative;overflow:hidden;background:var(--lvp-navy);min-height:600px}
-.lvp-hero-bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,27,51,.97) 0%,rgba(7,48,82,.88) 55%,rgba(7,48,82,.3) 100%),url('/laguna-hero.svg') center/cover no-repeat}
+.lvp-hero-bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,27,51,.97) 0%,rgba(7,48,82,.88) 55%,rgba(7,48,82,.3) 100%),var(--lvp-city-home-bg,url('/laguna-hero.svg')) center/cover no-repeat}
 .lvp-hero-inner{position:relative;z-index:1;width:min(1220px,100%);margin:auto;padding:86px 24px 104px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:68px;align-items:center}
 .lvp-hero-copy{max-width:780px}
 .lvp-kicker{display:inline-flex;padding:8px 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);color:#dff0ff;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
