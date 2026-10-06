@@ -12,5 +12,5 @@ test('Home aceita fundo personalizado por cidade e mantém fallback',()=>{
 
 test('Home consulta os metadados do fundo junto com a cidade',()=>{
  const page=fs.readFileSync('src/CityHomePage.jsx','utf8')
- assert.ok(page.includes('select(\'id,name,state,country,slug,active,home_background_url,home_background_path\')'))
+ assert.ok(page.includes('select(\'id,name,state,country,slug,active,home_background_url,home_background_path,home_background_position_desktop,home_background_position_mobile\')'))
 })
