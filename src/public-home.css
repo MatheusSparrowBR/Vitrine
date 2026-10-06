@@ -1056,3 +1056,14 @@
     padding:48px 0;
   }
 }
+
+/* Desktop hero/category rhythm refinement: reduce the oversized transition into the category section. */
+@media(min-width:761px){
+  .lvp-hero-inner{
+    padding-top:72px;
+    padding-bottom:64px;
+  }
+  .lvp-categories{
+    padding-top:28px;
+  }
+}
