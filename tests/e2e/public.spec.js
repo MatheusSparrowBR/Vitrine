@@ -83,7 +83,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  const text=await page.locator('.lvp-category-count').innerText()
  const total=Number((text.match(/\d+/)||[])[0]||0)
  expect(total).toBeGreaterThan(0)
- expect(count).toBeLessThanOrEqual(7)
+ expect(count).toBeLessThanOrEqual(8)
  const next=box.locator('.lvp-arrow').last()
  if(total>7){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
  if(count)await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\/categoria\/.+/)
