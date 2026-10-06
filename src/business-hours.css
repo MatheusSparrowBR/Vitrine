@@ -1,4 +1,5 @@
 /* Editor de horários: layout orientado por dia, com segundo período opcional. */
+.hours-row{display:grid;grid-template-columns:1fr;min-width:0}
 .business-registration-card .hours-editor{margin-top:2px}
 .business-registration-card .hours-help{display:flex;align-items:flex-start;gap:12px;margin:0 0 14px;padding:13px 14px;border:1px solid #dce7f4;border-radius:13px;background:#f7faff;color:#60758c;font-size:11px;line-height:1.5}
 .business-registration-card .hours-help>div{display:grid;gap:2px}
