@@ -63,7 +63,7 @@ export default function BusinessHoursEditor({value,onChange}){
     const second=day.periods?.[1]||EMPTY_PERIOD
     const split=hasSecondPeriod(day)
 
-    return <section className={'hours-day-card '+(day.closed?'is-closed':'')} key={key}>
+    return <section className={'hours-row hours-day-card '+(day.closed?'is-closed':'')} key={key}>
      <header className="hours-day-header">
       <div className="hours-day-title">
        <strong>{label}</strong>
