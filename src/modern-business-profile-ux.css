@@ -448,30 +448,37 @@
  .mbp-profile-shortcuts .mbp-shortcut-action{min-height:50px;height:50px;font-size:8.5px}
 }
 
-/* Mobile profile reading rhythm: align content cards and improve hours readability without inflating the card. */
+/* Final mobile profile layout: flatten the main column so hours sit before reviews and every card spans the viewport. */
 @media(max-width:760px){
   .mbp-layout{
-    align-items:stretch!important;
-    width:100%!important;
-  }
-  .mbp-layout>.mbp-main-column{
     display:flex!important;
     flex-direction:column!important;
+    align-items:stretch!important;
     width:100%!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
+    gap:0!important;
+  }
+  .mbp-layout>.mbp-main-column{
+    display:contents!important;
   }
   .mbp-layout>.mbp-main-column>.mbp-panel{
     width:100%!important;
     min-width:0!important;
     box-sizing:border-box!important;
+    order:1!important;
   }
-  .mbp-layout>.mbp-sidebar{
+  .mbp-layout>.mbp-main-column>.vl-profile-reviews-host,
+  .mbp-layout>.vl-profile-reviews-host{
     width:100%!important;
     min-width:0!important;
     box-sizing:border-box!important;
-    margin-left:0!important;
-    margin-right:0!important;
+    order:3!important;
+  }
+  .mbp-layout>.mbp-sidebar{
+    order:2!important;
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    margin:8px 0 0!important;
   }
   .mbp-sidebar .mbp-hours-card-only{
     width:100%!important;
@@ -488,8 +495,30 @@
     font-size:10px!important;
     line-height:1.35!important;
   }
+  .mbp-side-title>span{
+    font-size:9px!important;
+  }
   .mbp-note{
     font-size:9px!important;
     line-height:1.45!important;
+  }
+}
+
+/* Desktop profile hours: increase legibility while preserving the compact sidebar card. */
+@media(min-width:761px){
+  .mbp-hours li{
+    font-size:10px!important;
+    line-height:1.35!important;
+  }
+  .mbp-hours li strong,
+  .mbp-hours li span{
+    font-size:10px!important;
+    line-height:1.35!important;
+  }
+  .mbp-side-title>span{
+    font-size:9px!important;
+  }
+  .mbp-note{
+    font-size:9px!important;
   }
 }

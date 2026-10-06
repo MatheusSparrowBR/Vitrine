@@ -12,10 +12,12 @@ test('perfil mobile usa badges compactas e topo reduzido',()=>{
 })
  
 test('perfil mobile mantém informações e endereço alinhados na mesma largura',()=>{
- assert.match(css,/\.mbp-layout>\.mbp-main-column\{[\s\S]*display:flex!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-main-column\{[\s\S]*display:contents!important/)
  assert.match(css,/\.mbp-layout>\.mbp-main-column\{[\s\S]*width:100%!important/)
  assert.match(css,/\.mbp-layout>\.mbp-main-column>\.mbp-panel\{[\s\S]*width:100%!important/)
  assert.match(css,/\.mbp-layout>\.mbp-sidebar\{[\s\S]*width:100%!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-sidebar\{[\s\S]*order:2!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-main-column>\.vl-profile-reviews-host,\n  \.mbp-layout>\.vl-profile-reviews-host\{[\s\S]*order:3!important/)
 })
 
 test('horarios do perfil mobile ficam maiores sem estourar o card',()=>{
@@ -23,4 +25,10 @@ test('horarios do perfil mobile ficam maiores sem estourar o card',()=>{
  assert.match(css,/\.mbp-hours li\{[\s\S]*padding:9px 0!important/)
  assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:10px!important/)
  assert.match(css,/\.mbp-note\{[\s\S]*font-size:9px!important/)
+})
+
+ 
+test('horarios desktop ficam legíveis sem alterar a estrutura do card',()=>{
+ assert.match(css,/@media\(min-width:761px\)\{[\s\S]*\.mbp-hours li\{[\s\S]*font-size:10px!important/)
+ assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:10px!important/)
 })
