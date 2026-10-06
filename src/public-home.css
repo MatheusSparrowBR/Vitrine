@@ -636,6 +636,28 @@
   border-color:#c6d9ef!important;
   box-shadow:0 14px 30px rgba(15,23,42,.09)!important;
 }
+.home-lab-migration-featured .lvp-business-image-link{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  display:block!important;
+  border-radius:inherit!important;
+  overflow:hidden!important;
+  text-decoration:none!important;
+  color:inherit!important;
+}
+.home-lab-migration-featured .lvp-business-image-link img{
+  position:relative!important;
+  z-index:1!important;
+}
+.home-lab-migration-featured .lvp-business-image-link .lvp-business-logo-visual{
+  z-index:2!important;
+}
+.home-lab-migration-featured .lvp-migration-photo-badge,
+.home-lab-migration-featured .lvp-migration-status-badge,
+.home-lab-migration-featured .lvp-migration-save{
+  z-index:6!important;
+}
 .home-lab-migration-featured .home-lab-migration-card .lvp-business-image{
   width:100%!important;
   min-width:0!important;
@@ -1065,5 +1087,52 @@
   }
   .lvp-categories{
     padding-top:28px;
+  }
+}
+
+/* Mobile profile reading rhythm: keep all content cards full-width and make hours readable without inflating the panel. */
+@media(max-width:760px){
+  .mbp-layout{
+    align-items:stretch!important;
+    width:100%!important;
+  }
+  .mbp-layout>.mbp-main-column{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .mbp-layout>.mbp-main-column>.mbp-panel{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .mbp-layout>.mbp-sidebar{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+  .mbp-side-hours-card-only,
+  .mbp-sidebar .mbp-hours-card-only{
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .mbp-hours li{
+    gap:12px!important;
+    padding:9px 0!important;
+    font-size:10px!important;
+    line-height:1.35!important;
+  }
+  .mbp-hours li strong,
+  .mbp-hours li span{
+    font-size:10px!important;
+    line-height:1.35!important;
+  }
+  .mbp-note{
+    font-size:9px!important;
+    line-height:1.45!important;
   }
 }
