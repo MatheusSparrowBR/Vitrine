@@ -636,6 +636,28 @@
   border-color:#c6d9ef!important;
   box-shadow:0 14px 30px rgba(15,23,42,.09)!important;
 }
+.home-lab-migration-featured .lvp-business-image-link{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  display:block!important;
+  border-radius:inherit!important;
+  overflow:hidden!important;
+  text-decoration:none!important;
+  color:inherit!important;
+}
+.home-lab-migration-featured .lvp-business-image-link img{
+  position:relative!important;
+  z-index:1!important;
+}
+.home-lab-migration-featured .lvp-business-image-link .lvp-business-logo-visual{
+  z-index:2!important;
+}
+.home-lab-migration-featured .lvp-migration-photo-badge,
+.home-lab-migration-featured .lvp-migration-status-badge,
+.home-lab-migration-featured .lvp-migration-save{
+  z-index:6!important;
+}
 .home-lab-migration-featured .home-lab-migration-card .lvp-business-image{
   width:100%!important;
   min-width:0!important;

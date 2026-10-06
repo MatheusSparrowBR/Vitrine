@@ -10,3 +10,17 @@ test('perfil mobile usa badges compactas e topo reduzido',()=>{
  assert.ok(css.includes('mbp-contact-card:first-child'))
  assert.ok(css.includes('.mbp-primary-cta'))
 })
+ 
+test('perfil mobile mantém informações e endereço alinhados na mesma largura',()=>{
+ assert.match(css,/\.mbp-layout>\.mbp-main-column\{[\s\S]*display:flex!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-main-column\{[\s\S]*width:100%!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-main-column>\.mbp-panel\{[\s\S]*width:100%!important/)
+ assert.match(css,/\.mbp-layout>\.mbp-sidebar\{[\s\S]*width:100%!important/)
+})
+
+test('horarios do perfil mobile ficam maiores sem estourar o card',()=>{
+ assert.match(css,/\.mbp-hours li\{[\s\S]*font-size:10px!important/)
+ assert.match(css,/\.mbp-hours li\{[\s\S]*padding:9px 0!important/)
+ assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:10px!important/)
+ assert.match(css,/\.mbp-note\{[\s\S]*font-size:9px!important/)
+})
