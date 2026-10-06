@@ -867,21 +867,25 @@
 .home-lab-migration-featured .lvp-business-image.has-profile-logo{
   display:grid!important;
   place-items:center!important;
-  padding:18px!important;
+  width:100%!important;
+  height:170px!important;
+  min-height:170px!important;
+  max-height:170px!important;
+  padding:14px!important;
   box-sizing:border-box!important;
   background:#fff!important;
 }
-.home-lab-migration-featured .lvp-business-logo-fallback{
+.home-lab-migration-featured .lvp-business-logo-fallback-img{
   display:block!important;
-  width:100%!important;
-  height:100%!important;
+  width:78%!important;
+  height:78%!important;
   min-width:0!important;
   min-height:0!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  background-repeat:no-repeat!important;
-  background-position:center!important;
-  background-size:contain!important;
+  max-width:200px!important;
+  max-height:140px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border-radius:10px!important;
 }
 .home-lab-migration-featured .lvp-business-logo-visual{
   position:absolute!important;
@@ -917,7 +921,15 @@
 }
 @media(max-width:760px){
   .home-lab-migration-featured .lvp-business-image.has-profile-logo{
-    padding:22px!important;
+    height:190px!important;
+    min-height:190px!important;
+    max-height:190px!important;
+    padding:18px!important;
+  }
+  .home-lab-migration-featured .lvp-business-logo-fallback-img{
+    width:76%!important;
+    height:76%!important;
+    max-height:150px!important;
   }
   .home-lab-migration-featured .lvp-business-image img.logo-contain{
     object-fit:contain!important;
