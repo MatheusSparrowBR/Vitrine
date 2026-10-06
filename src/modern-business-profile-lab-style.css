@@ -942,3 +942,40 @@
     flex-basis:22px!important;
   }
 }
+
+
+/* Ensure the desktop notification bell remains visible inside the compact action card. */
+.mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-notifications{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-notifications .mbp-notification-svg{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:15px!important;
+  height:15px!important;
+  min-width:15px!important;
+  min-height:15px!important;
+  flex:0 0 15px!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  color:currentColor!important;
+  stroke:currentColor!important;
+  fill:none!important;
+}
+.mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-notifications .mbp-notification-label{
+  display:block!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  line-height:1!important;
+}
+@media(max-width:760px){
+  .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-notifications .mbp-notification-svg{
+    width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;flex-basis:14px!important;
+  }
+}
