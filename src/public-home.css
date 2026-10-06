@@ -867,3 +867,12 @@
     object-position:center!important;
   }
 }
+
+/* Profile-logo safeguards for featured cards. */
+.home-lab-migration-featured .lvp-business-image.has-profile-logo{
+  aspect-ratio:auto!important;
+}
+.home-lab-migration-featured .lvp-business-logo-visual{
+  max-width:100%!important;
+  max-height:100%!important;
+}
