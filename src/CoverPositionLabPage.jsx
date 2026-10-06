@@ -4,9 +4,9 @@ import './cover-position-lab.css'
 const DEFAULT={
  x:0,
  y:0,
- zoom:1,
- desktop:{x:0,y:0,zoom:1},
- mobile:{x:0,y:0,zoom:1}
+ zoom:0.85,
+ desktop:{x:0,y:0,zoom:0.85},
+ mobile:{x:0,y:0,zoom:0.85}
 }
 
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,v))
@@ -68,7 +68,7 @@ export default function CoverPositionLabPage(){
  }
  const onPointerUp=()=>setDrag(null)
 
- const reset=()=>update({x:0,y:0,zoom:1})
+ const reset=()=>update({x:0,y:0,zoom:0.85})
  const save=()=>{
   localStorage.setItem('vitrine-cover-position-lab',JSON.stringify(settings))
   window.alert('Ajuste salvo apenas neste navegador (modo Lab).')
@@ -135,8 +135,8 @@ export default function CoverPositionLabPage(){
 
      <div className="cplab-card">
       <h2>Zoom</h2>
-      <div className="cplab-zoom-row"><button type="button" onClick={()=>update({zoom:clamp(current.zoom-.05,1,1.8)})}>−</button><strong>{current.zoom.toFixed(2)}×</strong><button type="button" onClick={()=>update({zoom:clamp(current.zoom+.05,1,1.8)})}>+</button></div>
-      <input type="range" min="1" max="1.8" step="0.01" value={current.zoom} onChange={e=>update({zoom:Number(e.target.value)})}/>
+      <div className="cplab-zoom-row"><button type="button" onClick={()=>update({zoom:clamp(current.zoom-.05,0.6,1.8)})}>−</button><strong>{current.zoom.toFixed(2)}×</strong><button type="button" onClick={()=>update({zoom:clamp(current.zoom+.05,0.6,1.8)})}>+</button></div>
+      <input type="range" min="0.6" max="1.8" step="0.01" value={current.zoom} onChange={e=>update({zoom:Number(e.target.value)})}/>
      </div>
 
      <div className="cplab-card">

@@ -13,3 +13,11 @@ test('editor de capa Lab existe de forma isolada, sem dependência de banco',()=
  assert.match(css,/\.cplab-stage\{[\s\S]*touch-action:none/)
  assert.match(css,/\.cplab-stage-wrap\.mobile \.cplab-stage\{/)
 })
+
+
+test('editor de capa permite reduzir o zoom abaixo de 1x',()=>{
+ const page=fs.readFileSync('src/CoverPositionLabPage.jsx','utf8')
+ assert.match(page,/clamp\(current\.zoom-\.05,0\.6,1\.8\)/)
+ assert.match(page,/type="range" min="0\.6" max="1\.8"/)
+ assert.match(page,/zoom:0\.85/)
+})
