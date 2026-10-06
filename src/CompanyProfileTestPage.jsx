@@ -115,7 +115,7 @@ export default function CompanyProfileTestPage(){
     <div className="cpl-identity">
      <div className="cpl-logo"><img src={b.logo} alt=""/></div>
      <div className="cpl-copy"><span className="cpl-kicker">EMPRESA LOCAL</span><p>{b.description}</p><div className="cpl-rating"><Stars/><strong>{b.rating}</strong><span>{b.reviews}</span></div><div className="cpl-tags"><span>Consumo no local</span><span>Delivery</span><span>Retirada</span></div></div>
-     <div className="cpl-actions"><button type="button" className={saved?'active':''} onClick={()=>setSaved(v=>!v)}><I n="heart" s={16} fill={saved}/>{saved?'Salvo':'Salvar'}</button><button type="button" onClick={share}><I n="share" s={16}/>Compartilhar</button></div>
+     <div className="cpl-actions"><button type="button" className={saved?'active':''} onClick={()=>setSaved(v=>!v)}><I n="heart" s={16} fill={saved}/>{saved?'Salvo':'Salvar'}</button><a className="cpl-edit-cover" href="/capa-teste">✏️ Editar capa</a><button type="button" onClick={share}><I n="share" s={16}/>Compartilhar</button></div>
     </div>
     <div className="cpl-primary"><a className="wa" href={wa} target="_blank" rel="noreferrer"><I n="phone" s={16}/> Falar no WhatsApp</a><a href="https://www.google.com/maps/search/?api=1&query=Rua+Gustavo+Richard+245+Laguna+SC"><I n="pin" s={16}/> Como chegar</a></div>
    </section>
