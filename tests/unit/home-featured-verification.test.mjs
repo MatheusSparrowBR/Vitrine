@@ -27,3 +27,13 @@ test('badge de verificada permanece compacto dentro do titulo do card',()=>{
  assert.match(css,/max-width:max-content!important/)
  assert.doesNotMatch(css,/\.home-lab-migration-featured \.home-lab-migration-card \.verified\{[\s\S]*position:absolute!important/)
 })
+
+test('controles do card de destaque permanecem visiveis dentro da imagem',()=>{
+ const css=fs.readFileSync('src/public-home.css','utf8')
+ assert.match(css,/\.lvp-migration-save\{[\s\S]*z-index:6!important/)
+ assert.match(css,/\.lvp-migration-save\{[\s\S]*width:34px!important/)
+ assert.match(css,/\.lvp-migration-save\{[\s\S]*min-width:34px!important/)
+ assert.match(css,/\.lvp-migration-status-badge\{[\s\S]*max-width:calc\(100% - 105px\)!important/)
+ assert.match(css,/\.home-lab-migration-featured \.home-lab-migration-card \.lvp-business-image\{[\s\S]*width:100%!important/)
+ assert.match(css,/\.home-lab-migration-featured \.home-lab-migration-card \.lvp-business-image\{[\s\S]*overflow:hidden!important/)
+})
