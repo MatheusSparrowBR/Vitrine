@@ -26,9 +26,31 @@ test('perfil público usa exatamente o mesmo transform salvo pelo editor',()=>{
  const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
  const css=fs.readFileSync('src/modern-business-profile-lab-style.css','utf8')
  assert.ok(page.includes('mbp-cover-positioned'))
- assert.ok(page.includes('--cover-scalex-desktop'))
- assert.ok(page.includes('--cover-scaley-mobile'))
+ assert.ok(page.includes('coverPositionCssVars(coverPositionDesktop,\'desktop\')'))
+ assert.ok(page.includes('coverPositionCssVars(coverPositionMobile,\'mobile\')'))
  assert.match(css,/img\.mbp-cover-positioned\{[\s\S]*object-fit:contain!important/)
  assert.match(css,/scaleX\(var\(--cover-scalex-desktop\)\) scaleY\(var\(--cover-scaley-desktop\)\)/)
  assert.match(css,/scaleX\(var\(--cover-scalex-mobile\)\) scaleY\(var\(--cover-scaley-mobile\)\)/)
+})
+
+test('editor usa a mesma proporção do frame final desktop e mobile',()=>{
+ const page=fs.readFileSync('src/CoverPositionEditor.jsx','utf8'),css=fs.readFileSync('src/cover-position-editor.css','utf8')
+ assert.match(page,/aspectRatio:mode==='desktop'\?'1180 \/ 330':'1\.87 \/ 1'/)
+ assert.match(page,/left:'calc\(50% \+ '\+current\.xPct\+'%\)'/)
+ assert.match(css,/\.cover-editor-stage\{position:relative;width:100%;height:auto/)
+})
+
+test('posições antigas em pixels são convertidas para percentuais responsivos',()=>{
+ const util=fs.readFileSync('src/cover-position-utils.js','utf8')
+ assert.match(util,/raw\.unit==='percent'\|\|raw\.xPct!=null\|\|raw\.yPct!=null/)
+ assert.match(util,/xPct:\(Number\(raw\.x\)\|\|0\)\/ref\.width\*100/)
+ assert.match(util,/yPct:\(Number\(raw\.y\)\|\|0\)\/ref\.height\*100/)
+})
+
+test('perfil usa posicionamento percentual com o mesmo frame responsivo do editor',()=>{
+ const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8'),css=fs.readFileSync('src/modern-business-profile-lab-style.css','utf8')
+ assert.match(page,/coverPositionCssVars\(coverPositionDesktop,'desktop'\)/)
+ assert.match(css,/position:absolute!important;display:block!important;width:100%!important/)
+ assert.match(css,/left:calc\(50% \+ var\(--cover-x-desktop\)\)/)
+ assert.match(css,/left:calc\(50% \+ var\(--cover-x-mobile\)\)/)
 })
