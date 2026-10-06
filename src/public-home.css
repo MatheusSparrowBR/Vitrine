@@ -1025,3 +1025,34 @@
   max-width:100%!important;
   max-height:100%!important;
 }
+
+/* Desktop rhythm refinement: reduce stacked section padding so consecutive Home sections stay visually connected. */
+@media(min-width:761px){
+  .lvp-categories{
+    padding-top:48px;
+    padding-bottom:30px;
+  }
+  .lvp-featured{
+    padding-top:48px;
+    padding-bottom:30px;
+  }
+  .lvp-needs{
+    padding-top:48px;
+    padding-bottom:48px;
+  }
+  .lvp-sponsored-wrap{
+    padding-top:18px;
+    padding-bottom:0;
+  }
+  .lvp-events{
+    padding-top:48px;
+    padding-bottom:48px;
+  }
+  .lvp-local-guide{
+    padding-top:46px!important;
+    padding-bottom:44px!important;
+  }
+  .lvp-business-cta-section{
+    padding:48px 0;
+  }
+}
