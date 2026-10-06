@@ -43,8 +43,8 @@ test('editor usa a mesma proporção do frame final desktop e mobile',()=>{
 test('posições antigas em pixels são convertidas para percentuais responsivos',()=>{
  const util=fs.readFileSync('src/cover-position-utils.js','utf8')
  assert.match(util,/raw\.unit==='percent'\|\|raw\.xPct!=null\|\|raw\.yPct!=null/)
- assert.match(util,/xPct:\(Number\(raw\.x\)\|\|0\)\/ref\.width\*100/)
- assert.match(util,/yPct:\(Number\(raw\.y\)\|\|0\)\/ref\.height\*100/)
+ assert.match(util,/xPct:clamp\(\(Number\(raw\.x\)\|\|0\)\/ref\.width\*100,-50,50\)/)
+ assert.match(util,/yPct:clamp\(\(Number\(raw\.y\)\|\|0\)\/ref\.height\*100,-50,50\)/)
 })
 
 test('perfil usa posicionamento percentual com o mesmo frame responsivo do editor',()=>{
