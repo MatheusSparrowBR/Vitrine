@@ -1,25 +1,27 @@
 export const COVER_FRAME_REFERENCE={desktop:{width:1180,height:330},mobile:{width:360,height:180}}
 export const DEFAULT_COVER_POSITION={xPct:0,yPct:0,zoom:1,scaleX:1,scaleY:1,unit:'percent'}
+const clamp=(value,min,max)=>Math.min(max,Math.max(min,value))
+const numberOr=(value,fallback)=>Number.isFinite(Number(value))?Number(value):fallback
 
 export function normalizeCoverPosition(value={},mode='desktop'){
  const raw=value&&typeof value==='object'?value:{}
  if(raw.unit==='percent'||raw.xPct!=null||raw.yPct!=null){
   return {
-   xPct:Number.isFinite(Number(raw.xPct))?Number(raw.xPct):0,
-   yPct:Number.isFinite(Number(raw.yPct))?Number(raw.yPct):0,
-   zoom:Number.isFinite(Number(raw.zoom))?Number(raw.zoom):1,
-   scaleX:Number.isFinite(Number(raw.scaleX))?Number(raw.scaleX):1,
-   scaleY:Number.isFinite(Number(raw.scaleY))?Number(raw.scaleY):1,
+   xPct:clamp(numberOr(raw.xPct,0),-50,50),
+   yPct:clamp(numberOr(raw.yPct,0),-50,50),
+   zoom:clamp(numberOr(raw.zoom,1),0.6,1.8),
+   scaleX:clamp(numberOr(raw.scaleX,1),0.6,1.8),
+   scaleY:clamp(numberOr(raw.scaleY,1),0.6,1.8),
    unit:'percent'
   }
  }
  const ref=COVER_FRAME_REFERENCE[mode]||COVER_FRAME_REFERENCE.desktop
  return {
-  xPct:(Number(raw.x)||0)/ref.width*100,
-  yPct:(Number(raw.y)||0)/ref.height*100,
-  zoom:Number.isFinite(Number(raw.zoom))?Number(raw.zoom):1,
-  scaleX:Number.isFinite(Number(raw.scaleX))?Number(raw.scaleX):1,
-  scaleY:Number.isFinite(Number(raw.scaleY))?Number(raw.scaleY):1,
+  xPct:clamp((Number(raw.x)||0)/ref.width*100,-50,50),
+  yPct:clamp((Number(raw.y)||0)/ref.height*100,-50,50),
+  zoom:clamp(numberOr(raw.zoom,1),0.6,1.8),
+  scaleX:clamp(numberOr(raw.scaleX,1),0.6,1.8),
+  scaleY:clamp(numberOr(raw.scaleY,1),0.6,1.8),
   unit:'percent'
  }
 }
