@@ -299,7 +299,7 @@
 
   .lvp-mobile-bottom-nav{
     position:fixed;left:0;right:0;bottom:0;z-index:1100;
-    display:none;
+    display:block;
     padding:5px 8px calc(5px + env(safe-area-inset-bottom));
     border-top:1px solid #dce6f0;
     background:#fff;
@@ -342,9 +342,6 @@
     color:#216df3;
   }
   .lvp-mobile-bottom-nav a:active{transform:scale(.98)}
-  @media(max-width:760px){
-    .lvp-mobile-bottom-nav{display:block}
-  }
 }
 
 /* Featured businesses: profile/logo image stays fully visible and centered. */
