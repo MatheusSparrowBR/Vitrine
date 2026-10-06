@@ -16,8 +16,9 @@ function normalizePeriod(period){
   return {open:String(source.open||''),close:String(source.close||'')}
 }
 
-export function normalizeDay(value){
-  const source=value&&typeof value==='object'?value:{}
+export function normalizeDay(value,defaultClosed=false){
+  const hasValue=value&&typeof value==='object'
+  const source=hasValue?value:{}
   const periods=Array.isArray(source.periods)
     ? source.periods.slice(0,2).map(normalizePeriod)
     : [
@@ -25,12 +26,12 @@ export function normalizeDay(value){
         normalizePeriod({open:source.breakOpen??source.open2??'',close:source.breakClose??source.close2??''})
       ]
   while(periods.length<2)periods.push(EMPTY_PERIOD())
-  return {closed:Boolean(source.closed),periods}
+  return {closed:hasValue?Boolean(source.closed):defaultClosed,periods}
 }
 
 export function normalizeHours(value){
   const source=value&&typeof value==='object'?value:{}
-  return Object.fromEntries(DAYS.map(([key])=>[key,normalizeDay(source[key])]))
+  return Object.fromEntries(DAYS.map(([key])=>[key,normalizeDay(source[key],key==='sunday')]))
 }
 
 function toMinutes(value){
@@ -78,9 +79,11 @@ export function getOpenStatus(value,date=new Date()){
   for(let offset=0;offset<7;offset+=1){
     const target=(index+offset)%7
     const periods=parsePeriods(hours[DAY_KEYS[target]])
+    const endedToday=offset===0&&periods.some(period=>now>=period.close)
     for(const period of periods){
       if(offset===0&&now>=period.open)continue
-      return{open:false,label:'Fechado agora',detail:offset===0?'Reabre às '+period.openLabel:'Abre às '+period.openLabel}
+      const label=offset===0&&endedToday?'Reabre às ':'Abre às '
+      return{open:false,label:'Fechado agora',detail:label+period.openLabel}
     }
   }
   return{open:false,label:'Fechado agora',detail:'Consulte os horários'}
