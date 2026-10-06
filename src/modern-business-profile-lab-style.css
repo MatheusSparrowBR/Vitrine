@@ -1117,10 +1117,11 @@
   object-fit:contain!important;
   object-position:center!important;
   background:#eef2ea!important;
-  transform:none!important;
+  transform:translate(var(--cover-x-desktop),var(--cover-y-desktop)) scale(var(--cover-zoom-desktop))!important;
+  transform-origin:center!important;
 }
 .mbp-profile-top .mbp-gallery-main:hover img{
-  transform:none!important;
+  transform:translate(var(--cover-x-desktop),var(--cover-y-desktop)) scale(var(--cover-zoom-desktop))!important;
 }
 .mbp-profile-top .mbp-gallery-side{
   display:grid!important;
@@ -1209,4 +1210,44 @@
   .mbp-profile-top .mbp-gallery-side{
     height:66px!important;
   }
+}
+
+/* Production cover editor trigger */
+.mbp-profile-top{position:relative}
+.mbp-cover-edit-button{
+  position:absolute!important;
+  top:12px!important;
+  right:12px!important;
+  z-index:20!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  min-height:32px!important;
+  padding:0 10px!important;
+  border:1px solid rgba(255,255,255,.7)!important;
+  border-radius:9px!important;
+  background:rgba(8,43,82,.9)!important;
+  color:#fff!important;
+  box-shadow:0 4px 12px rgba(8,43,82,.18)!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+}
+.mbp-cover-edit-button:hover{background:#216df3!important}
+@media(max-width:760px){
+  .mbp-profile-top .mbp-gallery-main img{
+    transform:translate(var(--cover-x-mobile),var(--cover-y-mobile)) scale(var(--cover-zoom-mobile))!important;
+  }
+  .mbp-cover-edit-button{
+    top:8px!important;
+    right:8px!important;
+    min-height:30px!important;
+    font-size:8px!important;
+    padding:0 8px!important;
+  }
+}
+@media(max-width:480px){
+  .mbp-cover-edit-button span{display:none}
+  .mbp-cover-edit-button{width:32px!important;min-width:32px!important;padding:0!important}
 }
