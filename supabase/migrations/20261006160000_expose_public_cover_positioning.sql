@@ -11,8 +11,6 @@ select
   b.description,
   b.logo_url,
   b.cover_url,
-  b.cover_position_desktop,
-  b.cover_position_mobile,
   b.phone,
   b.whatsapp,
   b.website_url,
@@ -35,7 +33,9 @@ select
   b.has_pickup,
   b.has_dine_in,
   public.business_search_featured_enabled(b.id) as search_featured,
-  b.ifood_url
+  b.ifood_url,
+  b.cover_position_desktop,
+  b.cover_position_mobile
 from public.businesses b
 left join public.cities c on c.id=b.city_id
 left join public.categories cat on cat.id=b.category_id
