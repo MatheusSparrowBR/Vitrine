@@ -26,7 +26,7 @@ test('perfil desktop não posiciona ações sobre a galeria e preserva a imagem 
  const css=read('src/modern-business-profile-lab-style.css')
  assert.match(css,/@media\(min-width:1051px\)\{[\s\S]*\.mbp-profile-top \.mbp-profile-shortcuts\{[\s\S]*position:static!important/)
  assert.match(css,/\.mbp-profile-top \.mbp-gallery\{[\s\S]*overflow:hidden!important/)
- assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-fit:cover!important/)
+ assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-fit:contain!important/)
 })
 
 
@@ -35,7 +35,7 @@ test('galeria do perfil mantém a capa centralizada e as fotos em faixa inferior
  assert.match(css,/\.mbp-profile-top \.mbp-gallery\{[\s\S]*grid-template-columns:1fr!important/)
  assert.match(css,/\.mbp-profile-top \.mbp-gallery\{[\s\S]*grid-template-rows:minmax\(340px,380px\) 112px!important/)
  assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-fit:contain!important/)
- assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-position:50% 58%!important/)
+ assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-position:center!important/)
  assert.ok(css.includes('.mbp-profile-top .mbp-gallery-side'))
  assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'))
 })
