@@ -1082,3 +1082,117 @@
     position:static!important;
   }
 }
+
+/* Gallery redesign: the company cover stays fixed and centered; additional photos become a clean strip below. */
+.mbp-profile-top .mbp-gallery{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:minmax(340px,380px) 112px!important;
+  gap:8px!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  background:#f4f6f1!important;
+  padding:0!important;
+}
+.mbp-profile-top .mbp-gallery-main{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  border-radius:0!important;
+  background:#f4f6f1!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+}
+.mbp-profile-top .mbp-gallery-main img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#f4f6f1!important;
+  transform:none!important;
+}
+.mbp-profile-top .mbp-gallery-main:hover img{
+  transform:none!important;
+}
+.mbp-profile-top .mbp-gallery-side{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-rows:1fr!important;
+  gap:8px!important;
+  height:112px!important;
+  min-width:0!important;
+  background:#f4f6f1!important;
+}
+.mbp-profile-top .mbp-gallery-thumb,
+.mbp-profile-top .mbp-gallery-more{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+}
+.mbp-profile-top .mbp-gallery-thumb img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
+.mbp-profile-top .mbp-gallery-more{
+  border:1px solid #dce5de!important;
+  background:linear-gradient(135deg,#eef6ee,#e5edf0)!important;
+  color:#173754!important;
+}
+.mbp-profile-top .mbp-gallery-more strong{
+  font-size:22px!important;
+  line-height:1!important;
+  margin-bottom:4px!important;
+  color:#173754!important;
+}
+.mbp-profile-top .mbp-gallery-more span{
+  font-size:10px!important;
+  font-weight:900!important;
+  color:#52697f!important;
+}
+.mbp-profile-top .mbp-gallery.is-empty{
+  grid-template-rows:minmax(340px,380px)!important;
+}
+.mbp-profile-top .mbp-gallery.is-empty .mbp-gallery-side{
+  display:none!important;
+}
+@media(max-width:760px){
+  .mbp-profile-top .mbp-gallery{
+    grid-template-rows:220px 78px!important;
+    gap:6px!important;
+  }
+  .mbp-profile-top .mbp-gallery.is-empty{
+    grid-template-rows:220px!important;
+  }
+  .mbp-profile-top .mbp-gallery-side{
+    height:78px!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  .mbp-profile-top .mbp-gallery-thumb,
+  .mbp-profile-top .mbp-gallery-more{
+    border-radius:10px!important;
+  }
+  .mbp-profile-top .mbp-gallery-more strong{
+    font-size:16px!important;
+  }
+  .mbp-profile-top .mbp-gallery-more span{
+    font-size:8px!important;
+  }
+}
+@media(max-width:480px){
+  .mbp-profile-top .mbp-gallery{
+    grid-template-rows:195px 66px!important;
+  }
+  .mbp-profile-top .mbp-gallery.is-empty{
+    grid-template-rows:195px!important;
+  }
+  .mbp-profile-top .mbp-gallery-side{
+    height:66px!important;
+  }
+}
