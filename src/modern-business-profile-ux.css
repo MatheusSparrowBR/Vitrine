@@ -507,18 +507,19 @@
 /* Desktop profile hours: increase legibility while preserving the compact sidebar card. */
 @media(min-width:761px){
   .mbp-hours li{
-    font-size:10px!important;
-    line-height:1.35!important;
+    font-size:11px!important;
+    line-height:1.4!important;
   }
   .mbp-hours li strong,
   .mbp-hours li span{
-    font-size:10px!important;
-    line-height:1.35!important;
+    font-size:11px!important;
+    line-height:1.4!important;
   }
   .mbp-side-title>span{
-    font-size:9px!important;
+    font-size:10px!important;
   }
   .mbp-note{
-    font-size:9px!important;
+    font-size:10px!important;
+    line-height:1.5!important;
   }
 }
