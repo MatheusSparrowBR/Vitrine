@@ -12,3 +12,23 @@ test('área segura da capa prioriza a região superior útil do perfil e reserva
  assert.match(css,/\.cover-editor-safe\{position:absolute;left:9%;right:9%;top:6%;bottom:26%/)
  assert.match(css,/Evite conteúdo importante na faixa inferior/)
 })
+
+test('editor permite alongamento independente de largura e altura',()=>{
+ const page=fs.readFileSync('src/CoverPositionEditor.jsx','utf8')
+ assert.ok(page.includes('scaleX'))
+ assert.ok(page.includes('scaleY'))
+ assert.match(page,/aria-label="Largura da capa"/)
+ assert.match(page,/aria-label="Altura da capa"/)
+ assert.ok(page.includes("scale('+current.zoom+') scaleX('+current.scaleX+') scaleY('+current.scaleY+')"))
+})
+
+test('perfil público usa exatamente o mesmo transform salvo pelo editor',()=>{
+ const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
+ const css=fs.readFileSync('src/modern-business-profile-lab-style.css','utf8')
+ assert.ok(page.includes('mbp-cover-positioned'))
+ assert.ok(page.includes('--cover-scalex-desktop'))
+ assert.ok(page.includes('--cover-scaley-mobile'))
+ assert.match(css,/img\.mbp-cover-positioned\{[\s\S]*object-fit:contain!important/)
+ assert.match(css,/scaleX\(var\(--cover-scalex-desktop\)\) scaleY\(var\(--cover-scaley-desktop\)\)/)
+ assert.match(css,/scaleX\(var\(--cover-scalex-mobile\)\) scaleY\(var\(--cover-scaley-mobile\)\)/)
+})
