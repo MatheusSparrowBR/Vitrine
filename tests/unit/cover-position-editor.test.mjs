@@ -54,3 +54,8 @@ test('perfil usa posicionamento percentual com o mesmo frame responsivo do edito
  assert.match(css,/left:calc\(50% \+ var\(--cover-x-desktop\)\)/)
  assert.match(css,/left:calc\(50% \+ var\(--cover-x-mobile\)\)/)
 })
+
+test('hover da capa mantém exatamente o mesmo enquadramento salvo',()=>{
+ const css=fs.readFileSync('src/modern-business-profile-lab-style.css','utf8')
+ assert.match(css,/mbp-gallery-main:hover img\.mbp-cover-positioned\{left:calc\(50% \+ var\(--cover-x-desktop\)\)!important;top:calc\(50% \+ var\(--cover-y-desktop\)\)!important;transform:translate\(-50%,-50%\) scale\(var\(--cover-zoom-desktop\)\)/)
+})
