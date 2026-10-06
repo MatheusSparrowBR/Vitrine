@@ -109,7 +109,8 @@ function getCityRoute(path){
  const p=partsOf(path)
  if(p.length===0)return {kind:'home',citySlug:'laguna'}
  if(p.length===1&&!['login','planos','conta','admin','privacidade','termos','atualizar-senha','usuario','preview-lancamento'].includes(p[0].toLowerCase()))return {kind:'home',citySlug:p[0].toLowerCase()}
- if(p.length===2&&!['admin','usuario'].includes(p[0].toLowerCase())){const citySlug=p[0].toLowerCase(),child=p[1].toLowerCase();if(child==='eventos')return {kind:'events',citySlug};if(child==='empresas')return {kind:'businesses',citySlug};if(child==='promocoes')return {kind:'promotions',citySlug}}\n if(p.length===3&&p[1].toLowerCase()==='evento')return {kind:'event',citySlug:p[0].toLowerCase(),eventId:p[2]}
+ if(p.length===2&&!['admin','usuario'].includes(p[0].toLowerCase())){const citySlug=p[0].toLowerCase(),child=p[1].toLowerCase();if(child==='eventos')return {kind:'events',citySlug};if(child==='empresas')return {kind:'businesses',citySlug};if(child==='promocoes')return {kind:'promotions',citySlug}}
+ if(p.length===3&&p[1].toLowerCase()==='evento')return {kind:'event',citySlug:p[0].toLowerCase(),eventId:p[2]}
  if(p.length===4&&p[1].toLowerCase()==='empresas'&&p[2].toLowerCase()==='categoria')return {kind:'businesses',citySlug:p[0].toLowerCase(),categorySlug:p[3]}
  if(p.length===3&&p[1].toLowerCase()==='empresa')return {kind:'business',citySlug:p[0].toLowerCase(),businessSlug:p[2]}
  return null
