@@ -32,3 +32,10 @@ test('horarios desktop ficam legíveis sem alterar a estrutura do card',()=>{
  assert.match(css,/@media\(min-width:761px\)\{[\s\S]*\.mbp-hours li\{[\s\S]*font-size:10px!important/)
  assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:10px!important/)
 })
+
+
+test('horarios desktop usam tipografia maior para leitura',()=>{
+ assert.match(css,/@media\(min-width:761px\)\{[\s\S]*\.mbp-hours li\{[\s\S]*font-size:11px!important/)
+ assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:11px!important/)
+ assert.match(css,/\.mbp-side-title>span\{[\s\S]*font-size:10px!important/)
+})
