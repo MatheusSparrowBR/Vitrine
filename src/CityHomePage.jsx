@@ -135,7 +135,7 @@ export default function CityHomePage({citySlug='laguna'}){
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
      <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span><Icon name={categoryIcon(c.name,c.icon)} size={20}/></span><b>{c.name}</b></a>)}</div>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.min(maxCatStart,v+1))} disabled={catStart>=maxCatStart} aria-label='Próximas categorias'>›</button>
-    </div>
+    <div className='sr-only lvp-category-count' aria-live='polite'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
    </section>
    <section id='explorar' className='lvp-wrap lvp-featured home-lab-migration-featured'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS LOCAIS</span><h2>Empresas em destaque</h2><p>Encontre negócios reais cadastrados em {city?.name||'sua cidade'}.</p></div><div className='lvp-results-context-wrap'><span className='lvp-results-counter'>{Math.min(featuredBusinesses.length,8)} {Math.min(featuredBusinesses.length,8)===1?'estabelecimento encontrado':'estabelecimentos encontrados'}</span><span className='lvp-results-context'><Icon name='pin' size={14}/>{city?.name||'Sua cidade'} - {city?.state||'SC'}</span></div></div>
