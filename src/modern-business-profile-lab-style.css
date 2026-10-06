@@ -1117,10 +1117,11 @@
   object-fit:contain!important;
   object-position:center!important;
   background:#eef2ea!important;
-  transform:none!important;
+  transform:translate(var(--cover-x-desktop),var(--cover-y-desktop)) scale(var(--cover-zoom-desktop))!important;
+  transform-origin:center!important;
 }
 .mbp-profile-top .mbp-gallery-main:hover img{
-  transform:none!important;
+  transform:translate(var(--cover-x-desktop),var(--cover-y-desktop)) scale(var(--cover-zoom-desktop))!important;
 }
 .mbp-profile-top .mbp-gallery-side{
   display:grid!important;
