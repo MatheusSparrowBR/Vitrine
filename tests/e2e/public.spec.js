@@ -85,7 +85,7 @@ test('home usa o conjunto atual de categorias e permite abrir uma categoria',asy
  expect(total).toBeGreaterThan(0)
  expect(count).toBeLessThanOrEqual(8)
  const next=box.locator('.lvp-arrow').last()
- if(total>7){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
+ if(total>8){await expect(next).toBeEnabled();await next.click()}else{await expect(next).toBeDisabled()}
  if(count)await expect(cards.first()).toHaveAttribute('href',/\/laguna\/empresas\/categoria\/.+/)
 })
 
