@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState}from'react'
 import './cover-position-editor.css'
+import{normalizeCoverPosition,DEFAULT_COVER_POSITION}from'./cover-position-utils.js'
 const DEFAULT=DEFAULT_COVER_POSITION
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,v))
 export default function CoverPositionEditor({coverUrl,businessName='Empresa',desktopPosition,mobilePosition,onSave,onClose,saveLabel='Salvar enquadramento'}){
