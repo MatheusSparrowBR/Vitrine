@@ -18,3 +18,12 @@ test('empresas em destaque carregam e exibem a média das avaliações publicada
  assert.match(page,/avg\.toFixed\(1\)/)
 })
 
+test('badge de verificada permanece compacto dentro do titulo do card',()=>{
+ const css=fs.readFileSync('src/public-home.css','utf8')
+ assert.match(css,/\.home-lab-migration-featured \.home-lab-migration-card \.lvp-migration-title-row \.verified\{/)
+ assert.match(css,/position:static!important/)
+ assert.match(css,/width:auto!important/)
+ assert.match(css,/height:auto!important/)
+ assert.match(css,/max-width:max-content!important/)
+ assert.doesNotMatch(css,/\.home-lab-migration-featured \.home-lab-migration-card \.verified\{[\s\S]*position:absolute!important/)
+})
