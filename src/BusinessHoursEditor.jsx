@@ -38,7 +38,7 @@ export default function BusinessHoursEditor({value,onChange}){
   })
  }
 
- const removeSecondPeriod=day=>{
+ const removeSecondPeriod=(key,day)=>{
   onChange({
    ...hours,
    [day.key]:{
@@ -143,7 +143,7 @@ export default function BusinessHoursEditor({value,onChange}){
          />
         </label>
        </div>
-       <button type="button" className="hours-remove-period" onClick={()=>removeSecondPeriod(day)} aria-label={'Remover 2º período de '+label}>Remover 2º período</button>
+       <button type="button" className="hours-remove-period" onClick={()=>removeSecondPeriod(key,day)} aria-label={'Remover 2º período de '+label}>Remover 2º período</button>
       </div>}
 
       {!split&&<button type="button" className="hours-add-period" onClick={()=>addSecondPeriod({key,periods:day.periods})}>
