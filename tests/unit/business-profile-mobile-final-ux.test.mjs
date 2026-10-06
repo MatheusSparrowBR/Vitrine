@@ -44,7 +44,7 @@ test('horarios desktop usam tipografia maior para leitura',()=>{
 test('perfil mobile usa Início no primeiro item e mantém quatro células de navegação com o mesmo tamanho',()=>{
  const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
  assert.match(page,/className="mbp-mobile-home"/)
- assert.match(page,/href=\{'\/\'+citySlug\}/)
+ assert.ok(page.includes("href={'/'+citySlug}"))
  assert.match(page,/<span>Início<\/span>/)
  assert.doesNotMatch(page,/<span>Perfil<\/span>/)
  assert.match(css,/\.mbp-mobile-bottom>a,\n \.mbp-mobile-bottom>\.mbp-relationship-row-compact\{[\s\S]*width:100%/)
