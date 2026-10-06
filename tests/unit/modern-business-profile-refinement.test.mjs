@@ -20,3 +20,11 @@ test('refinamento visual do perfil define hierarquia para galeria, contato e aç
  assert.ok(css.includes('.mbp-profile-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));'))
  assert.match(css,/\.mbp-primary-cta/)
 })
+
+
+test('perfil desktop não posiciona ações sobre a galeria e preserva a imagem principal',()=>{
+ const css=read('src/modern-business-profile-lab-style.css')
+ assert.match(css,/@media\(min-width:1051px\)\{[\s\S]*\.mbp-profile-top \.mbp-profile-shortcuts\{[\s\S]*position:static!important/)
+ assert.match(css,/\.mbp-profile-top \.mbp-gallery\{[\s\S]*overflow:hidden!important/)
+ assert.match(css,/\.mbp-profile-top \.mbp-gallery-main img\{[\s\S]*object-fit:contain!important/)
+})

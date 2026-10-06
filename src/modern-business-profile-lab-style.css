@@ -1040,3 +1040,45 @@
     box-sizing:border-box!important;
   }
 }
+
+
+/* Gallery/media regression guard: keep desktop actions in the identity row, never over the photo grid. */
+@media(min-width:1051px){
+  .mbp-profile-top .mbp-identity{
+    position:relative!important;
+    grid-template-columns:82px minmax(0,1fr) minmax(420px,520px)!important;
+    gap:15px!important;
+    align-items:start!important;
+    min-height:92px!important;
+  }
+  .mbp-profile-top .mbp-identity-copy{
+    padding-right:0!important;
+  }
+  .mbp-profile-top .mbp-profile-shortcuts{
+    position:static!important;
+    grid-column:auto!important;
+    grid-row:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+}
+
+.mbp-profile-top .mbp-gallery{
+  overflow:hidden!important;
+}
+.mbp-profile-top .mbp-gallery-main img{
+  object-fit:contain!important;
+  background:#eef2f6!important;
+}
+.mbp-profile-top .mbp-gallery-thumb img{
+  object-fit:cover!important;
+  object-position:center!important;
+}
+
+@media(max-width:1050px){
+  .mbp-profile-top .mbp-profile-shortcuts{
+    position:static!important;
+  }
+}
