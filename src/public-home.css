@@ -463,7 +463,10 @@
   text-decoration:none!important;
 }
 .home-lab-migration-categories .lvp-cat-box{
-  display:block!important;
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr) 34px!important;
+  align-items:center!important;
+  gap:10px!important;
   padding:0!important;
   border:0!important;
   border-radius:0!important;
@@ -506,7 +509,21 @@
   line-height:1.2!important;
   font-weight:650!important;
 }
-.home-lab-migration-categories .lvp-arrow,
+.home-lab-migration-categories .lvp-arrow{
+  display:grid!important;
+  place-items:center!important;
+  width:34px!important;
+  height:38px!important;
+  border:1px solid #dce6f0!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#173754!important;
+  font-size:18px!important;
+  box-shadow:none!important;
+}
+.home-lab-migration-categories .lvp-arrow:disabled{
+  opacity:.35!important;
+}
 .home-lab-migration-categories .lvp-category-count{
   display:none!important;
 }
@@ -760,6 +777,12 @@
   .home-lab-migration-featured .lvp-business-grid.home-lab-migration-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 @media(max-width:760px){
+  .home-lab-migration-categories .lvp-cat-box{
+    display:block!important;
+  }
+  .home-lab-migration-categories .lvp-arrow{
+    display:none!important;
+  }
   .home-lab-migration-categories .lvp-cat-grid{
     display:flex!important;
     grid-template-columns:none!important;
