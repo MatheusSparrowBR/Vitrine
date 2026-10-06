@@ -1,3 +1,5 @@
+import { formatHours } from './business-hours-utils.js'
+
 import { createClient } from '@supabase/supabase-js'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
@@ -5,7 +7,7 @@ const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabase = URL && KEY ? createClient(URL, KEY) : null
 const state = { mountedFor:'' }
 const esc = (v='') => String(v).replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))
-const days = [['monday','Segunda'],['tuesday','Terça'],['wednesday','Quarta'],['thursday','Quinta'],['friday','Sexta'],['saturday','Sábado'],['sunday','Domingo']]
+
 
 function injectStyles(){
   if(document.getElementById('vl-public-business-profile-css')) return
@@ -15,8 +17,7 @@ function injectStyles(){
   `; document.head.appendChild(s)
 }
 
-function formatHour(value){return value || '--'}
-function hourBlock(b){const h=b.opening_hours&&typeof b.opening_hours==='object'?b.opening_hours:{};return days.map(([key,label])=>{const row=h[key]||{};const closed=Boolean(row.closed);return `<div class="vlpb-hour ${closed?'closed':''}"><strong>${label}</strong><span>${closed?'Fechado':`${formatHour(row.open)} – ${formatHour(row.close)}`}</span></div>`}).join('')}
+const hourBlock=b=>formatHours(b?.opening_hours).map(day=>'<div class="vlpb-hour '+(day.closed?'closed':'')+'"><strong>'+esc(day.label)+'</strong><span>'+esc(day.text)+'</span></div>').join('')
 
 async function mount(){
   const hero=document.querySelector('.profile-hero');
