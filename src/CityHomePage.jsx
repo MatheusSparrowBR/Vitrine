@@ -204,10 +204,12 @@ export default function CityHomePage({citySlug='laguna'}){
    </section>
   </main>
   <nav className='lvp-mobile-bottom-nav' aria-label='Navegação principal mobile'>
-   <a href={base} className='is-active'><Icon name='grid' size={18}/><span>Início</span></a>
-   <a href={base+'/empresas'}><Icon name='search' size={18}/><span>Explorar</span></a>
-   <a href={base+'/promocoes'}><Icon name='tag' size={18}/><span>Ofertas</span></a>
-   <a href='/conta'><Icon name='user' size={18}/><span>Conta</span></a>
+   <div className='lvp-mobile-bottom-nav-inner'>
+    <a href={base} className='is-active' aria-current='page'><Icon name='home' size={22}/><span>Início</span></a>
+    <a href={base+'#categorias'}><Icon name='compass' size={22}/><span>Categorias</span></a>
+    <a href='/usuario/perfil?mode=personal&tab=favorites'><Icon name='heart' size={22}/><span>Salvos</span></a>
+    <a href='/conta?new=business'><Icon name='sparkle' size={22}/><span>Anunciar</span></a>
+   </div>
   </nav>
   <footer className='lvp-footer'>
    <div className='lvp-wrap lvp-footer-grid'>

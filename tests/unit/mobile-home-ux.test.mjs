@@ -22,13 +22,22 @@ test('home mobile usa navegação por toque nas categorias, empresas, promoçõe
  assert.match(c,/scroll-snap-type:x mandatory/)
 })
 
-test('home mobile possui navegação inferior acessível e links válidos',()=>{
+test('home mobile possui a navegação inferior no padrão do perfil e atalhos reais',()=>{
  const p=page()
+ const c=css()
  assert.match(p,/aria-label='Navegação principal mobile'/)
- assert.match(p,/href=\{base\+'\/empresas'\}/)
- assert.match(p,/href=\{base\+'\/promocoes'\}/)
- assert.match(p,/href='\/conta'/)
- assert.match(p,/name='user'/)
+ assert.match(p,/className='lvp-mobile-bottom-nav-inner'/)
+ assert.match(p,/href=\{base\+'#categorias'\}/)
+ assert.match(p,/href='\/usuario\/perfil\?mode=personal&tab=favorites'/)
+ assert.match(p,/href='\/conta\?new=business'/)
+ assert.match(p,/name='home'/)
+ assert.match(p,/name='compass'/)
+ assert.match(p,/name='heart'/)
+ assert.match(p,/name='sparkle'/)
+ assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*position:fixed/)
+ assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*left:0;right:0;bottom:0/)
+ assert.match(c,/\.lvp-mobile-bottom-nav-inner\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)/)
+ assert.match(c,/\.lvp-mobile-bottom-nav a\.is-active\{[\s\S]*background:#eef5ff/)
 })
 
 test('home mobile reduz a altura do hero e mantém busca utilizável',()=>{
