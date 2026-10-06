@@ -22,14 +22,14 @@ function injectStyles() {
   const style = document.createElement('style')
   style.id = 'vl-cities-admin-css'
   style.textContent = `
-    .vlcity-backdrop{position:fixed;inset:0;z-index:40000;background:rgba(4,10,20,.68);backdrop-filter:blur(7px);display:grid;place-items:center;padding:18px}.vlcity-modal{width:min(1050px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;padding:26px;box-shadow:0 30px 90px rgba(0,0,0,.28)}.vlcity-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.vlcity-kicker{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#2474ff}.vlcity-head h2{margin:7px 0 8px;font:800 28px/1.05 Manrope;color:#122033}.vlcity-head p{margin:0;color:#738196;font-size:12px;line-height:1.55}.vlcity-close{border:0;background:#eef3f8;border-radius:50%;width:36px;height:36px;font-size:22px;color:#607089;cursor:pointer}.vlcity-form{margin-top:22px;padding:18px;border:1px solid #e0e7ef;border-radius:16px;background:#fbfcfe}.vlcity-grid{display:grid;grid-template-columns:1.2fr .7fr 1fr 1fr;gap:11px}.vlcity-field{display:grid;gap:6px}.vlcity-field span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#6c7b90}.vlcity-field input{width:100%;box-sizing:border-box;border:1px solid #d9e1ea;border-radius:10px;background:#fff;padding:10px 11px;font:500 12px 'DM Sans';outline:none;color:#26384f}.vlcity-check{display:flex;align-items:center;gap:7px;font-size:11px;color:#506077;margin-top:12px}.vlcity-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.vlcity-actions button{border:1px solid #d6dfe9;background:#fff;border-radius:9px;padding:9px 12px;font:700 11px 'DM Sans';color:#34465c;cursor:pointer}.vlcity-actions .primary{background:#2474ff;border-color:#2474ff;color:#fff}.vlcity-status{min-height:18px;margin-top:9px;font-size:11px;color:#65748a}.vlcity-status.error{color:#a42f2f}.vlcity-list-head{display:flex;justify-content:space-between;align-items:center;margin:23px 0 11px}.vlcity-list-head strong{font:800 16px Manrope;color:#24364d}.vlcity-list-head span{font-size:10px;color:#7b8798}.vlcity-row{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:11px;border:1px solid #e0e7ef;border-radius:13px;background:#fff;margin-bottom:8px}.vlcity-icon{width:54px;height:54px;border-radius:12px;background:#eef4ff;display:grid;place-items:center;font-size:24px}.vlcity-info strong{display:block;font:800 14px Manrope;color:#25384e}.vlcity-info small{display:block;margin-top:3px;color:#7b8899;font-size:10px}.vlcity-actions-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.vlcity-actions-row button{border:1px solid #d7e0ea;background:#fff;border-radius:8px;padding:7px 9px;font:700 10px 'DM Sans';color:#3e5066;cursor:pointer}.vlcity-actions-row .toggle-off{background:#fff7e5;border-color:#ead5a5;color:#8b6500}.vlcity-actions-row .toggle-on{background:#eaf8f0;border-color:#b8dec8;color:#247b54}.vlcity-empty{padding:35px 15px;text-align:center;border:1px dashed #cdd8e4;border-radius:13px;color:#7b8899;font-size:11px}
+    .vlcity-backdrop{position:fixed;inset:0;z-index:40000;background:rgba(4,10,20,.68);backdrop-filter:blur(7px);display:grid;place-items:center;padding:18px}.vlcity-modal{width:min(1050px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;padding:26px;box-shadow:0 30px 90px rgba(0,0,0,.28)}.vlcity-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.vlcity-kicker{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#2474ff}.vlcity-head h2{margin:7px 0 8px;font:800 28px/1.05 Manrope;color:#122033}.vlcity-head p{margin:0;color:#738196;font-size:12px;line-height:1.55}.vlcity-close{border:0;background:#eef3f8;border-radius:50%;width:36px;height:36px;font-size:22px;color:#607089;cursor:pointer}.vlcity-form{margin-top:22px;padding:18px;border:1px solid #e0e7ef;border-radius:16px;background:#fbfcfe}.vlcity-grid{display:grid;grid-template-columns:1.2fr .7fr 1fr 1fr;gap:11px}.vlcity-field{display:grid;gap:6px}.vlcity-field span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#6c7b90}.vlcity-field input{width:100%;box-sizing:border-box;border:1px solid #d9e1ea;border-radius:10px;background:#fff;padding:10px 11px;font:500 12px 'DM Sans';outline:none;color:#26384f}.vlcity-check{display:flex;align-items:center;gap:7px;font-size:11px;color:#506077;margin-top:12px}.vlcity-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.vlcity-actions button{border:1px solid #d6dfe9;background:#fff;border-radius:9px;padding:9px 12px;font:700 11px 'DM Sans';color:#34465c;cursor:pointer}.vlcity-actions .primary{background:#2474ff;border-color:#2474ff;color:#fff}.vlcity-status{min-height:18px;margin-top:9px;font-size:11px;color:#65748a}.vlcity-status.error{color:#a42f2f}.vlcity-list-head{display:flex;justify-content:space-between;align-items:center;margin:23px 0 11px}.vlcity-list-head strong{font:800 16px Manrope;color:#24364d}.vlcity-list-head span{font-size:10px;color:#7b8798}.vlcity-row{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:11px;border:1px solid #e0e7ef;border-radius:13px;background:#fff;margin-bottom:8px}.vlcity-icon{width:54px;height:54px;border-radius:12px;background:#eef4ff;display:grid;place-items:center;font-size:24px}.vlcity-info strong{display:block;font:800 14px Manrope;color:#25384e}.vlcity-info small{display:block;margin-top:3px;color:#7b8899;font-size:10px}.vlcity-actions-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.vlcity-actions-row button{border:1px solid #d7e0ea;background:#fff;border-radius:8px;padding:7px 9px;font:700 10px 'DM Sans';color:#3e5066;cursor:pointer}.vlcity-actions-row .toggle-off{background:#fff7e5;border-color:#ead5a5;color:#8b6500}.vlcity-actions-row .toggle-on{background:#eaf8f0;border-color:#b8dec8;color:#247b54}.vlcity-empty{padding:35px 15px;text-align:center;border:1px dashed #cdd8e4;border-radius:13px;color:#7b8899;font-size:11px}.vlcity-bg-section{margin-top:14px;padding:14px;border:1px solid #dfe7ef;border-radius:13px;background:#f8fbff}.vlcity-bg-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.vlcity-bg-head strong{display:block;font-size:11px;color:#25384e}.vlcity-bg-head small{display:block;margin-top:3px;color:#7b8899;font-size:9px;line-height:1.4}.vlcity-bg-preview{margin-top:10px;height:135px;border-radius:11px;overflow:hidden;background:linear-gradient(115deg,#062746,#0f517e);border:1px solid #d8e3ed}.vlcity-bg-preview img{width:100%;height:100%;display:block;object-fit:cover}.vlcity-bg-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.vlcity-bg-actions button{border:1px solid #d6dfe9;background:#fff;border-radius:9px;padding:8px 10px;font:700 10px 'DM Sans';color:#34465c;cursor:pointer}.vlcity-bg-actions .primary{background:#2474ff;border-color:#2474ff;color:#fff}.vlcity-bg-actions button:disabled{opacity:.55;cursor:not-allowed}.vlcity-bg-note{margin-top:7px;color:#8492a3;font-size:9px}
     @media(max-width:760px){.vlcity-grid{grid-template-columns:1fr 1fr}.vlcity-row{grid-template-columns:45px 1fr}.vlcity-actions-row{grid-column:1/-1;justify-content:flex-start}.vlcity-icon{width:45px;height:45px}}@media(max-width:520px){.vlcity-modal{padding:18px}.vlcity-grid{grid-template-columns:1fr}.vlcity-actions{flex-direction:column}.vlcity-actions button{width:100%}}
   `
   document.head.appendChild(style)
 }
 
 async function loadCities() {
-  const { data, error } = await supabase.from('cities').select('id,name,state,slug,country,active,created_at,updated_at').order('name')
+  const { data, error } = await supabase.from('cities').select('id,name,state,slug,country,active,home_background_url,home_background_path,created_at,updated_at').order('name')
   if (error) throw error
   state.rows = data || []
 }
@@ -54,6 +54,16 @@ function render() {
         <label class="vlcity-field"><span>País</span><input name="country" value="${esc(editing?.country || 'BR')}" maxlength="2" placeholder="BR"></label>
       </div>
       <label class="vlcity-check"><input name="active" type="checkbox" ${editing?.active !== false ? 'checked' : ''}> Cidade ativa para os moradores</label>
+      <div class="vlcity-bg-section">
+        <div class="vlcity-bg-head"><div><strong>Fundo personalizado da Home</strong><small>Use uma foto real da cidade. Se não houver imagem, o fundo padrão do VitrineLocal continuará sendo usado.</small></div></div>
+        <div class="vlcity-bg-preview">${editing?.home_background_url ? `<img src="${esc(editing.home_background_url)}" alt="Fundo atual de ${esc(editing.name)}">` : '<span style="display:grid;place-items:center;height:100%;color:#cfe0ef;font:800 11px DM Sans">Fundo padrão VitrineLocal</span>'}</div>
+        <div class="vlcity-bg-actions">
+          <button type="button" class="primary" id="vlcity-bg-upload" ${editing ? '' : 'disabled'}>${editing?.home_background_url ? 'Trocar imagem' : 'Adicionar imagem'}</button>
+          ${editing?.home_background_url ? '<button type="button" id="vlcity-bg-remove">Remover imagem</button>' : ''}
+          <input id="vlcity-bg-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        </div>
+        <div class="vlcity-bg-note">${editing ? 'JPG, PNG ou WebP · até 15 MB.' : 'Salve a cidade primeiro para depois adicionar o fundo personalizado.'}</div>
+      </div>
       <div class="vlcity-status" id="vlcity-status"></div>
       <div class="vlcity-actions"><button type="button" id="vlcity-cancel">${editing ? 'Cancelar edição' : 'Limpar'}</button><button class="primary" type="submit">${editing ? 'Salvar alterações' : 'Criar cidade'}</button></div>
     </form>
@@ -63,6 +73,56 @@ function render() {
 
   root.querySelector('#vlcity-close').onclick = closeModal
   root.querySelector('#vlcity-cancel').onclick = () => { state.editingId = null; render() }
+
+  const bgUpload = root.querySelector('#vlcity-bg-upload')
+  const bgFile = root.querySelector('#vlcity-bg-file')
+  if (bgUpload && bgFile && editing) {
+    bgUpload.onclick = () => bgFile.click()
+    bgFile.onchange = async () => {
+      const file = bgFile.files?.[0]
+      bgFile.value = ''
+      if (!file) return
+      const valid = ['image/jpeg','image/png','image/webp'].includes(file.type)
+      if (!valid) return window.alert('Use JPG, PNG ou WebP.')
+      if (file.size > 15 * 1024 * 1024) return window.alert('A imagem ultrapassa 15 MB.')
+      bgUpload.disabled = true
+      bgUpload.textContent = 'Enviando…'
+      try {
+        const ext = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/png' ? 'png' : 'webp'
+        const path = 'city/' + editing.id + '/home-' + crypto.randomUUID() + '.' + ext
+        const upload = await supabase.storage.from('city-home-media').upload(path, file, { cacheControl: '31536000', contentType: file.type, upsert: false })
+        if (upload.error) throw upload.error
+        const url = supabase.storage.from('city-home-media').getPublicUrl(path).data.publicUrl
+        const update = await supabase.from('cities').update({ home_background_url: url, home_background_path: path, updated_at: new Date().toISOString() }).eq('id', editing.id)
+        if (update.error) {
+          await supabase.storage.from('city-home-media').remove([path]).catch(() => {})
+          throw update.error
+        }
+        if (editing.home_background_path && editing.home_background_path !== path) await supabase.storage.from('city-home-media').remove([editing.home_background_path]).catch(() => {})
+        await loadCities()
+        render()
+      } catch (error) {
+        bgUpload.disabled = false
+        bgUpload.textContent = editing.home_background_url ? 'Trocar imagem' : 'Adicionar imagem'
+        window.alert(error?.message || 'Não foi possível salvar o fundo da cidade.')
+      }
+    }
+  }
+  const bgRemove = root.querySelector('#vlcity-bg-remove')
+  if (bgRemove && editing) {
+    bgRemove.onclick = async () => {
+      if (!window.confirm('Remover o fundo personalizado e voltar ao fundo padrão?')) return
+      bgRemove.disabled = true
+      const update = await supabase.from('cities').update({ home_background_url: null, home_background_path: null, updated_at: new Date().toISOString() }).eq('id', editing.id)
+      if (update.error) {
+        bgRemove.disabled = false
+        return window.alert(update.error.message)
+      }
+      if (editing.home_background_path) await supabase.storage.from('city-home-media').remove([editing.home_background_path]).catch(() => {})
+      await loadCities()
+      render()
+    }
+  }
 
   const form = root.querySelector('#vlcity-form')
   const nameInput = form.querySelector('[name="name"]')

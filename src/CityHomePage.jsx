@@ -68,7 +68,7 @@ async function fetchCityWeather(city){
 
 export default function CityHomePage({citySlug='laguna'}){
   const [cities,setCities]=useState([]),[city,setCity]=useState(citySlug==='laguna'?FALLBACK:{...FALLBACK,slug:citySlug,name:citySlug}),[categories,setCategories]=useState(fallbackCategories),[needs,setNeeds]=useState(fallbackNeeds),[businesses,setBusinesses]=useState([]),[ratings,setRatings]=useState({}),[savedBusinessIds,setSavedBusinessIds]=useState(new Set()),[promotions,setPromotions]=useState([]),[events,setEvents]=useState([]),[banners,setBanners]=useState([]),[bannerIndex,setBannerIndex]=useState(0),[catStart,setCatStart]=useState(0),[catVisibleCount,setCatVisibleCount]=useState(typeof window!=='undefined'&&window.matchMedia('(max-width:760px)').matches?4:8),[q,setQ]=useState(''),[loading,setLoading]=useState(true),[eventError,setEventError]=useState(''),[promoError,setPromoError]=useState(''),[businessCount,setBusinessCount]=useState(0),[weather,setWeather]=useState(null),[weatherLoading,setWeatherLoading]=useState(true),[weatherError,setWeatherError]=useState('')
- useEffect(()=>{if(!db){setLoading(false);return}let alive=true;(async()=>{try{const{data,error}=await withTimeout(db.from('cities').select('id,name,state,country,slug,active').eq('active',true).eq('slug',citySlug).maybeSingle());if(!alive)return;if(error||!data){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false);return}setCities([data]);setCity(data)}catch(error){if(alive){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false)}}})();return()=>{alive=false}},[citySlug])
+ useEffect(()=>{if(!db){setLoading(false);return}let alive=true;(async()=>{try{const{data,error}=await withTimeout(db.from('cities').select('id,name,state,country,slug,active,home_background_url,home_background_path').eq('active',true).eq('slug',citySlug).maybeSingle());if(!alive)return;if(error||!data){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false);return}setCities([data]);setCity(data)}catch(error){if(alive){setEventError(error?.message||'Não foi possível localizar a cidade.');setLoading(false)}}})();return()=>{alive=false}},[citySlug])
  useEffect(()=>{setCatStart(0)},[city?.id])
  useEffect(()=>{const update=()=>setCatVisibleCount(window.matchMedia('(max-width:760px)').matches?4:8);update();window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)},[])
  useEffect(()=>{if(!city?.name)return;let alive=true;let timer=null;const loadWeather=async()=>{setWeatherLoading(true);setWeatherError('');try{const result=await fetchCityWeather(city);if(!alive)return;setWeather(result)}catch(error){if(!alive)return;setWeather(null);setWeatherError(error?.message||'Clima indisponível')}finally{if(alive)setWeatherLoading(false)}};loadWeather();timer=setInterval(loadWeather,10*60*1000);return()=>{alive=false;if(timer)clearInterval(timer)}},[city?.id,city?.name,city?.state,city?.country])
@@ -89,6 +89,7 @@ export default function CityHomePage({citySlug='laguna'}){
  const eventCount=Math.min(events.length,3)
  const banner=banners[bannerIndex]||null
  const base=`/${city?.slug||citySlug}`
+ const heroBackgroundStyle=city?.home_background_url?{'--lvp-city-home-bg':`url("${city.home_background_url}")`}:{}
  const visibleCats=categories.slice(catStart,catStart+catVisibleCount)
  const maxCatStart=Math.max(0,categories.length-catVisibleCount)
  const go=path=>location.href=path
@@ -108,7 +109,7 @@ export default function CityHomePage({citySlug='laguna'}){
  return <div className='lvp-page'>
   <main>
    <section className='lvp-hero'>
-    <div className='lvp-hero-bg'></div>
+    <div className='lvp-hero-bg' style={heroBackgroundStyle}></div>
     <div className='lvp-hero-inner'>
      <div className='lvp-hero-copy'>
       <span className='lvp-kicker'><Icon name="grid" size={14}/> A cidade na palma da mão</span>
