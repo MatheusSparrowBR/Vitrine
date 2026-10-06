@@ -39,3 +39,15 @@ test('horarios desktop usam tipografia maior para leitura',()=>{
  assert.match(css,/\.mbp-hours li strong,\n  \.mbp-hours li span\{[\s\S]*font-size:11px!important/)
  assert.match(css,/\.mbp-side-title>span\{[\s\S]*font-size:10px!important/)
 })
+
+
+test('perfil mobile usa Início no primeiro item e mantém quatro células de navegação com o mesmo tamanho',()=>{
+ const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
+ assert.match(page,/className="mbp-mobile-home"/)
+ assert.match(page,/href=\{'\/\'+citySlug\}/)
+ assert.match(page,/<span>Início<\/span>/)
+ assert.doesNotMatch(page,/<span>Perfil<\/span>/)
+ assert.match(css,/\.mbp-mobile-bottom>a,\n \.mbp-mobile-bottom>\.mbp-relationship-row-compact\{[\s\S]*width:100%/)
+ assert.match(css,/\.mbp-mobile-bottom>a,\n \.mbp-mobile-bottom>\.mbp-relationship-row-compact\{[\s\S]*height:54px/)
+ assert.match(css,/\.mbp-mobile-bottom\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)/)
+})
