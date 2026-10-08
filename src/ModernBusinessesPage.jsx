@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react'
 import {supabase as db} from './supabase-client.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
+import {getOpenStatus} from './business-hours-utils.js'
 import './search-featured.css'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
 
