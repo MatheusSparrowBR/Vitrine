@@ -110,3 +110,7 @@
 @media(min-width:761px){
  .mbp-shell .mbp-profile-top .mbp-profile-shortcuts{grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;min-width:0!important;max-width:none!important;margin-top:0!important}
 }
+
+/* Capa da empresa: a foto preenche a área (como na home); só mostra inteira quando marcado. */
+.mbp-profile-top .mbp-gallery-main img.mbp-cover-positioned:not(.is-logo){object-fit:cover!important}
+.mbp-profile-top .mbp-gallery-main img.mbp-cover-positioned.is-contain{object-fit:contain!important}
