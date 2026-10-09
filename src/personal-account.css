@@ -158,3 +158,8 @@
 /* Resumo da conta pessoal: ícone à esquerda, texto no centro e seta à direita. */
 .personal-account-list-item>span:nth-child(2){flex:1;min-width:0;text-align:left}
 .personal-account-list-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;color:#1f6df2;flex:none}
+
+/* Notificações agrupadas por período (Hoje, Esta semana, Anteriores). */
+.personal-account-notification-group{display:grid;gap:10px}
+.personal-account-notification-group h3{margin:8px 0 0;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#7b8ca0;font-weight:900}
+.personal-account-notification-group:first-child h3{margin-top:0}
