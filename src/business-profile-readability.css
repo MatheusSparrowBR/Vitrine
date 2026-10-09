@@ -105,3 +105,8 @@
 .mbp-shell .mbp-hours-today strong{text-align:left;font-size:15px;white-space:normal;line-height:1.35}
 .mbp-shell .mbp-hours li{gap:12px}
 .mbp-shell .mbp-hours li span{text-align:right;white-space:normal;line-height:1.35}
+
+/* Desktop: as cinco ações ficam numa só linha, ocupando a largura do bloco (vence a grade antiga de 4 colunas com largura fixa). */
+@media(min-width:761px){
+ .mbp-shell .mbp-profile-top .mbp-profile-shortcuts{grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;min-width:0!important;max-width:none!important;margin-top:0!important}
+}
