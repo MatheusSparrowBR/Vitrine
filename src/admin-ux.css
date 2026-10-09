@@ -1,0 +1,14 @@
+/* Painel admin: menu agrupado com links, seletor de tipo de cadastro. */
+.admin-v2-nav-group{display:flex;flex-direction:column;gap:2px}
+.admin-v2-nav-group+.admin-v2-nav-group{margin-top:12px}
+.admin-v2-nav a{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:12px;color:#a7b7ca;text-decoration:none;font-size:12px;font-weight:750;transition:.16s ease}
+.admin-v2-nav a:hover{background:rgba(255,255,255,.06);color:#fff;transform:translateX(2px)}
+.admin-v2-nav a.active{background:linear-gradient(90deg,rgba(49,121,255,.25),rgba(49,121,255,.08));color:#fff;box-shadow:inset 3px 0 0 #5d9aff}
+.admin-v2-nav a .icon{display:inline-flex;width:20px;justify-content:center;color:#82a1c5}
+.admin-v2-nav a.active .icon{color:#75a8ff}
+.admin-v2-nav a:focus-visible{outline:2px solid #5d9aff;outline-offset:2px}
+.admin-v2-nav-group>small{margin-top:4px}
+
+.admin-onboarding-type-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.admin-onboarding-type-tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 15px;border:1px solid #dbe4ee;border-radius:999px;background:#fff;color:#33475e;font-size:13px;font-weight:800;text-decoration:none}
+.admin-onboarding-type-tabs a.active{border-color:#1f6df2;background:#1f6df2;color:#fff}

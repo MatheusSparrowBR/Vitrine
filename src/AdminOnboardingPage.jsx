@@ -56,7 +56,7 @@ export default function AdminOnboardingPage({mode='partner'}){
  const createdBusiness=s.created?.business||null
  if(s.loading)return <div className="admin-v2-shell"><div className="admin-v2-empty"><span>Verificando acesso administrativo…</span></div></div>
  if(!s.allowed)return <div className="admin-v2-shell"><main className="admin-v2-content"><div className="admin-v2-card admin-v2-empty"><h2>Acesso restrito</h2><span>Esta área é exclusiva para administradores.</span><a className="admin-v2-btn primary" href="/admin">Voltar ao admin</a></div></main></div>
- return <AdminShell active={mode==='business'?'businesses':'users'} title={title} description={description} email={s.session?.user?.email}>
+ return <AdminShell active={mode==='business'?'businesses':'users'} title={title} description={description} email={s.session?.user?.email}><nav className="admin-onboarding-type-tabs" aria-label="Tipo de cadastro">{[['partner','Parceiro','/admin/novo-parceiro'],['user','Usuário','/admin/novo-usuario'],['business','Empresa','/admin/nova-empresa']].map(([key,label,href])=><a key={key} href={href} className={mode===key?'active':''} aria-current={mode===key?'page':undefined}>{label}</a>)}</nav>
   <div className="ao-actions"><a className="admin-v2-btn" href="/admin/usuarios">Usuários</a><a className="admin-v2-btn" href="/admin/empresas">Empresas</a><a className="admin-v2-btn" href="/admin/convites">Convites</a></div>
   {s.error&&<div className="ao-alert error">{s.error}</div>}
   {s.notice&&<div className="ao-alert success">{s.notice}</div>}

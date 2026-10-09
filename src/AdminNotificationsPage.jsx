@@ -82,7 +82,7 @@ export default function AdminNotificationsPage({supabase}){
   if(!title)return setMessage({text:'Informe o título da notificação.',error:true})
   if(!body)return setMessage({text:'Informe o texto da notificação.',error:true})
   if(form.source_type!=='custom'&&!form.source_id)return setMessage({text:'Selecione uma '+sourceLabel.toLowerCase()+'.',error:true})
-  setSending(true);setMessage({text:'',error:false});setResult(null)
+  if(!window.confirm('Enviar esta notificação agora?\n\nTítulo: '+title+'\nPara: '+(form.source_type==='custom'?'o público informado':sourceLabel.toLowerCase())+'\n\nDepois de enviada, não é possível desfazer.'))return;setSending(true);setMessage({text:'',error:false});setResult(null)
   try{
    const image_data=imageFile?await fileToDataUrl(imageFile):''
    const{data,error}=await supabase.functions.invoke('send-admin-notification',{body:{...form,title,body,image_data,image_type:imageFile?.type||''}})

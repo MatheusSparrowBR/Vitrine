@@ -190,7 +190,7 @@ export default function AdminAnalyticsPage(){
     </article>
 
     <article className="admin-v2-card aa-card">
-     <div className="aa-head"><div><span className="admin-v2-kicker">CANAIS</span><h2>Canais que geraram contatos</h2><p>Distribuição das ações de contato registradas.</p></div></div>
+     <div className="aa-head"><div><span className="admin-v2-kicker">CANAIS</span><h2>Ações de contato por canal</h2><p>Distribuição das ações de contato registradas.</p></div></div>
      <Channel label="WhatsApp" value={m.wa} total={m.contacts}/>
      <Channel label="Site" value={m.web} total={m.contacts}/>
      <Channel label="Instagram" value={m.ig} total={m.contacts}/>
