@@ -33,7 +33,7 @@ export default function AdminPromotionsPage({supabase}){
   setLoading(true)
   const [b,p]=await Promise.all([
    supabase.from('businesses').select('id,name,status,city_id,cities(name,state)').order('name').limit(500),
-   supabase.from('promotions').select('id,business_id,title,description,image_url,image_path,price,original_price,starts_at,ends_at,status,created_at,updated_at,businesses(name,cities(name,state))').order('created_at',{ascending:false}).limit(500)
+   supabase.from('promotions').select('id,business_id,title,description,image_url,image_path,price,original_price,starts_at,ends_at,status,notify_on_publish,created_at,updated_at,businesses(name,cities(name,state))').order('created_at',{ascending:false}).limit(500)
   ])
   if(b.error||p.error)notify((b.error||p.error).message||'Não foi possível carregar as promoções.',true)
   setBusinesses(b.data||[]);setItems(p.data||[]);setLoading(false)
@@ -77,13 +77,17 @@ export default function AdminPromotionsPage({supabase}){
    let imagePath=form.image_path||null
    if(imageFile){const uploaded=await uploadImage(imageFile,form.business_id);imageUrl=uploaded.url;imagePath=uploaded.path;uploadedPath=uploaded.path}
    const payload={business_id:form.business_id,title:form.title.trim(),description:form.description.trim()||null,price:form.price===''?null:Number(form.price),original_price:form.original_price===''?null:Number(form.original_price),starts_at:starts,ends_at:ends,status:form.status,image_url:imageUrl,image_path:imagePath,updated_at:new Date().toISOString()}
-   const r=editor?.id?await supabase.from('promotions').update(payload).eq('id',editor.id):await supabase.from('promotions').insert(payload)
+   const r=editor?.id?await supabase.from('promotions').update(payload).eq('id',editor.id):await supabase.from('promotions').insert(payload).select('id').single()
    if(r.error)throw r.error
-   notify(editor?.id?'Promoção atualizada com sucesso.':'Promoção criada com sucesso.')
+   const promotionId=editor?.id||r.data?.id
+   const becamePublished=payload.status==='published'&&editor?.status!=='published'
+   const alert=becamePublished&&editor?.notify_on_publish!==false?await sendPublishAlert(promotionId):''
+   notify((editor?.id?'Promoção atualizada com sucesso.':'Promoção criada com sucesso.')+alert)
    close();await load()
   }catch(err){if(uploadedPath)await supabase.storage.from(MEDIA_BUCKET).remove([uploadedPath]).catch(()=>{});notify(err.message||'Não foi possível salvar a promoção.',true)}finally{setSaving(false)}
  }
- async function quickStatus(row,status){const r=await supabase.from('promotions').update({status,updated_at:new Date().toISOString()}).eq('id',row.id);if(r.error)notify(r.error.message,true);else{notify(status==='archived'?'Promoção arquivada.':'Status atualizado.');await load()}}
+ async function sendPublishAlert(promotionId){const{data,error}=await supabase.functions.invoke('send-promotion-notification',{body:{promotion_id:promotionId}});if(error)return ' Aviso não enviado: '+(error.message||'erro desconhecido.');const sent=Number(data?.sent||0);return ` Aviso enviado para ${sent} ${sent===1?'pessoa':'pessoas'}.`}
+ async function quickStatus(row,status){const r=await supabase.from('promotions').update({status,updated_at:new Date().toISOString()}).eq('id',row.id);if(r.error)notify(r.error.message,true);else{const alert=status==='published'&&row.status!=='published'&&row.notify_on_publish!==false?await sendPublishAlert(row.id):'';notify((status==='archived'?'Promoção arquivada.':'Status atualizado.')+alert);await load()}}
  async function remove(row){if(!window.confirm(`Excluir a promoção “${row.title}”?`))return;const r=await supabase.from('promotions').delete().eq('id',row.id);if(r.error)notify(r.error.message,true);else{notify('Promoção excluída.');await load()}}
  if(loading)return <div className="admin-promotions-page"><div className="admin-promo-empty">Carregando promoções…</div></div>
  return <div className="admin-promotions-page">

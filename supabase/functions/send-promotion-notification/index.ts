@@ -20,6 +20,15 @@ function logSafeError(label: string, error: unknown) {
   })
 }
 
+async function isActiveAdmin(admin: ReturnType<typeof createClient>, userId: string) {
+  const { data } = await admin
+    .from('profiles')
+    .select('role,account_status')
+    .eq('id', userId)
+    .maybeSingle()
+  return data?.role === 'admin' && data?.account_status === 'active'
+}
+
 async function hashToken(value: string) {
   const bytes = new TextEncoder().encode(value)
   const digest = await crypto.subtle.digest('SHA-256', bytes)
@@ -86,7 +95,8 @@ export default {
         logSafeError('business_lookup_failed', businessError)
         return json({ error: 'business_lookup_failed' }, 500)
       }
-      if (!business || business.owner_id !== user.id) return json({ error: 'forbidden' }, 403)
+      const isOwner = business?.owner_id === user.id
+      if (!business || (!isOwner && !(await isActiveAdmin(admin, user.id)))) return json({ error: 'forbidden' }, 403)
       const { data: businessCity, error: businessCityError } = await admin
         .from('cities')
         .select('slug')
@@ -143,6 +153,20 @@ export default {
       }
       for (const row of businessFollows || []) followedUserIds.add(row.user_id)
 
+      // Quem salvou a empresa também recebe o aviso, além de quem segue.
+      const favoritedUserIds = new Set<string>()
+      const { data: businessFavorites, error: businessFavoriteError } = await admin
+        .from('business_favorites')
+        .select('user_id')
+        .eq('business_id', business.id)
+        .in('user_id', userIds)
+
+      if (businessFavoriteError) {
+        logSafeError('business_favorites_lookup_failed', businessFavoriteError)
+        return json({ error: 'business_favorites_lookup_failed' }, 500)
+      }
+      for (const row of businessFavorites || []) favoritedUserIds.add(row.user_id)
+
       const preferenceByUser = new Map((preferences || []).map(row => [row.user_id, row]))
       const eligibleSubscriptions = subscriptions.filter(subscription => {
         const preference = preferenceByUser.get(subscription.user_id)
@@ -151,6 +175,7 @@ export default {
         const categories = Array.isArray(preference?.category_ids) ? preference.category_ids : []
         if (categories.length && !categories.includes(business.category_id)) return false
         const globalBusinessNotifications = preference?.business_enabled !== false
+        if (!followedUserIds.has(subscription.user_id) && !favoritedUserIds.has(subscription.user_id)) return false
         if (!globalBusinessNotifications && !followedUserIds.has(subscription.user_id)) return false
         return true
       })

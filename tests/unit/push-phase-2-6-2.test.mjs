@@ -20,7 +20,8 @@ test('fase 2.6.2 evita duplicar notificacao da mesma promocao para o usuario',()
 
 test('fase 2.6.2 exige promocao publicada e dono autenticado',()=>{
  assert.match(fn,/promotion\.status !== 'published'/)
- assert.match(fn,/business\.owner_id !== user\.id/)
+ assert.match(fn,/business\?\.owner_id === user\.id/)
+ assert.match(fn,/isActiveAdmin\(admin, user\.id\)/)
  assert.match(fn,/promotion_id_required/)
 })
 
