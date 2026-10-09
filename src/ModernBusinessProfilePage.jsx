@@ -13,6 +13,7 @@ import'./modern-business-profile-ux.css'
 import'./modern-business-profile-lab-style.css'
 import'./business-profile-readability.css'
 import CoverPositionEditor from './CoverPositionEditor.jsx'
+import PromotionShareButton from './PromotionShareButton.jsx'
 import{coverPositionCssVars,coverFitOf,normalizeCoverPosition,COVER_FRAMES,COVER_MIN_WIDTHS}from'./cover-position-utils.js'
 
 const U=import.meta.env.VITE_SUPABASE_URL
@@ -120,7 +121,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
 
      {items.length>0&&<ItemsSection items={items} tab={offerTab} setTab={setOfferTab}/>}
 
-     {promotions.length>0&&<section className="mbp-panel mbp-promotions-panel"><div className="mbp-title"><span>OFERTAS ATIVAS</span><h2>Promoções da empresa</h2></div><div className="mbp-promo-grid">{promotions.slice(0,3).map(p=><article className="mbp-promo-card" key={p.id}>{p.image_url&&<img src={p.image_url} alt={p.title} loading="lazy"/>}<div><strong>{p.title}</strong>{p.description&&<p>{p.description}</p>}<div>{p.original_price!=null&&<del>{fmt(p.original_price)}</del>}{p.price!=null&&<b>{fmt(p.price)}</b>}{promotionDiscountPercent(p)!==null&&<span className="promo-discount-inline">-{promotionDiscountPercent(p)}%</span>}</div>{promotionValidUntil(p)&&<small className="mbp-promo-valid">Válida até {promotionValidUntil(p)}</small>}</div></article>)}</div></section>}
+     {promotions.length>0&&<section className="mbp-panel mbp-promotions-panel"><div className="mbp-title"><span>OFERTAS ATIVAS</span><h2>Promoções da empresa</h2></div><div className="mbp-promo-grid">{promotions.slice(0,3).map(p=><article className="mbp-promo-card" key={p.id}>{p.image_url&&<img src={p.image_url} alt={p.title} loading="lazy"/>}<div><strong>{p.title}</strong>{p.description&&<p>{p.description}</p>}<div>{p.original_price!=null&&<del>{fmt(p.original_price)}</del>}{p.price!=null&&<b>{fmt(p.price)}</b>}{promotionDiscountPercent(p)!==null&&<span className="promo-discount-inline">-{promotionDiscountPercent(p)}%</span>}</div>{promotionValidUntil(p)&&<small className="mbp-promo-valid">Válida até {promotionValidUntil(p)}</small>}<PromotionShareButton promotion={p} businessName={business.name} cityName={city.name} logoUrl={business.logo_url}/></div></article>)}</div></section>}
 
      <section className="mbp-panel" id="endereco">
       <div className="mbp-title-row"><div className="mbp-title"><span>LOCALIZAÇÃO</span><h2>Endereço e rota</h2></div>{mapsUrl&&<a href={mapsUrl} target="_blank" rel="noreferrer">Abrir no Google Maps →</a>}</div>
