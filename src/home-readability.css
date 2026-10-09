@@ -1,0 +1,57 @@
+/* Home: legibilidade no celular, ordem das seções e novos blocos (skeleton, "Novo", link para o catálogo, miniatura de evento).
+   Carregado pela CityHomePage depois das folhas antigas, com seletores .lvp-page para ganhar delas. */
+
+.lvp-skeleton-card{flex:0 0 min(82vw,330px);min-height:300px;border-radius:18px;background:linear-gradient(90deg,#eef2f7 25%,#f7f9fc 50%,#eef2f7 75%);background-size:200% 100%;animation:lvp-skeleton 1.2s ease-in-out infinite}
+@keyframes lvp-skeleton{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.lvp-skeleton-card{animation:none}}
+
+.lvp-card-new{display:inline-block;padding:2px 9px;border-radius:999px;background:#eef5ff;color:#1f6df2;font-size:12px;font-weight:800}
+
+.lvp-featured-footer{display:flex;justify-content:center;margin-top:18px}
+.lvp-featured-footer a{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 18px;border:1px solid #dbe6f3;border-radius:14px;background:#fff;color:#1f6df2;font-size:14px;font-weight:800;text-decoration:none}
+
+.lvp-event .lvp-date.has-image{width:64px;height:64px;border-radius:14px;background-size:cover;background-position:center;flex:none;color:transparent}
+.lvp-event .lvp-date.has-image b,.lvp-event .lvp-date.has-image span{display:none}
+
+@media(max-width:760px){
+ /* Tamanhos mínimos: 11px para rótulos, 12–13px para detalhes, 14px+ para textos de leitura. */
+ .lvp-page .lvp-kicker{font-size:11px}
+ .lvp-page .lvp-search input{font-size:15px}
+ .lvp-page .lvp-discovery-actions>span{font-size:11px}
+ .lvp-page .lvp-discovery-actions a{font-size:12px}
+ .lvp-page .lvp-eyebrow{font-size:11px}
+ .lvp-page .lvp-section-head p{font-size:14px}
+ .lvp-page .lvp-category-count{font-size:11px}
+ .lvp-page .lvp-cat-grid b{font-size:13px}
+ .lvp-page .lvp-need-grid a b{font-size:15px}
+ .lvp-page .lvp-need-grid a small{font-size:13px}
+ .lvp-page .lvp-weather small{font-size:12px}
+ .lvp-page .lvp-live-dot{font-size:10px}
+ .lvp-page .lvp-business-body p{font-size:14px}
+ .lvp-page .lvp-migration-meta{font-size:12px}
+ .lvp-page .lvp-migration-photo-badge,.lvp-page .lvp-migration-status-badge{font-size:11px}
+ .lvp-page .lvp-card-rating{font-size:13px}
+ .lvp-page .lvp-whatsapp-action,.lvp-page .lvp-profile-action{font-size:13px}
+ .lvp-page .verified{font-size:11px}
+ .lvp-page .lvp-promo-body p{font-size:14px}
+ .lvp-page .lvp-promo-body span,.lvp-page .lvp-promo-image strong{font-size:11px}
+ .lvp-page .lvp-event h3{font-size:15px}
+ .lvp-page .lvp-event p{font-size:13px}
+ .lvp-page .lvp-date span{font-size:11px}
+ .lvp-page .lvp-sponsored-label{font-size:11px}
+ .lvp-page .lvp-sponsored-copy p{font-size:14px}
+ .lvp-page .lvp-local-guide-copy p{font-size:14px}
+ .lvp-page .lvp-local-guide-links a{font-size:13px}
+ .lvp-page .lvp-business-points span{font-size:13px}
+ .lvp-page .lvp-business-cta-wrap p{font-size:14px}
+ .lvp-page .lvp-mobile-bottom-nav a span{font-size:12px}
+ .lvp-page .lvp-featured-footer a{font-size:14px}
+
+ /* Painel "Hoje em ..." compacto: no celular fica só o clima (o resumo aparece nas seções abaixo). */
+ .lvp-page .lvp-hero-card .lvp-mini-head,
+ .lvp-page .lvp-hero-card .lvp-mini-stat,
+ .lvp-page .lvp-hero-card .lvp-mini-cta{display:none}
+
+ .lvp-page .lvp-featured-footer{margin-top:14px}
+ .lvp-page .lvp-skeleton-card{min-height:280px}
+}
