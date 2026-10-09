@@ -3,6 +3,7 @@ import {supabase as db} from './supabase-client.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import './search-featured.css'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
+import {getOpenStatus} from './business-hours-utils.js'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
 const iconForCategory=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
