@@ -149,3 +149,12 @@ test('catálogo diferencia categoria vazia de busca sem resultados',()=>{
  assert.match(app,/Ainda não há/)
  assert.match(app,/selectedCategory/)
 })
+
+test('SEO de empresa publica Offer para promoções vigentes com preço e validade',()=>{
+ const seo=read('src/seo-runtime.js')
+ assert.match(seo,/supabasePublic\('promotions'/)
+ assert.match(seo,/'@type':'Offer'/)
+ assert.match(seo,/priceValidUntil/)
+ assert.match(seo,/America\/Sao_Paulo/)
+ assert.match(seo,/makesOffer/)
+})

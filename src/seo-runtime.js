@@ -457,10 +457,52 @@ async function enrichBusinessMetadata(){
     }
   }
 
+  // Promoções vigentes da empresa viram Offer, com preço e validade (data em São Paulo).
+  const promotionRows=await supabasePublic('promotions',{
+    select:'id,title,description,image_url,price,starts_at,ends_at',
+    business_id:'eq.'+business.id,
+    status:'eq.published',
+    order:'created_at.desc',
+    limit:'20'
+  })
+  const now=Date.now()
+  const offers=(Array.isArray(promotionRows)?promotionRows:[]).filter(promo=>{
+    if(!promo?.title)return false
+    const start=promo.starts_at?new Date(promo.starts_at).getTime():null
+    const end=promo.ends_at?new Date(promo.ends_at).getTime():null
+    if(start!==null&&(!Number.isFinite(start)||start>now))return false
+    if(end!==null&&(!Number.isFinite(end)||end<=now))return false
+    return true
+  }).map(promo=>{
+    const offer={
+      '@type':'Offer',
+      '@id':businessUrl+'#promotion-'+encodeURIComponent(String(promo.id)),
+      name:promo.title,
+      description:truncate(promo.description||promo.title,300),
+      url:businessUrl,
+      seller:{'@id':businessUrl+'#business'},
+      availability:'https://schema.org/InStock'
+    }
+    const numericPrice=Number(promo.price)
+    if(promo.price!=null&&Number.isFinite(numericPrice)){
+      offer.price=numericPrice
+      offer.priceCurrency='BRL'
+    }
+    if(promo.ends_at){
+      const endDate=new Date(promo.ends_at)
+      if(!Number.isNaN(endDate.getTime()))offer.priceValidUntil=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(endDate)
+    }
+    const promoImage=absoluteUrl(promo.image_url)
+    if(promoImage)offer.image=[promoImage]
+    return offer
+  })
+  if(offers.length)localBusiness.makesOffer=offers.map(offer=>({'@id':offer['@id']}))
+
   setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
     {...baseWebsite},
     {'@type':'WebPage','@id':businessUrl+'#webpage',url:businessUrl,name:title,description:description,inLanguage:'pt-BR',mainEntity:{'@id':businessUrl+'#business'}},
     localBusiness,
+    ...offers,
     createBreadcrumbs(cityName)
   ]})
 }
