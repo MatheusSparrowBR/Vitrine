@@ -3,3 +3,6 @@
 /* Planos: nota de confiança e preço legível. */
 .plans-trust{margin:18px auto 0;max-width:620px;text-align:center;color:#6b7c93;font-size:13px;line-height:1.5}
 .plan-card .plan-price small{font-size:15px;font-weight:700;color:#6b7c93}
+
+/* Nota de pagamento centralizada abaixo dos cards (vence a regra global de margem de parágrafo). */
+.page>.plans-trust{margin:18px auto 0!important;max-width:620px;width:calc(100% - 32px);text-align:center!important;font-size:13px!important;color:#6b7c93}

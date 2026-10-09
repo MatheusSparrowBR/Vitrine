@@ -245,3 +245,9 @@
 .auth-customer-link:hover{text-decoration:underline}
 .auth-benefits span{font-size:11px}
 .auth-benefits b{font-size:10px}
+
+/* Login e cadastro: o formulário ocupa a largura inteira do cartão (sem espaço vazio à direita). */
+.vl-auth-page .vl-auth-card{width:min(640px,100%)}
+.vl-auth-page .vl-auth-card form,
+.vl-auth-page .vl-auth-card .auth-form{width:100%!important;max-width:none!important;justify-self:stretch}
+.vl-auth-page .vl-auth-card .auth-field{width:100%;justify-self:stretch}
