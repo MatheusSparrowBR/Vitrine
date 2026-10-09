@@ -52,3 +52,6 @@
   .vl-event-profile-card strong{font-size:14px}
   .vl-event-profile-chip{font-size:14px}
 }
+
+/* Rótulo "A partir de" antes do preço do evento. */
+.vl-event-profile-from{color:#7a8ca1;font-size:14px;font-weight:700}

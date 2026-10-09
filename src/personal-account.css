@@ -163,3 +163,6 @@
 .personal-account-notification-group{display:grid;gap:10px}
 .personal-account-notification-group h3{margin:8px 0 0;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#7b8ca0;font-weight:900}
 .personal-account-notification-group:first-child h3{margin-top:0}
+
+/* Nome da empresa em cada avaliação da conta pessoal. */
+.personal-account-review-business{display:block;color:#1f6df2;font-weight:800;font-size:13px}
