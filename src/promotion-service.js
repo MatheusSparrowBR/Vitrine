@@ -62,3 +62,11 @@ export async function getActiveBusinessPromotions(db,businessId,{limit=100}={}){
 export function projectTodayISO(date=new Date()){
  return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)
 }
+
+// Percentual de desconto calculado a partir do valor original. Null quando não há desconto real.
+export function promotionDiscountPercent(promotion){
+ const original=Number(promotion?.original_price)
+ const price=Number(promotion?.price)
+ if(promotion?.price==null||!(original>0)||!Number.isFinite(price)||price<0||price>=original)return null
+ return Math.round((1-price/original)*100)
+}

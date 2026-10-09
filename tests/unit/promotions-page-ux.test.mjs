@@ -2,7 +2,8 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-const read=p=>fs.readFileSync(p,'utf8')
+// Lê com quebras de linha normalizadas (o checkout do Windows usa CRLF).
+const read=p=>fs.readFileSync(p,'utf8').replace(/\r\n/g,'\n')
 
 test('card de promoção na home ocupa a largura toda da imagem',()=>{
  const css=read('src/home-readability.css')
