@@ -1,0 +1,3 @@
+/* Página de promoções: grade centralizada (também com uma única oferta) e data de validade. */
+main.page .promotion-grid{grid-template-columns:repeat(auto-fill,minmax(260px,388px));justify-content:center}
+.promotion-valid{display:block;margin-top:8px;color:#6b7c93;font-size:12px;font-weight:700}
