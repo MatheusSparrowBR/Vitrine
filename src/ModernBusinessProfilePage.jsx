@@ -24,6 +24,7 @@ const normalizeItemType=item=>{const raw=String(item?.type??item?.item_type??ite
 const stripMarker=s=>String(s||'').replace(/^(?:[\s•·\-–—]|\p{Extended_Pictographic}|️|‍)+/u,'').trim()
 const normalizeText=s=>stripMarker(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim()
 function AboutText({text,shortText}){const lines=String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);const shortKey=normalizeText(shortText);if(lines.length<=1){if(shortKey&&normalizeText(text)===shortKey)return null;return <p className="mbp-about-description">{text}</p>}const kept=lines.filter(l=>!(shortKey&&normalizeText(l)===shortKey));if(!kept.length)return null;return <ul className="mbp-about-list">{kept.map((l,i)=><li key={i}>{stripMarker(l)}</li>)}</ul>}
+const formatPeriods=text=>{const parts=String(text||'').split(' - ');if(parts.length<2||parts.length%2)return text;const pairs=[];for(let i=0;i<parts.length;i+=2)pairs.push(parts[i]+'–'+parts[i+1]);return pairs.join(' · ')}
 function Gallery({business,photos,coverPositionDesktop,coverPositionMobile,canEditCover,onEditCover}){const cover=business.cover_url||'';const media=photos.filter(p=>p.url&&p.url!==cover);const images=media.filter(p=>p.media_type!=='video');const main=cover||images[0]?.url;const thumbs=media.filter(p=>p.media_type!=='video').slice(0,2);const total=(cover?1:0)+media.length;const extra=Math.max(0,total-3);const hasThumbs=thumbs.length>0;const coverStyle={...coverPositionCssVars(coverPositionDesktop,'desktop'),...coverPositionCssVars(coverPositionMobile,'mobile')};return <div className={`mbp-gallery ${hasThumbs?'has-media':'is-empty'}`} data-gallery-total={total}><button className="mbp-gallery-main" type="button" data-gallery-open aria-label="Abrir galeria de fotos">{main?<img className={'mbp-cover-positioned'+(main&&main===business.logo_url?' is-logo':'')} src={main} alt={`${business.name} capa`} loading="eager" style={coverStyle}/>:<div className="mbp-gallery-placeholder">VitrineLocal</div>}</button>{canEditCover&&<button type="button" className="mbp-cover-edit-button" onClick={onEditCover} aria-label="Editar posicionamento da capa" title="Editar capa"><Icon name="camera" size={15}/><span>Editar capa</span></button>}<div className="mbp-gallery-side">{thumbs.map((p,i)=><button className="mbp-gallery-thumb" type="button" key={p.id||i} data-gallery-open aria-label={`Abrir foto ${i+2}`}><img src={p.url} alt="" loading="lazy"/></button>)}<button className="mbp-gallery-more" type="button" data-gallery-open aria-label="Ver todas as fotos">{extra>0&&<strong>+{extra}</strong>}<span>{total>0?'Ver todas as fotos':'Adicionar fotos'}</span></button></div></div>}
 function ContactCard({icon,title,value,link,state}){const content=<><span className="mbp-contact-icon"><Icon name={icon} size={17}/></span><span><strong>{title}</strong><small>{value}</small></span></>;if(!link)return <div className={`mbp-contact-card ${state?`is-${state}`:''}`} data-contact-state={state||''}>{content}</div>;return <a className="mbp-contact-card" href={link} target="_blank" rel="noreferrer">{content}</a>}
 function ItemCard({item}){const type=normalizeItemType(item)||'product';const hasPrice=item.price!==null&&item.price!==undefined&&item.price!==''&&Number.isFinite(Number(item.price));return <article className="mbp-item-card" data-item-type={type}>{item.image_url&&<div className="mbp-item-image"><img src={item.image_url} alt={item.name||'Item'} loading="lazy"/></div>}<div className="mbp-item-body"><span className="mbp-item-type">{type==='service'?'SERVIÇO':'PRODUTO'}</span><h3>{item.name}</h3>{item.description&&<p>{item.description}</p>}{hasPrice?<div className="mbp-item-price"><small>{type==='service'?'A partir de':'Por'}</small><strong>{fmt(item.price)}</strong></div>:<span className="mbp-item-no-price">Consulte o preço</span>}</div></article>}
@@ -86,7 +87,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
         <span className="mbp-notification-label">{businessNotificationLoading?'Ativando…':businessNotifications?'Notificações ativadas':'Ativar notificações'}</span>
        </button>
       </div>
-      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>
+      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share}><Icon name="share" size={15}/> Compartilhar</button>{business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer">iFood</a>}
       {businessNotificationMessage&&<small className="mbp-inline-action-message">{businessNotificationMessage}</small>}
      </div>
     </div>
@@ -96,9 +97,6 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      {mapsUrl&&<a className="mbp-secondary-cta" data-track="maps" href={mapsUrl} target="_blank" rel="noreferrer"><Icon name="pin" size={16}/> Como chegar</a>}
     </div>
 
-    <div className="mbp-extra-actions mbp-share-row">
-     {business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer">iFood</a>}
-    </div>
    </section>
 
    <div className="mbp-layout">
@@ -129,7 +127,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <aside className="mbp-sidebar">
      <div className="mbp-side mbp-side-sticky mbp-hours-card-only">
       <div className="mbp-side-title"><small>HORÁRIOS</small></div>
-      {hours.filter(day=>day.key===todayKey).map(day=><div className="mbp-hours-today" key={day.key}><span>Hoje · {day.label}</span><strong>{day.text}</strong></div>)}<details className="mbp-hours-details"><summary>Ver todos os horários</summary><ul className="mbp-hours">{hours.map(day=><li key={day.key} className={day.key===todayKey?'is-today':''}><strong>{day.label}</strong><span>{day.text}</span></li>)}</ul></details>
+      {hours.filter(day=>day.key===todayKey).map(day=><div className="mbp-hours-today" key={day.key}><span>Hoje · {day.label}</span><strong>{formatPeriods(day.text)}</strong></div>)}<details className="mbp-hours-details"><summary>Ver todos os horários</summary><ul className="mbp-hours">{hours.map(day=><li key={day.key} className={day.key===todayKey?'is-today':''}><strong>{day.label}</strong><span>{formatPeriods(day.text)}</span></li>)}</ul></details>
       <small className="mbp-note"><Icon name="clock" size={12}/> Horários podem mudar em feriados. Confirme pelo contato da empresa.</small>
      </div>
     </aside>
