@@ -13,3 +13,9 @@
 
 /* Pré-visualização do editor: mesma mecânica do fundo da home (cobre a área, deslocada em % da área). */
 .cover-editor-stage .cover-editor-image{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;pointer-events:none;user-select:none}
+
+/* Editor de capa: explicação de por que o zoom começa em 100%, e controles de posição desabilitados. */
+.cover-editor-explain{margin:0 0 14px;padding:10px 12px;border:1px solid #cfe0f7;border-radius:10px;background:#eef5ff;color:#33475e;font-size:12px;line-height:1.5}
+.cover-editor-explain strong{color:#12253e}
+.cover-editor-hint{margin:6px 0 0;color:#7a5a00;font-size:12px;font-weight:700}
+.cover-editor-controls input[type=range]:disabled{opacity:.4;cursor:not-allowed}
