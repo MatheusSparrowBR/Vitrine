@@ -14,7 +14,7 @@ const friendlyAuthError=(e,mode)=>{
 function safeNext(value){const fallback='/laguna',candidate=String(value||'').trim();if(!candidate.startsWith('/')||candidate.startsWith('//'))return fallback;try{const url=new URL(candidate,window.location.origin);return url.origin!==window.location.origin?fallback:`${url.pathname}${url.search}${url.hash}`||fallback}catch{return fallback}}
 
 export default function AuthPage(){
- const[m,setM]=useState('login'),[email,setE]=useState(''),[pw,setP]=useState(''),[name,setN]=useState(''),[msg,setMsg]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[show,setShow]=useState(false)
+ const[m,setM]=useState(()=>new URLSearchParams(location.search).get('mode')==='signup'?'signup':'login'),[email,setE]=useState(''),[pw,setP]=useState(''),[name,setN]=useState(''),[msg,setMsg]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[show,setShow]=useState(false)
  const isSignup=m==='signup',isForgot=m==='forgot',next=safeNext(new URLSearchParams(location.search).get('next'))
  const password=pw
  const rules=useMemo(()=>({length:password.length>=8,mixed:/[A-Za-z]/.test(password)&&/\d/.test(password)}),[password])
@@ -33,11 +33,12 @@ export default function AuthPage(){
     const{error:e}=await db.auth.signInWithPassword({email:email.trim(),password});if(e){if(isWeakPasswordError(e)){await db.auth.resetPasswordForEmail(email.trim(),{redirectTo:`${location.origin}/atualizar-senha`});setM('forgot');setMsg('Sua senha precisa ser atualizada. Enviamos um link para criar uma nova senha segura.')}else throw e}else await redirect()
    }
   }catch(e){setError(friendlyAuthError(e,isSignup?'signup':'login'))}finally{setBusy(false)}}
+ const missingFields=isSignup?[name.trim().length<2&&'nome',!email.trim()&&'e-mail',!(rules.length&&rules.mixed)&&'senha com 8+ caracteres, letras e números'].filter(Boolean):[]
  const title=isForgot?'Recupere seu acesso':isSignup?'Crie sua conta':'Entre na sua conta'
  const subtitle=isForgot?'Informe seu e-mail e enviaremos um link para redefinir sua senha.':isSignup?'Crie seu acesso gratuito e cadastre sua empresa quando estiver pronto.':'Acesse seu painel para gerenciar empresa, conteúdo e resultados.'
  return <div className="vl-auth-page"><div className={`vl-auth-card ${isSignup?'is-signup':''}`}>
   <div className="auth-brand-row"><a className="brand" href="/laguna"><span className="brand-mark">V</span><span>Vitrine<span className="brand-accent">Local</span></span></a><span className="auth-secure"><span aria-hidden="true">●</span>Acesso protegido</span></div>
-  <div className="auth-kicker-row"><span className="section-kicker">ÁREA DO COMERCIANTE</span>{!isForgot&&<span className="auth-progress">{isSignup?'01 · CRIAÇÃO':'01 · ACESSO'}</span>}</div>
+  <div className="auth-kicker-row"><span className="section-kicker">ÁREA DO COMERCIANTE</span></div>
   <header className="auth-heading"><div className="auth-context">{isSignup?'Comece em menos de 1 minuto':'Seu painel começa aqui'}</div><h1>{title}</h1><p>{subtitle}</p></header>
   {isSignup&&<div className="auth-benefits" aria-label="Benefícios da conta"><div><b>01</b><span>Acesso ao painel</span></div><div><b>02</b><span>Cadastre sua empresa</span></div><div><b>03</b><span>Comece grátis</span></div></div>}
   {error&&<div className="auth-alert error" role="alert"><span className="auth-alert-icon">!</span><span>{error}</span></div>}
@@ -47,10 +48,11 @@ export default function AuthPage(){
    <label className="auth-field"><span>E-mail</span><input type="email" value={email} onChange={e=>setE(e.target.value)} placeholder="voce@empresa.com" required autoComplete="email" autoFocus={!isSignup}/></label>
    <label className="auth-field"><span>Senha</span><div className="auth-input-wrap"><input type={show?'text':'password'} value={password} onChange={e=>setP(e.target.value)} placeholder={isSignup?'Crie uma senha segura':'Digite sua senha'} required minLength={isSignup?8:1} autoComplete={isSignup?'new-password':'current-password'} aria-describedby={isSignup?'password-help':undefined}/><button type="button" className="password-toggle" onClick={()=>setShow(v=>!v)} aria-label={show?'Ocultar senha':'Mostrar senha'}>{show?'Ocultar':'Mostrar'}</button></div>{isSignup&&<div id="password-help" className="password-rules"><span className={rules.length?'is-valid':''}>{rules.length?'✓':'○'} 8 caracteres ou mais</span><span className={rules.mixed?'is-valid':''}>{rules.mixed?'✓':'○'} letras e números</span></div>}</label>
    {!isSignup&&<div className="auth-actions-row"><button type="button" className="text-button inline" onClick={()=>switchMode('forgot')}>Esqueci minha senha</button></div>}
+   {isSignup&&missingFields.length>0&&<p className="auth-hint">Falta preencher: {missingFields.join(', ')}.</p>}
    <button className="primary wide" disabled={busy||(isSignup&&!signupReady)}>{busy?<><i className="auth-spinner"/>Aguarde…</>:isSignup?'Criar minha conta':'Entrar na minha conta'}</button>
-   {isSignup?<p className="auth-under-note">Você poderá cadastrar sua empresa depois. Primeiro criamos seu acesso seguro.</p>:<p className="auth-under-note">Acesso protegido com autenticação segura.</p>}
+   {isSignup?<p className="auth-under-note">Você poderá cadastrar sua empresa depois. Primeiro criamos seu acesso seguro.</p>:null}
   </form>}
-  <div className="auth-switch">{isForgot?<><span>Lembrou da senha?</span><button className="text-button" onClick={()=>switchMode('login')}>Voltar para entrar</button></>:<><span>{isSignup?'Já possui uma conta?':'Ainda não tem uma conta?'}</span><button className="text-button" onClick={()=>switchMode(isSignup?'login':'signup')}>{isSignup?'Entrar na conta':'Criar conta grátis'}</button></>}</div>
+  <div className="auth-switch">{isForgot?<><span>Lembrou da senha?</span><button className="text-button" onClick={()=>switchMode('login')}>Voltar para entrar</button></>:<><span>{isSignup?'Já possui uma conta?':'Ainda não tem uma conta?'}</span><button className="text-button" onClick={()=>switchMode(isSignup?'login':'signup')}>{isSignup?'Entrar na conta':'Criar conta grátis'}</button></>}</div>{!isForgot&&!isSignup&&<a className="auth-customer-link" href="/usuario/login">Procurando sua conta de cliente? Entrar como usuário →</a>}
   <a className="auth-back" href={next}>← Voltar ao site</a>
  </div></div>
 }
