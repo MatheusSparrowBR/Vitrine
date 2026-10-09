@@ -114,3 +114,10 @@
 /* Capa da empresa: a foto preenche a área (como na home); só mostra inteira quando marcado. */
 .mbp-profile-top .mbp-gallery-main img.mbp-cover-positioned:not(.is-logo){object-fit:cover!important}
 .mbp-profile-top .mbp-gallery-main img.mbp-cover-positioned.is-contain{object-fit:contain!important}
+
+/* Logo do perfil: preenche a caixa (sem espaço branco) e tem botão de editar para admin e dono. */
+.mbp-shell .mbp-identity .mbp-logo{position:relative;overflow:hidden}
+.mbp-shell .mbp-identity .mbp-logo img.mbp-logo-positioned{position:absolute!important;top:0;left:0;width:100%!important;height:100%!important;max-width:none!important;padding:0!important;border-radius:0!important;object-fit:cover!important;transform-origin:center center}
+.mbp-shell .mbp-identity .mbp-logo img.mbp-logo-positioned.is-contain{object-fit:contain!important;padding:6px!important;box-sizing:border-box}
+.mbp-logo-edit-button{position:absolute;right:4px;bottom:4px;z-index:3;display:grid;place-items:center;width:26px;height:26px;border:0;border-radius:8px;background:rgba(15,39,68,.88);color:#fff;cursor:pointer}
+.mbp-logo-edit-button:focus-visible{outline:2px solid #5d9aff;outline-offset:2px}
