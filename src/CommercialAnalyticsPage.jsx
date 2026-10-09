@@ -110,7 +110,7 @@ export default function CommercialAnalyticsPage(){
   <section className="ca-kpis">
    <Kpi title="Visualizações" value={fmt(m.profile_views)} note={range+' dias'} trend={delta} trendClass={deltaClass(currentViews,previous)}/>
    <Kpi title="Contatos" value={fmt(leadCount)} note="WhatsApp + Instagram + site" tone="green"/>
-   <Kpi title="Taxa de contato" value={conversion+'%'} note="contatos ÷ visualizações" tone="purple"/>
+   <Kpi title="Taxa de contato" value={conversion+'%'} note="cliques de contato ÷ visualizações" tone="purple"/>
    <Kpi title="Interações" value={fmt(m.total_interactions)} note="ações registradas" tone="amber"/>
   </section>
 
@@ -120,13 +120,13 @@ export default function CommercialAnalyticsPage(){
 
   <section className="ca-card ca-summary-story">
    <div className="ca-card-head"><div><span>RESUMO DO PERÍODO</span><h2>O que aconteceu nos últimos {range} dias?</h2><p>Uma leitura simples dos principais sinais do seu perfil.</p></div></div>
-   <div className="ca-story-grid"><div><strong>{fmt(m.profile_views)}</strong><span>visualizações no perfil</span></div><div><strong>{fmt(leadCount)}</strong><span>contatos gerados</span></div><div><strong>{fmt(m.gallery_opens)}</strong><span>aberturas da galeria</span></div><div><strong>{fmt(m.promotion_clicks)}</strong><span>cliques em promoções</span></div></div>
+   
    <p className="ca-story-text">{leadCount>0?'Seu perfil está recebendo visitas e já gerou '+fmt(leadCount)+' contato(s). O foco agora é repetir as ações que geram mais interação.':'Seu perfil recebeu '+fmt(m.profile_views)+' visualizações, mas ainda não transformou essas visitas em contatos. Use o painel para ajustar a apresentação e criar um próximo passo claro.'}</p>
   </section>
 
   <section className="ca-card ca-trend-card">
    <div className="ca-card-head"><div><span>TENDÊNCIA</span><h2>Visualizações ao longo do período</h2><p>Veja como o interesse evoluiu dia a dia.</p></div><span className="ca-period-chip">{range} dias</span></div>
-   <div className="ca-daily-chart ca-daily-chart-large" aria-label="Visualizações por dia">{daily.length?daily.map(row=><div className="ca-day-bar" key={row.day} title={String(row.day)+': '+fmt(row.profile_views)+' visualizações'}><i style={{height:Math.max(6,(Number(row.profile_views||0)/maxDaily)*100)+'%'}}/><small>{String(row.day||'').slice(8,10)}</small></div>):<div className="ca-chart-upgrade"><strong>Tendência diária</strong><span>O detalhamento por dia está disponível nas estatísticas avançadas do Premium.</span><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}</div>
+   <div className="ca-daily-chart ca-daily-chart-large" aria-label="Visualizações por dia">{daily.length?daily.map((row,i)=>{const step=daily.length>31?7:daily.length>14?3:1;const day=String(row.day||'');return <div className="ca-day-bar" key={row.day} title={day+': '+fmt(row.profile_views)+' visualizações'}><i style={{height:Math.max(6,(Number(row.profile_views||0)/maxDaily)*100)+'%'}}/><small>{i%step===0?day.slice(8,10)+'/'+day.slice(5,7):''}</small></div>}):<div className="ca-chart-upgrade"><strong>Tendência diária</strong><span>O detalhamento por dia está disponível nas estatísticas avançadas do Premium.</span><a href={'/planos?business_id='+encodeURIComponent(s.businessId)}>Conhecer o Premium →</a></div>}</div>
    <p className="ca-caption">{delta?'Variação de '+delta+' em visualizações em relação ao período anterior.':'Ainda não há período anterior suficiente para comparar.'}</p>
   </section>
 
@@ -136,7 +136,7 @@ export default function CommercialAnalyticsPage(){
     <div className="ca-funnel">{funnel.map(([label,value,ratio],index)=>{const width=index===0?100:Math.min(100,Math.max(3,Number(ratio||0)));return <div className="ca-funnel-row" key={label}><div><strong>{label}</strong><small>{fmt(value)}</small></div><div className="ca-track"><i style={{width:width+'%'}}/></div><b>{index===0?'100.0%':Number(ratio||0).toFixed(1)+'%'}</b></div>})}</div>
    </article>
    <article className="ca-card ca-channels-card">
-    <div className="ca-card-head"><div><span>CANAIS DE CONTATO</span><h2>Canais que geraram contatos</h2><p>Veja quais ações de contato aconteceram no seu perfil.</p></div></div>
+    <div className="ca-card-head"><div><span>CANAIS DE CONTATO</span><h2>Ações de contato por canal</h2><p>Veja quais ações de contato aconteceram no seu perfil.</p></div></div>
     <div className="ca-channel-list ca-channel-list-emphasis">{channelEntries.map(([label,value])=><div key={label}><div><strong>{label}</strong><span>{fmt(value)}</span></div><div className="ca-channel-track"><i style={{width:Math.max(4,pct(Number(value),leadCount))+'%'}}/></div></div>)}</div>
     <p className="ca-caption">Aqui medimos as ações realizadas no perfil. Isso não representa a origem externa do visitante.</p>
    </article>
