@@ -154,3 +154,7 @@
  .personal-account-notification-topline{align-items:flex-start}
  .personal-account-notification-topline time{max-width:74px;text-align:right}
 }
+
+/* Resumo da conta pessoal: ícone à esquerda, texto no centro e seta à direita. */
+.personal-account-list-item>span:nth-child(2){flex:1;min-width:0;text-align:left}
+.personal-account-list-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;color:#1f6df2;flex:none}
