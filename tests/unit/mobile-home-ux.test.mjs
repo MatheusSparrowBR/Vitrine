@@ -5,12 +5,12 @@ import fs from 'node:fs'
 const css=()=>fs.readFileSync('src/public-home.css','utf8')
 const page=()=>fs.readFileSync('src/CityHomePage.jsx','utf8')
 
-test('home mobile prioriza necessidade e mantém ordem de descoberta',()=>{
+test('home mobile mostra empresas logo após as categorias e deixa necessidades depois',()=>{
  const c=css()
  assert.match(c,/main>\.lvp-hero\{order:1\}/)
- assert.match(c,/main>\.lvp-needs\{order:2\}/)
- assert.match(c,/main>\.lvp-categories\{order:3\}/)
- assert.match(c,/main>\.lvp-featured\{order:4\}/)
+ assert.match(c,/main>\.lvp-categories\{order:2\}/)
+ assert.match(c,/main>\.lvp-featured\{order:3\}/)
+ assert.match(c,/main>\.lvp-needs\{order:5\}/)
 })
 
 test('home mobile usa navegação por toque nas categorias, empresas, promoções e eventos',()=>{
@@ -29,11 +29,11 @@ test('home mobile possui a navegação inferior no padrão do perfil e atalhos r
  assert.match(p,/className='lvp-mobile-bottom-nav-inner'/)
  assert.match(p,/href=\{base\+'#categorias'\}/)
  assert.match(p,/href='\/usuario\/perfil\?mode=personal&tab=favorites'/)
- assert.match(p,/href='\/conta\?new=business'/)
+ assert.match(p,/href=\{base\+'\/eventos'\}/)
  assert.match(p,/name='home'/)
- assert.match(p,/name='compass'/)
+ assert.match(p,/name='grid'/)
  assert.match(p,/name='heart'/)
- assert.match(p,/name='sparkle'/)
+ assert.match(p,/name='calendar'/)
  assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*position:fixed/)
  assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*left:0;right:0;bottom:0/)
  assert.match(c,/\.lvp-mobile-bottom-nav-inner\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)/)

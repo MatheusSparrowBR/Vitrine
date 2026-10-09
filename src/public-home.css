@@ -204,10 +204,10 @@
   .lvp-page main>.lvp-business-cta-section{order:9}
   .lvp-page main{display:flex;flex-direction:column}
   .lvp-page main>.lvp-hero{order:1}
-  .lvp-page main>.lvp-needs{order:2}
-  .lvp-page main>.lvp-categories{order:3}
-  .lvp-page main>.lvp-featured{order:4}
-  .lvp-page main>.lvp-sponsored-wrap{order:5}
+  .lvp-page main>.lvp-needs{order:5}
+  .lvp-page main>.lvp-categories{order:2}
+  .lvp-page main>.lvp-featured{order:3}
+  .lvp-page main>.lvp-sponsored-wrap{order:4}
   .lvp-page main>.lvp-soft{order:6}
   .lvp-page main>.lvp-events{order:7}
   .lvp-page main>.lvp-business-cta-section{order:8}
