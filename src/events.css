@@ -61,3 +61,6 @@
   .vl-events-filters button{font-size:14px}
   .vl-event .section-kicker{font-size:11px}
 }
+
+/* Preço no card: "A partir de" em destaque antes do valor. */
+.vl-event-price b{color:#12253e}
