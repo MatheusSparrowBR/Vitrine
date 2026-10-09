@@ -10,3 +10,6 @@
 .cover-editor-warning{margin:10px 0 0;padding:9px 11px;border:1px solid #f4d48a;border-radius:10px;background:#fff9e8;color:#7a5a00;font-size:12px;font-weight:700;line-height:1.45}
 .cover-editor-check{display:flex;align-items:center;gap:8px;color:#33475e;font-size:13px;font-weight:700;cursor:pointer}
 .cover-editor-check input{width:16px;height:16px;margin:0}
+
+/* Pré-visualização do editor: mesma mecânica do fundo da home (cobre a área, deslocada em % da área). */
+.cover-editor-stage .cover-editor-image{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;pointer-events:none;user-select:none}

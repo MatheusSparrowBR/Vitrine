@@ -2,13 +2,13 @@
 // O editor usa estas mesmas proporções, para que a área segura corresponda ao que o visitante vê.
 export const COVER_FRAMES={
  profile:{desktop:{width:1000,height:400},mobile:{width:360,height:200}},
- home:{desktop:{width:1440,height:700},mobile:{width:390,height:570}},
+ home:{desktop:{width:1600,height:720},mobile:{width:390,height:570}},
  logo:{desktop:{width:1,height:1},mobile:{width:1,height:1}}
 }
 // Largura mínima recomendada da imagem original (2x no celular, para telas de alta densidade).
 export const COVER_MIN_WIDTHS={
  profile:{desktop:1000,mobile:720},
- home:{desktop:1440,mobile:780},
+ home:{desktop:1920,mobile:780},
  logo:{desktop:1000,mobile:1000}
 }
 export const COVER_FRAME_REFERENCE={desktop:{width:1180,height:330},mobile:{width:360,height:180}}
