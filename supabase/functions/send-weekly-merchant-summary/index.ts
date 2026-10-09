@@ -1,8 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 // Envia o resumo semanal por e-mail às empresas que ativaram a opção.
 // Disparada por agendamento (cron), autenticada com CRON_SECRET; não usa sessão de usuário.
-// Provedor de e-mail: Resend (RESEND_API_KEY e MAIL_FROM precisam estar configurados).
+// Envio por SMTP da caixa do próprio domínio: SMTP_HOST, SMTP_PORT (465), SMTP_USER, SMTP_PASSWORD e MAIL_FROM.
 
 const SITE_ORIGIN = 'https://vitrinelocal.net'
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
@@ -66,14 +67,8 @@ ${rows.map(([label, value]) => `<tr><td style="padding:12px 0;border-top:1px sol
   return { subject, html, text }
 }
 
-async function sendWithResend(apiKey: string, from: string, to: string, email: { subject: string; html: string; text: string }) {
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject: email.subject, html: email.html, text: email.text }),
-  })
-  if (!response.ok) throw Object.assign(new Error('email_provider_rejected'), { statusCode: response.status })
-  return response.json()
+async function sendMail(smtp: SMTPClient, from: string, to: string, email: { subject: string; html: string; text: string }) {
+  await smtp.send({ from, to, subject: email.subject, content: email.text, html: email.html })
 }
 
 export default {
@@ -81,11 +76,14 @@ export default {
     if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
 
     const cronSecret = Deno.env.get('CRON_SECRET')?.trim()
-    const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
+    const smtpHost = Deno.env.get('SMTP_HOST')?.trim()
+    const smtpPort = Number(Deno.env.get('SMTP_PORT') || 465)
+    const smtpUser = Deno.env.get('SMTP_USER')?.trim()
+    const smtpPassword = Deno.env.get('SMTP_PASSWORD')
     const mailFrom = Deno.env.get('MAIL_FROM')?.trim()
     const supabaseUrl = Deno.env.get('SUPABASE_URL')?.trim()
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim()
-    if (!cronSecret || !resendKey || !mailFrom || !supabaseUrl || !serviceRoleKey) return json({ error: 'server_not_configured' }, 503)
+    if (!cronSecret || !smtpHost || !smtpUser || !smtpPassword || !mailFrom || !supabaseUrl || !serviceRoleKey) return json({ error: 'server_not_configured' }, 503)
 
     if (req.headers.get('Authorization') !== `Bearer ${cronSecret}`) return json({ error: 'unauthorized' }, 401)
 
@@ -118,26 +116,40 @@ export default {
       ]),
     )
 
+    const smtp = new SMTPClient({
+      connection: { hostname: smtpHost, port: smtpPort, tls: true, auth: { username: smtpUser, password: smtpPassword } },
+    })
+    try {
+      await smtp.connect()
+    } catch (error) {
+      logSafeError('smtp_connect_failed', error)
+      return json({ error: 'smtp_connect_failed' }, 502)
+    }
+
     let sent = 0
     let failed = 0
     let skipped = 0
-    for (const business of businesses) {
-      const { data: owner, error: ownerError } = await admin.auth.admin.getUserById(business.owner_id)
-      const to = owner?.user?.email
-      if (ownerError || !to) {
-        skipped += 1
-        continue
+    try {
+      for (const business of businesses) {
+        const { data: owner, error: ownerError } = await admin.auth.admin.getUserById(business.owner_id)
+        const to = owner?.user?.email
+        if (ownerError || !to) {
+          skipped += 1
+          continue
+        }
+        const metrics = metricsByBusiness.get(business.id) || { visits: 0, promotion_clicks: 0, contact_clicks: 0 }
+        const citySlug = (business as { cities?: { slug?: string } }).cities?.slug || 'laguna'
+        try {
+          await sendMail(smtp, mailFrom, to, buildEmail({ name: business.name, citySlug, slug: business.slug }, metrics))
+          sent += 1
+        } catch (error) {
+          logSafeError('summary_send_failed', error)
+          failed += 1
+        }
+        await new Promise(resolve => setTimeout(resolve, SEND_INTERVAL_MS))
       }
-      const metrics = metricsByBusiness.get(business.id) || { visits: 0, promotion_clicks: 0, contact_clicks: 0 }
-      const citySlug = (business as { cities?: { slug?: string } }).cities?.slug || 'laguna'
-      try {
-        await sendWithResend(resendKey, mailFrom, to, buildEmail({ name: business.name, citySlug, slug: business.slug }, metrics))
-        sent += 1
-      } catch (error) {
-        logSafeError('summary_send_failed', error)
-        failed += 1
-      }
-      await new Promise(resolve => setTimeout(resolve, SEND_INTERVAL_MS))
+    } finally {
+      await smtp.close().catch(() => {})
     }
 
     return json({ sent, failed, skipped, businesses: businesses.length })

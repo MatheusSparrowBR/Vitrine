@@ -22,7 +22,9 @@ test('função de envio exige segredo do agendador e não usa sessão de usuári
  assert.match(fn,/req\.headers\.get\('Authorization'\) !== `Bearer \$\{cronSecret\}`/)
  assert.match(fn,/\.eq\('weekly_summary_enabled', true\)/)
  assert.match(fn,/admin\.rpc\('weekly_business_metrics'/)
- assert.match(fn,/api\.resend\.com\/emails/)
+ assert.match(fn,/SMTPClient/)
+ assert.match(fn,/Deno\.env\.get\('SMTP_PASSWORD'\)/)
+ assert.match(fn,/await smtp\.close\(\)/)
 })
 
 test('e-mail escapa nomes de empresa antes de montar o HTML',()=>{
