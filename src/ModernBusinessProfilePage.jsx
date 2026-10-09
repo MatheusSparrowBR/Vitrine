@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState}from'react'
 import{createClient}from'@supabase/supabase-js'
 import{getActiveBusinessPromotions}from'./promotion-service.js'
-import{formatHours,getOpenStatus}from'./business-hours-utils.js'
+import{DAY_KEYS,formatHours,getOpenStatus}from'./business-hours-utils.js'
 import{loadPublicBusinessReviewSummaries}from'./public-review-summary.js'
 import Icon from'./ui-icons.jsx'
 import{createPushSubscription,syncPushSubscription,isPushSupported}from'./push-notifications.js'
@@ -11,6 +11,7 @@ import'./business-service-badges.css'
 import'./modern-business-profile-refinement.css'
 import'./modern-business-profile-ux.css'
 import'./modern-business-profile-lab-style.css'
+import'./business-profile-readability.css'
 import CoverPositionEditor from './CoverPositionEditor.jsx'
 import{coverPositionCssVars}from'./cover-position-utils.js'
 
@@ -20,12 +21,15 @@ const db=U&&K?createClient(U,K):null
 const phoneDigits=v=>String(v||'').replace(/\D/g,'')
 const fmt=v=>{const n=Number(v);return Number.isFinite(n)?`R$ ${n.toFixed(2).replace('.',',')}`:''}
 const normalizeItemType=item=>{const raw=String(item?.type??item?.item_type??item?.kind??'').trim().toLowerCase();if(['service','services','servico','serviço','servicos','serviços'].includes(raw))return'service';if(['product','products','produto','produtos'].includes(raw))return'product';return null}
-function Gallery({business,photos,coverPositionDesktop,coverPositionMobile,canEditCover,onEditCover}){const cover=business.cover_url||'';const media=photos.filter(p=>p.url&&p.url!==cover);const images=media.filter(p=>p.media_type!=='video');const main=cover||images[0]?.url;const thumbs=media.filter(p=>p.media_type!=='video').slice(0,2);const total=(cover?1:0)+media.length;const extra=Math.max(0,total-3);const hasThumbs=thumbs.length>0;const coverStyle={...coverPositionCssVars(coverPositionDesktop,'desktop'),...coverPositionCssVars(coverPositionMobile,'mobile')};return <div className={`mbp-gallery ${hasThumbs?'has-media':'is-empty'}`} data-gallery-total={total}><button className="mbp-gallery-main" type="button" data-gallery-open aria-label="Abrir galeria de fotos">{main?<img className="mbp-cover-positioned" src={main} alt={`${business.name} capa`} loading="eager" style={coverStyle}/>:<div className="mbp-gallery-placeholder">VitrineLocal</div>}<span className="mbp-gallery-caption">▣ {business.short_description||'Conheça esta empresa local.'}</span></button>{canEditCover&&<button type="button" className="mbp-cover-edit-button" onClick={onEditCover} aria-label="Editar posicionamento da capa" title="Editar capa"><Icon name="camera" size={15}/><span>Editar capa</span></button>}<div className="mbp-gallery-side">{thumbs.map((p,i)=><button className="mbp-gallery-thumb" type="button" key={p.id||i} data-gallery-open aria-label={`Abrir foto ${i+2}`}><img src={p.url} alt="" loading="lazy"/></button>)}<button className="mbp-gallery-more" type="button" data-gallery-open aria-label="Ver todas as fotos">{extra>0&&<strong>+{extra}</strong>}<span>{total>0?'Ver todas as fotos':'Adicionar fotos'}</span></button></div></div>}
+const stripMarker=s=>String(s||'').replace(/^(?:[\s•·\-–—]|\p{Extended_Pictographic}|️|‍)+/u,'').trim()
+const normalizeText=s=>stripMarker(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim()
+function AboutText({text,shortText}){const lines=String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);const shortKey=normalizeText(shortText);if(lines.length<=1){if(shortKey&&normalizeText(text)===shortKey)return null;return <p className="mbp-about-description">{text}</p>}const kept=lines.filter(l=>!(shortKey&&normalizeText(l)===shortKey));if(!kept.length)return null;return <ul className="mbp-about-list">{kept.map((l,i)=><li key={i}>{stripMarker(l)}</li>)}</ul>}
+function Gallery({business,photos,coverPositionDesktop,coverPositionMobile,canEditCover,onEditCover}){const cover=business.cover_url||'';const media=photos.filter(p=>p.url&&p.url!==cover);const images=media.filter(p=>p.media_type!=='video');const main=cover||images[0]?.url;const thumbs=media.filter(p=>p.media_type!=='video').slice(0,2);const total=(cover?1:0)+media.length;const extra=Math.max(0,total-3);const hasThumbs=thumbs.length>0;const coverStyle={...coverPositionCssVars(coverPositionDesktop,'desktop'),...coverPositionCssVars(coverPositionMobile,'mobile')};return <div className={`mbp-gallery ${hasThumbs?'has-media':'is-empty'}`} data-gallery-total={total}><button className="mbp-gallery-main" type="button" data-gallery-open aria-label="Abrir galeria de fotos">{main?<img className={'mbp-cover-positioned'+(main&&main===business.logo_url?' is-logo':'')} src={main} alt={`${business.name} capa`} loading="eager" style={coverStyle}/>:<div className="mbp-gallery-placeholder">VitrineLocal</div>}</button>{canEditCover&&<button type="button" className="mbp-cover-edit-button" onClick={onEditCover} aria-label="Editar posicionamento da capa" title="Editar capa"><Icon name="camera" size={15}/><span>Editar capa</span></button>}<div className="mbp-gallery-side">{thumbs.map((p,i)=><button className="mbp-gallery-thumb" type="button" key={p.id||i} data-gallery-open aria-label={`Abrir foto ${i+2}`}><img src={p.url} alt="" loading="lazy"/></button>)}<button className="mbp-gallery-more" type="button" data-gallery-open aria-label="Ver todas as fotos">{extra>0&&<strong>+{extra}</strong>}<span>{total>0?'Ver todas as fotos':'Adicionar fotos'}</span></button></div></div>}
 function ContactCard({icon,title,value,link,state}){const content=<><span className="mbp-contact-icon"><Icon name={icon} size={17}/></span><span><strong>{title}</strong><small>{value}</small></span></>;if(!link)return <div className={`mbp-contact-card ${state?`is-${state}`:''}`} data-contact-state={state||''}>{content}</div>;return <a className="mbp-contact-card" href={link} target="_blank" rel="noreferrer">{content}</a>}
 function ItemCard({item}){const type=normalizeItemType(item)||'product';const hasPrice=item.price!==null&&item.price!==undefined&&item.price!==''&&Number.isFinite(Number(item.price));return <article className="mbp-item-card" data-item-type={type}>{item.image_url&&<div className="mbp-item-image"><img src={item.image_url} alt={item.name||'Item'} loading="lazy"/></div>}<div className="mbp-item-body"><span className="mbp-item-type">{type==='service'?'SERVIÇO':'PRODUTO'}</span><h3>{item.name}</h3>{item.description&&<p>{item.description}</p>}{hasPrice?<div className="mbp-item-price"><small>{type==='service'?'A partir de':'Por'}</small><strong>{fmt(item.price)}</strong></div>:<span className="mbp-item-no-price">Consulte o preço</span>}</div></article>}
 function ItemsSection({items,tab,setTab}){if(!items.length)return null;const normalized=items.map(item=>({...item,__normalizedType:normalizeItemType(item)}));const products=normalized.filter(i=>i.__normalizedType==='product'),services=normalized.filter(i=>i.__normalizedType==='service');const visible=tab==='products'?products:tab==='services'?services:normalized;const tabs=[['all','Todos',normalized.length],['products','Produtos',products.length],['services','Serviços',services.length]].filter(t=>t[2]>0||t[0]==='all');return <section id="mbp-catalogo" className="mbp-section mbp-offer-section"><div className="mbp-section-title"><span>CATÁLOGO</span><div className="mbp-section-heading-row"><h2>O que esta empresa oferece</h2><small>{normalized.length} {normalized.length===1?'item':'itens'}</small></div></div><div className="mbp-offer-tabs" role="tablist">{tabs.map(([id,label,count])=><button type="button" key={id} className={tab===id?'active':''} role="tab" aria-selected={tab===id} onClick={()=>setTab(id)}>{label} <small>{count}</small></button>)}</div><div className="mbp-items">{visible.slice(0,6).map(i=><ItemCard item={i} key={i.id}/>)}</div></section>}
 
-function MobileProfileNav({citySlug='laguna',businessId,wa,mapsUrl}){return <nav className="mbp-mobile-bottom" aria-label="Navegação principal mobile"><a className="mbp-mobile-home" href={'/'+citySlug}><Icon name="home" size={22}/><span>Início</span></a><BusinessPersonalActions businessId={businessId} compact/><a className="mbp-mobile-wa" data-track="whatsapp" href={wa||undefined} target={wa?'_blank':undefined} rel={wa?'noreferrer':undefined}><Icon name="phone" size={22}/><span>WhatsApp</span></a><a className="mbp-mobile-map" data-track="maps" href={mapsUrl||undefined} target={mapsUrl?'_blank':undefined} rel={mapsUrl?'noreferrer':undefined}><Icon name="pin" size={22}/><span>Mapa</span></a></nav>}
+function MobileProfileNav({citySlug='laguna',businessId,mapsUrl}){return <nav className="mbp-mobile-bottom" aria-label="Navegação principal mobile"><a className="mbp-mobile-home" href={'/'+citySlug}><Icon name="home" size={22}/><span>Início</span></a><a className="mbp-mobile-categories" href={'/'+citySlug+'/empresas'}><Icon name="grid" size={22}/><span>Categorias</span></a><BusinessPersonalActions businessId={businessId} compact/><a className="mbp-mobile-map" data-track="maps" href={mapsUrl||undefined} target={mapsUrl?'_blank':undefined} rel={mapsUrl?'noreferrer':undefined}><Icon name="pin" size={22}/><span>Mapa</span></a></nav>}
 function BusinessPersonalActions({businessId,compact=false}){const[relationship,setRelationship]=useState({favorite:false}),[busy,setBusy]=useState(false);useEffect(()=>{let live=true;(async()=>{const next=await getBusinessRelationship(businessId);if(live)setRelationship({favorite:Boolean(next.favorite)})})();return()=>{live=false}},[businessId]);const toggleFavorite=async()=>{if(busy)return;const nextValue=!relationship.favorite;setBusy(true);try{const result=await setBusinessRelationship(businessId,'favorite',nextValue);if(result.requiresAuth){location.assign(loginPathForIntent('favorite'));return}setRelationship({favorite:nextValue})}finally{setBusy(false)}};return compact?<div className="mbp-relationship-row-compact"><button type="button" className={`mbp-shortcut-action ${relationship.favorite?'is-active':''}`} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Salvo':'Salvar'}</span></button></div>:<div className="mbp-relationship-row" aria-label="Ações pessoais"><button type="button" className={relationship.favorite?'is-active':''} disabled={busy} aria-pressed={relationship.favorite} onClick={toggleFavorite}><span className="mbp-relationship-icon" aria-hidden="true">♡</span><span>{busy?'Salvando…':relationship.favorite?'Empresa salva':'Salvar empresa'}</span></button></div>}
 
 export default function ModernBusinessProfilePage({citySlug='laguna',businessSlug=''}){ 
@@ -43,6 +47,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
  const contactLabel=business?.whatsapp?'Falar no WhatsApp':business?.phone?'Entrar em contato':'Contato indisponível'
  const services=[business?.has_dine_in&&'Consumo no local',business?.has_delivery&&'Delivery',business?.has_pickup&&'Retirada no local'].filter(Boolean)
  const share=async()=>{const data={title:business?.name||'VitrineLocal',text:`Confira ${business?.name||'esta empresa'} no VitrineLocal.`,url:window.location.href};try{if(navigator.share)await navigator.share(data);else if(navigator.clipboard)await navigator.clipboard.writeText(data.url)}catch{}}
+ const todayKey=DAY_KEYS[(new Date().getDay()+6)%7]
  if(loading)return <main className="mbp-shell"><div className="mbp-loading">Carregando empresa…</div></main>
  if(error||!business||!city)return <main className="mbp-shell"><div className="mbp-error"><h1>{error||'Empresa não encontrada.'}</h1><a href={returnUrl}>Voltar para o catálogo</a></div></main>
  return <div className="mbp-shell">
@@ -65,7 +70,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      <div className="mbp-identity-copy">
       <span className="mbp-kicker">EMPRESA LOCAL</span>
       <p className="mbp-identity-description">{business.short_description||business.description||'Conheça esta empresa local.'}</p>
-      <div className="mbp-rating-line" aria-label={rating.count?`${rating.avg.toFixed(1)} de 5, ${rating.count} avaliações`:'Ainda sem avaliações'}>
+      <div className={rating.count?'mbp-rating-line':'mbp-rating-line is-empty'} aria-label={rating.count?`${rating.avg.toFixed(1)} de 5, ${rating.count} avaliações`:'Ainda sem avaliações'}>
        <span className="mbp-rating-stars">{Array.from({length:5},(_,i)=><Icon key={i} name="star" size={13} filled={Boolean(rating.count&&i<Math.round(rating.avg))}/>)}</span>
        <strong>{rating.count?rating.avg.toFixed(1):'—'}</strong>
        <span>{rating.count?`${rating.count} ${rating.count===1?'avaliação':'avaliações'}`:'Ainda sem avaliações'}</span>
@@ -100,7 +105,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <div className="mbp-main-column">
      <section className="mbp-panel" id="sobre">
       <div className="mbp-title"><span>INFORMAÇÕES ESSENCIAIS</span><h2>Informações essenciais</h2></div>
-      <p className="mbp-about-description">{business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'}</p>
+      <AboutText text={business.description||business.short_description||'Informações desta empresa ainda não foram detalhadas.'} shortText={business.short_description}/>
       <div className="mbp-info-grid">
        <div><span className="mbp-info-icon"><Icon name="pin" size={16}/></span><strong>Localização</strong><small>{business.address||profileLocation||'Laguna - SC'}</small></div>
        <div><span className="mbp-info-icon"><Icon name="clock" size={16}/></span><strong>Funcionamento</strong><small>{status.detail}</small></div>
@@ -117,21 +122,21 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
      <section className="mbp-panel" id="endereco">
       <div className="mbp-title-row"><div className="mbp-title"><span>LOCALIZAÇÃO</span><h2>Endereço e rota</h2></div>{mapsUrl&&<a href={mapsUrl} target="_blank" rel="noreferrer">Abrir no Google Maps →</a>}</div>
       <p className="mbp-address">{business.address||profileLocation||'Laguna - SC'}</p>
-      <div className="mbp-mapbox"><Icon name="pin" size={22}/><div><strong>{business.neighborhood||city.name}, {city.name}</strong><small>Abra a rota para chegar até a empresa.</small></div></div>
+      {business.address?<div className="mbp-map-embed"><iframe title={`Mapa: ${business.name}`} src={`https://www.google.com/maps?q=${encodeURIComponent(business.address)}&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade"/></div>:<div className="mbp-mapbox"><Icon name="pin" size={22}/><div><strong>{business.neighborhood||city.name}, {city.name}</strong><small>Abra a rota para chegar até a empresa.</small></div></div>}
      </section>
     </div>
 
     <aside className="mbp-sidebar">
      <div className="mbp-side mbp-side-sticky mbp-hours-card-only">
-      <div className="mbp-side-title"><small>HORÁRIOS</small><span className={status.open?'open':'closed'}>{status.open?'Aberto agora':'Fechado agora'}</span></div>
-      <ul className="mbp-hours">{hours.map(day=><li key={day.key}><strong>{day.label}</strong><span>{day.text}</span></li>)}</ul>
+      <div className="mbp-side-title"><small>HORÁRIOS</small></div>
+      {hours.filter(day=>day.key===todayKey).map(day=><div className="mbp-hours-today" key={day.key}><span>Hoje · {day.label}</span><strong>{day.text}</strong></div>)}<details className="mbp-hours-details"><summary>Ver todos os horários</summary><ul className="mbp-hours">{hours.map(day=><li key={day.key} className={day.key===todayKey?'is-today':''}><strong>{day.label}</strong><span>{day.text}</span></li>)}</ul></details>
       <small className="mbp-note"><Icon name="clock" size={12}/> Horários podem mudar em feriados. Confirme pelo contato da empresa.</small>
      </div>
     </aside>
    </div>
   </main>
 
-  <MobileProfileNav citySlug={citySlug} businessId={business.id} wa={waUrl} mapsUrl={mapsUrl}/>
+  <MobileProfileNav citySlug={citySlug} businessId={business.id} mapsUrl={mapsUrl}/>
   {coverEditorOpen&&canEditCover&&<CoverPositionEditor coverUrl={business.cover_url} businessName={business.name} desktopPosition={coverPositionDesktop} mobilePosition={coverPositionMobile} onSave={saveCoverPosition} onClose={()=>!coverSaveBusy&&setCoverEditorOpen(false)} saveLabel="Salvar enquadramento"/>}
  </div>
 }

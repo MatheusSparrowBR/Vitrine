@@ -1,0 +1,72 @@
+/* Perfil da empresa: legibilidade, ações, mapa, horários e avaliações vazias.
+   Carregado por ModernBusinessProfilePage.jsx depois das folhas antigas do perfil. */
+
+/* Textos de leitura: mesmo critério da home (11px rótulos, 14px+ para leitura). */
+@media(max-width:760px){
+ .mbp-shell .mbp-breadcrumbs{font-size:12px}
+ .mbp-shell .mbp-kicker,
+ .mbp-shell .mbp-title span,
+ .mbp-shell .mbp-section-title span,
+ .mbp-shell .mbp-item-type,
+ .mbp-shell .mbp-side-title small{font-size:11px}
+ .mbp-shell .mbp-verified{font-size:12px}
+ .mbp-shell .mbp-status-pill{font-size:14px}
+ .mbp-shell .mbp-identity-description{font-size:15px}
+ .mbp-shell .mbp-rating-line span{font-size:13px}
+ .mbp-shell .mbp-service-badge{font-size:12px}
+ .mbp-shell .mbp-gallery-more span{font-size:12px}
+ .mbp-shell .mbp-about-description{font-size:15px}
+ .mbp-shell .mbp-info-grid strong{font-size:14px}
+ .mbp-shell .mbp-info-grid small{font-size:14px}
+ .mbp-shell .mbp-address{font-size:16px}
+ .mbp-shell .mbp-mapbox small{font-size:14px}
+ .mbp-shell .mbp-shortcut-action{font-size:14px}
+ .mbp-shell .mbp-primary-cta{font-size:16px}
+ .mbp-shell .mbp-item-card p,
+ .mbp-shell .mbp-promo-card p{font-size:14px}
+ .mbp-shell .mbp-item-no-price{font-size:13px}
+ .mbp-shell .mbp-note{font-size:12px}
+ .mbp-shell .mbp-hours li strong,
+ .mbp-shell .mbp-hours li span{font-size:14px}
+ .mbp-shell .mbp-mobile-bottom span{font-size:12px}
+}
+
+/* Lista da descrição (substitui os emojis como marcadores). */
+.mbp-shell .mbp-about-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.mbp-shell .mbp-about-list li{position:relative;padding-left:20px;font-size:15px;line-height:1.45;color:#2b4159}
+.mbp-shell .mbp-about-list li::before{content:"";position:absolute;left:3px;top:.6em;width:7px;height:7px;border-radius:50%;background:#1f6df2}
+
+/* Cabeçalho: sem avaliações, a linha de nota some (o bloco de avaliações informa isso). */
+.mbp-shell .mbp-rating-line.is-empty{display:none}
+
+/* Logo usada como imagem principal: inteira, sem corte nem esticamento. */
+.mbp-shell .mbp-gallery-main img.is-logo{object-fit:contain;box-sizing:border-box;padding:12% 20%;background:#f4f7fb}
+
+/* Mapa embutido (Google Maps, sem chave). */
+.mbp-shell .mbp-map-embed{margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid #dfe7ef;background:#f4f7fb;aspect-ratio:16/9}
+.mbp-shell .mbp-map-embed iframe{width:100%;height:100%;border:0;display:block}
+
+/* Horários: dia de hoje em destaque; a semana completa fica recolhida. */
+.mbp-shell .mbp-hours-today{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:14px;background:#eef5ff}
+.mbp-shell .mbp-hours-today span{font-size:13px;font-weight:800;color:#1f6df2}
+.mbp-shell .mbp-hours-today strong{font-size:14px;color:#12253e;text-align:right}
+.mbp-shell .mbp-hours-details{margin-top:10px}
+.mbp-shell .mbp-hours-details summary{cursor:pointer;list-style:none;font-size:14px;font-weight:800;color:#1f6df2;padding:6px 0}
+.mbp-shell .mbp-hours-details summary::-webkit-details-marker{display:none}
+.mbp-shell .mbp-hours li.is-today strong,
+.mbp-shell .mbp-hours li.is-today span{color:#1f6df2;font-weight:800}
+
+/* Ações: só o WhatsApp tem cor de destaque; as demais ficam neutras. */
+.mbp-shell .mbp-profile-shortcuts .mbp-shortcut-action,
+.mbp-shell .mbp-share-row .mbp-shortcut-action,
+.mbp-shell .mbp-shortcut-instagram,
+.mbp-shell .mbp-shortcut-ifood,
+.mbp-shell .mbp-shortcut-share{background:#fff;border:1px solid #dbe4ee;color:#17304f;box-shadow:none}
+.mbp-shell .mbp-shortcut-action.is-active,
+.mbp-shell .mbp-shortcut-notifications.active{background:#eef5ff;border-color:#bcd0e8;color:#1f6df2}
+.mbp-shell .mbp-secondary-cta{background:#fff;border:1px solid #dbe4ee;color:#17304f;box-shadow:none}
+
+/* Avaliações vazias: o bloco de nota, barras e filtro não aparecem; fica o convite. */
+.vl-reviews.is-empty .vl-reviews-score,
+.vl-reviews.is-empty .vl-reviews-summary,
+.vl-reviews.is-empty .vl-review-sort{display:none}

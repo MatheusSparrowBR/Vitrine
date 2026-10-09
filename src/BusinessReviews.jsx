@@ -23,7 +23,7 @@ export default function BusinessReviews({businessId}){
  const rows=useMemo(()=>[...d.rows].sort((a,b)=>sort==='highest'?(b.rating||0)-(a.rating||0):sort==='lowest'?(a.rating||0)-(b.rating||0):new Date(b.created_at)-new Date(a.created_at)),[d.rows,sort])
  const scoreLabel=d.count?`${d.count} ${d.count===1?'avaliação':'avaliações'}`:'Ainda não há avaliações'
  const remaining=Math.max(0,d.count-rows.length)
- return <section className="vl-reviews" aria-label="Avaliações dos clientes">
+ return <section className={d.count?'vl-reviews':'vl-reviews is-empty'} aria-label="Avaliações dos clientes">
   <div className="vl-reviews-head"><div><span>REPUTAÇÃO</span><h2>Avaliações dos clientes</h2><p>Veja a experiência de quem já conheceu esta empresa.</p></div><div className="vl-reviews-score"><strong>{d.avg.toFixed(1)}</strong><span aria-label={`${d.avg.toFixed(1)} de 5 estrelas`}>★★★★★</span><small>{scoreLabel}</small></div></div>
   <div className="vl-reviews-summary"><div className="vl-review-breakdown">{bars.map(x=><div className="vl-review-bar" key={x.n}><span>{x.n} <b>★</b></span><i><b style={{width:`${x.pct}%`}}/></i><em>{x.count}</em></div>)}</div><div className="vl-review-meta"><div><strong>{d.count}</strong><span>Avaliações</span></div><div><strong>{d.avg?d.avg.toFixed(1):'—'}</strong><span>Nota média</span></div></div></div>
   {d.count>1&&<div className="vl-review-sort"><span>Ordenar</span><select value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">Mais recentes</option><option value="highest">Maior nota</option><option value="lowest">Menor nota</option></select></div>}
