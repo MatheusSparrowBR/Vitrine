@@ -13,7 +13,7 @@ import'./modern-business-profile-ux.css'
 import'./modern-business-profile-lab-style.css'
 import'./business-profile-readability.css'
 import CoverPositionEditor from './CoverPositionEditor.jsx'
-import{coverPositionCssVars,coverFitOf}from'./cover-position-utils.js'
+import{coverPositionCssVars,coverFitOf,normalizeCoverPosition,COVER_FRAMES,COVER_MIN_WIDTHS}from'./cover-position-utils.js'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -39,6 +39,11 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
  const hours=useMemo(()=>business?formatHours(business.opening_hours):[],[business])
  const toggleBusinessNotifications=async()=>{if(businessNotificationLoading||!business)return;if(!db)return;setBusinessNotificationLoading(true);setBusinessNotificationMessage('');try{const{data:{user}}=await db.auth.getUser();if(!user){setBusinessNotificationMessage('Entre na sua conta para ativar as notificações desta empresa.');return}if(businessNotifications){const{error:removeError}=await db.from('business_notification_subscriptions').update({enabled:false}).eq('user_id',user.id).eq('business_id',business.id);if(removeError)throw removeError;setBusinessNotifications(false);setBusinessNotificationMessage('Notificações desta empresa desativadas.');return}if(!isPushSupported()){setBusinessNotificationMessage('Seu navegador não oferece notificações Push.');return}if(Notification.permission==='denied'){setBusinessNotificationMessage('As notificações estão bloqueadas no navegador. Libere a permissão nas configurações do navegador.');return}if(Notification.permission!=='granted'){const permission=await Notification.requestPermission();if(permission!=='granted'){setBusinessNotificationMessage('Permissão para notificações não concedida.');return}}let subscription=await navigator.serviceWorker.ready.then(reg=>reg.pushManager.getSubscription());if(!subscription)subscription=await createPushSubscription();if(!subscription)throw new Error('Não foi possível ativar as notificações neste dispositivo.');await syncPushSubscription(user.id);const{error:upsertError}=await db.from('business_notification_subscriptions').upsert({user_id:user.id,business_id:business.id,enabled:true},{onConflict:'user_id,business_id'});if(upsertError)throw upsertError;setBusinessNotifications(true);setBusinessNotificationMessage('Pronto! Você receberá notificações desta empresa.')}catch(err){setBusinessNotificationMessage(err?.message||'Não foi possível ativar as notificações.')}finally{setBusinessNotificationLoading(false)}}
  const status=useMemo(()=>business?getOpenStatus(business.opening_hours):{open:false,label:'Horário',detail:'Consulte os horários'},[business])
+ const[logoEditorOpen,setLogoEditorOpen]=useState(false)
+ const saveLogoPosition=async({desktop})=>{if(!db||!business||!canEditCover)return;const{error}=await db.from('businesses').update({logo_position:desktop,updated_at:new Date().toISOString()}).eq('id',business.id);if(error){window.alert(error.message||'Não foi possível salvar a logo.');return}setBusiness(b=>({...b,logo_position:desktop}));setLogoEditorOpen(false)}
+ const logoFit=coverFitOf(business?.logo_position)
+ const logoPos=normalizeCoverPosition(business?.logo_position,'desktop')
+ const logoStyle={objectFit:logoFit,left:'calc(50% + '+logoPos.xPct+'%)',top:'calc(50% + '+logoPos.yPct+'%)',transform:'translate(-50%,-50%) scale('+logoPos.zoom+') scaleX('+logoPos.scaleX+') scaleY('+logoPos.scaleY+')'}
  const saveCoverPosition=async({desktop,mobile})=>{if(!db||!business||!canEditCover)return;setCoverSaveBusy(true);try{const{error}=await db.from('businesses').update({cover_position_desktop:desktop,cover_position_mobile:mobile,updated_at:new Date().toISOString()}).eq('id',business.id);if(error)throw error;setCoverPositionDesktop(desktop);setCoverPositionMobile(mobile);setCoverEditorOpen(false)}catch(err){setError(err?.message||'Não foi possível salvar o enquadramento da capa.')}finally{setCoverSaveBusy(false)}}
  const mapsUrl=business?.address?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`:''
  const returnUrl=useMemo(()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${citySlug}/empresas`)?stored:`/${citySlug}/empresas`}catch{return`/${citySlug}/empresas`}},[citySlug])
@@ -67,7 +72,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     <Gallery business={business} photos={photos} coverPositionDesktop={coverPositionDesktop} coverPositionMobile={coverPositionMobile} canEditCover={canEditCover} onEditCover={()=>setCoverEditorOpen(true)}/>
 
     <div className="mbp-identity">
-     <div className="mbp-logo">{business.logo_url?<img src={business.logo_url} alt={`${business.name} logo`}/>:<span>V</span>}</div>
+     <div className="mbp-logo">{business.logo_url?<img className={'mbp-logo-positioned'+(logoFit==='contain'?' is-contain':'')} src={business.logo_url} alt={`${business.name} logo`} style={logoStyle}/>:<span>V</span>}{canEditCover&&business.logo_url&&<button type="button" className="mbp-logo-edit-button" onClick={()=>setLogoEditorOpen(true)} aria-label="Editar logo" title="Editar logo"><Icon name="camera" size={13}/></button>}</div>
      <div className="mbp-identity-copy">
       <span className="mbp-kicker">EMPRESA LOCAL</span>
       <p className="mbp-identity-description">{business.short_description||business.description||'Conheça esta empresa local.'}</p>
@@ -135,6 +140,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
   </main>
 
   <MobileProfileNav citySlug={citySlug} businessId={business.id} mapsUrl={mapsUrl}/>
+  {logoEditorOpen&&canEditCover&&<CoverPositionEditor kind="logo" frames={COVER_FRAMES.logo} minWidths={COVER_MIN_WIDTHS.logo} coverUrl={business.logo_url} businessName={business.name} desktopPosition={business.logo_position} mobilePosition={business.logo_position} onSave={saveLogoPosition} onClose={()=>setLogoEditorOpen(false)} saveLabel="Salvar logo"/>}
   {coverEditorOpen&&canEditCover&&<CoverPositionEditor coverUrl={business.cover_url} businessName={business.name} desktopPosition={coverPositionDesktop} mobilePosition={coverPositionMobile} onSave={saveCoverPosition} onClose={()=>!coverSaveBusy&&setCoverEditorOpen(false)} saveLabel="Salvar enquadramento"/>}
  </div>
 }
