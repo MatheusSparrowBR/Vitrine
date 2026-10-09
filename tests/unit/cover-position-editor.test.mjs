@@ -35,7 +35,11 @@ test('perfil público usa exatamente o mesmo transform salvo pelo editor',()=>{
 
 test('editor usa a mesma proporção do frame final desktop e mobile',()=>{
  const page=fs.readFileSync('src/CoverPositionEditor.jsx','utf8'),css=fs.readFileSync('src/cover-position-editor.css','utf8')
- assert.match(page,/aspectRatio:mode==='desktop'\?'1180 \/ 330':'1\.87 \/ 1'/)
+ assert.match(page,/aspectRatio:frame\.width\+' \/ '\+frame\.height/)
+ assert.match(page,/frames=COVER_FRAMES\.profile/)
+ const util=fs.readFileSync('src/cover-position-utils.js','utf8')
+ assert.match(util,/home:\{desktop:\{width:1440,height:700\},mobile:\{width:390,height:570\}\}/)
+ assert.match(util,/profile:\{desktop:\{width:1000,height:400\},mobile:\{width:360,height:200\}\}/)
  assert.match(page,/left:'calc\(50% \+ '\+current\.xPct\+'%\)'/)
  assert.match(css,/\.cover-editor-stage\{position:relative;width:100%;height:auto/)
 })
