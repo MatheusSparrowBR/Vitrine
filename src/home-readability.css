@@ -63,3 +63,7 @@
 /* Cards da home: a imagem ocupa a largura do card. A proporção 16/10 com altura fixa calculava a largura pela altura e deixava espaço vazio à direita. */
 .lvp-page .lvp-promo-image,
 .lvp-page .lvp-business-image{width:100%}
+
+/* Selo de desconto e validade nos cards de promoção da home. */
+.lvp-promo-image .promo-discount-badge{position:absolute;top:12px;right:12px;z-index:2;padding:6px 10px;border-radius:999px;background:#e5484d;color:#fff;font-style:normal;font-size:12px;font-weight:900;line-height:1}
+.lvp-page .lvp-promo-valid{display:block;margin-top:8px;color:#6b7c93;font-size:12px;font-weight:700}

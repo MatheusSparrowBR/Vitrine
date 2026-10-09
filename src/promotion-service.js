@@ -70,3 +70,10 @@ export function promotionDiscountPercent(promotion){
  if(promotion?.price==null||!(original>0)||!Number.isFinite(price)||price<0||price>=original)return null
  return Math.round((1-price/original)*100)
 }
+
+// Data de término no formato dd/mm (fuso do projeto). Vazio quando não há data.
+export function promotionValidUntil(promotion){
+ if(!promotion?.ends_at)return ''
+ const d=new Date(promotion.ends_at)
+ return Number.isNaN(d.getTime())?'':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',timeZone:'America/Sao_Paulo'})
+}

@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react'
 import {createClient} from '@supabase/supabase-js'
-import {getActiveCityPromotions,projectTodayISO,promotionDiscountPercent} from './promotion-service.js'
+import {getActiveCityPromotions,projectTodayISO,promotionDiscountPercent,promotionValidUntil} from './promotion-service.js'
 import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import {setBusinessRelationship,loginPathForIntent} from './business-relationship.js'
 import {getOpenStatus} from './business-hours-utils.js'
@@ -180,7 +180,7 @@ export default function CityHomePage({citySlug='laguna'}){
     <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
      {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className={`lvp-promo-grid ${promotions.length===1?'lvp-promo-grid-single':''}`}>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
        <div className='lvp-promo-image'>{p.image_url?<img src={p.image_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.cover_url?<img src={p.businesses.cover_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.logo_url?<img src={p.businesses.logo_url} alt={p.title||'Promoção'} loading='lazy'/>:<div className='lvp-promo-image-placeholder'><Icon name="tag" size={24}/></div>}<strong>PROMOÇÃO</strong>{promotionDiscountPercent(p)!==null&&<em className="promo-discount-badge">-{promotionDiscountPercent(p)}%</em>}</div>
-       <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div><b>Ver oferta →</b></div>
+       <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div>{promotionValidUntil(p)&&<small className='lvp-promo-valid'>Válida até {promotionValidUntil(p)}</small>}<b>Ver oferta →</b></div>
       </a>)}</div>}
     </div>
    </section>}
