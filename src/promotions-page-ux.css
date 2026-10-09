@@ -4,4 +4,5 @@ main.page .promotion-grid{grid-template-columns:repeat(auto-fill,minmax(260px,38
 
 /* Selo de desconto (calculado: valor original vs. valor promocional), no canto superior direito da imagem. */
 .promotion-image-wrap{position:relative}
-.promo-discount-badge{position:absolute;top:12px;right:12px;z-index:2;padding:6px 10px;border-radius:999px;background:#e5484d;color:#fff;font-style:normal;font-size:12px;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(229,72,77,.3)}
+.promo-discount-badge,
+.promotion-discount-badge{position:absolute;top:12px;right:12px;z-index:2;padding:6px 10px;border-radius:999px;background:#e5484d;color:#fff;font-style:normal;font-size:12px;font-weight:900;line-height:1;box-shadow:0 4px 12px rgba(229,72,77,.3)}
