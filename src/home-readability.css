@@ -55,3 +55,7 @@
  .lvp-page .lvp-featured-footer{margin-top:14px}
  .lvp-page .lvp-skeleton-card{min-height:280px}
 }
+
+/* Sem avaliações: o selo "Novo" fica azul, sem a caixa amarela da nota. */
+.lvp-business-card .lvp-card-rating:has(.lvp-card-new){border:0!important;background:transparent!important;padding:0!important;box-shadow:none!important}
+.lvp-business-card .lvp-card-rating .lvp-card-new{display:inline-block;padding:3px 10px!important;border:1px solid #cfe0f7!important;border-radius:999px!important;background:#eef5ff!important;color:#1f6df2!important;font-size:12px!important;font-weight:800!important;line-height:1.2}

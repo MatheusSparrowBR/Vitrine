@@ -103,9 +103,10 @@ test('ações rápidas da empresa usam cartões compactos e separados do compart
  assert.match(page,/mbp-profile-shortcuts/)
  assert.match(page,/mbp-shortcut-action/)
  assert.match(page,/mbp-shortcut-instagram/)
- assert.match(page,/mbp-share-row/)
+ assert.match(page,/mbp-shortcut-ifood/)
  assert.match(css,/\.mbp-profile-shortcuts\{display:grid/)
- assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/)
+ const layout=read('src/business-profile-readability.css')
+ assert.match(layout,/\.mbp-profile-shortcuts\{display:grid;grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/)
 })
 
 

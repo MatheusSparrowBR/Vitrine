@@ -71,11 +71,37 @@
 .vl-reviews.is-empty .vl-reviews-summary,
 .vl-reviews.is-empty .vl-review-sort{display:none}
 
-/* iFood: botão de largura total, com o destaque da marca, alinhado às ações acima. */
-.mbp-shell .mbp-share-row{display:block;margin-top:10px;padding:0}
-.mbp-shell .mbp-share-row .mbp-shortcut-ifood{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;height:auto!important;min-height:44px!important;padding:0 16px;border:1px solid #f5c2c6;border-radius:12px;background:#fff7f7;color:#c81e2a;font-size:14px;font-weight:800;text-decoration:none}
-.mbp-shell .mbp-share-row .mbp-shortcut-ifood:hover{background:#ffeef0;border-color:#eca6ad}
-
 /* Horários: nota com a leitura normal (sem o espaçamento de rótulo) e alinhamento com o destaque de hoje. */
 .mbp-shell .mbp-side>small.mbp-note{display:flex;letter-spacing:0;font-weight:500;font-size:12px;line-height:1.45;color:#71859b;margin-top:12px;padding:0 14px}
 .mbp-shell .mbp-hours-details summary{padding:6px 14px}
+
+/* Ações da empresa: uma linha no desktop (Salvar, Instagram, Notificações, Compartilhar, iFood). */
+.mbp-shell .mbp-profile-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:stretch}
+.mbp-shell .mbp-profile-shortcuts>*{min-width:0;margin:0}
+.mbp-shell .mbp-profile-shortcuts .mbp-shortcut-action,
+.mbp-shell .mbp-profile-shortcuts .mbp-business-notification .mbp-shortcut-action{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:auto!important;min-height:44px!important;padding:8px 10px!important;border-radius:12px;font-size:13px;font-weight:800;line-height:1.2;text-align:center;text-decoration:none;box-sizing:border-box}
+.mbp-shell .mbp-profile-shortcuts .mbp-shortcut-ifood{border-color:#f5c2c6;background:#fff7f7;color:#c81e2a}
+.mbp-shell .mbp-profile-shortcuts .mbp-shortcut-ifood:hover{background:#ffeef0}
+.mbp-shell .mbp-profile-shortcuts .mbp-inline-action-message{grid-column:1/-1}
+.mbp-shell .mbp-profile-shortcuts .mbp-relationship-row{display:contents}
+
+/* Linha principal: WhatsApp e Como chegar com a mesma altura. */
+.mbp-shell .mbp-primary-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px;align-items:stretch}
+.mbp-shell .mbp-primary-row>a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:14px;font-size:15px;font-weight:800;text-align:center;text-decoration:none;box-sizing:border-box}
+
+/* Celular: grade de 2 colunas com a mesma altura; a última ação ocupa a largura toda quando sobra. */
+@media(max-width:760px){
+ .mbp-shell .mbp-profile-shortcuts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .mbp-shell .mbp-profile-shortcuts .mbp-shortcut-action,
+ .mbp-shell .mbp-profile-shortcuts .mbp-business-notification .mbp-shortcut-action{min-height:48px!important;font-size:14px}
+ .mbp-shell .mbp-profile-shortcuts>.mbp-shortcut-ifood:last-child{grid-column:1/-1}
+ .mbp-shell .mbp-profile-shortcuts .mbp-inline-action-message{grid-column:1/-1}
+ .mbp-shell .mbp-primary-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .mbp-shell .mbp-primary-row>a{min-height:52px;font-size:15px}
+}
+
+/* Horários: cada dia em uma linha; períodos quebram sem cortar. */
+.mbp-shell .mbp-hours-today{flex-direction:column;align-items:flex-start;gap:4px}
+.mbp-shell .mbp-hours-today strong{text-align:left;font-size:15px;white-space:normal;line-height:1.35}
+.mbp-shell .mbp-hours li{gap:12px}
+.mbp-shell .mbp-hours li span{text-align:right;white-space:normal;line-height:1.35}
