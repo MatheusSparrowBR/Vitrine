@@ -236,3 +236,12 @@
     margin-top:9px;
   }
 }
+
+/* Login e cadastro: formulário na largura do cartão, dica de campos e atalho para cliente. */
+.vl-auth-page .auth-form{width:100%;max-width:none;margin:0}
+.vl-auth-page .auth-field{width:100%}
+.auth-hint{margin:-4px 0 0;color:#6b7c93;font-size:12px;font-weight:700;text-align:center}
+.auth-customer-link{display:block;margin-top:14px;text-align:center;color:#1677ff;font-size:12px;font-weight:800;text-decoration:none}
+.auth-customer-link:hover{text-decoration:underline}
+.auth-benefits span{font-size:11px}
+.auth-benefits b{font-size:10px}
