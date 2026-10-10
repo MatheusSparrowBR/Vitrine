@@ -143,7 +143,11 @@ export default {
         await new Promise(resolve => setTimeout(resolve, SEND_INTERVAL_MS))
       }
     } finally {
-      await smtp.close().catch(() => {})
+      try {
+        await smtp.close()
+      } catch {
+        // Conexão já fechada pelo servidor: nada a fazer.
+      }
     }
 
     return json({ sent, failed, skipped, businesses: businesses.length })
