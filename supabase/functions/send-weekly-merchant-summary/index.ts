@@ -119,13 +119,7 @@ export default {
     const smtp = new SMTPClient({
       connection: { hostname: smtpHost, port: smtpPort, tls: true, auth: { username: smtpUser, password: smtpPassword } },
     })
-    try {
-      await smtp.connect()
-    } catch (error) {
-      logSafeError('smtp_connect_failed', error)
-      return json({ error: 'smtp_connect_failed' }, 502)
-    }
-
+    // A biblioteca conecta no primeiro envio; falhas de conexão caem no contador de falhas por empresa.
     let sent = 0
     let failed = 0
     let skipped = 0
