@@ -117,3 +117,9 @@ test('cartão da home só aparece quando há vagas abertas',()=>{
  assert.match(teaser,/if \(!count\) return null/)
  assert.match(teaser,/\{ count: 'exact', head: true \}/)
 })
+
+test('cartão da home tem ordem na sequência da home e título legível sobre o fundo escuro',()=>{
+ const css=read('src/city-jobs.css')
+ assert.match(css,/\.city-jobs-teaser-section\{[^}]*order:6/)
+ assert.match(css,/\.lvp-wrap \.city-jobs-teaser \.city-jobs-teaser-copy strong\{[^}]*color:#fff/)
+})
