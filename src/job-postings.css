@@ -1,0 +1,53 @@
+/* Vagas de emprego: painel do dono, painel do admin e seção pública da empresa. */
+.job-section{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.job-card{display:flex;flex-direction:column;gap:14px}
+.job-card-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+.job-card-head h2{margin:4px 0 6px}
+.job-card-head p{margin:0;color:#4a5a70;font-size:15px;line-height:1.5}
+.job-skeleton,.job-empty{color:#4a5a70;font-size:15px}
+.job-alert{padding:12px 14px;border-radius:12px;font-size:15px;font-weight:700}
+.job-alert.success{background:#e8f7ee;color:#136b3a}
+.job-alert.error{background:#fdecec;color:#9b1c1c}
+.job-upgrade{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:#fff7e6;border:1px solid #f5d28a}
+.job-upgrade strong{font-size:16px}
+.job-upgrade p{margin:0;font-size:15px;color:#4a5a70}
+.job-select{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:700}
+.job-select select{padding:10px 12px;border:1px solid #cdd7e5;border-radius:10px;font:inherit;font-size:15px;background:#fff}
+.job-form{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:14px;background:#f6f8fb}
+.job-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.job-form-grid label{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:700}
+.job-form-grid label small{font-size:14px;font-weight:600;color:#4a5a70}
+.job-form-full{grid-column:1/-1}
+.job-form input,.job-form select,.job-form textarea{padding:10px 12px;border:1px solid #cdd7e5;border-radius:10px;font:inherit;font-size:15px;background:#fff;color:#0b1424}
+.job-form-note{margin:0;font-size:14px;color:#4a5a70;line-height:1.5}
+.job-form-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.job-list{display:flex;flex-direction:column;gap:10px}
+.job-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px;border:1px solid #e3e9f2;border-radius:14px;background:#fff}
+.job-row-main{flex:1 1 260px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.job-row-main strong{font-size:16px}
+.job-row-main span,.job-row-main small{font-size:14px;color:#4a5a70}
+.job-status{padding:4px 10px;border-radius:999px;font-size:14px;font-weight:800;background:#eef2f7;color:#4a5a70}
+.job-status.live{background:#e8f7ee;color:#136b3a}
+.job-status.paused{background:#fff7e6;color:#8a5a00}
+.job-status.closed{background:#f1f1f1;color:#666}
+.job-row-actions{display:flex;flex-wrap:wrap;gap:8px}
+.job-btn{appearance:none;border:1px solid #cdd7e5;background:#fff;color:#0b1424;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.job-btn.primary{background:#0b1424;border-color:#0b1424;color:#fff}
+.job-btn.ghost{border-color:transparent;background:transparent;color:#4a5a70}
+.job-btn:disabled{opacity:.6;cursor:progress}
+.job-btn:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.job-public{display:flex;flex-direction:column;gap:14px}
+.job-public-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.job-public-card{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;border:1px solid #e3e9f2;background:#fff}
+.job-public-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.job-public-head strong{font-size:17px}
+.job-public-type{padding:3px 10px;border-radius:999px;background:#eef2f7;font-size:14px;font-weight:800}
+.job-public-card small,.job-public-card p{font-size:14px;color:#4a5a70;line-height:1.5;margin:0}
+.job-public-source{font-weight:700}
+.job-public-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.job-public-disclaimer{margin:0;font-size:14px;color:#4a5a70}
+.job-report{display:flex;flex-direction:column;gap:8px}
+.job-report label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700}
+.job-report textarea{padding:10px 12px;border:1px solid #cdd7e5;border-radius:10px;font:inherit;font-size:15px}
+.job-report-login,.job-report-note{font-size:14px;color:#4a5a70;margin:0}
+@media (max-width:640px){.job-form-grid{grid-template-columns:1fr}}
