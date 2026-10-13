@@ -7,11 +7,11 @@ const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const db=U&&K?createClient(U,K):null
 const FALLBACK=[
  {id:'free',code:'free',name:'Grátis',price_monthly:0,price_yearly:0,description:'Presença básica e recursos essenciais para começar no VitrineLocal.',features:{photos:5,items:10,promotions:1}},
- {id:'pro',code:'pro',name:'Pro',price_monthly:29.9,price_yearly:299,description:'Mais destaque e recursos para crescer com sua empresa.',features:{photos:30,items:50,promotions:5,analytics:true,featured:true,verified:true}},
- {id:'premium',code:'premium',name:'Premium',price_monthly:59.9,price_yearly:599,description:'Máxima presença, reputação avançada e recursos exclusivos, incluindo resposta às avaliações e estatísticas avançadas.',features:{photos:100,items:200,promotions:20,analytics:true,featured:true,verified:true,city_instagram:true,advanced_analytics:true,review_management:true}}
+ {id:'pro',code:'pro',name:'Pro',price_monthly:29.9,price_yearly:299,description:'Mais destaque e recursos para crescer com sua empresa.',features:{photos:30,items:50,promotions:5,analytics:true,featured:true,verified:true,job_postings:true}},
+ {id:'premium',code:'premium',name:'Premium',price_monthly:59.9,price_yearly:599,description:'Máxima presença, reputação avançada e recursos exclusivos, incluindo resposta às avaliações e estatísticas avançadas.',features:{photos:100,items:200,promotions:20,analytics:true,featured:true,verified:true,city_instagram:true,advanced_analytics:true,review_management:true,job_postings:true}}
 ]
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-const label=(k,n)=>({photos:`Até ${n} fotos/mídias`,items:`Até ${n} produtos/serviços`,promotions:n===1?'Até 1 promoção':`Até ${n} promoções`,analytics:'Analytics comercial',featured:'Destaque nas buscas',verified:'Selo de verificação',city_instagram:'Presença no Instagram da cidade',advanced_analytics:'Estatísticas avançadas',review_management:'Reputação + respostas às avaliações'})[k]||k
+const label=(k,n)=>({photos:`Até ${n} fotos/mídias`,items:`Até ${n} produtos/serviços`,promotions:n===1?'Até 1 promoção':`Até ${n} promoções`,analytics:'Analytics comercial',featured:'Destaque nas buscas',verified:'Selo de verificação',city_instagram:'Presença no Instagram da cidade',advanced_analytics:'Estatísticas avançadas',review_management:'Reputação + respostas às avaliações',job_postings:'Vagas de emprego no perfil'})[k]||k
 function featureList(f={}){return['photos','items','promotions','analytics','featured','verified','advanced_analytics','city_instagram','review_management'].map(k=>['photos','items','promotions'].includes(k)?Number(f[`${k}_limit`]??f[k])>0?label(k,Number(f[`${k}_limit`]??f[k])):null:f[k]===true?label(k):null).filter(Boolean).slice(0,10)}
 
 export default function BillingPlansPage(){

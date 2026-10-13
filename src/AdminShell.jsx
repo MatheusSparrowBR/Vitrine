@@ -5,7 +5,7 @@ import './admin-ux.css'
 const NAV_GROUPS=[
  ['Hoje',[['dashboard','Visão geral','home','/admin'],['notifications','Notificações','bell','/admin/notificacoes']]],
  ['Pessoas',[['businesses','Empresas','store','/admin/empresas'],['users','Usuários','user','/admin/usuarios'],['invitations','Convites','share','/admin/convites']]],
- ['Conteúdo',[['reviews','Avaliações','star','/admin/avaliacoes'],['events','Eventos','calendar','/admin/gestao?tab=events'],['promotions','Promoções','tag','/admin/gestao?tab=promotions'],['banners','Banners','image','/admin/banners']]],
+ ['Conteúdo',[['reviews','Avaliações','star','/admin/avaliacoes'],['events','Eventos','calendar','/admin/gestao?tab=events'],['promotions','Promoções','tag','/admin/gestao?tab=promotions'],['jobs','Vagas','briefcase','/admin/gestao?tab=jobs'],['banners','Banners','image','/admin/banners']]],
  ['Comercial',[['advertising','Publicidade','ticket','/admin/publicidade'],['plans','Planos','check','/admin/gestao?tab=plans'],['plan_assignments','Planos por empresa','briefcase','/admin/gestao?tab=assignments'],['analytics','Analytics','search','/admin/analytics']]],
  ['Catálogo',[['needs','Necessidades','grid','/admin/gestao?tab=needs'],['categories','Categorias','grid','/admin/gestao?tab=categories'],['cities','Cidades','pin','/admin/gestao?tab=cities']]],
 ]
