@@ -1,0 +1,19 @@
+name: Resumo semanal do comerciante
+
+on:
+  schedule:
+    # Toda segunda às 08:00 de Brasília (11:00 UTC).
+    - cron: '0 11 * * 1'
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispara o envio do resumo
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -sS --fail-with-body -X POST \
+            "https://swscqihiqmsyntsmuafm.supabase.co/functions/v1/send-weekly-merchant-summary" \
+            -H "Authorization: Bearer $CRON_SECRET"
