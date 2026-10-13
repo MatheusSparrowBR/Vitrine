@@ -68,9 +68,11 @@
 .job-public-meta span{display:inline-flex;align-items:center;gap:5px}
 .job-public-source{padding:2px 8px;border-radius:999px;background:#eef2f7;color:#0b1424;font-size:12px;font-weight:800}
 .job-public-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.job-public-apply{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:4px;border-radius:14px;background:#25d366;color:#fff;font-size:15px;font-weight:900;text-decoration:none;box-shadow:0 10px 22px rgba(37,211,102,.25)}
+.job-public-apply-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px}
+.job-public-apply-wrap small{font-size:12px;font-weight:600;color:#71859b}
+.job-public-apply{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;padding:0 14px;border-radius:12px;background:#25d366;color:#fff;font-size:14px;font-weight:800;line-height:1;white-space:nowrap;text-decoration:none;box-shadow:0 8px 18px rgba(37,211,102,.22)}
 .job-public-apply:hover{background:#1ebe5a}
 .job-public-apply:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
-.job-public-report{align-self:center;appearance:none;border:0;background:none;color:#71859b;font:inherit;font-size:14px;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
+.job-public-report{align-self:center;appearance:none;border:0;background:none;color:#71859b;font:inherit;font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
 .job-public-report:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
 .job-public-disclaimer{font-size:13px}
