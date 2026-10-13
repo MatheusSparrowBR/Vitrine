@@ -93,3 +93,27 @@ test('botão de candidatura usa o verde da página da empresa',()=>{
  const css=read('src/job-postings.css')
  assert.match(css,/\.job-public-apply\{[^}]*background:#25d366/)
 })
+
+test('página de vagas da cidade usa só vagas publicadas da cidade e a regra de plano do banco',()=>{
+ const page=read('src/CityJobsPage.jsx')
+ assert.match(page,/businesses!inner/)
+ assert.match(page,/eq\('businesses\.city_id', cityRow\.id\)/)
+ assert.match(page,/eq\('status', 'published'\)/)
+ assert.match(page,/isJobCurrent\(job\)/)
+})
+
+test('rota /vagas, item de menu e cartão na home estão ligados',()=>{
+ const app=read('src/app-entry.jsx')
+ const header=read('src/SiteHeader.jsx')
+ const home=read('src/CityHomePage.jsx')
+ assert.match(app,/child==='vagas'\)return \{kind:'jobs'/)
+ assert.match(app,/route\.kind==='jobs'\)return <CityJobsPage/)
+ assert.match(header,/\['jobs','Vagas',`\$\{cityBase\}\/vagas`\]/)
+ assert.match(home,/<JobsTeaser cityId=\{city\?\.id\}/)
+})
+
+test('cartão da home só aparece quando há vagas abertas',()=>{
+ const teaser=read('src/JobsTeaser.jsx')
+ assert.match(teaser,/if \(!count\) return null/)
+ assert.match(teaser,/\{ count: 'exact', head: true \}/)
+})

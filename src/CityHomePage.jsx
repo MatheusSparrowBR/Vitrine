@@ -12,7 +12,7 @@ import './home-v2.css'
 import './home-v2-fixes.css'
 import './home-content-layout.css'
 import './public-home.css'
-import './home-readability.css'
+import './home-readability.css';import JobsTeaser from './JobsTeaser.jsx'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -184,7 +184,7 @@ export default function CityHomePage({citySlug='laguna'}){
       </a>)}</div>}
     </div>
    </section>}
-   <section id='eventos' className='lvp-wrap lvp-events'>
+   <JobsTeaser cityId={city?.id} citySlug={city?.slug||citySlug} cityName={city?.name||'sua cidade'}/><section id='eventos' className='lvp-wrap lvp-events'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>AGENDA LOCAL</span><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Eventos publicados e ainda válidos para a cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
     {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda <Icon name="arrowRight" size={14}/></a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className={'lvp-date'+(e.image_url?' has-image':'')} style={e.image_url?{backgroundImage:`url(${JSON.stringify(e.image_url)})`}:undefined}>{e.image_url?null:<><b>{d.day}</b><span>{d.month}</span></>}</div><div><h3>{e.title}</h3><p>{e.image_url?<><b>{d.day} {d.month}</b> · </>:null}<Icon name="pin" size={11}/> {e.location||'Local a confirmar'}{formatEventRange(e.event_date,e.event_end_date)}{e.start_time?<> <Icon name="clock" size={11}/> {String(e.start_time).slice(0,5)}</>:null}</p></div><span className='lvp-event-arrow'><Icon name="arrowRight" size={16}/></span></a>})}</div>:<div className='lvp-empty-panel'><h3>A agenda está tranquila por enquanto.</h3><p>Novos eventos publicados para a cidade aparecerão aqui automaticamente.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
    </section>
