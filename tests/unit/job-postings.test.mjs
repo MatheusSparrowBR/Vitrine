@@ -82,3 +82,14 @@ test('situação da vaga separa ativa, agendada, vencida, pausada e encerrada',a
  assert.equal(jobStatusBucket({...base,status:'closed'},NOW),'closed')
  assert.equal(jobStatusBucket({...base,status:'paused',ends_at:'2026-10-13T10:00:00.000Z'},NOW),'paused')
 })
+
+test('prazo de inscrição mostra o dia de término no fuso de São Paulo',async()=>{
+ const {jobDeadlineLabel}=await import('../../src/job-utils.js')
+ assert.equal(jobDeadlineLabel({ends_at:'2026-10-14T02:59:00.000Z'}),'Inscrições até 13/10')
+ assert.equal(jobDeadlineLabel({ends_at:'2026-11-13T21:00:00.000Z'}),'Inscrições até 13/11')
+})
+
+test('botão de candidatura usa o verde da página da empresa',()=>{
+ const css=read('src/job-postings.css')
+ assert.match(css,/\.job-public-apply\{[^}]*background:#25d366/)
+})

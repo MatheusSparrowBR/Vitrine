@@ -61,3 +61,16 @@
 .job-filter.active{background:#0b1424;border-color:#0b1424;color:#fff}
 .job-filter.active span{background:rgba(255,255,255,.18);color:#fff}
 .job-filter:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+
+/* Card público da vaga: candidatura em destaque, denúncia discreta. */
+.job-public-card{gap:10px;padding:18px}
+.job-public-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#4a5a70}
+.job-public-meta span{display:inline-flex;align-items:center;gap:5px}
+.job-public-source{padding:2px 8px;border-radius:999px;background:#eef2f7;color:#0b1424;font-size:12px;font-weight:800}
+.job-public-desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.job-public-apply{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:4px;border-radius:14px;background:#25d366;color:#fff;font-size:15px;font-weight:900;text-decoration:none;box-shadow:0 10px 22px rgba(37,211,102,.25)}
+.job-public-apply:hover{background:#1ebe5a}
+.job-public-apply:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.job-public-report{align-self:center;appearance:none;border:0;background:none;color:#71859b;font:inherit;font-size:14px;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
+.job-public-report:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.job-public-disclaimer{font-size:13px}
