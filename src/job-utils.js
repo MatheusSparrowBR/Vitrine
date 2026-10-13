@@ -78,3 +78,9 @@ export function formatJobPeriod(job) {
   const format = value => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' })
   return `${format(job.starts_at)} a ${format(job.ends_at)}`
 }
+
+// Prazo de inscrição para o candidato, por exemplo "Inscrições até 14/10".
+export function jobDeadlineLabel(job) {
+  const end = new Date(job.ends_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' })
+  return `Inscrições até ${end}`
+}

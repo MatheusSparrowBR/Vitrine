@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { loginPathForIntent } from './business-relationship.js'
-import { formatJobPeriod, isJobCurrent, jobTypeLabel, jobWhatsappUrl } from './job-utils.js'
+import Icon from './ui-icons.jsx'
+import { isJobCurrent, jobDeadlineLabel, jobTypeLabel, jobWhatsappUrl } from './job-utils.js'
 import './job-postings.css'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
@@ -24,7 +25,7 @@ export default function BusinessJobs({ businessId, businessName, whatsapp }) {
       .select('id,title,description,employment_type,starts_at,ends_at,status,source')
       .eq('business_id', businessId)
       .eq('status', 'published')
-      .order('starts_at', { ascending: false })
+      .order('ends_at', { ascending: true })
       .then(({ data }) => {
         if (live) setJobs((data || []).filter(job => isJobCurrent(job)))
       })
@@ -61,13 +62,19 @@ export default function BusinessJobs({ businessId, businessName, whatsapp }) {
                 <strong>{job.title}</strong>
                 <span className="job-public-type">{jobTypeLabel(job.employment_type)}</span>
               </div>
-              <small>Inscrições: {formatJobPeriod(job)}</small>
-              {job.description && <p>{job.description}</p>}
-              {job.source === 'admin' && <small className="job-public-source">Publicada pela VitrineLocal</small>}
-              <div className="job-public-actions">
-                {link && <a className="job-btn primary" href={link} target="_blank" rel="noreferrer">Candidatar pelo WhatsApp</a>}
-                <button type="button" className="job-btn ghost" onClick={() => { setReporting(reporting === job.id ? null : job.id); setNote('') }}>Denunciar vaga</button>
+              <div className="job-public-meta">
+                <span><Icon name="clock" size={13} /> {jobDeadlineLabel(job)}</span>
+                {job.source === 'admin' && <span className="job-public-source">VitrineLocal</span>}
               </div>
+              {job.description && <p className="job-public-desc">{job.description}</p>}
+              {link && (
+                <a className="job-public-apply" href={link} target="_blank" rel="noreferrer">
+                  <Icon name="phone" size={16} /> Candidatar pelo WhatsApp
+                </a>
+              )}
+              <button type="button" className="job-public-report" onClick={() => { setReporting(reporting === job.id ? null : job.id); setNote('') }}>
+                Denunciar esta vaga
+              </button>
               {reporting === job.id && (
                 session ? (
                   <form className="job-report" onSubmit={event => report(event, job)}>
@@ -86,7 +93,7 @@ export default function BusinessJobs({ businessId, businessName, whatsapp }) {
         })}
       </div>
       {note && <small className="job-report-note" role="status">{note}</small>}
-      <p className="job-public-disclaimer">Vaga publicada pela empresa. A seleção e a contratação são feitas diretamente por ela.</p>
+      <p className="job-public-disclaimer">A seleção é feita pela empresa.</p>
     </section>
   )
 }
