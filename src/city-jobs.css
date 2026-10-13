@@ -1,0 +1,41 @@
+/* Vagas da cidade: cartão na home e página /laguna/vagas. */
+
+/* Cartão na home */
+.city-jobs-teaser-section{margin:28px auto 8px}
+.city-jobs-teaser{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 20px;border-radius:18px;background:#0b1424;color:#fff;text-decoration:none;box-shadow:0 18px 36px rgba(11,20,36,.18)}
+.city-jobs-teaser:hover{background:#13213a}
+.city-jobs-teaser:focus-visible{outline:3px solid #f5b841;outline-offset:3px}
+.city-jobs-teaser-icon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:#25d366;color:#fff;flex:0 0 auto}
+.city-jobs-teaser-copy{display:flex;flex-direction:column;gap:3px;flex:1 1 240px;min-width:0}
+.city-jobs-teaser-copy small{font-size:12px;font-weight:800;letter-spacing:.08em;color:#f5b841}
+.city-jobs-teaser-copy strong{font-size:18px}
+.city-jobs-teaser-copy span{font-size:14px;color:#c8d4e6}
+.city-jobs-teaser-cta{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;background:#fff;color:#0b1424;font-size:14px;font-weight:800;white-space:nowrap}
+
+/* Página de vagas */
+.city-jobs h1{margin:6px 0 8px}
+.city-jobs>p{margin:0 0 18px;color:#4a5a70;font-size:16px;line-height:1.5}
+.city-jobs-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.city-jobs-filters button{appearance:none;border:1px solid #cdd7e5;background:#fff;color:#0b1424;border-radius:999px;padding:9px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.city-jobs-filters button.active{background:#0b1424;border-color:#0b1424;color:#fff}
+.city-jobs-filters button:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.city-jobs-company{display:flex;flex-direction:column;gap:6px;max-width:360px;margin-bottom:18px;font-size:14px;font-weight:700}
+.city-jobs-company select{padding:10px 12px;border:1px solid #cdd7e5;border-radius:10px;font:inherit;font-size:15px;background:#fff}
+.city-jobs-none{color:#4a5a70;font-size:15px}
+.city-jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.city-job-card{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:18px;background:#fff;border:1px solid #e3e9f2;box-shadow:0 10px 24px rgba(11,20,36,.05)}
+.city-job-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.city-job-type{padding:4px 10px;border-radius:999px;background:#eef2f7;font-size:13px;font-weight:800}
+.city-job-deadline{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:#4a5a70}
+.city-job-card h2{margin:2px 0 0;font-size:19px;line-height:1.25}
+.city-job-company{align-self:flex-start;font-size:14px;font-weight:800;color:#216df3;text-decoration:none}
+.city-job-company:hover{text-decoration:underline}
+.city-job-desc{margin:0;font-size:15px;line-height:1.5;color:#4a5a70;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.city-job-actions{margin-top:auto;padding-top:4px}
+.city-job-apply{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:14px;background:#25d366;color:#fff;font-size:15px;font-weight:900;text-decoration:none}
+.city-job-apply:hover{background:#1ebe5a}
+.city-job-apply.muted{background:#fff;color:#0b1424;border:1px solid #cdd7e5}
+.city-job-apply:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.city-jobs-empty{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.city-jobs-btn{display:inline-flex;padding:10px 16px;border-radius:999px;background:#0b1424;color:#fff;text-decoration:none;font-size:14px;font-weight:800}
+@media (max-width:640px){.city-jobs-teaser-cta{width:100%;justify-content:center}}
