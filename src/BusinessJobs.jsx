@@ -68,9 +68,12 @@ export default function BusinessJobs({ businessId, businessName, whatsapp }) {
               </div>
               {job.description && <p className="job-public-desc">{job.description}</p>}
               {link && (
-                <a className="job-public-apply" href={link} target="_blank" rel="noreferrer">
-                  <Icon name="phone" size={16} /> Candidatar pelo WhatsApp
-                </a>
+                <div className="job-public-apply-wrap">
+                  <a className="job-public-apply" href={link} target="_blank" rel="noreferrer">
+                    <Icon name="phone" size={15} /> Candidatar-se
+                  </a>
+                  <small>Abre o WhatsApp da empresa</small>
+                </div>
               )}
               <button type="button" className="job-public-report" onClick={() => { setReporting(reporting === job.id ? null : job.id); setNote('') }}>
                 Denunciar esta vaga
