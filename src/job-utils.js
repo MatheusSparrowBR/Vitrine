@@ -45,6 +45,26 @@ export function isJobCurrent(job, now = Date.now()) {
   return Number.isFinite(start) && Number.isFinite(end) && start <= now && end > now
 }
 
+export const JOB_FILTERS = [
+  ['all', 'Todas'],
+  ['active', 'Ativas'],
+  ['scheduled', 'Agendadas'],
+  ['expired', 'Vencidas'],
+  ['paused', 'Pausadas'],
+  ['closed', 'Encerradas'],
+]
+
+// Situação da vaga para o painel do admin. Encerrada e pausada têm prioridade sobre o prazo.
+export function jobStatusBucket(job, now = Date.now()) {
+  if (job?.status === 'closed') return 'closed'
+  if (job?.status === 'paused') return 'paused'
+  const start = new Date(job?.starts_at).getTime()
+  const end = new Date(job?.ends_at).getTime()
+  if (end <= now) return 'expired'
+  if (start > now) return 'scheduled'
+  return 'active'
+}
+
 // Link do WhatsApp da empresa com uma mensagem pronta sobre a vaga. Vazio quando não há número válido.
 export function jobWhatsappUrl(whatsapp, title) {
   const digits = String(whatsapp || '').replace(/\D/g, '')

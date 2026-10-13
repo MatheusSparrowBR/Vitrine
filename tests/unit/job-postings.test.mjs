@@ -71,3 +71,14 @@ test('telas de vaga estão ligadas no perfil, no painel do dono, no admin e nos 
  assert.match(read('src/AdminShell.jsx'),/\['jobs','Vagas','briefcase'/)
  assert.match(read('src/BillingPlansPage.jsx'),/job_postings:true/)
 })
+
+test('situação da vaga separa ativa, agendada, vencida, pausada e encerrada',async()=>{
+ const {jobStatusBucket}=await import('../../src/job-utils.js')
+ const base={status:'published',starts_at:'2026-10-13T11:00:00.000Z',ends_at:'2026-11-13T21:00:00.000Z'}
+ assert.equal(jobStatusBucket(base,NOW),'active')
+ assert.equal(jobStatusBucket({...base,starts_at:'2026-10-20T11:00:00.000Z'},NOW),'scheduled')
+ assert.equal(jobStatusBucket({...base,ends_at:'2026-10-13T10:00:00.000Z'},NOW),'expired')
+ assert.equal(jobStatusBucket({...base,status:'paused'},NOW),'paused')
+ assert.equal(jobStatusBucket({...base,status:'closed'},NOW),'closed')
+ assert.equal(jobStatusBucket({...base,status:'paused',ends_at:'2026-10-13T10:00:00.000Z'},NOW),'paused')
+})
