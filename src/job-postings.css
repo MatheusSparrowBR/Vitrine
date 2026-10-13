@@ -54,3 +54,10 @@
 /* Vagas na coluna lateral, abaixo dos horários: uma coluna só. */
 .mbp-sidebar .job-public{padding:18px;gap:12px}
 .mbp-sidebar .job-public-list{grid-template-columns:1fr}
+/* Filtros de situação das vagas no admin. */
+.job-filters{display:flex;flex-wrap:wrap;gap:8px}
+.job-filter{appearance:none;border:1px solid #cdd7e5;background:#fff;color:#0b1424;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.job-filter span{padding:1px 8px;border-radius:999px;background:#eef2f7;font-size:13px;font-weight:800}
+.job-filter.active{background:#0b1424;border-color:#0b1424;color:#fff}
+.job-filter.active span{background:rgba(255,255,255,.18);color:#fff}
+.job-filter:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
