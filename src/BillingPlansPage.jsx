@@ -12,7 +12,7 @@ const FALLBACK=[
 ]
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const label=(k,n)=>({photos:`Até ${n} fotos/mídias`,items:`Até ${n} produtos/serviços`,promotions:n===1?'Até 1 promoção':`Até ${n} promoções`,analytics:'Analytics comercial',featured:'Destaque nas buscas',verified:'Selo de verificação',city_instagram:'Presença no Instagram da cidade',advanced_analytics:'Estatísticas avançadas',review_management:'Reputação + respostas às avaliações',job_postings:'Vagas de emprego no perfil'})[k]||k
-function featureList(f={}){return['photos','items','promotions','analytics','featured','verified','advanced_analytics','city_instagram','review_management'].map(k=>['photos','items','promotions'].includes(k)?Number(f[`${k}_limit`]??f[k])>0?label(k,Number(f[`${k}_limit`]??f[k])):null:f[k]===true?label(k):null).filter(Boolean).slice(0,10)}
+function featureList(f={}){return['photos','items','promotions','analytics','featured','verified','advanced_analytics','city_instagram','review_management','job_postings'].map(k=>['photos','items','promotions'].includes(k)?Number(f[`${k}_limit`]??f[k])>0?label(k,Number(f[`${k}_limit`]??f[k])):null:f[k]===true?label(k):null).filter(Boolean).slice(0,10)}
 
 export default function BillingPlansPage(){
  const[plans,setPlans]=useState(FALLBACK),[session,setSession]=useState(null),[businesses,setBusinesses]=useState([]),[businessId,setBusinessId]=useState(''),[current,setCurrent]=useState(null),[interval,setIntervalValue]=useState('monthly'),[msg,setMsg]=useState(''),[loading,setLoading]=useState(true),[checkoutLoading,setCheckoutLoading]=useState('')
