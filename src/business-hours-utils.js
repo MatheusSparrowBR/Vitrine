@@ -26,7 +26,8 @@ export function normalizeDay(value,defaultClosed=false){
         normalizePeriod({open:source.breakOpen??source.open2??'',close:source.breakClose??source.close2??''})
       ]
   while(periods.length<2)periods.push(EMPTY_PERIOD())
-  return {closed:hasValue?Boolean(source.closed):defaultClosed,periods}
+  const split=Boolean(source.split)||Boolean(periods[1].open||periods[1].close)
+  return {closed:hasValue?Boolean(source.closed):defaultClosed,periods,split}
 }
 
 export function normalizeHours(value){

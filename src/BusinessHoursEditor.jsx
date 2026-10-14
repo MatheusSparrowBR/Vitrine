@@ -22,30 +22,12 @@ export default function BusinessHoursEditor({value,onChange}){
   onChange({...hours,[day]:{...hours[day],closed:next}})
  }
 
- const hasSecondPeriod=day=>{
-  const second=day.periods?.[1]||EMPTY_PERIOD
-  return Boolean(second.open||second.close)
+ const addSecondPeriod=key=>{
+  onChange({...hours,[key]:{...hours[key],split:true,periods:[hours[key].periods[0],{...EMPTY_PERIOD}]}})
  }
 
- const addSecondPeriod=day=>{
-  if(hasSecondPeriod(day))return
-  onChange({
-   ...hours,
-   [day.key]:{
-    ...hours[day.key],
-    periods:[day.periods?.[0]||EMPTY_PERIOD,{...EMPTY_PERIOD}]
-   }
-  })
- }
-
- const removeSecondPeriod=(key,day)=>{
-  onChange({
-   ...hours,
-   [day.key]:{
-    ...hours[day.key],
-    periods:[day.periods?.[0]||EMPTY_PERIOD,{...EMPTY_PERIOD}]
-   }
-  })
+ const removeSecondPeriod=key=>{
+  onChange({...hours,[key]:{...hours[key],split:false,periods:[hours[key].periods[0],{...EMPTY_PERIOD}]}})
  }
 
  return <div className="hours-editor">
@@ -61,7 +43,7 @@ export default function BusinessHoursEditor({value,onChange}){
     const day=hours[key]
     const first=day.periods?.[0]||EMPTY_PERIOD
     const second=day.periods?.[1]||EMPTY_PERIOD
-    const split=hasSecondPeriod(day)
+    const split=Boolean(day.split)
 
     return <section className={'hours-day-card '+(day.closed?'is-closed':'')} key={key}>
      <header className="hours-day-header">
@@ -143,10 +125,10 @@ export default function BusinessHoursEditor({value,onChange}){
          />
         </label>
        </div>
-       <button type="button" className="hours-remove-period" onClick={()=>removeSecondPeriod(key,day)} aria-label={'Remover 2º período de '+label}>Remover 2º período</button>
+       <button type="button" className="hours-remove-period" onClick={()=>removeSecondPeriod(key)} aria-label={'Remover 2º período de '+label}>Remover 2º período</button>
       </div>}
 
-      {!split&&<button type="button" className="hours-add-period" onClick={()=>addSecondPeriod({key,periods:day.periods})}>
+      {!split&&<button type="button" className="hours-add-period" onClick={()=>addSecondPeriod(key)}>
        <span aria-hidden="true">+</span> Adicionar 2º período
       </button>}
      </div>}
