@@ -1,0 +1,12 @@
+/* Próximos eventos na página da empresa. */
+.business-events{display:flex;flex-direction:column;gap:12px}
+.business-events-list{display:flex;flex-direction:column;gap:10px}
+.business-event-card{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #e3e9f2;border-radius:14px;background:#fff;color:#0b1424;text-decoration:none}
+.business-event-card:hover{border-color:#216df3}
+.business-event-card:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.business-event-thumb{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;flex:0 0 auto;border-radius:12px;background:#eef2f7;overflow:hidden;font-size:22px}
+.business-event-thumb img{width:100%;height:100%;object-fit:cover}
+.business-event-copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.business-event-copy strong{font-size:15px;line-height:1.3}
+.business-event-copy small{font-size:14px;color:#4a5a70}
+.business-event-arrow{color:#216df3;font-weight:800}

@@ -49,7 +49,7 @@ test('páginas de promoção ligam o botão de cartão aos cards',()=>{
 })
 
 test('compartilhamento usa o sistema quando permite arquivos e baixa o PNG como alternativa',()=>{
- const button=read('src/PromotionShareButton.jsx')
+ const button=read('src/ShareCardButton.jsx')
  assert.match(button,/navigator\.canShare\?\.\(/)
  assert.match(button,/navigator\.share\(/)
  assert.match(button,/link\.download = file\.name/)

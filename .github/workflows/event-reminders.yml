@@ -1,0 +1,19 @@
+name: Lembrete de eventos salvos
+
+on:
+  schedule:
+    # Todo dia às 12:00 de Brasília (15:00 UTC): avisa quem salvou eventos de amanhã.
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispara os lembretes
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -sS --fail-with-body -X POST \
+            "https://swscqihiqmsyntsmuafm.supabase.co/functions/v1/send-event-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET"

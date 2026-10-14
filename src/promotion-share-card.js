@@ -112,7 +112,7 @@ function paint(ctx, model, { image, logo }) {
   let y = 880
   ctx.font = '800 34px system-ui, "Segoe UI", Arial, sans-serif'
   ctx.fillStyle = '#f5b841'
-  ctx.fillText('PROMOÇÃO', left, y)
+  ctx.fillText(model.kicker || 'PROMOÇÃO', left, y)
 
   y += 70
   ctx.font = '900 78px system-ui, "Segoe UI", Arial, sans-serif'
@@ -169,9 +169,14 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.closePath()
 }
 
-// Gera o cartão em PNG. Se a imagem não puder ser usada (CORS), gera sem ela em vez de falhar.
-export async function renderPromotionShareCard(promotion, meta = {}, { imageUrl = '', logoUrl = '' } = {}) {
-  const model = shareCardModel(promotion, meta)
+// Gera o cartão da promoção em PNG.
+export function renderPromotionShareCard(promotion, meta = {}, images = {}) {
+  return renderShareCard(shareCardModel(promotion, meta), images)
+}
+
+// Gera um cartão em PNG a partir de um modelo de texto (promoção ou evento).
+// Se a imagem não puder ser usada (CORS), gera sem ela em vez de falhar.
+export async function renderShareCard(model, { imageUrl = '', logoUrl = '' } = {}) {
   const [image, logo] = await Promise.all([loadImage(imageUrl), loadImage(logoUrl)])
   const canvas = document.createElement('canvas')
   canvas.width = SHARE_CARD_WIDTH

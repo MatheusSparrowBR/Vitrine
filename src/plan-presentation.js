@@ -14,10 +14,11 @@ const FEATURE_LABELS = {
   city_instagram: 'Presença no Instagram da cidade',
   review_management: 'Reputação + respostas às avaliações',
   job_postings: 'Vagas de emprego no perfil',
+  event_publishing: 'Publicação de eventos na agenda',
 }
 
 // Ordem em que os recursos aparecem. Mesma ordem usada na página de planos.
-const DISPLAY_ORDER = ['photos', 'items', 'promotions', 'analytics', 'featured', 'verified', 'advanced_analytics', 'city_instagram', 'review_management', 'job_postings']
+const DISPLAY_ORDER = ['photos', 'items', 'promotions', 'analytics', 'featured', 'verified', 'advanced_analytics', 'city_instagram', 'review_management', 'job_postings', 'event_publishing']
 
 export const PLAN_CATEGORY_LABELS = { free: 'COMECE AQUI', pro: 'RECOMENDADO', premium: 'MAIS COMPLETO' }
 

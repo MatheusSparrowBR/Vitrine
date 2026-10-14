@@ -55,3 +55,9 @@
 
 /* Rótulo "A partir de" antes do preço do evento. */
 .vl-event-profile-from{color:#7a8ca1;font-size:14px;font-weight:700}
+
+/* Contador de interessados, empresa do evento e cartão de compartilhamento. */
+.vl-event-profile-interest{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;font-size:14px;font-weight:700;color:#c2410c}
+.vl-event-profile-business .vl-event-profile-card-icon img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.vl-event-profile-business a{font-weight:800}
+.vl-event-profile-actions .promo-share{margin-top:10px}
