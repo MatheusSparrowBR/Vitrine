@@ -93,3 +93,11 @@ test('texto do cartão nunca encosta no rodapé, mesmo com título longo',async(
  }
  assert.equal(textBlockStart(1,{}),880)
 })
+
+test('cartão do evento só aparece para admin ou para a empresa dona do evento',()=>{
+ const page=read('src/EventProfilePage.jsx')
+ assert.match(page,/setCanShareCard\(profile\?\.role==='admin'\|\|Boolean\(owner\?\.owner_id&&owner\.owner_id===user\.id\)\)/)
+ assert.match(page,/\{canShareCard&&<ShareCardButton/)
+ const css=read('src/event-profile.css')
+ assert.match(css,/\.vl-event-profile-page \.vl-event-profile-actions\{display:flex;flex-direction:column/)
+})
