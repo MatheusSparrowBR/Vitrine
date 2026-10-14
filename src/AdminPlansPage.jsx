@@ -11,7 +11,7 @@ const TOGGLES=[
  ['premium_ads','Publicidade Premium'],
  ['city_instagram','Instagram da cidade'],
  ['advanced_analytics','Estatísticas avançadas'],
- ['review_management','Reputação + respostas às avaliações']
+ ['review_management','Reputação + respostas às avaliações'],['job_postings','Vagas de emprego no perfil']
 ]
 const fmt=v=>v==null||v===''?'—':Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const normalize=n=>Math.max(0,Number.isFinite(Number(n))?Number(n):0)
