@@ -4,7 +4,7 @@ import './promotion-share.css'
 const toSlug = value => String(value || 'cartao').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cartao'
 
 // Gera um cartão em PNG e compartilha pelo sistema, ou baixa o arquivo quando o aparelho não aceita compartilhar imagens.
-export default function ShareCardButton({ buildBlob, fileName, shareTitle, shareText, shareUrl, ariaLabel, label = '↗ Compartilhar cartão' }) {
+export default function ShareCardButton({ buildBlob, fileName, shareTitle, shareText, shareUrl, ariaLabel, label = '↗ Compartilhar cartão', className = '', buttonClassName = 'promo-share-btn' }) {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
 
@@ -40,8 +40,8 @@ export default function ShareCardButton({ buildBlob, fileName, shareTitle, share
   }
 
   return (
-    <div className="promo-share">
-      <button type="button" className="promo-share-btn" onClick={share} disabled={busy} aria-label={ariaLabel}>
+    <div className={`promo-share ${className}`.trim()}>
+      <button type="button" className={buttonClassName} onClick={share} disabled={busy} aria-label={ariaLabel}>
         {busy ? 'Gerando cartão…' : label}
       </button>
       {note && <small className="promo-share-note" role="status">{note}</small>}

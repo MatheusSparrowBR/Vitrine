@@ -60,4 +60,10 @@
 .vl-event-profile-interest{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;font-size:14px;font-weight:700;color:#c2410c}
 .vl-event-profile-business .vl-event-profile-card-icon img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .vl-event-profile-business a{font-weight:800}
-.vl-event-profile-actions .promo-share{margin-top:10px}
+/* Botões do evento: ação principal na primeira linha, demais ações em chips logo abaixo. */
+.vl-event-profile-page .vl-event-profile-actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.vl-event-profile-page .vl-event-profile-actions .vl-event-profile-primary{padding:0 22px;font-size:15px}
+.vl-event-profile-page .vl-event-profile-secondary-actions{margin-top:0}
+.vl-event-profile-share-card{display:inline-flex;flex-direction:column;align-items:flex-start;gap:4px;margin:0}
+.vl-event-profile-share-card .promo-share-note{font-size:13px}
+@media (max-width:640px){.vl-event-profile-page .vl-event-profile-actions{align-items:stretch}.vl-event-profile-page .vl-event-profile-actions .vl-event-profile-primary{justify-content:center}}
