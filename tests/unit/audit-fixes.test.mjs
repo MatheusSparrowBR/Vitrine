@@ -53,3 +53,9 @@ test('código morto removido não volta',()=>{
   assert.equal(fs.existsSync(path.join('src',file)),false,file)
  }
 })
+
+test('sitemap inclui a página de vagas da cidade',()=>{
+ const sitemap=read('scripts/generate-sitemap.mjs')
+ assert.match(sitemap,/add\('\/laguna\/vagas', 'daily', '0\.7'\)/)
+ assert.match(sitemap,/add\(`\/\$\{slug\}\/vagas`, 'daily', '0\.7', lastmod\)/)
+})
