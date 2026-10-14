@@ -82,15 +82,24 @@ if(path==='/'){
 }else if(citySlug&&parts[1]==='promocoes'){
   title='Promoções em '+fallbackCityName+' | VitrineLocal'
   description='Confira ofertas e promoções publicadas por empresas de '+fallbackCityName+'.'
+}else if(citySlug&&parts[1]==='vagas'){
+  title='Vagas em '+fallbackCityName+' | VitrineLocal'
+  description='Vagas de emprego abertas em empresas de '+fallbackCityName+'. Candidate-se pelo WhatsApp da empresa.'
 }else if(citySlug&&parts[1]==='eventos'){
   title='Eventos em '+fallbackCityName+' | VitrineLocal'
   description='Veja os próximos eventos e o que está acontecendo em '+fallbackCityName+'.'
 }else if(citySlug&&parts[1]==='empresa'){
   title='Empresa em '+fallbackCityName+' | VitrineLocal'
   description='Conheça esta empresa local, seus serviços, contatos, horários, promoções e mídias no VitrineLocal.'
-}else if(path==='/planos'){
+}else if(path==='/planos'||path==='/em-breve/planos'){
   title='Planos para empresas | VitrineLocal'
   description='Escolha o plano VitrineLocal que melhor ajuda sua empresa a ganhar presença e destaque.'
+}else if(path==='/privacidade'){
+  title='Política de Privacidade | VitrineLocal'
+  description='Como o VitrineLocal coleta, usa e protege os seus dados.'
+}else if(path==='/termos'){
+  title='Termos de Uso | VitrineLocal'
+  description='Regras de uso da plataforma VitrineLocal para pessoas e empresas.'
 }
 
 if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){
@@ -141,7 +150,8 @@ const createBreadcrumbs=(cityName,categoryName='')=>{
       const label=parts[1]==='empresa'?'Empresas':
         parts[1]==='empresas'?'Empresas':
         parts[1]==='promocoes'?'Promoções':
-        parts[1]==='eventos'?'Eventos':humanize(parts[1])
+        parts[1]==='eventos'?'Eventos':
+        parts[1]==='vagas'?'Vagas':humanize(parts[1])
       items.push({'@type':'ListItem',position:3,name:label,item:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/'+encodeURIComponent(parts[1])})
       if(parts[1]==='empresas'&&categoryName){
         items.push({'@type':'ListItem',position:4,name:categoryName,item:canonicalUrl})
@@ -201,6 +211,17 @@ async function enrichCityMetadata(){
     limit:'1'
   })
   const city=Array.isArray(rows)?rows[0]:null
+  // A API respondeu e a cidade não existe, ou o caminho dentro da cidade é desconhecido:
+  // página de "não encontrada", fora do índice do Google.
+  const knownCityChildren=['empresas','promocoes','eventos','vagas']
+  const unknownChild=parts.length===2&&!knownCityChildren.includes(parts[1])
+  if((Array.isArray(rows)&&!city?.name)||(city?.name&&unknownChild)){
+    title='Página não encontrada | VitrineLocal'
+    description='O endereço acessado não existe no VitrineLocal.'
+    robots='noindex,follow'
+    applyHead()
+    return
+  }
   if(!city?.name)return
   const cityName=city.name
 
@@ -283,6 +304,9 @@ async function enrichCityMetadata(){
   }else if(parts[1]==='promocoes'){
     title='Promoções em '+cityName+' | VitrineLocal'
     description='Confira ofertas e promoções publicadas por empresas de '+cityName+'.'
+  }else if(parts[1]==='vagas'){
+    title='Vagas em '+cityName+' | VitrineLocal'
+    description='Vagas de emprego abertas em empresas de '+cityName+'. Candidate-se pelo WhatsApp da empresa.'
   }else if(parts[1]==='eventos'){
     title='Eventos em '+cityName+' | VitrineLocal'
     description='Veja os próximos eventos e o que está acontecendo em '+cityName+'.'
@@ -415,7 +439,16 @@ async function enrichBusinessMetadata(){
     limit:'1'
   })
   const business=Array.isArray(businessRows)?businessRows[0]:null
-  if(!business)return
+  if(!business){
+    // A API respondeu e a empresa não existe: fora do índice do Google.
+    if(Array.isArray(businessRows)){
+      title='Empresa não encontrada | VitrineLocal'
+      description='Esta empresa não está disponível no VitrineLocal.'
+      robots='noindex,follow'
+      applyHead()
+    }
+    return
+  }
 
   const cityName=business.city_name||city.name
   const category=business.category_name||'Empresa local'

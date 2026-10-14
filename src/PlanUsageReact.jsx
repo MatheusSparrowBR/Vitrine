@@ -1,11 +1,11 @@
 import React,{useEffect,useMemo,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import{getBusinessCollectionUsage,getPlanCycleFeatureUsage,getPlanFeatureLimit,getPlanCycleUsage}from'./plan-cycle-usage.js'
 import'./plan-usage.css'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
+const db=sharedSupabase
 const PLAN_NAMES={free:'Grátis',pro:'Pro',premium:'Premium'}
 const LABELS={photos:'Mídias',items:'Produtos e serviços',promotions:'Promoções'}
 function usagePercent(used,limit){if(limit<=0)return 0;return Math.min(100,(used/limit)*100)}

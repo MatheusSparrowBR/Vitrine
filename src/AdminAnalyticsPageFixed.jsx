@@ -1,9 +1,9 @@
 import React,{useEffect,useMemo,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import AdminShell from './AdminShell.jsx'
 import './admin-analytics.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&KEY?createClient(U,KEY):null
+const U=import.meta.env.VITE_SUPABASE_URL,KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=sharedSupabase
 const PAGE_SIZE=1000
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const fmt=v=>Number(v||0).toLocaleString('pt-BR')

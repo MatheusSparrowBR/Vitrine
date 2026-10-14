@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 
 const U = import.meta.env.VITE_SUPABASE_URL
 const K = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db = U && K ? createClient(U, K) : null
+const db = sharedSupabase
 let state = { open: false, items: [], index: 0 }
 
 function close() {

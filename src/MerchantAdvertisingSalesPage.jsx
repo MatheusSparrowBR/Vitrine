@@ -1,10 +1,10 @@
 import React,{useEffect,useMemo,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import{hasPlanFeature}from'./phase2-rules.js'
 import{chooseBusiness,getRequestedBusinessId,persistBusinessId}from'./business-selection.js'
 import'./merchant-advertising-sales.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=sharedSupabase
 const BUCKET='advertising-request-art',MAX_BYTES=10*1024*1024,TYPES=new Set(['image/jpeg','image/png','image/webp']),TZ='America/Sao_Paulo'
 const empty={title:'',description:'',target_url:'',desired_start_at:'',desired_end_at:'',monthly_budget:'',creative_mode:'self'}
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})

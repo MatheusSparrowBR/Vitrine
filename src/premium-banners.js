@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import './storage-media.css'
 import './storage-media.js'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const supabase = url && key ? createClient(url, key) : null
+const supabase = sharedSupabase
 const BUCKET = 'premium-banners'
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])

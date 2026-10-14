@@ -1,10 +1,10 @@
 import React,{useEffect,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import './auth-page.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=U&&K?createClient(U,K):null
+const db=sharedSupabase
 
 export default function PasswordUpdatePage(){
  const [ready,setReady]=useState(false),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[error,setError]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false)

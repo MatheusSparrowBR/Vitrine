@@ -1,6 +1,6 @@
 import React,{useEffect}from'react'
-import{createClient}from'@supabase/supabase-js'
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+import{supabase as sharedSupabase}from'./supabase-client.js'
+const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=sharedSupabase
 const adCache=new Map()
 function sessionId(){try{let id=localStorage.getItem('vl_analytics_session');if(!id){id=crypto.randomUUID();localStorage.setItem('vl_analytics_session',id)}return id}catch{return null}}
 async function resolveAdvertisement({id,title,href,city_id}){if(!db)return null;const key=id||`${city_id||''}|${title||''}|${href||''}`;if(adCache.has(key))return adCache.get(key);let q=db.from('advertisements').select('id,business_id,city_id').eq('placement','home_banner');if(id)q=q.eq('id',id);else{if(title)q=q.eq('title',title);if(href)q=q.eq('target_url',href);if(city_id)q=q.eq('city_id',city_id)}const{data}=await q.limit(1).maybeSingle();adCache.set(key,data||null);return data||null}

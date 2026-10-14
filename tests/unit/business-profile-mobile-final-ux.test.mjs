@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-const css=fs.readFileSync('src/modern-business-profile-ux.css','utf8')+fs.readFileSync('src/modern-business-profile-lab-style.css','utf8')
+const css=fs.readFileSync('src/modern-business-profile-ux.css','utf8').replace(/\r\n/g,'\n')+fs.readFileSync('src/modern-business-profile-lab-style.css','utf8').replace(/\r\n/g,'\n')
 test('perfil mobile usa badges compactas e topo reduzido',()=>{
  assert.ok(css.includes('mbp-identity-badges'))
  assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important'))
@@ -42,7 +42,7 @@ test('horarios desktop usam tipografia maior para leitura',()=>{
 
 
 test('perfil mobile usa Início no primeiro item e mantém quatro células de navegação com o mesmo tamanho',()=>{
- const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
+ const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8').replace(/\r\n/g,'\n')
  assert.match(page,/className="mbp-mobile-home"/)
  assert.ok(page.includes("href={'/'+citySlug}"))
  assert.match(page,/<span>Início<\/span>/)

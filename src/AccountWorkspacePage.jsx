@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import PlanUsagePanel from './PlanUsageReact.jsx'
 import OwnerPromotionsSection from './OwnerPromotionsSection.jsx'
 import MerchantAdvertisingWorkspaceSection from './MerchantAdvertisingWorkspaceSection.jsx'
@@ -23,7 +23,7 @@ import NotificationCenter from './NotificationCenter.jsx'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
+const db=sharedSupabase
 const MEDIA_BUCKET='business-media'
 const IMAGE_TYPES=new Set(['image/jpeg','image/png','image/webp','image/gif'])
 const VIDEO_TYPES=new Set(['video/mp4','video/webm','video/quicktime'])

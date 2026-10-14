@@ -1,9 +1,9 @@
 import React,{useEffect,useMemo,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import AdminShell from './AdminShell.jsx'
 import'./admin-advertising.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=sharedSupabase
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const dateTime=v=>v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(v)):'—'
 const eventMatchesAd=(event,ad)=>event.metadata?.advertisement_id===ad.id||(event.metadata?.title===ad.title&&event.metadata?.href===ad.target_url)

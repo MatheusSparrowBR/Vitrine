@@ -50,6 +50,7 @@ async function buildUrls() {
     add('/laguna/empresas', 'daily', '0.9')
     add('/laguna/promocoes', 'daily', '0.8')
     add('/laguna/eventos', 'daily', '0.8')
+    add('/laguna/vagas', 'daily', '0.7')
     return rowsToUrls([...urls.values()])
   }
 
@@ -64,6 +65,7 @@ async function buildUrls() {
       add(`/${slug}/empresas`, 'daily', '0.9', lastmod)
       add(`/${slug}/promocoes`, 'daily', '0.8', lastmod)
       add(`/${slug}/eventos`, 'daily', '0.8', lastmod)
+      add(`/${slug}/vagas`, 'daily', '0.7', lastmod)
     }
 
     const [businesses,categories] = await Promise.all([
@@ -104,6 +106,7 @@ async function buildUrls() {
     add('/laguna/empresas', 'daily', '0.9')
     add('/laguna/promocoes', 'daily', '0.8')
     add('/laguna/eventos', 'daily', '0.8')
+    add('/laguna/vagas', 'daily', '0.7')
   }
 
   return rowsToUrls([...urls.values()])

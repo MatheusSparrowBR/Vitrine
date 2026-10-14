@@ -5,7 +5,7 @@ import fs from 'node:fs'
 const read=path=>fs.readFileSync(path,'utf8')
 
 test('merchant workspace has a single React entrypoint',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  assert.match(account,/OwnerPromotionsSection/)
  assert.match(account,/AccountResourceUsage/)
  assert.match(account,/OwnerItemForm/)
@@ -17,7 +17,7 @@ test('merchant workspace has a single React entrypoint',()=>{
 })
 
 test('merchant workspace writes go through Supabase client and shared storage bucket',()=>{
- const account=read('src/AccountPage.jsx')
+ const account=read('src/AccountWorkspacePage.jsx')
  const itemForm=read('src/OwnerItemForm.jsx')
  assert.match(account,/const MEDIA_BUCKET='business-media'/)
  assert.match(account,/(?:supabase|db)\.storage\.from\(MEDIA_BUCKET\)\.upload/)

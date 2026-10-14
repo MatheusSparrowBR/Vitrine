@@ -1,10 +1,10 @@
 import React,{useEffect,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import'./account-onboarding.css';import{loadPublicPlans}from'./plan-presentation.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
+const db=sharedSupabase
 const STORAGE_KEY='vitrinelocal_company_onboarding_v1'
 
 export function AccountOnboardingGate({children}){

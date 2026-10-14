@@ -1,5 +1,5 @@
 import React,{useEffect,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import{DEFAULT_PROMOTION_IMAGE,getActiveBusinessPromotions,getActiveCityPromotions,promotionDiscountPercent}from'./promotion-service.js'
 import{formatHours}from'./BusinessHoursEditor.jsx'
 import'./core.css'
@@ -9,7 +9,7 @@ import'./business-hours.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=U&&K?createClient(U,K):null
+const db=sharedSupabase
 const fallbackCats=[['Restaurantes','🍽️'],['Lojas','🛍️'],['Serviços','🧰'],['Saúde','❤️'],['Beleza','✨'],['Turismo','📍'],['Automóveis','🚗'],['Imóveis','🏠'],['Pets','🐾'],['Outros','✦']]
 const fmt=v=>v==null||v===''?'':`R$ ${Number(v).toFixed(2).replace('.',',')}`
 const phoneDigits=v=>String(v||'').replace(/\D/g,'')

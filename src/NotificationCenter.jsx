@@ -1,9 +1,9 @@
 import React,{useEffect,useMemo,useState}from'react'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import'./notification-center.css'
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
+const db=sharedSupabase
 const DEFAULT_PREFERENCES={promotions_enabled:true,business_enabled:true,system_enabled:true,city_id:'',category_ids:[]}
 const TYPE_OPTIONS=[['all','Todas'],['promotion','Promoções'],['business','Empresas'],['system','Sistema']]
 function formatDate(value){if(!value)return '';return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value))}

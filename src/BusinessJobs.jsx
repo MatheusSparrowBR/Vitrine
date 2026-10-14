@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import { loginPathForIntent } from './business-relationship.js'
 import Icon from './ui-icons.jsx'
 import { isJobCurrent, jobDeadlineLabel, jobTypeLabel, jobWhatsappUrl } from './job-utils.js'
@@ -7,7 +7,7 @@ import './job-postings.css'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db = URL && KEY ? createClient(URL, KEY) : null
+const db = sharedSupabase
 
 // Vagas publicadas da empresa. Não aparece nada quando não há vaga ativa.
 export default function BusinessJobs({ businessId, businessName, whatsapp }) {

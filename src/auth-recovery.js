@@ -1,11 +1,11 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import AdminDashboard from './AdminDashboard.jsx'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const supabase = URL && KEY ? createClient(URL, KEY) : null
+const supabase = sharedSupabase
 
 const state = {
   initialized: false,

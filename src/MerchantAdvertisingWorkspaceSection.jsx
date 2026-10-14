@@ -1,11 +1,11 @@
 import React,{useEffect,useMemo,useState}from'react'
 import{hasPlanFeature}from'./phase2-rules.js'
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import'./merchant-advertising-sales.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=U&&K?createClient(U,K):null
+const db=sharedSupabase
 const BUCKET='advertising-request-art'
 const MAX_BYTES=10*1024*1024
 const TYPES=new Set(['image/jpeg','image/png','image/webp'])
