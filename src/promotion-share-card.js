@@ -50,6 +50,17 @@ export function wrapText(text, maxWidth, measure, maxLines = 3) {
   return kept
 }
 
+// Onde o bloco de texto começa: o mais baixo possível (880), sem que a última linha
+// encoste no rodapé com a cidade e o site. Títulos longos empurram o bloco para cima.
+export function textBlockStart(titleLineCount, model) {
+  let offset = 70 + titleLineCount * 92
+  let last = 70 + (titleLineCount - 1) * 92
+  if (model.business) { last = offset + 8; offset += 70 }
+  if (model.priceText || model.originalText) { last = offset + 14; offset += 70 }
+  if (model.validText) last = offset + 8
+  return Math.min(880, SHARE_CARD_HEIGHT - 115 - last)
+}
+
 function loadImage(url) {
   return new Promise(resolve => {
     if (!url) return resolve(null)
@@ -109,16 +120,17 @@ function paint(ctx, model, { image, logo }) {
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = '#ffffff'
 
-  let y = 880
+  ctx.font = '900 78px system-ui, "Segoe UI", Arial, sans-serif'
+  const titleLines = wrapText(model.title, maxWidth, text => ctx.measureText(text).width, 3)
+  let y = textBlockStart(titleLines.length, model)
   ctx.font = '800 34px system-ui, "Segoe UI", Arial, sans-serif'
   ctx.fillStyle = '#f5b841'
-  ctx.fillText('PROMOÇÃO', left, y)
+  ctx.fillText(model.kicker || 'PROMOÇÃO', left, y)
 
   y += 70
   ctx.font = '900 78px system-ui, "Segoe UI", Arial, sans-serif'
   ctx.fillStyle = '#ffffff'
-  const measureTitle = text => ctx.measureText(text).width
-  for (const line of wrapText(model.title, maxWidth, measureTitle, 3)) {
+  for (const line of titleLines) {
     ctx.fillText(line, left, y)
     y += 92
   }
@@ -169,9 +181,14 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.closePath()
 }
 
-// Gera o cartão em PNG. Se a imagem não puder ser usada (CORS), gera sem ela em vez de falhar.
-export async function renderPromotionShareCard(promotion, meta = {}, { imageUrl = '', logoUrl = '' } = {}) {
-  const model = shareCardModel(promotion, meta)
+// Gera o cartão da promoção em PNG.
+export function renderPromotionShareCard(promotion, meta = {}, images = {}) {
+  return renderShareCard(shareCardModel(promotion, meta), images)
+}
+
+// Gera um cartão em PNG a partir de um modelo de texto (promoção ou evento).
+// Se a imagem não puder ser usada (CORS), gera sem ela em vez de falhar.
+export async function renderShareCard(model, { imageUrl = '', logoUrl = '' } = {}) {
   const [image, logo] = await Promise.all([loadImage(imageUrl), loadImage(logoUrl)])
   const canvas = document.createElement('canvas')
   canvas.width = SHARE_CARD_WIDTH

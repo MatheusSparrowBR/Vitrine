@@ -10,5 +10,5 @@ test('admin mostra a caixa de vagas de emprego na edição dos planos',()=>{
 })
 
 test('página pública de planos lista vagas de emprego quando o plano tem o recurso',()=>{
- assert.match(read('src/BillingPlansPage.jsx'),/'review_management','job_postings'\]\.map\(/)
+ assert.match(read('src/BillingPlansPage.jsx'),/'review_management','job_postings'(,'event_publishing')?\]\.map\(/)
 })
