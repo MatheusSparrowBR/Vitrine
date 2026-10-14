@@ -1,36 +1,25 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { loadPublicPlans } from './plan-presentation.js'
 
-const plans=[
-  {
-    key:'free',
-    label:'COMECE AQUI',
-    name:'Grátis',
-    description:'Presença básica e recursos essenciais para começar no VitrineLocal.',
-    price:'R$ 0,00',
-    suffix:'/mês',
-    features:['Até 5 fotos/mídias','Até 10 produtos/serviços','Até 1 promoção']
-  },
-  {
-    key:'pro',
-    label:'RECOMENDADO',
-    name:'Pro',
-    description:'Mais destaque e recursos para crescer com sua empresa.',
-    price:'R$ 29,90',
-    suffix:'/mês',
-    features:['Até 30 fotos/mídias','Até 50 produtos/serviços','Até 5 promoções','Analytics comercial','Destaque nas buscas','Selo de verificação']
-  },
-  {
-    key:'premium',
-    label:'MAIS COMPLETO',
-    name:'Premium',
-    description:'Máxima presença, reputação avançada e recursos exclusivos, incluindo resposta às avaliações e estatísticas avançadas.',
-    price:'R$ 59,90',
-    suffix:'/mês',
-    features:['Até 100 fotos/mídias','Até 200 produtos/serviços','Até 20 promoções','Analytics comercial','Destaque nas buscas','Selo de verificação','Estatísticas avançadas','Presença no Instagram da cidade','Reputação + respostas às avaliações']
-  }
-]
+const URL = import.meta.env.VITE_SUPABASE_URL
+const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const db = URL && KEY ? createClient(URL, KEY) : null
 
 export default function PrelaunchPlansPage(){
+  const [plans, setPlans] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let live = true
+    loadPublicPlans(db).then(list => {
+      if (!live) return
+      setPlans(list)
+      setLoading(false)
+    })
+    return () => { live = false }
+  }, [])
+
   return <main className="vl-prelaunch-plans" aria-labelledby="vl-prelaunch-plans-title">
     <div className="vl-prelaunch-plans-orb vl-prelaunch-plans-orb-a" aria-hidden="true" />
     <div className="vl-prelaunch-plans-orb vl-prelaunch-plans-orb-b" aria-hidden="true" />
@@ -44,17 +33,19 @@ export default function PrelaunchPlansPage(){
     </header>
 
     <section className="vl-prelaunch-plan-grid" aria-label="Planos VitrineLocal">
-      {plans.map(plan=><article key={plan.key} className={`vl-prelaunch-plan-card vl-prelaunch-plan-card-${plan.key}`}>
+      {loading && <p className="vl-prelaunch-plans-loading">Carregando planos…</p>}
+      {!loading && plans.length === 0 && <p className="vl-prelaunch-plans-loading">Os planos estão sendo atualizados. Fale com a gente pelo e-mail contato@vitrinelocal.net.</p>}
+      {plans.map(plan => <article key={plan.code} className={`vl-prelaunch-plan-card vl-prelaunch-plan-card-${plan.code}`}>
         <span className="vl-prelaunch-plan-label">{plan.label}</span>
         <h2>{plan.name}</h2>
         <p className="vl-prelaunch-plan-description">{plan.description}</p>
-        <div className="vl-prelaunch-plan-price"><strong>{plan.price}</strong><span>{plan.suffix}</span></div>
+        <div className="vl-prelaunch-plan-price"><strong>{plan.price}</strong><span>/mês</span></div>
         <ul>
-          {plan.features.map(feature=><li key={feature}><span aria-hidden="true">✓</span>{feature}</li>)}
+          {plan.features.map(feature => <li key={feature}><span aria-hidden="true">✓</span>{feature}</li>)}
         </ul>
-        {plan.key==='free'
+        {plan.code === 'free'
           ? <a className="vl-prelaunch-plan-action secondary" href="/usuario/cadastro">Cadastrar empresa</a>
-          : <a className="vl-prelaunch-plan-action" href="mailto:contato@vitrinelocal.net?subject=Interesse%20no%20plano%20${encodeURIComponent(plan.name)}">Tenho interesse</a>}
+          : <a className="vl-prelaunch-plan-action" href={`mailto:contato@vitrinelocal.net?subject=Interesse%20no%20plano%20${encodeURIComponent(plan.name)}`}>Tenho interesse</a>}
       </article>)}
     </section>
 
