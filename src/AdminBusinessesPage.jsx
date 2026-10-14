@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import AdminShell from './AdminShell.jsx'
 import Icon from './ui-icons.jsx'
 import BusinessHoursEditor from './BusinessHoursEditor.jsx'
@@ -9,7 +9,7 @@ import './business-service-badges.css'
 import './business-hours.css'
 import './admin-business-hours.css'
 
-const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=U&&K?createClient(U,K):null
+const U=import.meta.env.VITE_SUPABASE_URL,K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,db=sharedSupabase
 const emptyForm={name:'',slug:'',short_description:'',description:'',city_id:'',category_id:'',address:'',neighborhood:'',phone:'',whatsapp:'',instagram_url:'',website_url:'',ifood_url:'',cover_url:'',logo_url:'',status:'pending',featured:false,search_featured:false,search_featured_mode:'auto',verified:false,owner_id:'',rejection_reason:'',opening_hours:{},has_delivery:false,has_pickup:false,has_dine_in:false}
 const labels={active:'Ativa',pending:'Pendente',suspended:'Suspensa',rejected:'Rejeitada'}
 const MEDIA_BUCKET='business-media'

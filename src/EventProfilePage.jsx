@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react'
-import {createClient} from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import {projectTodayISO} from './promotion-service.js'
 import Icon from './ui-icons.jsx'
 import {toPlainText,buildEventIcs,googleCalendarUrl,isFreeEvent} from './event-utils.js'
@@ -8,7 +8,7 @@ import './event-profile.css'
 
 const U=import.meta.env.VITE_SUPABASE_URL
 const K=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=U&&K?createClient(U,K):null
+const db=sharedSupabase
 
 const formatDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'Data não informada'
 const formatShortDate=value=>value?new Date(`${value}T00:00:00`).toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}):''
@@ -28,7 +28,7 @@ function Description({text}){
 
 export default function EventProfilePage({citySlug='laguna',eventId='',onBack}){
  const [city,setCity]=useState(null),[event,setEvent]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[shareFeedback,setShareFeedback]=useState(''),[saved,setSaved]=useState(false),[saveMessage,setSaveMessage]=useState('')
- useEffect(()=>{let live=true;(async()=>{if(!db){setError('Configuração do banco indisponível.');setLoading(false);return}const{data:c,error:ce}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(!live)return;if(ce||!c){setError('Cidade não encontrada.');setLoading(false);return}setCity(c);const{data:e,error:ee}=await db.from('events').select('id,title,description,image_url,event_date,event_end_date,start_time,end_time,location,address,category,price,external_url,featured,active').eq('id',eventId).eq('city_id',c.id).eq('active',true).gte('event_end_date',projectTodayISO()).maybeSingle();if(!live)return;if(ee||!e){setError('Evento não encontrado.');setLoading(false);return}setEvent(e);setLoading(false)})();return()=>{live=false}},[citySlug,eventId])
+ useEffect(()=>{let live=true;(async()=>{if(!db){setError('Configuração do banco indisponível.');setLoading(false);return}const{data:c,error:ce}=await db.from('cities').select('id,name,state,slug,active').eq('slug',citySlug).eq('active',true).maybeSingle();if(!live)return;if(ce||!c){setError('Cidade não encontrada.');setLoading(false);return}setCity(c);const{data:e,error:ee}=await db.from('events').select('id,title,description,image_url,event_date,event_end_date,start_time,end_time,location,address,category,price,external_url,featured,active').eq('id',eventId).eq('city_id',c.id).eq('active',true).gte('event_end_date',projectTodayISO()).maybeSingle();if(!live)return;if(ee||!e){setError('Evento não encontrado.');setLoading(false);if(!ee){document.title='Evento não encontrado | VitrineLocal';document.querySelector('meta[name="robots"]')?.setAttribute('content','noindex,follow')}return}setEvent(e);setLoading(false)})();return()=>{live=false}},[citySlug,eventId])
  useEffect(()=>{let live=true;if(!event)return;getEventFavoriteIds(db,[event.id]).then(result=>{if(live)setSaved(result.ids.has(event.id))});return()=>{live=false}},[event])
  const dateLabel=useMemo(()=>{if(!event)return '';if(!event.event_end_date||event.event_end_date===event.event_date)return formatDate(event.event_date);return `${formatShortDate(event.event_date)} até ${formatDate(event.event_end_date)}`},[event])
  useEffect(()=>{if(!event||!city)return;const description=event.description?toPlainText(event.description).replace(/\s+/g,' ').slice(0,155):`Confira os detalhes de ${event.title} em ${city.name}.`;const title=`${event.title} — ${city.name} | VitrineLocal`;document.title=title;const upsert=(key,value,attribute)=>{let el=document.head.querySelector(`meta[${attribute}="${key}"]`);if(!el){el=document.createElement('meta');el.setAttribute(attribute,key);document.head.appendChild(el)}el.setAttribute('content',value)};upsert('description',description,'name');upsert('og:title',title,'property');upsert('og:description',description,'property');upsert('og:type','website','property');upsert('og:url',location.href,'property');if(event.image_url)upsert('og:image',event.image_url,'property');return()=>{document.title='VitrineLocal — A cidade na palma da mão'}},[event,city])

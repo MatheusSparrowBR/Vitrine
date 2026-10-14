@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import JobPostingForm, { EMPTY_JOB_FORM } from './JobPostingForm.jsx'
 import { formatJobPeriod, isJobCurrent, jobTypeLabel, JOB_PLAN_NOTICE, localDateTimeToISO, validateJobDraft } from './job-utils.js'
 import './job-postings.css'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db = URL && KEY ? createClient(URL, KEY) : null
+const db = sharedSupabase
 
 const STATUS_LABEL = { published: 'Publicada', paused: 'Pausada', closed: 'Encerrada' }
 

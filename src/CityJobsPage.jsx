@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import { PublicHeader } from './PublicCatalogPages.jsx'
 import Icon from './ui-icons.jsx'
 import { isJobCurrent, JOB_TYPES, jobDeadlineLabel, jobTypeLabel, jobWhatsappUrl } from './job-utils.js'
@@ -9,7 +9,7 @@ import './city-jobs.css'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db = URL && KEY ? createClient(URL, KEY) : null
+const db = sharedSupabase
 
 // Vagas abertas das empresas da cidade. O banco só devolve vagas de empresas com plano Pro ou Premium.
 export default function CityJobsPage({ citySlug = 'laguna' }) {

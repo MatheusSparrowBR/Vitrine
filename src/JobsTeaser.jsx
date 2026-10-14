@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 import Icon from './ui-icons.jsx'
 import './city-jobs.css'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db = URL && KEY ? createClient(URL, KEY) : null
+const db = sharedSupabase
 
 // Cartão da home com o total de vagas abertas da cidade. Não aparece quando não há vaga.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default function JobsTeaser({ cityId, citySlug = 'laguna', cityName = 'Laguna' }) {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
     let live = true
-    if (!db || !cityId) return undefined
+    // A home usa um id provisório ('fallback') até a cidade carregar; só consulta com o UUID real.
+    if (!db || !UUID.test(String(cityId || ''))) return undefined
     db.from('job_postings')
       .select('id,businesses!inner(city_id)', { count: 'exact', head: true })
       .eq('businesses.city_id', cityId)

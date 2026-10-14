@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const supabase = URL && KEY ? createClient(URL, KEY) : null
+const supabase = sharedSupabase
 
 const fallbackPlans = [
   { code: 'free', name: 'Grátis', price_monthly: 0, features: { photos: 5, ai_posts: 3, business_profile: true, featured: false } },

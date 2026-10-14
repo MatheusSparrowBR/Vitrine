@@ -1,8 +1,8 @@
-import{createClient}from'@supabase/supabase-js'
+import{supabase as sharedSupabase}from'./supabase-client.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-const db=URL&&KEY?createClient(URL,KEY):null
+const db=sharedSupabase
 export const ADMIN_UNLIMITED_LIMIT=2147483647
 
 export async function getPlanCycleUsage(businessId){
