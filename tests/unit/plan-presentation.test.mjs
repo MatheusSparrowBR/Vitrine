@@ -33,3 +33,11 @@ test('telas de apresentação leem os planos do banco, sem lista fixa',()=>{
  assert.doesNotMatch(onboarding,/const plans=\[/)
  assert.match(prelaunch,/href=\{`mailto:contato@vitrinelocal\.net\?subject=Interesse%20no%20plano%20\$\{encodeURIComponent\(plan\.name\)\}`\}/)
 })
+
+test('sem banco, as telas usam os planos de reserva com os preços de sempre',async()=>{
+ const {loadPublicPlans}=await import('../../src/plan-presentation.js')
+ const plans=await loadPublicPlans(null)
+ assert.deepEqual(plans.map(plan=>plan.name),['Grátis','Pro','Premium'])
+ assert.equal(plans[1].price,'R$ 29,90')
+ assert.equal(plans[2].price,'R$ 59,90')
+})

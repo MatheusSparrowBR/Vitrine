@@ -38,15 +38,43 @@ export function formatPlanPrice(value) {
   return number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-// Planos ativos, na ordem de exibição. Vazio quando a leitura falha.
+// Planos de reserva, usados só quando o banco não responde ou não tem planos ativos.
+export const FALLBACK_PLANS = [
+  {
+    code: 'free',
+    label: PLAN_CATEGORY_LABELS.free,
+    name: 'Grátis',
+    description: 'Presença básica e recursos essenciais para começar no VitrineLocal.',
+    price: 'R$ 0,00',
+    features: ['Até 5 fotos/mídias', 'Até 10 produtos/serviços', 'Até 1 promoção'],
+  },
+  {
+    code: 'pro',
+    label: PLAN_CATEGORY_LABELS.pro,
+    name: 'Pro',
+    description: 'Mais destaque e recursos para crescer com sua empresa.',
+    price: 'R$ 29,90',
+    features: ['Até 30 fotos/mídias', 'Até 50 produtos/serviços', 'Até 5 promoções', 'Analytics comercial', 'Destaque nas buscas', 'Selo de verificação'],
+  },
+  {
+    code: 'premium',
+    label: PLAN_CATEGORY_LABELS.premium,
+    name: 'Premium',
+    description: 'Máxima presença, reputação avançada e recursos exclusivos, incluindo resposta às avaliações e estatísticas avançadas.',
+    price: 'R$ 59,90',
+    features: ['Até 100 fotos/mídias', 'Até 200 produtos/serviços', 'Até 20 promoções', 'Analytics comercial', 'Destaque nas buscas', 'Selo de verificação', 'Estatísticas avançadas', 'Reputação + respostas às avaliações'],
+  },
+];
+
+// Planos ativos, na ordem de exibição. Usa os planos de reserva quando a leitura falha ou está vazia.
 export async function loadPublicPlans(db) {
-  if (!db) return []
+  if (!db) return FALLBACK_PLANS
   const { data, error } = await db.from('plans')
     .select('id,code,name,description,price_monthly,features,sort_order')
     .eq('active', true)
     .order('sort_order')
     .order('price_monthly')
-  if (error || !data) return []
+  if (error || !data || data.length === 0) return FALLBACK_PLANS
   return data.map(plan => ({
     id: plan.id,
     code: plan.code,
