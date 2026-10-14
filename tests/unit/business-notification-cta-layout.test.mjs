@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import test from 'node:test'
 
-const css=fs.readFileSync('src/modern-business-profile-ux.css','utf8')
-const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8')
+const css=fs.readFileSync('src/modern-business-profile-ux.css','utf8').replace(/\r\n/g,'\n')
+const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8').replace(/\r\n/g,'\n')
 
 test('CTA de notificações permanece após o contato principal',()=>{
  assert.match(page,/mbp-primary-cta/)

@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-const read=path=>fs.readFileSync(path,'utf8')
+const read=path=>fs.readFileSync(path,'utf8').replace(/\r\n/g,'\n')
 
 test('fase 2.1 cria armazenamento seguro para subscriptions push',()=>{
   const sql=read('supabase/migrations/20260923180000_create_push_subscriptions.sql')
