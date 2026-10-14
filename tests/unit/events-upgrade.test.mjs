@@ -80,3 +80,16 @@ test('empresa vê seus eventos, admin aprova e perfil mostra a agenda',()=>{
  assert.match(read('src/ModernBusinessProfilePage.jsx'),/<BusinessEvents businessId=\{business\.id\}/)
  assert.match(read('src/AdminPlansPage.jsx'),/\['event_publishing','Publicação de eventos na agenda'\]/)
 })
+
+test('texto do cartão nunca encosta no rodapé, mesmo com título longo',async()=>{
+ const {textBlockStart,SHARE_CARD_HEIGHT}=await import('../../src/promotion-share-card.js')
+ const full={business:'Porto de Laguna',priceText:'R$ 60,00',validText:'26/12 às 16:00'}
+ for(const lines of [1,2,3]){
+  const start=textBlockStart(lines,full)
+  // Rótulo, título, local, preço e data: a data é a última linha do bloco.
+  const dateBaseline=start+70+lines*92+70+70+8
+  assert.ok(start<=880,'começa no máximo em 880')
+  assert.ok(dateBaseline<=SHARE_CARD_HEIGHT-115,`linhas=${lines}: data acima do rodapé`)
+ }
+ assert.equal(textBlockStart(1,{}),880)
+})
