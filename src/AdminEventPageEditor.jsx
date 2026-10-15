@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { accentWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
+import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
 import './event-profile.css'
 import './event-theme.css'
@@ -62,7 +62,8 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const setLink = (key, value) => setDraft(current => ({ ...current, links: { ...current.links, [key]: value } }))
   const notify = (text, error = false) => setMessage({ text, error })
   const warning = accentWarning(preview)
-  const videoInvalid = draft.videoUrl && !youtubeEmbedUrl(draft.videoUrl)
+  const titleWarn = titleWarning(preview)
+  const videoInvalid = draft.videos.some(video => video.url && !youtubeEmbedUrl(video.url))
   const slugInvalid = slug && !isValidPageSlug(slug)
   const publicUrl = `https://vitrinelocal.net/${citySlug}/evento/${slug || event.id}`
 
@@ -155,14 +156,16 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
               )}
               <Field label="Cor de destaque (botões e títulos)"><input type="color" value={preview.accent} onChange={e => set('accent', e.target.value)} /></Field>
               {warning && <p className="epe-warning">{warning}</p>}
+              <Field label="Cor do título" hint="O título fica dentro do cartão branco da página."><input type="color" value={preview.titleColor} onChange={e => set('titleColor', e.target.value)} /></Field>
+              {titleWarn && <p className="epe-warning">{titleWarn}</p>}
             </section>
 
             <section className="epe-card">
-              <h3>Capa e vídeo</h3>
+              <h3>Capa e vídeos</h3>
               {imagePicker(draft.bannerUrl, url => set('bannerUrl', url), 'Capa larga (proporção 21:9, ex.: 2100×900)')}
-              <Field label="Vídeo do YouTube" hint={videoInvalid ? 'Link inválido: use um link de vídeo do YouTube.' : 'Cole o link do vídeo (youtube.com ou youtu.be).'}>
-                <input className={videoInvalid ? 'is-invalid' : ''} value={draft.videoUrl} placeholder="https://www.youtube.com/watch?v=..." onChange={e => set('videoUrl', e.target.value)} />
-              </Field>
+              <RepeatList title="Vídeos do YouTube" items={draft.videos} onChange={v => set('videos', v)} max={THEME_LIMITS.videos} addLabel="Adicionar vídeo"
+                fields={[{ key: 'title', label: 'Título (ex.: nome do artista)', placeholder: 'Armandinho' }, { key: 'url', label: 'Link do vídeo', placeholder: 'https://www.youtube.com/watch?v=...' }]} />
+              {videoInvalid && <p className="epe-warning">Um dos links não é de vídeo do YouTube. Use links do youtube.com ou youtu.be.</p>}
             </section>
 
             <section className="epe-card">
@@ -222,7 +225,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
           <aside className="epe-preview-wrap" aria-label="Pré-visualização">
             <span className="epe-preview-label">PRÉ-VISUALIZAÇÃO{!draft.enabled && ' · personalização desativada'}</span>
             <div className={`vl-event-profile-page epe-preview${draft.enabled ? ' is-themed' : ''}`} style={draft.enabled ? themeStyle(preview) : undefined}>
-              <div className="vl-event-profile-container">
+              <div className="vl-event-profile-container"><div className="vl-event-profile-main">
                 {draft.enabled && preview.bannerUrl
                   ? <div className="ev-banner"><img src={preview.bannerUrl} alt="" /></div>
                   : event.image_url && <div className="vl-event-profile-hero"><img src={event.image_url} alt="" /></div>}
@@ -234,7 +237,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                 </div>
                 <div className="vl-event-profile-actions"><a className="vl-event-profile-primary" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>
                 {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} />}
-              </div>
+              </div></div>
             </div>
           </aside>
         </div>

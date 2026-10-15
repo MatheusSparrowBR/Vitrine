@@ -33,15 +33,22 @@ function Section({ kicker, title, children, className = '' }) {
 
 // Seções extras da página personalizada, na ordem em que aparecem.
 export default function EventThemeSections({ theme, eventTitle = '' }) {
-  const video = youtubeEmbedUrl(theme.videoUrl)
+  const videos = theme.videos.map(video => ({ ...video, embed: youtubeEmbedUrl(video.url) })).filter(video => video.embed)
   const { links } = theme
   const hasLinks = links.instagram || links.spotify || links.website
   return (
     <>
-      {video && (
-        <Section kicker="Vídeo" title="Assista" className="ev-video-section">
-          <div className="ev-video">
-            <iframe src={video} title={`Vídeo: ${eventTitle}`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+      {videos.length > 0 && (
+        <Section kicker={videos.length > 1 ? 'Vídeos' : 'Vídeo'} title="Assista" className="ev-video-section">
+          <div className={`ev-videos${videos.length > 1 ? ' is-multiple' : ''}`}>
+            {videos.map((video, i) => (
+              <figure className="ev-video-item" key={i}>
+                <div className="ev-video">
+                  <iframe src={video.embed} title={`Vídeo: ${video.title || eventTitle}`} loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+                </div>
+                {video.title && <figcaption>{video.title}</figcaption>}
+              </figure>
+            ))}
           </div>
         </Section>
       )}

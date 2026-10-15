@@ -1,11 +1,9 @@
 /* Página personalizada de evento. As cores vêm de variáveis definidas por themeStyle(). */
 
 .vl-event-profile-page.is-themed{background:var(--event-bg);background-color:#0b1424}
-.vl-event-profile-page.is-themed .vl-event-profile-breadcrumbs a,
-.vl-event-profile-page.is-themed .vl-event-profile-title h1,
-.vl-event-profile-page.is-themed .vl-event-profile-title .vl-event-profile-when,
-.vl-event-profile-page.is-themed .vl-event-profile-title .vl-event-profile-city,
-.vl-event-profile-page.is-themed .vl-event-profile-title .vl-event-profile-interest{color:var(--event-fg)}
+/* Só o que fica direto sobre o fundo usa a cor de contraste; o título fica no cartão branco. */
+.vl-event-profile-page.is-themed .vl-event-profile-breadcrumbs a{color:var(--event-fg)}
+.vl-event-profile-page.is-themed .vl-event-profile-title h1{color:var(--event-title,#09294d)}
 .vl-event-profile-page.is-themed .vl-event-profile-title .vl-event-profile-kicker{color:var(--event-accent)}
 .vl-event-profile-page.is-themed .vl-event-profile-actions .vl-event-profile-primary{background:var(--event-accent);border-color:var(--event-accent);color:var(--event-accent-fg);box-shadow:none}
 .vl-event-profile-page.is-themed .vl-event-profile-section-kicker{color:var(--event-accent)}
@@ -19,12 +17,16 @@
 
 /* Contagem regressiva */
 .ev-countdown{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
-.ev-countdown-label{font-size:14px;font-weight:800;color:var(--event-fg,#33475e);margin-right:2px}
-.ev-countdown-box{display:inline-flex;flex-direction:column;align-items:center;min-width:64px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.94);color:#0b1424}
+.ev-countdown-label{font-size:14px;font-weight:800;color:#33475e;margin-right:2px}
+.ev-countdown-box{display:inline-flex;flex-direction:column;align-items:center;min-width:64px;padding:8px 10px;border-radius:14px;background:#f1f5fb;border:1px solid var(--event-accent,#216df3);color:#0b1424}
 .ev-countdown-box b{font-size:22px;line-height:1}
 .ev-countdown-box small{font-size:12px;font-weight:700;color:#4a5a70}
 
 /* Seções */
+.ev-videos{display:grid;gap:14px}
+@media (min-width:760px){.ev-videos.is-multiple{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ev-video-item{margin:0;display:flex;flex-direction:column;gap:8px}
+.ev-video-item figcaption{font-size:15px;font-weight:800;color:#0b1424}
 .ev-video{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000}
 .ev-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .ev-tickets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}

@@ -1,9 +1,10 @@
 // Página personalizada de evento: normalização, validação e cálculos (sem interface, fáceis de testar).
 // Tudo que vem do banco passa por normalizeEventTheme antes de ser exibido.
 
-export const THEME_LIMITS = { tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20 }
+export const THEME_LIMITS = { videos: 4, tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20 }
 const DEFAULT_BG = '#0b1424'
 const DEFAULT_ACCENT = '#216df3'
+export const DEFAULT_TITLE_COLOR = '#09294d'
 
 const text = (value, max = 200) => String(value ?? '').trim().slice(0, max)
 
@@ -92,8 +93,13 @@ export function normalizeEventTheme(raw) {
       overlay,
     },
     accent: hexColor(source.accent, DEFAULT_ACCENT),
+    titleColor: hexColor(source.titleColor, DEFAULT_TITLE_COLOR),
     bannerUrl: safeUrl(source.bannerUrl),
-    videoUrl: youtubeEmbedUrl(source.videoUrl) ? text(source.videoUrl, 300) : '',
+    // Lista de vídeos; o campo antigo videoUrl (um vídeo só) vira o primeiro item.
+    videos: list(Array.isArray(source.videos) && source.videos.length ? source.videos : source.videoUrl ? [{ url: source.videoUrl }] : [], THEME_LIMITS.videos, v => {
+      const url = text(typeof v === 'string' ? v : v?.url, 300)
+      return youtubeEmbedUrl(url) ? { url, title: text(v?.title, 80) } : null
+    }),
     tickets: list(source.tickets, THEME_LIMITS.tickets, t => (text(t?.name, 80) ? { name: text(t.name, 80), price: text(t.price, 30), note: text(t.note, 120) } : null)),
     lineup: list(source.lineup, THEME_LIMITS.lineup, a => (text(a?.name, 80) ? { time: text(a.time, 20), name: text(a.name, 80), photoUrl: safeUrl(a.photoUrl), description: text(a.description, 240) } : null)),
     sponsors: list(source.sponsors, THEME_LIMITS.sponsors, s => (text(s?.name, 80) || safeUrl(s?.logoUrl) ? { name: text(s.name, 80), logoUrl: safeUrl(s.logoUrl), url: safeUrl(s.url) } : null)),
@@ -118,6 +124,7 @@ export function themeStyle(theme) {
     '--event-fg': bg.type === 'image' ? '#ffffff' : readableTextOn(base),
     '--event-accent': accent,
     '--event-accent-fg': readableTextOn(accent),
+    '--event-title': theme.titleColor,
   }
 }
 
@@ -125,6 +132,11 @@ export function themeStyle(theme) {
 export function accentWarning(theme) {
   const base = theme.background.type === 'image' ? '#0b1424' : theme.background.color
   return contrastRatio(theme.accent, base) < 1.6 ? 'A cor de destaque está muito parecida com o fundo. Os botões podem ficar difíceis de ver.' : ''
+}
+
+// O título fica dentro do cartão branco da página: avisa quando a cor some no branco.
+export function titleWarning(theme) {
+  return contrastRatio(theme.titleColor, '#ffffff') < 3 ? 'A cor do título está clara demais para o fundo branco do cartão.' : ''
 }
 
 // Tempo até o início do evento, ou null quando já começou.
