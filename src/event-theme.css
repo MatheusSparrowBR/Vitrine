@@ -1,8 +1,8 @@
 /* Página personalizada de evento. As cores vêm de variáveis definidas por themeStyle(). */
 
 .vl-event-profile-page.is-themed{background:var(--event-bg);background-color:#0b1424}
-/* Só o que fica direto sobre o fundo usa a cor de contraste; o título fica no cartão branco. */
-.vl-event-profile-page.is-themed .vl-event-profile-breadcrumbs a{color:var(--event-fg)}
+/* O link de voltar e o título ficam sobre fundo branco (pílula e cartão): usam a cor do título, que o editor valida contra o branco. */
+.vl-event-profile-page.is-themed .vl-event-profile-breadcrumbs a{color:var(--event-title,#1f6df2)}
 .vl-event-profile-page.is-themed .vl-event-profile-title h1{color:var(--event-title,#09294d)}
 .vl-event-profile-page.is-themed .vl-event-profile-title .vl-event-profile-kicker{color:var(--event-accent)}
 .vl-event-profile-page.is-themed .vl-event-profile-actions .vl-event-profile-primary{background:var(--event-accent);border-color:var(--event-accent);color:var(--event-accent-fg);box-shadow:none}

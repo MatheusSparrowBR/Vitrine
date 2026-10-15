@@ -114,3 +114,9 @@ test('vídeos: até 4 com título; o vídeo antigo vira o primeiro e links que n
  assert.equal(many.videos.length,THEME_LIMITS.videos)
  assert.equal('videoUrl' in two,false)
 })
+
+test('link de voltar (pílula branca) usa a cor do título, nunca a cor pensada para o fundo',()=>{
+ const css=read('src/event-theme.css')
+ assert.match(css,/\.vl-event-profile-breadcrumbs a\{color:var\(--event-title,#1f6df2\)\}/)
+ assert.doesNotMatch(css,/breadcrumbs a\{color:var\(--event-fg\)\}/)
+})
