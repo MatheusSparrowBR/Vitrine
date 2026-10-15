@@ -18,6 +18,8 @@ export function normalizeTeaser(raw) {
       overlay: Math.min(0.85, Math.max(0, Number(bg.overlay ?? 0.5) || 0)),
     },
     accent: hexColor(source.accent, '#f5b841'),
+    // Link de venda de ingressos: com ele, a página Em breve mostra o botão "Comprar seu ingresso".
+    ticketUrl: safeUrl(source.ticketUrl),
   }
 }
 

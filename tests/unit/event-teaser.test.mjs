@@ -96,3 +96,14 @@ test('cartão Em breve: selo, nome e data de revelação; sem local nem preço',
  assert.match(page,/<ShareCardButton\s+buildBlob=\{\(\) => renderTeaserShareCard\(row, city\.name\)\}/)
  assert.doesNotMatch(page,/async function share\(\)/)
 })
+
+test('botão "Comprar seu ingresso": só com link válido e entre "Me avise" e o cartão',()=>{
+ assert.equal(normalizeTeaser({ticketUrl:'https://www.sympla.com.br/evento'}).ticketUrl,'https://www.sympla.com.br/evento')
+ assert.equal(normalizeTeaser({ticketUrl:'javascript:alert(1)'}).ticketUrl,'')
+ assert.equal(normalizeTeaser({}).ticketUrl,'')
+ const page=read('src/EventTeaserPage.jsx')
+ const notify=page.indexOf('ev-teaser-notify'),ticket=page.indexOf('ev-teaser-ticket'),card=page.indexOf('<ShareCardButton')
+ assert.ok(notify<ticket&&ticket<card,'ordem: Me avise, ingresso, cartão')
+ assert.match(page,/\{teaser\.ticketUrl && \(/)
+ assert.match(read('src/AdminEventPageEditor.jsx'),/Link de venda de ingressos \(opcional\)/)
+})
