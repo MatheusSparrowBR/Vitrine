@@ -233,9 +233,9 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                   {draft.enabled && preview.partnerBadge && <span className="ev-partner-badge">★ Evento parceiro VitrineLocal</span>}
                   <span className="vl-event-profile-kicker">Evento</span>
                   <h1>{event.title}</h1>
-                  {draft.enabled && preview.countdown && <EventCountdown event={event} />}
+                  {draft.enabled && preview.countdown && <div className="ev-countdown-row"><EventCountdown event={event} /><a className="ev-countdown-cta" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>}
                 </div>
-                <div className="vl-event-profile-actions"><a className="vl-event-profile-primary" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>
+                {!(draft.enabled && preview.countdown) && <div className="vl-event-profile-actions"><a className="vl-event-profile-primary" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>}
                 {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} />}
               </div></div>
             </div>

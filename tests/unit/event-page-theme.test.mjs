@@ -120,3 +120,11 @@ test('link de voltar (pílula branca) usa a cor do título, nunca a cor pensada 
  assert.match(css,/\.vl-event-profile-breadcrumbs a\{color:var\(--event-title,#1f6df2\)\}/)
  assert.doesNotMatch(css,/breadcrumbs a\{color:var\(--event-fg\)\}/)
 })
+
+test('página personalizada com contagem: botão de ingressos ao lado do contador e fora da linha de botões',()=>{
+ const page=read('src/EventProfilePage.jsx')
+ assert.match(page,/<div className="ev-countdown-row"><EventCountdown event=\{event\}\/><a className="ev-countdown-cta" href=\{event\.external_url\}/)
+ assert.match(page,/\{event\.external_url&&!\(themed&&theme\.countdown\)&&<a className="vl-event-profile-primary"/)
+ assert.match(read('src/event-theme.css'),/\.ev-countdown-cta\{[^}]*background:var\(--event-accent,#216df3\)/)
+ assert.match(read('src/AdminEventPageEditor.jsx'),/<div className="ev-countdown-row"><EventCountdown event=\{event\} \/>/)
+})
