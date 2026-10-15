@@ -67,9 +67,16 @@ export function teaserShareCardModel(row, cityName = '') {
   }
 }
 
+// A capa principal do evento tem prioridade no cartão compartilhável.
+ // O fundo personalizado da tela Em breve só é usado quando o evento não possui capa.
+export function teaserShareCardImageUrl(row) {
+  const coverUrl = String(row?.image_url || '').trim()
+  if (coverUrl) return coverUrl
+  return normalizeTeaser(row?.teaser).background.imageUrl || ''
+}
+
 export function renderTeaserShareCard(row, cityName = '') {
-  const teaser = normalizeTeaser(row?.teaser)
-  return renderShareCard(teaserShareCardModel(row, cityName), { imageUrl: teaser.background.imageUrl || row?.image_url || '' })
+  return renderShareCard(teaserShareCardModel(row, cityName), { imageUrl: teaserShareCardImageUrl(row) })
 }
 
 // Converte datetime-local (horário de São Paulo) para ISO, e o contrário para preencher o campo.

@@ -1,11 +1,19 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import {normalizeTeaser,isTeaserActive,countdownToReveal,revealInputToISO,revealISOToInput,revealLabel,teaserStyle} from '../../src/event-teaser.js'
+import {normalizeTeaser,isTeaserActive,countdownToReveal,revealInputToISO,revealISOToInput,revealLabel,teaserStyle,teaserShareCardImageUrl} from '../../src/event-teaser.js'
 
 // Lê com quebras de linha normalizadas (o checkout do Windows usa CRLF).
 const read=p=>fs.readFileSync(p,'utf8').replace(/\r\n/g,'\n')
 const NOW=Date.parse('2026-10-16T12:00:00-03:00')
+
+test('cartão Em breve prioriza a capa do evento e usa o fundo como alternativa',()=>{
+ const cover='https://cdn.example.test/bloko-rosa-capa.png'
+ const background='https://cdn.example.test/fundo-evento.png'
+ assert.equal(teaserShareCardImageUrl({image_url:cover,teaser:{background:{type:'image',imageUrl:background}}}),cover)
+ assert.equal(teaserShareCardImageUrl({image_url:'',teaser:{background:{type:'image',imageUrl:background}}}),background)
+ assert.equal(teaserShareCardImageUrl({image_url:null,teaser:{background:{type:'gradient',imageUrl:background}}}),background)
+})
 
 test('modo ativo: ligado e antes da revelação automática; manual fica ativo até desligar',()=>{
  assert.equal(isTeaserActive({teaser_enabled:false},NOW),false)
