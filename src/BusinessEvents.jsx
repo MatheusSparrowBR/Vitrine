@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase as db } from './supabase-client.js'
 import { projectTodayISO } from './promotion-service.js'
-import { eventWhenLabel } from './event-share-card.js'
+import { eventWhenLabel } from './event-utils.js'
 import './business-events.css'
 
 // Próximos eventos ligados à empresa. Não aparece nada quando não há evento.

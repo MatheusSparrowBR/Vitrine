@@ -12,3 +12,10 @@ test('PWA atualiza o Service Worker automaticamente',()=>{
   assert.match(source,/setInterval\(update, UPDATE_INTERVAL_MS\)/)
   assert.match(source,/version=delivery-feedback-v7/)
 })
+
+test('primeira visita não recarrega a página quando o Service Worker assume',()=>{
+  assert.match(source,/const wasControlled = Boolean\(navigator\.serviceWorker\.controller\)/)
+  assert.match(source,/let controlled = wasControlled \|\| Boolean\(navigator\.serviceWorker\.controller\)/)
+  const change=source.slice(source.indexOf("addEventListener('controllerchange'"))
+  assert.ok(change.indexOf('if (!controlled)')>0&&change.indexOf('if (!controlled)')<change.indexOf('window.location.reload()'))
+})

@@ -1,7 +1,7 @@
 // Destaque de evento na home: escolha do destaque ativo e textos exibidos (sem interface, fáceis de testar).
 import { countdownParts, normalizeEventTheme, safeUrl } from './event-theme.js'
 import { countdownToReveal, normalizeTeaser, revealLabel } from './event-teaser.js'
-import { eventWhenLabel } from './event-share-card.js'
+import { eventWhenLabel } from './event-utils.js'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

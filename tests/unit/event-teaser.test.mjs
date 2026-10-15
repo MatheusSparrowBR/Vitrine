@@ -1,7 +1,8 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import {normalizeTeaser,isTeaserActive,countdownToReveal,revealInputToISO,revealISOToInput,revealLabel,teaserStyle,teaserShareCardImageUrl} from '../../src/event-teaser.js'
+import {normalizeTeaser,isTeaserActive,countdownToReveal,revealInputToISO,revealISOToInput,revealLabel,teaserStyle} from '../../src/event-teaser.js'
+import {teaserShareCardImageUrl} from '../../src/event-teaser-card.js'
 
 // Lê com quebras de linha normalizadas (o checkout do Windows usa CRLF).
 const read=p=>fs.readFileSync(p,'utf8').replace(/\r\n/g,'\n')
@@ -83,7 +84,7 @@ test('editor do admin controla o modo; avisos de revelação e lembrete respeita
 })
 
 test('cartão Em breve: selo, nome e data de revelação; sem local nem preço',async()=>{
- const {teaserShareCardModel}=await import('../../src/event-teaser.js')
+ const {teaserShareCardModel}=await import('../../src/event-teaser-card.js')
  const model=teaserShareCardModel({title:'Carnaval 2027',teaser:{headline:'EM BREVE'},teaser_reveal_at:'2026-11-20T23:00:00.000Z'},'Laguna')
  assert.equal(model.kicker,'EM BREVE')
  assert.equal(model.title,'Carnaval 2027')
@@ -106,4 +107,12 @@ test('botão "Comprar seu ingresso": só com link válido e entre "Me avise" e o
  assert.ok(notify<ticket&&ticket<card,'ordem: Me avise, ingresso, cartão')
  assert.match(page,/\{teaser\.ticketUrl && \(/)
  assert.match(read('src/AdminEventPageEditor.jsx'),/Link de venda de ingressos \(opcional\)/)
+})
+
+test('a home não carrega o gerador de cartões: destaque usa só módulos leves',()=>{
+ const teaser=read('src/event-teaser.js')
+ const highlight=read('src/home-highlight.js')
+ assert.doesNotMatch(teaser,/promotion-share-card/)
+ assert.doesNotMatch(highlight,/event-share-card|promotion-share-card|event-teaser-card/)
+ assert.match(highlight,/import \{ eventWhenLabel \} from '\.\/event-utils\.js'/)
 })

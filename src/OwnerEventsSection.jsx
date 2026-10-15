@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase as db } from './supabase-client.js'
-import { eventWhenLabel } from './event-share-card.js'
+import { eventWhenLabel } from './event-utils.js'
 import { EVENT_PLAN_NOTICE, ownerEventStatus, validateEventDraft } from './owner-event-rules.js'
 import './job-postings.css'
 
