@@ -128,3 +128,27 @@ test('página personalizada com contagem: botão de ingressos ao lado do contado
  assert.match(read('src/event-theme.css'),/\.ev-countdown-cta\{[^}]*background:var\(--event-accent,#216df3\)/)
  assert.match(read('src/AdminEventPageEditor.jsx'),/<div className="ev-countdown-row"><EventCountdown event=\{event\} \/>/)
 })
+
+test('onde comer e ficar: só ids válidos, sem repetir, até 8; mapa só com imagem http(s)',()=>{
+ const id='6703905f-0028-4859-8dcb-7a88c1069558'
+ const theme=normalizeEventTheme({nearby:[{businessId:id.toUpperCase(),note:'Desconto'},{businessId:id},{businessId:'nao-e-uuid'}],venueMap:{imageUrl:'https://cdn.x/mapa.png',caption:'Palco ao fundo'}})
+ assert.deepEqual(theme.nearby,[{businessId:id,note:'Desconto'}])
+ assert.deepEqual(theme.venueMap,{imageUrl:'https://cdn.x/mapa.png',caption:'Palco ao fundo'})
+ const ids=Array.from({length:12},(_,i)=>({businessId:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`}))
+ assert.equal(normalizeEventTheme({nearby:ids}).nearby.length,THEME_LIMITS.nearby)
+ assert.equal(normalizeEventTheme({venueMap:{imageUrl:'javascript:alert(1)'}}).venueMap.imageUrl,'')
+})
+
+test('seções só aparecem com conteúdo: mapa exige imagem e "onde comer" exige empresas ativas',()=>{
+ const sections=read('src/EventThemeSections.jsx')
+ assert.match(sections,/\{theme\.venueMap\.imageUrl && \(/)
+ assert.match(sections,/\{theme\.nearby\.length > 0 && <EventNearbyPlaces/)
+ const nearby=read('src/EventNearbyPlaces.jsx')
+ assert.match(nearby,/from\('public_business_directory'\)/)
+ assert.match(nearby,/if \(!places\.length\) return null/)
+ assert.match(nearby,/getOpenStatus\(business\.opening_hours\)/)
+ const editor=read('src/AdminEventPageEditor.jsx')
+ assert.match(editor,/<h3>Onde comer e ficar<\/h3>/)
+ assert.match(editor,/<h3>Mapa de setores<\/h3>/)
+ assert.match(editor,/\.eq\('city_id', event\.city_id\)\.eq\('status', 'active'\)/)
+})

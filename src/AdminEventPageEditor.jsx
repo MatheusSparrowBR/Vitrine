@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
 import './event-profile.css'
@@ -55,6 +55,16 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const [slug, setSlug] = useState(event.page_slug || '')
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState({ text: '', error: false })
+  const [cityBusinesses, setCityBusinesses] = useState([])
+
+  // Empresas ativas da cidade do evento, para a seção "Onde comer e ficar".
+  useEffect(() => {
+    let live = true
+    if (!supabase?.from || !event.city_id) return undefined
+    supabase.from('businesses').select('id,name,category_id,status').eq('city_id', event.city_id).eq('status', 'active').order('name')
+      .then(({ data }) => { if (live) setCityBusinesses(data || []) })
+    return () => { live = false }
+  }, [event.city_id])
 
   const preview = normalizeEventTheme(draft)
   const set = (key, value) => setDraft(current => ({ ...current, [key]: value }))
@@ -200,6 +210,41 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
             </section>
 
             <section className="epe-card">
+              <h3>Mapa de setores</h3>
+              {imagePicker(draft.venueMap.imageUrl, url => setDraft(current => ({ ...current, venueMap: { ...current.venueMap, imageUrl: url } })), 'Imagem do mapa (palco, pista, camarote, banheiros…)')}
+              <Field label="Legenda (opcional)"><input value={draft.venueMap.caption} maxLength={160} placeholder="Entrada pela Av. Beira-Mar. Camarote no 2º piso." onChange={e => setDraft(current => ({ ...current, venueMap: { ...current.venueMap, caption: e.target.value } }))} /></Field>
+              <small className="epe-hint">Sem imagem, a seção não aparece na página.</small>
+            </section>
+
+            <section className="epe-card">
+              <h3>Onde comer e ficar</h3>
+              <small className="epe-hint">Escolha até {THEME_LIMITS.nearby} empresas da cidade do evento. Sem empresas, a seção não aparece na página.</small>
+              {draft.nearby.length < THEME_LIMITS.nearby && (
+                <Field label="Adicionar empresa">
+                  <select value="" onChange={e => { const id = e.target.value; if (id) set('nearby', [...draft.nearby, { businessId: id, note: '' }]) }}>
+                    <option value="">{cityBusinesses.length ? 'Selecione uma empresa' : 'Carregando empresas…'}</option>
+                    {cityBusinesses.filter(business => !draft.nearby.some(item => item.businessId === business.id)).map(business => <option key={business.id} value={business.id}>{business.name}</option>)}
+                  </select>
+                </Field>
+              )}
+              {draft.nearby.map((item, index) => {
+                const business = cityBusinesses.find(b => b.id === item.businessId)
+                const move = delta => { const next = [...draft.nearby]; const target = index + delta; if (target < 0 || target >= next.length) return; [next[index], next[target]] = [next[target], next[index]]; set('nearby', next) }
+                return (
+                  <div className="epe-repeat-item" key={item.businessId}>
+                    <strong>{business?.name || 'Empresa indisponível (inativa ou removida)'}</strong>
+                    <Field label="Observação (opcional)"><input value={item.note} maxLength={140} placeholder="10% de desconto mostrando o ingresso" onChange={e => set('nearby', draft.nearby.map((n, i) => (i === index ? { ...n, note: e.target.value } : n)))} /></Field>
+                    <div className="epe-repeat-actions">
+                      <button type="button" onClick={() => move(-1)} disabled={index === 0} aria-label="Mover para cima">↑</button>
+                      <button type="button" onClick={() => move(1)} disabled={index === draft.nearby.length - 1} aria-label="Mover para baixo">↓</button>
+                      <button type="button" className="danger" onClick={() => set('nearby', draft.nearby.filter((_, i) => i !== index))}>Remover</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </section>
+
+            <section className="epe-card">
               <h3>Patrocinadores e redes</h3>
               <RepeatList title="Patrocinadores e apoio" items={draft.sponsors} onChange={v => set('sponsors', v)} max={THEME_LIMITS.sponsors} addLabel="Adicionar patrocinador" renderImage={imagePicker}
                 fields={[{ key: 'name', label: 'Nome' }, { key: 'logoUrl', label: 'Logo', type: 'image' }, { key: 'url', label: 'Site (opcional)', placeholder: 'https://' }]} />
@@ -236,7 +281,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                   {draft.enabled && preview.countdown && <div className="ev-countdown-row"><EventCountdown event={event} /><a className="ev-countdown-cta" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>}
                 </div>
                 {!(draft.enabled && preview.countdown) && <div className="vl-event-profile-actions"><a className="vl-event-profile-primary" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>}
-                {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} />}
+                {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} citySlug={citySlug} />}
               </div></div>
             </div>
           </aside>
