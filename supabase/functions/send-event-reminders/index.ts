@@ -30,7 +30,7 @@ function tomorrowInSaoPaulo(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(tomorrow)
 }
 
-type EventRow = { id: string; title: string; start_time: string | null; location: string | null; image_url: string | null; cities: { slug?: string } | null }
+type EventRow = { id: string; title: string; start_time: string | null; location: string | null; image_url: string | null; teaser_enabled?: boolean; teaser_auto_reveal?: boolean; teaser_reveal_at?: string | null; cities: { slug?: string } | null }
 
 function reminderText(event: EventRow) {
   const time = event.start_time ? String(event.start_time).slice(0, 5) : ''
@@ -67,7 +67,7 @@ export default {
     const day = tomorrowInSaoPaulo()
     const { data: events, error: eventsError } = await admin
       .from('events')
-      .select('id,title,start_time,location,image_url,cities(slug)')
+      .select('id,title,start_time,location,image_url,teaser_enabled,teaser_auto_reveal,teaser_reveal_at,cities(slug)')
       .eq('event_date', day)
       .eq('active', true)
       .eq('review_status', 'approved')
@@ -83,6 +83,9 @@ export default {
     let failed = 0
 
     for (const event of events as EventRow[]) {
+      // Evento ainda em modo Em breve: os detalhes não podem sair no lembrete.
+      const teaserOn = event.teaser_enabled && (event.teaser_auto_reveal === false || !event.teaser_reveal_at || new Date(event.teaser_reveal_at).getTime() > Date.now())
+      if (teaserOn) continue
       const [{ data: favorites, error: favoritesError }, { data: alreadySent, error: sentError }] = await Promise.all([
         admin.from('event_favorites').select('user_id').eq('event_id', event.id),
         admin.from('event_reminders_sent').select('user_id').eq('event_id', event.id),

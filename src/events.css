@@ -64,3 +64,7 @@
 
 /* Preço no card: "A partir de" em destaque antes do valor. */
 .vl-event-price b{color:#12253e}
+
+/* Card de evento em modo Em breve. */
+.vl-event-teaser-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:#0b1424;color:#f5b841;font-size:12px;font-weight:900;letter-spacing:.04em}
+.vl-event.is-teaser{border-color:#0b1424}

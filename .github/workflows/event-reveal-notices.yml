@@ -1,0 +1,19 @@
+name: Aviso de revelação de eventos
+
+on:
+  schedule:
+    # De hora em hora: avisa quem pediu "Me avise" quando um evento Em breve é revelado.
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispara os avisos de revelação
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -sS --fail-with-body -X POST \
+            "https://swscqihiqmsyntsmuafm.supabase.co/functions/v1/send-event-reveal-notices" \
+            -H "Authorization: Bearer $CRON_SECRET"

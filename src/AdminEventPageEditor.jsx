@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
+import EventTeaserPage from './EventTeaserPage.jsx'
+import { normalizeTeaser, revealISOToInput, revealInputToISO } from './event-teaser.js'
 import './event-profile.css'
 import './event-theme.css'
 import './admin-event-page-editor.css'
@@ -56,6 +58,14 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState({ text: '', error: false })
   const [cityBusinesses, setCityBusinesses] = useState([])
+  // Modo Em breve (colunas próprias do evento, separadas do tema da página completa).
+  const [teaserOn, setTeaserOn] = useState(Boolean(event.teaser_enabled))
+  const [teaserAuto, setTeaserAuto] = useState(event.teaser_auto_reveal !== false)
+  const [revealInput, setRevealInput] = useState(() => revealISOToInput(event.teaser_reveal_at))
+  const [teaserDraft, setTeaserDraft] = useState(() => normalizeTeaser(event.teaser))
+  const [previewMode, setPreviewMode] = useState(event.teaser_enabled ? 'teaser' : 'page')
+  const setTeaser = (key, value) => setTeaserDraft(current => ({ ...current, [key]: value }))
+  const setTeaserBg = (key, value) => setTeaserDraft(current => ({ ...current, background: { ...current.background, [key]: value } }))
 
   // Empresas ativas da cidade do evento, para a seção "Onde comer e ficar".
   useEffect(() => {
@@ -112,11 +122,12 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
 
   async function save(reset = false) {
     if (!reset && (slugInvalid || videoInvalid)) return notify('Corrija os campos marcados antes de salvar.', true)
+    if (!reset && teaserOn && teaserAuto && !revealInputToISO(revealInput)) return notify('Informe a data e hora da revelação, ou desmarque a revelação automática.', true)
     setBusy('save')
     notify('')
     const payload = reset
       ? { page_theme: null, page_slug: null, updated_at: new Date().toISOString() }
-      : { page_theme: normalizeEventTheme(draft), page_slug: slug || null, updated_at: new Date().toISOString() }
+      : { page_theme: normalizeEventTheme(draft), page_slug: slug || null, teaser_enabled: teaserOn, teaser_auto_reveal: teaserAuto, teaser_reveal_at: revealInputToISO(revealInput), teaser: normalizeTeaser(teaserDraft), updated_at: new Date().toISOString() }
     const { error } = await supabase.from('events').update(payload).eq('id', event.id)
     setBusy('')
     if (error) return notify(error.code === '23505' ? 'Esse endereço já está em uso por outro evento desta cidade.' : error.message, true)
@@ -143,6 +154,34 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
               <label className="epe-check"><input type="checkbox" checked={draft.enabled} onChange={e => set('enabled', e.target.checked)} /> Página personalizada ativa</label>
               <label className="epe-check"><input type="checkbox" checked={draft.partnerBadge} onChange={e => set('partnerBadge', e.target.checked)} /> Mostrar selo "Evento parceiro VitrineLocal"</label>
               <label className="epe-check"><input type="checkbox" checked={draft.countdown} onChange={e => set('countdown', e.target.checked)} /> Mostrar contagem regressiva</label>
+            </section>
+
+            <section className="epe-card epe-teaser-card">
+              <h3>Página Em breve</h3>
+              <small className="epe-hint">Com o modo ativo, o evento aparece na agenda com o selo "Em breve", mas os detalhes ficam escondidos (também no banco) até a revelação.</small>
+              <label className="epe-check"><input type="checkbox" checked={teaserOn} onChange={e => { setTeaserOn(e.target.checked); if (e.target.checked) setPreviewMode('teaser') }} /> Modo Em breve ativo</label>
+              <label className="epe-check"><input type="checkbox" checked={teaserAuto} onChange={e => setTeaserAuto(e.target.checked)} /> Revelar automaticamente na data</label>
+              <Field label="Data e hora da revelação (horário de Brasília)" hint={teaserAuto ? 'Na data, a página completa aparece sozinha e quem pediu aviso é notificado.' : 'Só informativo: a revelação acontece quando você desligar o modo.'}>
+                <input type="datetime-local" value={revealInput} onChange={e => setRevealInput(e.target.value)} />
+              </Field>
+              <Field label="Selo"><input value={teaserDraft.headline} maxLength={40} onChange={e => setTeaser('headline', e.target.value)} /></Field>
+              <Field label="Mensagem (opcional)"><textarea rows={2} maxLength={220} value={teaserDraft.message} placeholder="Line-up será revelado em breve. Ative o aviso!" onChange={e => setTeaser('message', e.target.value)} /></Field>
+              <Field label="Fundo da página Em breve">
+                <select value={teaserDraft.background.type} onChange={e => setTeaserBg('type', e.target.value)}>
+                  <option value="color">Cor sólida</option>
+                  <option value="gradient">Degradê</option>
+                  <option value="image">Foto</option>
+                </select>
+              </Field>
+              {teaserDraft.background.type !== 'image' && <Field label="Cor principal"><input type="color" value={teaserDraft.background.color} onChange={e => setTeaserBg('color', e.target.value)} /></Field>}
+              {teaserDraft.background.type === 'gradient' && <Field label="Segunda cor"><input type="color" value={teaserDraft.background.color2} onChange={e => setTeaserBg('color2', e.target.value)} /></Field>}
+              {teaserDraft.background.type === 'image' && (
+                <>
+                  {imagePicker(teaserDraft.background.imageUrl, url => setTeaserBg('imageUrl', url), 'Foto de fundo da página Em breve')}
+                  <Field label={`Escurecer a foto: ${Math.round(teaserDraft.background.overlay * 100)}%`}><input type="range" min="0" max="0.85" step="0.05" value={teaserDraft.background.overlay} onChange={e => setTeaserBg('overlay', Number(e.target.value))} /></Field>
+                </>
+              )}
+              <Field label="Cor de destaque (selo e botão)"><input type="color" value={teaserDraft.accent} onChange={e => setTeaser('accent', e.target.value)} /></Field>
             </section>
 
             <section className="epe-card">
@@ -268,7 +307,16 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
           </form>
 
           <aside className="epe-preview-wrap" aria-label="Pré-visualização">
-            <span className="epe-preview-label">PRÉ-VISUALIZAÇÃO{!draft.enabled && ' · personalização desativada'}</span>
+            <div className="epe-preview-tabs" role="group" aria-label="O que pré-visualizar">
+              <button type="button" className={previewMode === 'page' ? 'is-active' : ''} aria-pressed={previewMode === 'page'} onClick={() => setPreviewMode('page')}>Página completa</button>
+              <button type="button" className={previewMode === 'teaser' ? 'is-active' : ''} aria-pressed={previewMode === 'teaser'} onClick={() => setPreviewMode('teaser')}>Em breve</button>
+            </div>
+            <span className="epe-preview-label">PRÉ-VISUALIZAÇÃO{previewMode === 'teaser' ? (teaserOn ? ' · modo Em breve ativo' : ' · modo Em breve desligado') : !draft.enabled ? ' · personalização desativada' : ''}</span>
+            {previewMode === 'teaser' ? (
+              <div className="epe-preview epe-preview-teaser">
+                <EventTeaserPage preview row={{ id: event.id, title: event.title, image_url: event.image_url, teaser: teaserDraft, teaser_reveal_at: revealInputToISO(revealInput), teaser_auto_reveal: teaserAuto }} city={{ slug: citySlug, name: '' }} />
+              </div>
+            ) : (
             <div className={`vl-event-profile-page epe-preview${draft.enabled ? ' is-themed' : ''}`} style={draft.enabled ? themeStyle(preview) : undefined}>
               <div className="vl-event-profile-container"><div className="vl-event-profile-main">
                 {draft.enabled && preview.bannerUrl
@@ -284,6 +332,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                 {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} citySlug={citySlug} />}
               </div></div>
             </div>
+            )}
           </aside>
         </div>
       </div>
