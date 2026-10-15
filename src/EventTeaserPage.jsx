@@ -67,6 +67,9 @@ export default function EventTeaserPage({ row, city, preview = false }) {
           <button type="button" className={`ev-teaser-notify${saved ? ' is-active' : ''}`} onClick={notifyMe} aria-pressed={saved}>
             {saved ? '✓ Você será avisado' : '🔔 Me avise quando revelar'}
           </button>
+          {teaser.ticketUrl && (
+            <a className="ev-teaser-ticket" href={teaser.ticketUrl} target="_blank" rel="noreferrer" onClick={preview ? e => e.preventDefault() : undefined}>🎟️ Comprar seu ingresso</a>
+          )}
           <ShareCardButton
             buildBlob={() => renderTeaserShareCard(row, city.name)}
             fileName={`em-breve-${row.title}`}

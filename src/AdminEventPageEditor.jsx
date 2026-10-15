@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
+import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, safeUrl, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
 import EventTeaserPage from './EventTeaserPage.jsx'
 import { normalizeTeaser, revealISOToInput, revealInputToISO } from './event-teaser.js'
@@ -122,6 +122,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
 
   async function save(reset = false) {
     if (!reset && (slugInvalid || videoInvalid)) return notify('Corrija os campos marcados antes de salvar.', true)
+    if (!reset && teaserDraft.ticketUrl && !safeUrl(teaserDraft.ticketUrl)) return notify('O link de venda de ingressos é inválido. Use um endereço que comece com https://', true)
     if (!reset && teaserOn && teaserAuto && !revealInputToISO(revealInput)) return notify('Informe a data e hora da revelação, ou desmarque a revelação automática.', true)
     setBusy('save')
     notify('')
@@ -165,6 +166,9 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                 <input type="datetime-local" value={revealInput} onChange={e => setRevealInput(e.target.value)} />
               </Field>
               <Field label="Selo"><input value={teaserDraft.headline} maxLength={40} onChange={e => setTeaser('headline', e.target.value)} /></Field>
+              <Field label="Link de venda de ingressos (opcional)" hint={teaserDraft.ticketUrl && !safeUrl(teaserDraft.ticketUrl) ? 'Link inválido: use um endereço que comece com https://' : 'Com um link, a página Em breve mostra o botão "Comprar seu ingresso".'}>
+                <input type="url" className={teaserDraft.ticketUrl && !safeUrl(teaserDraft.ticketUrl) ? 'is-invalid' : ''} value={teaserDraft.ticketUrl} placeholder="https://www.sympla.com.br/..." onChange={e => setTeaser('ticketUrl', e.target.value)} />
+              </Field>
               <Field label="Mensagem (opcional)"><textarea rows={2} maxLength={220} value={teaserDraft.message} placeholder="Line-up será revelado em breve. Ative o aviso!" onChange={e => setTeaser('message', e.target.value)} /></Field>
               <Field label="Fundo da página Em breve">
                 <select value={teaserDraft.background.type} onChange={e => setTeaserBg('type', e.target.value)}>
