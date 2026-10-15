@@ -17,6 +17,13 @@
 
 /* Contagem regressiva */
 .ev-countdown{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
+/* Página personalizada com contagem: botão de ingressos ao lado do contador. */
+.ev-countdown-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:12px 0 4px}
+.ev-countdown-row .ev-countdown{margin:0}
+.ev-countdown-cta{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 24px;border-radius:14px;background:var(--event-accent,#216df3);color:var(--event-accent-fg,#fff);font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 12px 24px rgba(11,20,36,.14)}
+.ev-countdown-cta:hover{filter:brightness(1.06)}
+.ev-countdown-cta:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+@media (max-width:640px){.ev-countdown-cta{width:100%}}
 .ev-countdown-label{font-size:14px;font-weight:800;color:#33475e;margin-right:2px}
 .ev-countdown-box{display:inline-flex;flex-direction:column;align-items:center;min-width:64px;padding:8px 10px;border-radius:14px;background:#f1f5fb;border:1px solid var(--event-accent,#216df3);color:#0b1424}
 .ev-countdown-box b{font-size:22px;line-height:1}
