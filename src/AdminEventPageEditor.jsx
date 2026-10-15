@@ -63,7 +63,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const notify = (text, error = false) => setMessage({ text, error })
   const warning = accentWarning(preview)
   const titleWarn = titleWarning(preview)
-  const videoInvalid = draft.videoUrl && !youtubeEmbedUrl(draft.videoUrl)
+  const videoInvalid = draft.videos.some(video => video.url && !youtubeEmbedUrl(video.url))
   const slugInvalid = slug && !isValidPageSlug(slug)
   const publicUrl = `https://vitrinelocal.net/${citySlug}/evento/${slug || event.id}`
 
@@ -161,11 +161,11 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
             </section>
 
             <section className="epe-card">
-              <h3>Capa e vídeo</h3>
+              <h3>Capa e vídeos</h3>
               {imagePicker(draft.bannerUrl, url => set('bannerUrl', url), 'Capa larga (proporção 21:9, ex.: 2100×900)')}
-              <Field label="Vídeo do YouTube" hint={videoInvalid ? 'Link inválido: use um link de vídeo do YouTube.' : 'Cole o link do vídeo (youtube.com ou youtu.be).'}>
-                <input className={videoInvalid ? 'is-invalid' : ''} value={draft.videoUrl} placeholder="https://www.youtube.com/watch?v=..." onChange={e => set('videoUrl', e.target.value)} />
-              </Field>
+              <RepeatList title="Vídeos do YouTube" items={draft.videos} onChange={v => set('videos', v)} max={THEME_LIMITS.videos} addLabel="Adicionar vídeo"
+                fields={[{ key: 'title', label: 'Título (ex.: nome do artista)', placeholder: 'Armandinho' }, { key: 'url', label: 'Link do vídeo', placeholder: 'https://www.youtube.com/watch?v=...' }]} />
+              {videoInvalid && <p className="epe-warning">Um dos links não é de vídeo do YouTube. Use links do youtube.com ou youtu.be.</p>}
             </section>
 
             <section className="epe-card">

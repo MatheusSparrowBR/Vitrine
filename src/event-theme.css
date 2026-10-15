@@ -23,6 +23,10 @@
 .ev-countdown-box small{font-size:12px;font-weight:700;color:#4a5a70}
 
 /* Seções */
+.ev-videos{display:grid;gap:14px}
+@media (min-width:760px){.ev-videos.is-multiple{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ev-video-item{margin:0;display:flex;flex-direction:column;gap:8px}
+.ev-video-item figcaption{font-size:15px;font-weight:800;color:#0b1424}
 .ev-video{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000}
 .ev-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .ev-tickets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
