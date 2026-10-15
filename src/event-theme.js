@@ -1,7 +1,8 @@
 // Página personalizada de evento: normalização, validação e cálculos (sem interface, fáceis de testar).
 // Tudo que vem do banco passa por normalizeEventTheme antes de ser exibido.
 
-export const THEME_LIMITS = { videos: 4, tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20 }
+export const THEME_LIMITS = { videos: 4, tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20, nearby: 8 }
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DEFAULT_BG = '#0b1424'
 const DEFAULT_ACCENT = '#216df3'
 export const DEFAULT_TITLE_COLOR = '#09294d'
@@ -81,6 +82,7 @@ export function normalizeEventTheme(raw) {
   const type = ['color', 'gradient', 'image'].includes(bg.type) ? bg.type : 'color'
   const overlay = Math.min(0.85, Math.max(0, Number(bg.overlay ?? 0.45) || 0))
   const links = source.links && typeof source.links === 'object' ? source.links : {}
+  const venueMap = source.venueMap && typeof source.venueMap === 'object' ? source.venueMap : {}
   return {
     enabled: source.enabled === true,
     partnerBadge: source.partnerBadge === true,
@@ -106,6 +108,10 @@ export function normalizeEventTheme(raw) {
     gallery: list(source.gallery, THEME_LIMITS.gallery, g => safeUrl(typeof g === 'string' ? g : g?.url) || null),
     faq: list(source.faq, THEME_LIMITS.faq, f => (text(f?.q, 160) && text(f?.a, 600) ? { q: text(f.q, 160), a: text(f.a, 600) } : null)),
     links: { instagram: safeUrl(links.instagram), spotify: safeUrl(links.spotify), website: safeUrl(links.website) },
+    // Onde comer e ficar: empresas da plataforma escolhidas pelo admin, sem repetir.
+    nearby: list(source.nearby, THEME_LIMITS.nearby, n => (UUID.test(String(n?.businessId || '')) ? { businessId: String(n.businessId).toLowerCase(), note: text(n.note, 140) } : null))
+      .filter((n, i, all) => all.findIndex(other => other.businessId === n.businessId) === i),
+    venueMap: { imageUrl: safeUrl(venueMap.imageUrl), caption: text(venueMap.caption, 160) },
   }
 }
 

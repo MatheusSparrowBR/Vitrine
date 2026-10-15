@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { countdownParts, youtubeEmbedUrl } from './event-theme.js'
+import EventNearbyPlaces from './EventNearbyPlaces.jsx'
 import './event-theme.css'
 
 // Contagem regressiva até o início do evento. Some quando o evento começa.
@@ -32,7 +33,7 @@ function Section({ kicker, title, children, className = '' }) {
 }
 
 // Seções extras da página personalizada, na ordem em que aparecem.
-export default function EventThemeSections({ theme, eventTitle = '' }) {
+export default function EventThemeSections({ theme, eventTitle = '', citySlug = 'laguna' }) {
   const videos = theme.videos.map(video => ({ ...video, embed: youtubeEmbedUrl(video.url) })).filter(video => video.embed)
   const { links } = theme
   const hasLinks = links.instagram || links.spotify || links.website
@@ -63,6 +64,16 @@ export default function EventThemeSections({ theme, eventTitle = '' }) {
         </Section>
       )}
 
+      {theme.venueMap.imageUrl && (
+        <Section kicker="Mapa do evento" title="Setores e estrutura" className="ev-map-section">
+          <a className="ev-map" href={theme.venueMap.imageUrl} target="_blank" rel="noreferrer">
+            <img src={theme.venueMap.imageUrl} alt={`Mapa de setores: ${eventTitle}`} loading="lazy" />
+          </a>
+          {theme.venueMap.caption && <p className="ev-map-caption">{theme.venueMap.caption}</p>}
+          <small className="ev-map-hint">Toque na imagem para ampliar.</small>
+        </Section>
+      )}
+
       {theme.lineup.length > 0 && (
         <Section kicker="Programação" title="Line-up">
           <ol className="ev-lineup">
@@ -83,6 +94,8 @@ export default function EventThemeSections({ theme, eventTitle = '' }) {
           </div>
         </Section>
       )}
+
+      {theme.nearby.length > 0 && <EventNearbyPlaces items={theme.nearby} citySlug={citySlug} eventTitle={eventTitle} />}
 
       {theme.faq.length > 0 && (
         <Section kicker="Dúvidas" title="Perguntas frequentes">
