@@ -1,6 +1,5 @@
 // Modo "Em breve" do evento: configuração, regra de revelação e contador (sem interface, fáceis de testar).
 import { hexColor, safeUrl, themeStyle } from './event-theme.js'
-import { renderShareCard, SHARE_CARD_SITE } from './promotion-share-card.js'
 
 const text = (value, max) => String(value ?? '').trim().slice(0, max)
 
@@ -51,34 +50,6 @@ export function countdownToReveal(iso, now = Date.now()) {
   if (!iso || !Number.isFinite(diff) || diff <= 0) return null
   const minutes = Math.floor(diff / 60000)
   return { days: Math.floor(minutes / 1440), hours: Math.floor((minutes % 1440) / 60), minutes: minutes % 60 }
-}
-
-// Cartão de compartilhamento da tela Em breve: selo, nome do evento e data de revelação.
-export function teaserShareCardModel(row, cityName = '') {
-  const teaser = normalizeTeaser(row?.teaser)
-  const when = revealLabel(row?.teaser_reveal_at)
-  return {
-    kicker: teaser.headline,
-    title: String(row?.title || 'Evento').trim(),
-    business: '',
-    location: cityName ? `${cityName} · ${SHARE_CARD_SITE}` : SHARE_CARD_SITE,
-    discountText: '',
-    priceText: '',
-    originalText: '',
-    validText: when ? `Revelação em ${when}` : 'Novidades em breve',
-  }
-}
-
-// A capa principal do evento tem prioridade no cartão compartilhável.
- // O fundo personalizado da tela Em breve só é usado quando o evento não possui capa.
-export function teaserShareCardImageUrl(row) {
-  const coverUrl = String(row?.image_url || '').trim()
-  if (coverUrl) return coverUrl
-  return normalizeTeaser(row?.teaser).background.imageUrl || ''
-}
-
-export function renderTeaserShareCard(row, cityName = '') {
-  return renderShareCard(teaserShareCardModel(row, cityName), { imageUrl: teaserShareCardImageUrl(row) })
 }
 
 // Converte datetime-local (horário de São Paulo) para ISO, e o contrário para preencher o campo.

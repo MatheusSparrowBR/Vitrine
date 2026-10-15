@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase as db } from './supabase-client.js'
 import { getEventFavoriteIds, setEventFavorite, loginPathForIntent } from './event-favorites.js'
 import ShareCardButton from './ShareCardButton.jsx'
-import { countdownToReveal, normalizeTeaser, renderTeaserShareCard, revealLabel, teaserStyle } from './event-teaser.js'
+import { countdownToReveal, normalizeTeaser, revealLabel, teaserStyle } from './event-teaser.js'
+import { renderTeaserShareCard } from './event-teaser-card.js'
 import './event-teaser.css'
 
 const unit = (n, one, many) => (n === 1 ? one : many)

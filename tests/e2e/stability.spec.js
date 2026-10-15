@@ -34,6 +34,8 @@ const routes=[
 ]
 
 test('rotas principais não exibem tela branca nem erro de runtime',async({page})=>{
+ // Visita quase 30 rotas seguidas; o limite padrão de 30s é para um teste de uma tela só.
+ test.setTimeout(90000)
  const errors=[]
  page.on('pageerror',error=>errors.push(error.message))
  for(const route of routes){
@@ -42,8 +44,8 @@ test('rotas principais não exibem tela branca nem erro de runtime',async({page}
   await expect(page.locator('#root')).toBeVisible()
   await expect(page.locator('.vl-app-error')).toHaveCount(0)
   await expect(page.locator('.app-route-loading')).toHaveCount(0,{timeout:9000})
-  const text=(await page.locator('body').innerText()).trim()
-  expect(text.length,`rota ${route} ficou sem conteúdo visível`).toBeGreaterThan(20)
+  // Espera o React desenhar a tela: o servidor de testes compila cada arquivo na primeira visita.
+  await expect.poll(async()=>(await page.locator('body').innerText()).trim().length,{message:`rota ${route} ficou sem conteúdo visível`,timeout:9000}).toBeGreaterThan(20)
   expect(errors,`erro JavaScript na rota ${route}: ${errors.join(' | ')}`).toEqual([])
  }
 })
