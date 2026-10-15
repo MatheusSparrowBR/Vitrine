@@ -4,6 +4,7 @@
 export const THEME_LIMITS = { tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20 }
 const DEFAULT_BG = '#0b1424'
 const DEFAULT_ACCENT = '#216df3'
+export const DEFAULT_TITLE_COLOR = '#09294d'
 
 const text = (value, max = 200) => String(value ?? '').trim().slice(0, max)
 
@@ -92,6 +93,7 @@ export function normalizeEventTheme(raw) {
       overlay,
     },
     accent: hexColor(source.accent, DEFAULT_ACCENT),
+    titleColor: hexColor(source.titleColor, DEFAULT_TITLE_COLOR),
     bannerUrl: safeUrl(source.bannerUrl),
     videoUrl: youtubeEmbedUrl(source.videoUrl) ? text(source.videoUrl, 300) : '',
     tickets: list(source.tickets, THEME_LIMITS.tickets, t => (text(t?.name, 80) ? { name: text(t.name, 80), price: text(t.price, 30), note: text(t.note, 120) } : null)),
@@ -118,6 +120,7 @@ export function themeStyle(theme) {
     '--event-fg': bg.type === 'image' ? '#ffffff' : readableTextOn(base),
     '--event-accent': accent,
     '--event-accent-fg': readableTextOn(accent),
+    '--event-title': theme.titleColor,
   }
 }
 
@@ -125,6 +128,11 @@ export function themeStyle(theme) {
 export function accentWarning(theme) {
   const base = theme.background.type === 'image' ? '#0b1424' : theme.background.color
   return contrastRatio(theme.accent, base) < 1.6 ? 'A cor de destaque está muito parecida com o fundo. Os botões podem ficar difíceis de ver.' : ''
+}
+
+// O título fica dentro do cartão branco da página: avisa quando a cor some no branco.
+export function titleWarning(theme) {
+  return contrastRatio(theme.titleColor, '#ffffff') < 3 ? 'A cor do título está clara demais para o fundo branco do cartão.' : ''
 }
 
 // Tempo até o início do evento, ou null quando já começou.

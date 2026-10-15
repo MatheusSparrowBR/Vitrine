@@ -90,3 +90,17 @@ test('página do evento e admin usam o tema',()=>{
  assert.match(editor,/page_theme: normalizeEventTheme\(draft\)/)
  assert.match(editor,/error\.code === '23505'/)
 })
+
+test('título fica no cartão branco: cor própria com aviso, e textos do cartão não usam a cor do fundo',async()=>{
+ const {titleWarning,DEFAULT_TITLE_COLOR}=await import('../../src/event-theme.js')
+ assert.equal(normalizeEventTheme({}).titleColor,DEFAULT_TITLE_COLOR)
+ assert.equal(themeStyle(normalizeEventTheme({titleColor:'#7a1f5c'}))['--event-title'],'#7a1f5c')
+ assert.match(titleWarning(normalizeEventTheme({titleColor:'#ffffff'})),/clara demais/)
+ assert.equal(titleWarning(normalizeEventTheme({titleColor:'#09294d'})),'')
+ const css=read('src/event-theme.css')
+ assert.match(css,/\.vl-event-profile-title h1\{color:var\(--event-title,#09294d\)\}/)
+ assert.doesNotMatch(css,/vl-event-profile-when[^{]*\{color:var\(--event-fg\)/)
+ const editor=read('src/AdminEventPageEditor.jsx')
+ assert.match(editor,/<Field label="Cor do título"/)
+ assert.match(editor,/<div className="vl-event-profile-container"><div className="vl-event-profile-main">/)
+})

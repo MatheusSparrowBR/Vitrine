@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { accentWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
+import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
 import './event-profile.css'
 import './event-theme.css'
@@ -62,6 +62,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const setLink = (key, value) => setDraft(current => ({ ...current, links: { ...current.links, [key]: value } }))
   const notify = (text, error = false) => setMessage({ text, error })
   const warning = accentWarning(preview)
+  const titleWarn = titleWarning(preview)
   const videoInvalid = draft.videoUrl && !youtubeEmbedUrl(draft.videoUrl)
   const slugInvalid = slug && !isValidPageSlug(slug)
   const publicUrl = `https://vitrinelocal.net/${citySlug}/evento/${slug || event.id}`
@@ -155,6 +156,8 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
               )}
               <Field label="Cor de destaque (botões e títulos)"><input type="color" value={preview.accent} onChange={e => set('accent', e.target.value)} /></Field>
               {warning && <p className="epe-warning">{warning}</p>}
+              <Field label="Cor do título" hint="O título fica dentro do cartão branco da página."><input type="color" value={preview.titleColor} onChange={e => set('titleColor', e.target.value)} /></Field>
+              {titleWarn && <p className="epe-warning">{titleWarn}</p>}
             </section>
 
             <section className="epe-card">
@@ -222,7 +225,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
           <aside className="epe-preview-wrap" aria-label="Pré-visualização">
             <span className="epe-preview-label">PRÉ-VISUALIZAÇÃO{!draft.enabled && ' · personalização desativada'}</span>
             <div className={`vl-event-profile-page epe-preview${draft.enabled ? ' is-themed' : ''}`} style={draft.enabled ? themeStyle(preview) : undefined}>
-              <div className="vl-event-profile-container">
+              <div className="vl-event-profile-container"><div className="vl-event-profile-main">
                 {draft.enabled && preview.bannerUrl
                   ? <div className="ev-banner"><img src={preview.bannerUrl} alt="" /></div>
                   : event.image_url && <div className="vl-event-profile-hero"><img src={event.image_url} alt="" /></div>}
@@ -234,7 +237,7 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
                 </div>
                 <div className="vl-event-profile-actions"><a className="vl-event-profile-primary" href="#preview" onClick={e => e.preventDefault()}>Mais informações / ingressos →</a></div>
                 {draft.enabled && <EventThemeSections theme={preview} eventTitle={event.title} />}
-              </div>
+              </div></div>
             </div>
           </aside>
         </div>
