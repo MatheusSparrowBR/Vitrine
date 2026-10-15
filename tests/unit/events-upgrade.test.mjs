@@ -88,10 +88,10 @@ test('texto do cartão nunca encosta no rodapé, mesmo com título longo',async(
   const start=textBlockStart(lines,full)
   // Rótulo, título, local, preço e data: a data é a última linha do bloco.
   const dateBaseline=start+70+lines*92+70+70+8
-  assert.ok(start<=880,'começa no máximo em 880')
-  assert.ok(dateBaseline<=SHARE_CARD_HEIGHT-115,`linhas=${lines}: data acima do rodapé`)
+  assert.ok(start<=820,'começa acima da área reservada para a logo')
+  assert.ok(dateBaseline<=SHARE_CARD_HEIGHT-245,`linhas=${lines}: data acima do rodapé da logo`)
  }
- assert.equal(textBlockStart(1,{}),880)
+ assert.equal(textBlockStart(1,{}),820)
 })
 
 test('cartão do evento só aparece para admin ou para a empresa dona do evento',()=>{
