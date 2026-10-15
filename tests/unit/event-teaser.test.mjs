@@ -73,3 +73,18 @@ test('editor do admin controla o modo; avisos de revelação e lembrete respeita
  assert.match(read('supabase/functions/send-event-reminders/index.ts'),/if \(teaserOn\) continue/)
  assert.match(read('.github/workflows/event-reveal-notices.yml'),/cron: '5 \* \* \* \*'/)
 })
+
+test('cartão Em breve: selo, nome e data de revelação; sem local nem preço',async()=>{
+ const {teaserShareCardModel}=await import('../../src/event-teaser.js')
+ const model=teaserShareCardModel({title:'Carnaval 2027',teaser:{headline:'EM BREVE'},teaser_reveal_at:'2026-11-20T23:00:00.000Z'},'Laguna')
+ assert.equal(model.kicker,'EM BREVE')
+ assert.equal(model.title,'Carnaval 2027')
+ assert.equal(model.validText,'Revelação em 20/11 às 20:00')
+ assert.equal(model.location,'Laguna · vitrinelocal.net')
+ assert.equal(model.business,'')
+ assert.equal(model.priceText,'')
+ assert.equal(teaserShareCardModel({title:'X'}).validText,'Novidades em breve')
+ const page=read('src/EventTeaserPage.jsx')
+ assert.match(page,/<ShareCardButton\s+buildBlob=\{\(\) => renderTeaserShareCard\(row, city\.name\)\}/)
+ assert.doesNotMatch(page,/async function share\(\)/)
+})

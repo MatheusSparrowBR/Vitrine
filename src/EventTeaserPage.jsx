@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase as db } from './supabase-client.js'
 import { getEventFavoriteIds, setEventFavorite, loginPathForIntent } from './event-favorites.js'
-import { countdownToReveal, normalizeTeaser, revealLabel, teaserStyle } from './event-teaser.js'
+import ShareCardButton from './ShareCardButton.jsx'
+import { countdownToReveal, normalizeTeaser, renderTeaserShareCard, revealLabel, teaserStyle } from './event-teaser.js'
 import './event-teaser.css'
 
 const unit = (n, one, many) => (n === 1 ? one : many)
@@ -46,16 +47,6 @@ export default function EventTeaserPage({ row, city, preview = false }) {
     }
   }
 
-  async function share() {
-    if (preview) return
-    try {
-      if (navigator.share) await navigator.share({ title: row.title, text: `Em breve: ${row.title}`, url: location.href })
-      else if (navigator.clipboard) { await navigator.clipboard.writeText(location.href); setNote('Link copiado.') }
-    } catch (error) {
-      if (error?.name !== 'AbortError') setNote('Não foi possível compartilhar.')
-    }
-  }
-
   return (
     <main className={`ev-teaser-page${preview ? ' is-preview' : ''}`} style={teaserStyle(teaser)}>
       <div className="ev-teaser-inner">
@@ -76,7 +67,17 @@ export default function EventTeaserPage({ row, city, preview = false }) {
           <button type="button" className={`ev-teaser-notify${saved ? ' is-active' : ''}`} onClick={notifyMe} aria-pressed={saved}>
             {saved ? '✓ Você será avisado' : '🔔 Me avise quando revelar'}
           </button>
-          <button type="button" className="ev-teaser-share" onClick={share}>↗ Compartilhar</button>
+          <ShareCardButton
+            buildBlob={() => renderTeaserShareCard(row, city.name)}
+            fileName={`em-breve-${row.title}`}
+            shareTitle={`Em breve: ${row.title}`}
+            shareText={`Em breve: ${row.title}${when ? ` · revelação em ${when}` : ''}`}
+            shareUrl={preview ? `https://vitrinelocal.net/${city.slug}/evento/${row.page_slug || row.id}` : location.href}
+            ariaLabel={`Criar cartão para compartilhar: ${row.title}`}
+            label="↗ Compartilhar cartão"
+            className="ev-teaser-share-wrap"
+            buttonClassName="ev-teaser-share"
+          />
         </div>
         {note && <p className="ev-teaser-note" role="status">{note}</p>}
       </div>
