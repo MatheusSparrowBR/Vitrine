@@ -21,8 +21,8 @@ begin
       references public.events(id)
       on delete cascade;
   end if;
-end
-$$;
+end;
+$;
 
 -- Keep existing company banners public and allow active, non-expired event banners.
 drop policy if exists "anon read active ads" on public.advertisements;
