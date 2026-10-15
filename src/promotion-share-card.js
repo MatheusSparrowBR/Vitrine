@@ -4,6 +4,7 @@ import { promotionDiscountPercent, promotionValidUntil } from './promotion-servi
 export const SHARE_CARD_WIDTH = 1080
 export const SHARE_CARD_HEIGHT = 1350
 export const SHARE_CARD_SITE = 'vitrinelocal.net'
+export const SHARE_CARD_LOGO_URL = '/vitrine-local-header-logo.svg'
 
 const money = value => {
   const number = Number(value)
@@ -58,7 +59,7 @@ export function textBlockStart(titleLineCount, model) {
   if (model.business) { last = offset + 8; offset += 70 }
   if (model.priceText || model.originalText) { last = offset + 14; offset += 70 }
   if (model.validText) last = offset + 8
-  return Math.min(880, SHARE_CARD_HEIGHT - 115 - last)
+  return Math.min(820, SHARE_CARD_HEIGHT - 250 - last)
 }
 
 function loadImage(url) {
@@ -79,7 +80,7 @@ function drawCover(ctx, image) {
   ctx.drawImage(image, (SHARE_CARD_WIDTH - width) / 2, (SHARE_CARD_HEIGHT - height) / 2, width, height)
 }
 
-function paint(ctx, model, { image, logo }) {
+function paint(ctx, model, { image, logo, brandLogo }) {
   ctx.fillStyle = '#0b1424'
   ctx.fillRect(0, 0, SHARE_CARD_WIDTH, SHARE_CARD_HEIGHT)
   if (image) drawCover(ctx, image)
@@ -168,7 +169,23 @@ function paint(ctx, model, { image, logo }) {
 
   ctx.font = '700 32px system-ui, "Segoe UI", Arial, sans-serif'
   ctx.fillStyle = '#9fb0c7'
-  ctx.fillText(model.location, left, SHARE_CARD_HEIGHT - 60)
+  ctx.textAlign = 'center'
+  ctx.fillText(model.location, SHARE_CARD_WIDTH / 2, SHARE_CARD_HEIGHT - 205)
+
+  if (brandLogo) {
+    const width = 330
+    const height = width * 171 / 512
+    const x = (SHARE_CARD_WIDTH - width) / 2
+    const y = SHARE_CARD_HEIGHT - height - 76
+    ctx.save()
+    ctx.fillStyle = '#ffffff'
+    roundRect(ctx, x - 16, y - 8, width + 32, height + 16, 18)
+    ctx.fill()
+    ctx.drawImage(brandLogo, x, y, width, height)
+    ctx.restore()
+  }
+
+  drawBrandFrame(ctx)
 }
 
 function roundRect(ctx, x, y, width, height, radius) {
@@ -181,6 +198,20 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.closePath()
 }
 
+function drawBrandFrame(ctx) {
+  ctx.save()
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = '#1677ff'
+  ctx.lineWidth = 12
+  roundRect(ctx, 10, 10, SHARE_CARD_WIDTH - 20, SHARE_CARD_HEIGHT - 20, 48)
+  ctx.stroke()
+  ctx.strokeStyle = '#04c5f4'
+  ctx.lineWidth = 4
+  roundRect(ctx, 27, 27, SHARE_CARD_WIDTH - 54, SHARE_CARD_HEIGHT - 54, 38)
+  ctx.stroke()
+  ctx.restore()
+}
+
 // Gera o cartão da promoção em PNG.
 export function renderPromotionShareCard(promotion, meta = {}, images = {}) {
   return renderShareCard(shareCardModel(promotion, meta), images)
@@ -188,20 +219,20 @@ export function renderPromotionShareCard(promotion, meta = {}, images = {}) {
 
 // Gera um cartão em PNG a partir de um modelo de texto (promoção ou evento).
 // Se a imagem não puder ser usada (CORS), gera sem ela em vez de falhar.
-export async function renderShareCard(model, { imageUrl = '', logoUrl = '' } = {}) {
-  const [image, logo] = await Promise.all([loadImage(imageUrl), loadImage(logoUrl)])
+export async function renderShareCard(model, { imageUrl = '', logoUrl = '', brandLogoUrl = SHARE_CARD_LOGO_URL } = {}) {
+  const [image, logo, brandLogo] = await Promise.all([loadImage(imageUrl), loadImage(logoUrl), loadImage(brandLogoUrl)])
   const canvas = document.createElement('canvas')
   canvas.width = SHARE_CARD_WIDTH
   canvas.height = SHARE_CARD_HEIGHT
   const ctx = canvas.getContext('2d')
-  paint(ctx, model, { image, logo })
+  paint(ctx, model, { image, logo, brandLogo })
   const toBlob = () => new Promise((resolve, reject) => canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error('blob'))), 'image/png'))
   try {
     return await toBlob()
   } catch {
     // Canvas "sujo" por imagem sem CORS: refaz o cartão só com a cor de fundo.
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    paint(ctx, model, { image: null, logo: null })
+    paint(ctx, model, { image: null, logo: null, brandLogo })
     return toBlob()
   }
 }
