@@ -59,3 +59,4 @@
 .epe-preview-tabs button{appearance:none;border:0;background:transparent;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:800;color:#33475e;cursor:pointer}
 .epe-preview-tabs button.is-active{background:#fff;color:#0b1424;box-shadow:0 2px 6px rgba(11,20,36,.12)}
 .epe-preview-teaser{border:0;overflow:auto}
+.epe-home-card{border-color:#216df3}

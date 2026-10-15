@@ -66,6 +66,29 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
   const [previewMode, setPreviewMode] = useState(event.teaser_enabled ? 'teaser' : 'page')
   const setTeaser = (key, value) => setTeaserDraft(current => ({ ...current, [key]: value }))
   const setTeaserBg = (key, value) => setTeaserDraft(current => ({ ...current, background: { ...current.background, [key]: value } }))
+  // Destaque na home (tabela home_highlights): faixa abaixo do topo ou topo da home.
+  const [hlEnabled, setHlEnabled] = useState(false)
+  const [hlMode, setHlMode] = useState('strip')
+  const [hlStart, setHlStart] = useState(() => revealISOToInput(new Date().toISOString()))
+  const [hlEnd, setHlEnd] = useState(() => (event.event_end_date ? `${event.event_end_date}T23:59` : ''))
+  const [hlOthers, setHlOthers] = useState([])
+  useEffect(() => {
+    let live = true
+    if (!supabase?.from || !event.city_id) return undefined
+    supabase.from('home_highlights').select('event_id,mode,starts_at,ends_at,events(title)').eq('city_id', event.city_id).gt('ends_at', new Date().toISOString())
+      .then(({ data }) => {
+        if (!live) return
+        const mine = (data || []).find(row => row.event_id === event.id)
+        if (mine) {
+          setHlEnabled(true)
+          setHlMode(mine.mode)
+          setHlStart(revealISOToInput(mine.starts_at))
+          setHlEnd(revealISOToInput(mine.ends_at))
+        }
+        setHlOthers((data || []).filter(row => row.event_id !== event.id))
+      })
+    return () => { live = false }
+  }, [event.id, event.city_id])
 
   // Empresas ativas da cidade do evento, para a seção "Onde comer e ficar".
   useEffect(() => {
@@ -124,14 +147,32 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
     if (!reset && (slugInvalid || videoInvalid)) return notify('Corrija os campos marcados antes de salvar.', true)
     if (!reset && teaserDraft.ticketUrl && !safeUrl(teaserDraft.ticketUrl)) return notify('O link de venda de ingressos é inválido. Use um endereço que comece com https://', true)
     if (!reset && teaserOn && teaserAuto && !revealInputToISO(revealInput)) return notify('Informe a data e hora da revelação, ou desmarque a revelação automática.', true)
+    if (!reset && hlEnabled) {
+      const start = revealInputToISO(hlStart)
+      const end = revealInputToISO(hlEnd)
+      if (!start || !end) return notify('Informe o início e o fim do destaque na home.', true)
+      if (new Date(end) <= new Date(start)) return notify('O fim do destaque na home deve ser depois do início.', true)
+    }
     setBusy('save')
     notify('')
     const payload = reset
       ? { page_theme: null, page_slug: null, updated_at: new Date().toISOString() }
       : { page_theme: normalizeEventTheme(draft), page_slug: slug || null, teaser_enabled: teaserOn, teaser_auto_reveal: teaserAuto, teaser_reveal_at: revealInputToISO(revealInput), teaser: normalizeTeaser(teaserDraft), updated_at: new Date().toISOString() }
     const { error } = await supabase.from('events').update(payload).eq('id', event.id)
+    if (error) {
+      setBusy('')
+      return notify(error.code === '23505' ? 'Esse endereço já está em uso por outro evento desta cidade.' : error.message, true)
+    }
+    if (!reset) {
+      const highlight = hlEnabled
+        ? await supabase.from('home_highlights').upsert({ event_id: event.id, city_id: event.city_id, mode: hlMode, starts_at: revealInputToISO(hlStart), ends_at: revealInputToISO(hlEnd), updated_at: new Date().toISOString() }, { onConflict: 'event_id' })
+        : await supabase.from('home_highlights').delete().eq('event_id', event.id)
+      if (highlight.error) {
+        setBusy('')
+        return notify('A página foi salva, mas o destaque na home não: ' + highlight.error.message, true)
+      }
+    }
     setBusy('')
-    if (error) return notify(error.code === '23505' ? 'Esse endereço já está em uso por outro evento desta cidade.' : error.message, true)
     notify(reset ? 'Página voltou ao padrão.' : 'Página personalizada salva.')
     onSaved?.()
     if (reset) onClose?.()
@@ -155,6 +196,29 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
               <label className="epe-check"><input type="checkbox" checked={draft.enabled} onChange={e => set('enabled', e.target.checked)} /> Página personalizada ativa</label>
               <label className="epe-check"><input type="checkbox" checked={draft.partnerBadge} onChange={e => set('partnerBadge', e.target.checked)} /> Mostrar selo "Evento parceiro VitrineLocal"</label>
               <label className="epe-check"><input type="checkbox" checked={draft.countdown} onChange={e => set('countdown', e.target.checked)} /> Mostrar contagem regressiva</label>
+            </section>
+
+            <section className="epe-card epe-home-card">
+              <h3>Destaque na home</h3>
+              <small className="epe-hint">A home mostra um destaque por vez: o ativo que começou por último. Fora do período, nada aparece.</small>
+              <label className="epe-check"><input type="checkbox" checked={hlEnabled} onChange={e => setHlEnabled(e.target.checked)} /> Destacar este evento na home</label>
+              {hlEnabled && (
+                <>
+                  <Field label="Formato">
+                    <select value={hlMode} onChange={e => setHlMode(e.target.value)}>
+                      <option value="strip">Faixa abaixo do topo (recomendado)</option>
+                      <option value="hero">Topo da home com a arte do evento (patrocínio grande)</option>
+                    </select>
+                  </Field>
+                  {hlMode === 'hero' && <small className="epe-hint">Usa a capa larga do evento (ou a imagem do evento) no fundo do topo, com escurecimento para manter a busca legível.</small>}
+                  <Field label="Início do destaque (horário de Brasília)"><input type="datetime-local" value={hlStart} onChange={e => setHlStart(e.target.value)} /></Field>
+                  <Field label="Fim do destaque (horário de Brasília)"><input type="datetime-local" value={hlEnd} onChange={e => setHlEnd(e.target.value)} /></Field>
+                </>
+              )}
+              {hlOthers.length > 0 && (
+                <p className="epe-warning">Também em destaque nesta cidade: {hlOthers.map(row => row.events?.title || 'outro evento').join(', ')}. Vale o que começou por último.</p>
+              )}
+              <a className="epe-btn ghost" href={`/${citySlug}`} target="_blank" rel="noreferrer">Abrir a home</a>
             </section>
 
             <section className="epe-card epe-teaser-card">

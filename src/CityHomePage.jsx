@@ -12,7 +12,7 @@ import './home-v2.css'
 import './home-v2-fixes.css'
 import './home-content-layout.css'
 import './public-home.css'
-import './home-readability.css';import JobsTeaser from './JobsTeaser.jsx'
+import './home-readability.css';import JobsTeaser from './JobsTeaser.jsx';import {useHomeHighlight,HomeEventStrip,HomeHeroTakeoverBg,HomeHeroEventPill} from './HomeEventHighlight.jsx'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -74,7 +74,7 @@ export default function CityHomePage({citySlug='laguna'}){
  useEffect(()=>{setCatStart(0)},[city?.id])
  useEffect(()=>{const update=()=>setCatVisibleCount(window.matchMedia('(max-width:760px)').matches?4:8);update();window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)},[])
  useEffect(()=>{if(!city?.name)return;let alive=true;let timer=null;const loadWeather=async()=>{setWeatherLoading(true);setWeatherError('');try{const result=await fetchCityWeather(city);if(!alive)return;setWeather(result)}catch(error){if(!alive)return;setWeather(null);setWeatherError(error?.message||'Clima indisponível')}finally{if(alive)setWeatherLoading(false)}};loadWeather();timer=setInterval(loadWeather,10*60*1000);return()=>{alive=false;if(timer)clearInterval(timer)}},[city?.id,city?.name,city?.state,city?.country])
- const[cityMissing,setCityMissing]=useState(false);useEffect(()=>{if(!db||!city?.id||city.id==='fallback')return;let alive=true;setLoading(true);setEventError('');setPromoError('')
+ const[cityMissing,setCityMissing]=useState(false);const highlight=useHomeHighlight(city?.id,city?.slug||citySlug);useEffect(()=>{if(!db||!city?.id||city.id==='fallback')return;let alive=true;setLoading(true);setEventError('');setPromoError('')
     const loadCategories=async()=>{try{const r=await withTimeout(db.from('categories').select('id,name,slug,icon').eq('active',true).order('sort_order').order('name'));if(!alive)return;setCategories(r.data?.length?r.data:fallbackCategories())}catch(_){if(alive)setCategories(fallbackCategories())}}
   const loadNeeds=async()=>{try{const r=await withTimeout(db.from('business_needs').select('id,name,slug,icon,description,sort_order').eq('active',true).order('sort_order').order('name'));if(!alive)return;setNeeds(r.data?.length?r.data:fallbackNeeds())}catch(_){if(alive)setNeeds(fallbackNeeds())}}
   const loadBusinesses=async()=>{try{const r=await withTimeout(db.from('public_business_directory').select('id,name,slug,short_description,cover_url,logo_url,address,featured,verified,category_name,created_at',{count:'exact'}).eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8));if(r.error)throw r.error;const rows=r.data||[];const favoritePromise=(async()=>{const {data:{session}}=await db.auth.getSession();if(!session?.user?.id||!rows.length)return {data:[],error:null};return withTimeout(db.from('business_favorites').select('business_id').eq('user_id',session.user.id).in('business_id',rows.map(row=>row.id)))})();const [reviewMap,contactResult,favoriteResult]=await Promise.all([loadPublicBusinessReviewSummaries(db,rows.map(row=>row.id)),rows.length?withTimeout(db.from('public_business_directory').select('id,whatsapp,phone,neighborhood,opening_hours').in('id',rows.map(row=>row.id))):Promise.resolve({data:[],error:null}),favoritePromise]);const contactMap=Object.fromEntries((contactResult?.data||[]).map(row=>[row.id,row]));if(!alive)return;const enriched=rows.map(row=>({...row,...(contactMap[row.id]||{}),categories:row.category_name?{name:row.category_name}:null}));setBusinesses(enriched);setRatings(reviewMap);setSavedBusinessIds(new Set((favoriteResult?.data||[]).map(row=>row.business_id)));setBusinessCount(Number.isFinite(r.count)?r.count:rows.length)}catch(_){if(alive){setBusinesses([]);setRatings({});setBusinessCount(0)}}finally{if(alive)setBusinessesLoading(false)}}
@@ -115,10 +115,10 @@ export default function CityHomePage({citySlug='laguna'}){
  return <div className='lvp-page'>
   <main>
    <section className='lvp-hero'>
-    <div className='lvp-hero-bg' style={heroBackgroundStyle}></div>
+    <div className='lvp-hero-bg' style={heroBackgroundStyle}></div><HomeHeroTakeoverBg view={highlight}/>
     <div className='lvp-hero-inner'>
      <div className='lvp-hero-copy'>
-      <span className='lvp-kicker'><Icon name="grid" size={14}/> A cidade na palma da mão</span>
+      <HomeHeroEventPill view={highlight}/><span className='lvp-kicker'><Icon name="grid" size={14}/> A cidade na palma da mão</span>
       <h1>Descubra o que <span>{city?.name||'sua cidade'}</span> tem de melhor.</h1>
       <p>Encontre empresas, serviços, promoções e eventos perto de você — tudo em um só lugar.</p>
       <form className='lvp-search' onSubmit={e=>{e.preventDefault();go(base+'/empresas'+(q.trim()?'?q='+encodeURIComponent(q.trim()):''))}}>
@@ -137,7 +137,7 @@ export default function CityHomePage({citySlug='laguna'}){
      </aside>
     </div>
    </section>
-   <section id='categorias' className='lvp-wrap lvp-categories home-lab-migration-categories'>
+   <HomeEventStrip view={highlight}/><section id='categorias' className='lvp-wrap lvp-categories home-lab-migration-categories'>
     <div className='lvp-section-head'><div><span className='lvp-eyebrow'>CATEGORIAS PRINCIPAIS</span><h2 className='sr-only'>Categorias principais</h2></div><a href={base+'/empresas'}>Ver todas ({categories.length}) <span aria-hidden='true'>→</span></a></div>
     <div className='lvp-cat-box'>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
