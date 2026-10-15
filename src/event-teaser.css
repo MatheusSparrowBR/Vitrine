@@ -20,4 +20,7 @@
 .ev-teaser-share{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff}
 .ev-teaser-notify:focus-visible,.ev-teaser-share:focus-visible,.ev-teaser-back:focus-visible{outline:3px solid #f5b841;outline-offset:3px}
 .ev-teaser-note{margin:0;font-size:14px;font-weight:700;color:#fff}
+.ev-teaser-share-wrap{margin:0;align-items:center}
+.ev-teaser-page .promo-share-note{color:#fff;font-size:13px}
+.ev-teaser-share:disabled{opacity:.7;cursor:progress}
 @media (max-width:640px){.ev-teaser-notify,.ev-teaser-share{width:100%;justify-content:center}}
