@@ -48,7 +48,7 @@ export default function AdminPremiumBannerPage({supabase}){
   if(form.content_type==='event'){
    linkedEvent=events.find(event=>event.id===form.event_id&&event.city_id===form.city_id)
    const editingExistingEvent=Boolean(selected?.event_id&&selected.event_id===form.event_id)
-   if(!linkedEvent||(!editingExistingEvent&&(!linkedEvent.active||linkedEvent.event_end_date<projectTodayISO())))return toast('Selecione um evento ativo e não encerrado.',true)
+   if(!linkedEvent||((!linkedEvent.active||linkedEvent.event_end_date<projectTodayISO())&&(!editingExistingEvent||form.active)))return toast('Selecione um evento ativo e não encerrado. Para manter um evento encerrado no histórico, pause o banner.',true)
    if(!activeCities.some(city=>city.id===form.city_id))return toast('A cidade do evento não está ativa.',true)
   }else{
    if(!form.business_id)return toast('Selecione uma empresa.',true)
