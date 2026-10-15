@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import {shareCardModel,wrapText,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT} from '../../src/promotion-share-card.js'
+import {shareCardModel,wrapText,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT,SHARE_CARD_LOGO_URL} from '../../src/promotion-share-card.js'
 
 // Lê com quebras de linha normalizadas (o checkout do Windows usa CRLF).
 const read=p=>fs.readFileSync(p,'utf8').replace(/\r\n/g,'\n')
@@ -10,6 +10,15 @@ const measure=text=>text.length*10
 test('cartão usa formato retrato 4:5 para feed e WhatsApp',()=>{
  assert.equal(SHARE_CARD_WIDTH,1080)
  assert.equal(SHARE_CARD_HEIGHT,1350)
+})
+
+test('cartões usam moldura azul/ciano e logo oficial no rodapé',()=>{
+ assert.equal(SHARE_CARD_LOGO_URL,'/vitrine-local-header-logo.svg')
+ const source=read('src/promotion-share-card.js')
+ assert.match(source,/strokeStyle = '#1677ff'/)
+ assert.match(source,/strokeStyle = '#04c5f4'/)
+ assert.match(source,/drawImage\(brandLogo, x, y, width, height\)/)
+ assert.match(source,/brandLogoUrl = SHARE_CARD_LOGO_URL/)
 })
 
 test('modelo do cartão traz desconto, preços, validade e local',()=>{
