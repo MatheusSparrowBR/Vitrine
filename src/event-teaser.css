@@ -1,0 +1,23 @@
+/* Tela "Em breve" do evento. Fundo e destaque vêm de teaserStyle(). */
+.ev-teaser-page{min-height:100vh;background:var(--event-bg);background-color:#0b1424;color:#fff;display:flex;align-items:center;justify-content:center;padding:32px 16px 96px}
+.ev-teaser-page.is-preview{min-height:520px;border-radius:16px;padding:24px 16px}
+.ev-teaser-inner{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.ev-teaser-back{align-self:flex-start;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:13px;font-weight:800;text-decoration:none}
+.ev-teaser-image{width:min(420px,100%);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.ev-teaser-headline{display:inline-flex;padding:6px 16px;border-radius:999px;background:var(--event-accent);color:var(--event-accent-fg);font-size:15px;font-weight:900;letter-spacing:.18em}
+.ev-teaser-page h1{margin:0;font-size:clamp(30px,6vw,52px);line-height:1.05;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.ev-teaser-message{margin:0;max-width:560px;font-size:17px;line-height:1.5;color:rgba(255,255,255,.92)}
+.ev-teaser-when{margin:0;font-size:16px;color:rgba(255,255,255,.92)}
+.ev-teaser-when b{color:var(--event-accent)}
+.ev-teaser-countdown{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ev-teaser-countdown span{display:inline-flex;flex-direction:column;align-items:center;min-width:84px;padding:12px 10px;border-radius:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(6px)}
+.ev-teaser-countdown b{font-size:34px;line-height:1}
+.ev-teaser-countdown small{font-size:13px;font-weight:700;color:rgba(255,255,255,.85)}
+.ev-teaser-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:6px}
+.ev-teaser-notify,.ev-teaser-share{appearance:none;display:inline-flex;align-items:center;min-height:50px;padding:0 22px;border-radius:999px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.ev-teaser-notify{border:0;background:var(--event-accent);color:var(--event-accent-fg)}
+.ev-teaser-notify.is-active{background:#ffffff;color:#0b1424}
+.ev-teaser-share{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff}
+.ev-teaser-notify:focus-visible,.ev-teaser-share:focus-visible,.ev-teaser-back:focus-visible{outline:3px solid #f5b841;outline-offset:3px}
+.ev-teaser-note{margin:0;font-size:14px;font-weight:700;color:#fff}
+@media (max-width:640px){.ev-teaser-notify,.ev-teaser-share{width:100%;justify-content:center}}
