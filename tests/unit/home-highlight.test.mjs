@@ -37,6 +37,15 @@ test('evento em modo Em breve: selo, data de revelação e nada de local',()=>{
  assert.equal(view.cta.label,'Saiba mais')
 })
 
+test('evento em Em breve: a capa do evento aparece, não o fundo rosa da página',()=>{
+ const cover='https://x.supabase.co/storage/v1/object/public/events-media/abc/cover'
+ const background='https://x.supabase.co/storage/v1/object/public/events-media/abc/theme/bg.jpg'
+ const withCover=highlightView({mode:'strip',kind:'teaser',event:{id:'4',title:'Bloko',image_url:cover,teaser:{headline:'EM BREVE',background:{imageUrl:background}}}},'laguna')
+ assert.equal(withCover.imageUrl,cover)
+ const noCover=highlightView({mode:'strip',kind:'teaser',event:{id:'5',title:'Surpresa',teaser:{headline:'EM BREVE',background:{imageUrl:background}}}},'laguna')
+ assert.equal(noCover.imageUrl,background)
+})
+
 test('contador curto',()=>{
  assert.equal(countdownShort({days:3,hours:4,minutes:10}),'Faltam 3d 4h')
  assert.equal(countdownShort({days:0,hours:5,minutes:30}),'Faltam 5h 30min')
