@@ -10,7 +10,8 @@ test('home de Laguna usa a nova UX sobre dados reais do catálogo',async({page})
   await expect(page.locator('.lvp-featured')).toBeVisible()
   await expect(page.locator('.lvp-events')).toBeVisible()
  await expect(page.locator('.lvp-weather')).toBeVisible()
- await expect(page.locator('.lvp-sponsored, .lvp-empty-sponsored')).toHaveCount(1)
+ await expect(page.locator('.lvp-empty-sponsored')).toHaveCount(0)
+ await expect(page.locator('.vl-footer')).toHaveCount(1)
  expect(await page.locator('.lvp-cat-grid a').count()).toBeLessThanOrEqual(8)
  await expect(page.locator('.lvp-category-count')).toHaveText(/\d+ categorias? disponíveis/i)
  await expect(page.getByRole('link',{name:/Cadastrar empresa/i}).last()).toBeVisible()
@@ -34,7 +35,7 @@ test('header global mantém o mesmo componente em todas as páginas principais',
   await expect(page.locator('.vl-site-header')).toBeVisible()
   await expect(page.locator('.vl-site-brand')).toBeVisible()
   await expect(page.locator('.vl-site-city')).toBeVisible()
-  await expect(page.locator('.vl-site-business-cta')).toBeVisible()
+  await expect(page.locator('.vl-site-biz > summary')).toBeVisible()
   const visibleLegacyHeaders=page.locator('.topbar:visible, .account-topbar:visible, .mbl-topbar:visible, .mbp-topbar:visible, .legal-page > header:visible')
   await expect(visibleLegacyHeaders).toHaveCount(0)
  }
@@ -42,13 +43,13 @@ test('header global mantém o mesmo componente em todas as páginas principais',
 
 test('header global marca a seção ativa',async({page})=>{
  await page.goto('/laguna/empresas')
- await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Explorar')
+ await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Empresas')
  await page.goto('/laguna/promocoes')
  await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Promoções')
  await page.goto('/laguna/eventos')
  await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Eventos')
  await page.goto('/planos')
- await expect(page.locator('.vl-site-nav-link.active')).toHaveText('Planos')
+ await expect(page.locator('.vl-site-biz.active')).toHaveCount(1)
 })
 
 test('home mobile abre o menu real do site e não cria overflow horizontal',async({page})=>{
@@ -59,8 +60,9 @@ test('home mobile abre o menu real do site e não cria overflow horizontal',asyn
  await expect(toggle).toHaveAttribute('aria-expanded','false')
  await toggle.click()
  await expect(toggle).toHaveAttribute('aria-expanded','true')
- await expect(page.locator('.vl-site-mobile-panel')).toBeVisible()
- await expect(page.getByRole('link',{name:'Explorar',exact:true}).last()).toBeVisible()
+ await expect(page.locator('.vl-mobile-2026')).toBeVisible()
+ await expect(page.locator('.vl-mobile-2026').getByRole('link',{name:'Promoções',exact:true})).toBeVisible()
+ await expect(page.locator('.vl-tabbar a')).toHaveCount(4)
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1)
  expect(overflow).toBe(false)
 })
@@ -102,7 +104,7 @@ test('agenda possui URL por cidade e retorno',async({page})=>{
  await page.goto('/laguna/eventos')
  await expect(page).toHaveURL(/\/laguna\/eventos/)
  await expect(page.getByRole('heading',{name:/Eventos em Laguna/i})).toBeVisible()
- await expect(page.getByRole('button',{name:'← Voltar'})).toBeVisible()
+ await expect(page.getByRole('link',{name:'Voltar para Laguna'})).toBeVisible()
 })
 
 test('catalogo moderno possui filtros e cards visuais',async({page})=>{
@@ -134,7 +136,8 @@ test('perfil moderno abre a galeria completa de fotos',async({page})=>{
 
 test('cadastro de empresa exige autenticação',async({page})=>{
  await page.goto('/conta?new=business')
- await expect(page.getByRole('heading',{name:/Entre para cadastrar sua empresa/i})).toBeVisible()
+ await expect(page.getByRole('heading',{name:/Coloque sua empresa no VitrineLocal/i})).toBeVisible()
+ await expect(page.getByRole('link',{name:'Criar conta grátis'})).toHaveAttribute('href',/\/usuario\/cadastro\?next=/)
 })
 
 test('painéis analytics e empresas exigem perfil administrador ou conta',async({page})=>{
@@ -168,7 +171,7 @@ test('planos mostra valores públicos e retorno',async({page})=>{
  await expect(page.getByText(/5 fotos\/mídias/)).toBeVisible()
  await expect(page.getByText(/50 produtos\/serviços/)).toBeVisible()
  await expect(page.getByText(/20 promoções/)).toBeVisible()
- await expect(page.getByRole('link',{name:/Voltar para Laguna/})).toBeVisible()
+ await expect(page.getByRole('link',{name:'Voltar para Início'})).toBeVisible()
 })
 
 test('politica e termos sao acessiveis',async({page})=>{
