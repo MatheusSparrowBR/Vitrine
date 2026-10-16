@@ -60,3 +60,8 @@
 .epe-preview-tabs button.is-active{background:#fff;color:#0b1424;box-shadow:0 2px 6px rgba(11,20,36,.12)}
 .epe-preview-teaser{border:0;overflow:auto}
 .epe-home-card{border-color:#216df3}
+.epe-facility-group{margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:8px}
+.epe-facility-group legend{padding:0;margin-bottom:6px;font-size:13px;font-weight:800;color:#4a5a70;text-transform:uppercase;letter-spacing:.04em}
+.epe-facility-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 14px}
+.epe-check.epe-facility{font-weight:600}
+.epe-link-button{align-self:flex-start;appearance:none;border:0;background:none;padding:0;font:inherit;font-size:13px;font-weight:700;color:#216df3;cursor:pointer;text-decoration:underline}

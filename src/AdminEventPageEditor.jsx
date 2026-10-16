@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { accentWarning, titleWarning, isValidPageSlug, normalizeEventTheme, pageSlug, safeUrl, THEME_LIMITS, themeStyle, youtubeEmbedUrl } from './event-theme.js'
 import EventThemeSections, { EventCountdown } from './EventThemeSections.jsx'
 import EventTeaserPage from './EventTeaserPage.jsx'
+import { FACILITY_GROUPS } from './event-facilities.js'
 import { normalizeTeaser, revealISOToInput, revealInputToISO } from './event-teaser.js'
 import './event-profile.css'
 import './event-theme.css'
@@ -321,6 +322,24 @@ export default function AdminEventPageEditor({ supabase, event, citySlug = 'lagu
               {imagePicker(draft.venueMap.imageUrl, url => setDraft(current => ({ ...current, venueMap: { ...current.venueMap, imageUrl: url } })), 'Imagem do mapa (palco, pista, camarote, banheiros…)')}
               <Field label="Legenda (opcional)"><input value={draft.venueMap.caption} maxLength={160} placeholder="Entrada pela Av. Beira-Mar. Camarote no 2º piso." onChange={e => setDraft(current => ({ ...current, venueMap: { ...current.venueMap, caption: e.target.value } }))} /></Field>
               <small className="epe-hint">Sem imagem, a seção não aparece na página.</small>
+            </section>
+
+            <section className="epe-card">
+              <h3>Facilidades do evento</h3>
+              <small className="epe-hint">Marque o que o evento oferece. Na página aparecem só os grupos com algo marcado; sem nada marcado, a seção não aparece.</small>
+              {FACILITY_GROUPS.map(group => (
+                <fieldset className="epe-facility-group" key={group.id}>
+                  <legend>{group.title}</legend>
+                  <div className="epe-facility-items">
+                    {group.items.map(item => (
+                      <label className="epe-check epe-facility" key={item.id}>
+                        <input type="checkbox" checked={draft.facilities.includes(item.id)} onChange={e => set('facilities', e.target.checked ? [...draft.facilities, item.id] : draft.facilities.filter(id => id !== item.id))} /> {item.label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+              {draft.facilities.length > 0 && <button type="button" className="epe-link-button" onClick={() => set('facilities', [])}>Desmarcar todas ({draft.facilities.length})</button>}
             </section>
 
             <section className="epe-card">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { countdownParts, youtubeEmbedUrl } from './event-theme.js'
 import EventNearbyPlaces from './EventNearbyPlaces.jsx'
+import EventFacilities from './EventFacilities.jsx'
 import './event-theme.css'
 
 // Contagem regressiva até o início do evento. Some quando o evento começa.
@@ -73,6 +74,8 @@ export default function EventThemeSections({ theme, eventTitle = '', citySlug = 
           <small className="ev-map-hint">Toque na imagem para ampliar.</small>
         </Section>
       )}
+
+      {theme.facilities.length > 0 && <EventFacilities selected={theme.facilities} />}
 
       {theme.lineup.length > 0 && (
         <Section kicker="Programação" title="Line-up">
