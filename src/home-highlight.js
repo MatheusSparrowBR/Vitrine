@@ -22,7 +22,8 @@ export function highlightView({ mode, kind, event }, citySlug = 'laguna') {
       mode,
       badge: teaser.headline,
       title: event.title,
-      imageUrl: teaser.background.imageUrl || safeUrl(event.image_url),
+      // A capa do evento (o cartaz) vem antes; o fundo da página Em breve só se não houver capa.
+      imageUrl: safeUrl(event.image_url) || teaser.background.imageUrl,
       accent: teaser.accent,
       when: when ? `Revelação em ${when}` : 'Novidades em breve',
       place: '',
