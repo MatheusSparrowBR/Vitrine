@@ -68,3 +68,15 @@
 /* Card de evento em modo Em breve. */
 .vl-event-teaser-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:#0b1424;color:#f5b841;font-size:12px;font-weight:900;letter-spacing:.04em}
 .vl-event.is-teaser{border-color:#0b1424}
+/* Card de evento: horário e local numa linha; preço no rodapé, alinhado entre os cards da mesma fileira. */
+.vl-event-card-link{display:flex;flex-direction:column}
+.vl-event-body{flex:1;display:flex;flex-direction:column}
+html body .vl-event-meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0}
+.vl-event-description{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.vl-event-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:14px}
+html body .vl-event-foot .vl-events-link{margin-top:0}
+html body .vl-event-foot .vl-event-price{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-size:12px !important;font-weight:700;color:#667085;line-height:1.2;text-align:right;white-space:nowrap}
+.vl-event-foot .vl-event-price small{font-size:inherit;font-weight:inherit}
+.vl-event-foot .vl-event-price b{font-size:18px;font-weight:800;color:#12253e}
+html body .vl-event-foot .vl-event-price.is-free{padding:5px 10px;border-radius:999px;background:#e7f6ec;color:#11703a;font-size:13px !important;font-weight:800}
+@media(max-width:700px){.vl-event-description{-webkit-line-clamp:2}}
