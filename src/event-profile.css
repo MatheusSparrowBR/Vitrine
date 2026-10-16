@@ -67,3 +67,29 @@
 .vl-event-profile-share-card{display:inline-flex;flex-direction:column;align-items:flex-start;gap:4px;margin:0}
 .vl-event-profile-share-card .promo-share-note{font-size:13px}
 @media (max-width:640px){.vl-event-profile-page .vl-event-profile-actions{align-items:stretch}.vl-event-profile-page .vl-event-profile-actions .vl-event-profile-primary{justify-content:center}}
+
+/* Ações do evento: blocos do mesmo tamanho, ícone em cima e nome embaixo. */
+.ev-actions{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;width:100%;max-width:520px}
+.ev-actions .ev-action-wrap{position:relative;display:flex}
+.ev-actions .ev-action{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:78px;padding:10px 4px;border:1px solid #e3e9f2;border-radius:16px;background:#fff;color:#33475e;font:inherit;font-size:13px;font-weight:700;line-height:1.2;text-align:center;text-decoration:none;cursor:pointer;transition:border-color .15s,background-color .15s,transform .1s}
+.ev-actions .ev-action:hover{border-color:#c5d5ea;background:#f7faff}
+.ev-actions .ev-action:active{transform:scale(.97)}
+.ev-actions .ev-action:focus-visible,.ev-actions .ev-action-menu a:focus-visible,.ev-actions .ev-action-menu button:focus-visible{outline:3px solid #f5b841;outline-offset:2px}
+.ev-actions .ev-action-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#eef4ff;color:var(--event-title,#216df3)}
+.ev-actions .ev-action.is-active{border-color:#f3c1cf;background:#fff5f8;color:#c0244f}
+.ev-actions .ev-action.is-active .ev-action-icon{background:#ffe3eb;color:#e11d48}
+.ev-actions .ev-action.is-open{border-color:var(--event-title,#216df3)}
+.ev-actions .ev-action-menu{position:absolute;z-index:20;top:calc(100% + 6px);left:50%;transform:translateX(-50%);min-width:220px;display:flex;flex-direction:column;padding:6px;border:1px solid #e3e9f2;border-radius:14px;background:#fff;box-shadow:0 12px 32px rgba(11,20,36,.16)}
+.ev-actions .ev-action-menu a,.ev-actions .ev-action-menu button{display:block;width:100%;padding:12px;border:0;border-radius:10px;background:none;color:#0b1424;font:inherit;font-size:14px;font-weight:700;text-align:left;text-decoration:none;cursor:pointer}
+.ev-actions .ev-action-menu a:hover,.ev-actions .ev-action-menu button:hover{background:#f1f5fb}
+.vl-event-profile-page .vl-event-profile-share-card{width:100%;max-width:520px;align-items:stretch}
+.vl-event-profile-page .ev-share-card-button{justify-content:center;width:100%;border-radius:14px}
+/* Celular: duas colunas, ícone ao lado do nome, para os nomes caberem inteiros. */
+@media (max-width:520px){
+.ev-actions{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));max-width:none}
+.ev-actions>:last-child:nth-child(odd){grid-column:1/-1}
+.ev-actions .ev-action{flex-direction:row;justify-content:flex-start;gap:8px;min-height:56px;padding:8px 10px;font-size:14px;text-align:left;white-space:nowrap}
+.ev-actions .ev-action-icon{flex:none;width:34px;height:34px}
+.ev-actions .ev-action-menu{left:auto;right:0;transform:none}
+}
+@media (max-width:359px){.ev-actions .ev-action{flex-direction:column;justify-content:center;gap:6px;min-height:76px;text-align:center}}
