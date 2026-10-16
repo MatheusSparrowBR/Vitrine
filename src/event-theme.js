@@ -1,6 +1,8 @@
 // Página personalizada de evento: normalização, validação e cálculos (sem interface, fáceis de testar).
 // Tudo que vem do banco passa por normalizeEventTheme antes de ser exibido.
 
+import { normalizeFacilities } from './event-facilities.js'
+
 export const THEME_LIMITS = { videos: 4, tickets: 10, lineup: 30, sponsors: 24, gallery: 30, faq: 20, nearby: 8 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DEFAULT_BG = '#0b1424'
@@ -112,6 +114,8 @@ export function normalizeEventTheme(raw) {
     nearby: list(source.nearby, THEME_LIMITS.nearby, n => (UUID.test(String(n?.businessId || '')) ? { businessId: String(n.businessId).toLowerCase(), note: text(n.note, 140) } : null))
       .filter((n, i, all) => all.findIndex(other => other.businessId === n.businessId) === i),
     venueMap: { imageUrl: safeUrl(venueMap.imageUrl), caption: text(venueMap.caption, 160) },
+    // Facilidades marcadas pelo admin (Wi-Fi, banheiros, estacionamento…).
+    facilities: normalizeFacilities(source.facilities),
   }
 }
 
