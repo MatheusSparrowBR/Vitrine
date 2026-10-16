@@ -30,6 +30,10 @@ html body .lvp-page > main > .lvp-soft { order: 6 !important; }
 html body .lvp-page > main > .lvp-needs { order: 7 !important; }
 html body .lvp-page > main > .city-jobs-teaser-section { order: 8 !important; }
 html body .lvp-page > main > .lvp-sponsored-wrap { order: 9 !important; }
+/* No celular, o banner premium fica logo depois da agenda, sem poluir o topo nem sumir no fim da página. */
+@media (max-width: 720px) {
+  html body .lvp-page > main > .lvp-sponsored-wrap { order: 6 !important; }
+}
 html body .lvp-page > main > .lvp-business-cta-section { order: 10 !important; }
 html body .lvp-page > main > .vl-home-about { order: 11 !important; }
 @media (max-width: 760px) {
