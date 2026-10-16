@@ -5,6 +5,7 @@ import ShareCardButton from './ShareCardButton.jsx'
 import { countdownToReveal, normalizeTeaser, revealLabel, teaserStyle } from './event-teaser.js'
 import { renderTeaserShareCard } from './event-teaser-card.js'
 import './event-teaser.css'
+import {PageTrail} from './SiteChrome.jsx'
 
 const unit = (n, one, many) => (n === 1 ? one : many)
 
@@ -51,7 +52,7 @@ export default function EventTeaserPage({ row, city, preview = false }) {
   return (
     <main className={`ev-teaser-page${preview ? ' is-preview' : ''}`} style={teaserStyle(teaser)}>
       <div className="ev-teaser-inner">
-        {!preview && <a className="ev-teaser-back" href={`/${city.slug}/eventos`}>← Eventos em {city.name}</a>}
+        {!preview && <PageTrail className="ev-teaser-trail" items={[{ label: city.name, href: `/${city.slug}` }, { label: 'Eventos', href: `/${city.slug}/eventos` }]} />}
         {row.image_url && <img className="ev-teaser-image" src={row.image_url} alt="" />}
         <span className="ev-teaser-headline">{teaser.headline}</span>
         <h1>{row.title}</h1>

@@ -83,16 +83,15 @@ test('Catálogo público apresenta contexto textual específico quando uma categ
  const app=read('src/ModernBusinessesPage.jsx')
  assert.match(app,/selectedCategory/)
  assert.match(app,/catalogHeading/)
- assert.match(app,/CATEGORIA LOCAL/)
+ assert.match(app,/catalogDescription/)
 })
 
 
 test('página pública da cidade contém conteúdo local específico e links de descoberta',()=>{
  const app=read('src/CityHomePage.jsx')
- assert.match(app,/GUIA LOCAL/)
  assert.match(app,/localCategoryNames/)
- assert.match(app,/lvp-local-guide/)
- assert.match(app,/Explorar empresas em/)
+ assert.match(app,/vl-home-about/)
+ assert.match(app,/O VitrineLocal reúne/)
 })
 
 test('sitemap avançado inclui apenas categorias ativas presentes em empresas públicas',()=>{
@@ -104,13 +103,13 @@ test('sitemap avançado inclui apenas categorias ativas presentes em empresas p�
 })
 
 
-test('GUIA LOCAL permanece abaixo da agenda e antes do CTA final',()=>{
+test('texto local fica no fim da home, depois da agenda e do CTA para empresas',()=>{
  const app=read('src/CityHomePage.jsx')
- const guide=app.indexOf("className='lvp-wrap lvp-local-guide'")
+ const guide=app.indexOf("className='lvp-wrap vl-home-about'")
  const events=app.indexOf("id='eventos'")
  const cta=app.indexOf("className='lvp-business-cta-section'")
  assert.ok(guide>events)
- assert.ok(guide<cta)
+ assert.ok(guide>cta)
 })
 
 

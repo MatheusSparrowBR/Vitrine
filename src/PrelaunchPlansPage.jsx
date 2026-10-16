@@ -10,6 +10,8 @@ export default function PrelaunchPlansPage(){
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
 
+  useEffect(() => { document.title = 'Planos para empresas | VitrineLocal' }, [])
+
   useEffect(() => {
     let live = true
     loadPublicPlans(db).then(list => {

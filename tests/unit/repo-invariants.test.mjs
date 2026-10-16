@@ -25,7 +25,7 @@ test('arquivos legados de comunidade não existem',()=>{
  for(const file of ['main.jsx','main-v2.jsx','main-clean.jsx','AdminDashboard.jsx','site-enhancements.js','storage-media.js','storage-media.css','styles.css','admin.css'])assert.equal(fs.existsSync(path.join(srcDir,file)),false,`legacy file still exists: ${file}`)
 })
 
-test('migração de senha usa recovery para senha antiga',()=>{const src=read('src/AuthPage.jsx');assert.match(src,/weak_password/);assert.match(src,/resetPasswordForEmail/);assert.match(src,/atualizar-senha/);assert.match(src,/password\.length<8/)})
+test('migração de senha usa recovery para senha antiga',()=>{const src=read('src/UserAuthPage.jsx');assert.match(src,/weak_password/);assert.match(src,/resetPasswordForEmail/);assert.match(src,/atualizar-senha/);assert.match(src,/password\.length<8/)})
 test('página de atualização exige nova senha',()=>{const src=read('src/PasswordUpdatePage.jsx');assert.match(src,/updateUser\(\{password\}\)/);assert.match(src,/password\.length<8/);assert.match(src,/password!==confirm/)})
 test('integrações legadas de pagamento não existem no código ativo',()=>{
  const forbidden=/stripe/i

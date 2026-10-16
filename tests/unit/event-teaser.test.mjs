@@ -66,7 +66,7 @@ test('página do evento cai na tela Em breve; agenda mostra o card com selo',()=
  assert.match(page,/if\(teaserRow\)return <EventTeaserPage row=\{teaserRow\} city=\{city\}\/>/)
  const list=read('src/EventsPage.jsx')
  assert.match(list,/from\('public_event_teasers'\)/)
- assert.match(list,/⏳ Em breve/)
+ assert.match(list,/vl-event-teaser-badge"><Icon name="clock" size=\{12\}\/> Em breve/)
  assert.match(list,/!events\.length&&!teasers\.length/)
 })
 

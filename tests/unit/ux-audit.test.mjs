@@ -19,11 +19,12 @@ test('rotas públicas, cliente, empresa e admin permanecem registradas',()=>{
  assert.match(app,/kind==='business'/)
 })
 
-test('navegação pública expõe categorias sem alterar os destinos existentes',()=>{
+test('navegação pública enxuta: Empresas, Promoções, Eventos, busca, conta e Para empresas',()=>{
  const header=read('src/SiteHeader.jsx')
- assert.match(header,/CATEGORY_MENU/)
- for(const label of ['Restaurantes','Lojas','Serviços','Saúde','Beleza','Turismo','Automóveis','Imóveis','Pets','Outros'])assert.match(header,new RegExp(label))
- assert.match(header,/\/empresas\?categoria=/)
+ for(const label of ["'Empresas'","'Promoções'","'Eventos'"])assert.ok(header.includes(label))
+ assert.match(header,/jobs>0\?\[\['jobs','Vagas'/)
+ assert.match(header,/Para empresas/)
+ assert.match(header,/\/empresas\?buscar=1/)
  assert.match(header,/Minha conta/)
 })
 
@@ -57,11 +58,12 @@ test('camadas de UX e responsividade são carregadas globalmente',()=>{
 
 
 test('home real usa centralização para item único e rodapé da UX de lançamento',()=>{
- const page=read('src/CityHomePage.jsx'),css=read('src/public-home.css')
+ const page=read('src/CityHomePage.jsx'),css=read('src/public-home.css'),ctx=read('src/site-context.js'),chrome=read('src/SiteChrome.jsx')
  assert.match(page,/lvp-business-grid-single/)
  assert.match(page,/lvp-promo-grid-single/)
- assert.match(page,/lvp-footer/)
- assert.match(page,/contato@vitrinelocal\.net/)
+ assert.match(chrome,/className="vl-footer"/)
+ assert.match(ctx,/contato@vitrinelocal\.net/)
+ assert.match(ctx,/@vitrinelocaal/)
  assert.match(css,/\.lvp-business-grid-single\{/)
  assert.match(css,/\.lvp-promo-grid-single\{/)
 })
@@ -202,9 +204,8 @@ test('Perfil Lab aprimora o lightbox existente sem criar uma segunda galeria',()
 test('perfil oficial incorpora a linguagem do Perfil Lab sem perder integrações reais',()=>{
  const page=read('src/ModernBusinessProfilePage.jsx'),css=read('src/modern-business-profile-lab-style.css')
  assert.match(page,/modern-business-profile-lab-style\.css/)
- assert.match(page,/INFORMAÇÕES ESSENCIAIS/)
- assert.match(page,/mbp-mobile-bottom/)
- assert.match(page,/BusinessPersonalActions businessId=\{businessId\} compact/)
+ assert.match(page,/Informações essenciais/)
+ assert.match(page,/<BusinessPersonalActions businessId=\{business\.id\}\/>/)
  assert.match(page,/waUrl=/)
  assert.match(page,/public_business_directory/)
  assert.match(page,/business_notification_subscriptions/)

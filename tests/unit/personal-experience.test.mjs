@@ -12,7 +12,7 @@ test('experiência pessoal separa favoritos, seguindo e workspace empresarial',(
  assert.ok(page.includes('Empresas que você segue'))
  assert.ok(page.includes('notification_preferences'))
  assert.ok(page.includes("href={profile?.role==='business_owner'?'/conta':'/conta?new=business'}"))
- assert.ok(profile.includes('Salvar empresa'))
+ assert.ok(profile.includes('Salvar esta empresa'))
  assert.ok(profile.includes('Ativar notificações'))
  assert.ok(profile.includes('Receba novidades desta empresa'))
  assert.ok(!profile.includes('>Acompanhar novidades</button>'))
@@ -31,7 +31,7 @@ test('migração de favoritos usa unicidade por usuário/empresa e RLS autentica
 
 test('cadastro registra a preferência de experiência sem transformar preferência em autorização',()=>{
  const auth=read('src/UserAuthPage.jsx')
- assert.ok(auth.includes('Como você pretende usar o VitrineLocal?'))
+ assert.ok(auth.includes('Como você vai usar o VitrineLocal?'))
  assert.ok(auth.includes('experience_mode:experienceMode'))
  assert.ok(auth.includes('next=')||auth.includes('safeNext'))
 })
@@ -56,7 +56,7 @@ test('favorito da empresa usa insert/delete e não exige update no relacionament
 test('ações da empresa mantêm Favoritar separado do acompanhamento por Push',()=>{
  const page=read('src/ModernBusinessProfilePage.jsx')
  assert.match(page,/mbp-relationship-row/)
- assert.match(page,/Empresa salva/)
+ assert.match(page,/relationship\.favorite\?'Salva':'Salvar'/)
  assert.match(page,/Receba novidades desta empresa/)
  assert.match(page,/Ativar notificações/)
  assert.doesNotMatch(page,/>Acompanhar novidades<\/button>/)

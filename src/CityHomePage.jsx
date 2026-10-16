@@ -13,6 +13,7 @@ import './home-v2-fixes.css'
 import './home-content-layout.css'
 import './public-home.css'
 import './home-readability.css';import JobsTeaser from './JobsTeaser.jsx';import {useHomeHighlight,HomeEventStrip,HomeHeroTakeoverBg,HomeHeroEventPill} from './HomeEventHighlight.jsx'
+import {limparTexto} from './site-context.js'
 
 const URL=import.meta.env.VITE_SUPABASE_URL
 const KEY=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -23,7 +24,12 @@ const FALLBACK_NEEDS=[['Quero comer','quero-comer','store','Restaurantes · Pizz
 const fallbackNeeds=()=>FALLBACK_NEEDS.map(([name,slug,icon,description],i)=>({id:'fallback-need-'+i,name,slug,icon,description,sort_order:i+1,active:true}))
 const fallbackCategories=()=>FALLBACK_CATS.map(([name,icon],i)=>({id:`fallback-${i}`,name,icon,slug:String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}))
 const ratingStars=avg=>Math.max(0,Math.min(5,Math.round(Number(avg)||0)))
-const categoryIcon=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza')||n.includes('bem-estar'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
+const GENERIC_ICONS=new Set(['store','grid','bag','star','heart','briefcase'])
+const specificIcon=n=>{if(/hotel|hosped|pousada/.test(n))return'hotel';if(/pizz/.test(n))return'pizza';if(/restaur|lanch|aliment|comida/.test(n))return'utensils';if(/caf[eé]|padar/.test(n))return'coffee';if(/supermerc|mercad/.test(n))return'shoppingCart';if(/conveni/.test(n))return'bag';if(/internet|telecom/.test(n))return'wifi';if(/sa[uú]de|farm|cl[ií]nic|m[eé]dic/.test(n))return'medical';if(/beleza|sal[aã]o|barbear|est[eé]tic/.test(n))return'scissors';if(/academ|fitness/.test(n))return'dumbbell';if(/pet/.test(n))return'paw';if(/auto|ve[ií]cul|carro|oficina/.test(n))return'car';if(/flor/.test(n))return'flower';if(/roupa|moda|vestu/.test(n))return'shirt';if(/turis|viag/.test(n))return'plane';if(/im[oó]v/.test(n))return'home';if(/servi/.test(n))return'wrench';if(/loja|com[eé]rc/.test(n))return'store';return null}
+// cor suave por categoria (sempre a mesma para o mesmo nome)
+const CAT_TONES=[['#e8f1ff','#216df3'],['#e9f8ef','#16a34a'],['#fff4e5','#d97706'],['#fdecef','#e11d48'],['#f1ebff','#7c3aed'],['#e6f7f9','#0891b2'],['#fef9e3','#ca8a04'],['#eef2f7','#475569']]
+const categoryTone=name=>{let h=0;for(const ch of String(name||''))h=(h*31+ch.charCodeAt(0))>>>0;const[bg,fg]=CAT_TONES[h%CAT_TONES.length];return{'--cat-bg':bg,'--cat-fg':fg}}
+const categoryIcon=(name,selected)=>{const n0=String(name||'').toLowerCase();if(isOfficialIcon(selected)&&!(GENERIC_ICONS.has(selected)&&specificIcon(n0)))return selected;const sp=specificIcon(n0);if(sp)return sp;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza')||n.includes('bem-estar'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
 const slugify=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
 const money=value=>value==null||value===''?'':`R$ ${Number(value).toFixed(2).replace('.',',')}`
 const withTimeout=(promise,ms=8000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tempo limite de carregamento excedido.')),ms))])
@@ -79,7 +85,7 @@ export default function CityHomePage({citySlug='laguna'}){
   const loadNeeds=async()=>{try{const r=await withTimeout(db.from('business_needs').select('id,name,slug,icon,description,sort_order').eq('active',true).order('sort_order').order('name'));if(!alive)return;setNeeds(r.data?.length?r.data:fallbackNeeds())}catch(_){if(alive)setNeeds(fallbackNeeds())}}
   const loadBusinesses=async()=>{try{const r=await withTimeout(db.from('public_business_directory').select('id,name,slug,short_description,cover_url,logo_url,address,featured,verified,category_name,created_at',{count:'exact'}).eq('city_id',city.id).order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(8));if(r.error)throw r.error;const rows=r.data||[];const favoritePromise=(async()=>{const {data:{session}}=await db.auth.getSession();if(!session?.user?.id||!rows.length)return {data:[],error:null};return withTimeout(db.from('business_favorites').select('business_id').eq('user_id',session.user.id).in('business_id',rows.map(row=>row.id)))})();const [reviewMap,contactResult,favoriteResult]=await Promise.all([loadPublicBusinessReviewSummaries(db,rows.map(row=>row.id)),rows.length?withTimeout(db.from('public_business_directory').select('id,whatsapp,phone,neighborhood,opening_hours').in('id',rows.map(row=>row.id))):Promise.resolve({data:[],error:null}),favoritePromise]);const contactMap=Object.fromEntries((contactResult?.data||[]).map(row=>[row.id,row]));if(!alive)return;const enriched=rows.map(row=>({...row,...(contactMap[row.id]||{}),categories:row.category_name?{name:row.category_name}:null}));setBusinesses(enriched);setRatings(reviewMap);setSavedBusinessIds(new Set((favoriteResult?.data||[]).map(row=>row.business_id)));setBusinessCount(Number.isFinite(r.count)?r.count:rows.length)}catch(_){if(alive){setBusinesses([]);setRatings({});setBusinessCount(0)}}finally{if(alive)setBusinessesLoading(false)}}
   const loadPromotions=async()=>{try{const r=await withTimeout(getActiveCityPromotions(db,city.id,{limit:100}));if(!alive)return;if(r.error){setPromoError(r.error.message||'Não foi possível carregar as promoções.');setPromotions([])}else setPromotions(r.data||[])}catch(error){if(alive){setPromotions([]);setPromoError(error?.message||'Não foi possível carregar as promoções.')}}}
-  const loadEvents=async()=>{setLoading(true);setEventError('');try{const r=await withTimeout(db.from('events').select('id,title,description,image_url,event_date,event_end_date,start_time,location,featured').eq('city_id',city.id).eq('active',true).gte('event_end_date',projectTodayISO()).order('featured',{ascending:false}).order('event_date').order('start_time').limit(4));if(!alive)return;if(r.error){setEvents([]);setEventError(r.error.message||'Não foi possível carregar os eventos.')}else setEvents(r.data||[])}catch(error){if(alive){setEvents([]);setEventError(error?.message||'Não foi possível carregar os eventos.')}}finally{if(alive)setLoading(false)}}
+  const loadEvents=async()=>{setLoading(true);setEventError('');try{const r=await withTimeout(db.from('events').select('id,title,description,image_url,event_date,event_end_date,start_time,location,featured,page_slug').eq('city_id',city.id).eq('active',true).gte('event_end_date',projectTodayISO()).order('featured',{ascending:false}).order('event_date').order('start_time').limit(4));if(!alive)return;if(r.error){setEvents([]);setEventError(r.error.message||'Não foi possível carregar os eventos.')}else setEvents(r.data||[])}catch(error){if(alive){setEvents([]);setEventError(error?.message||'Não foi possível carregar os eventos.')}}finally{if(alive)setLoading(false)}}
   const loadBanners=async()=>{try{const r=await withTimeout(db.from('advertisements').select('id,title,description,image_url,target_url,event_id,events(image_url),priority,starts_at,ends_at').eq('city_id',city.id).eq('placement','home_banner').eq('active',true).order('priority',{ascending:false}).order('created_at',{ascending:false}).limit(20));if(!alive)return;const now=Date.now();const eligible=(r.data||[]).filter(x=>(!x.starts_at||new Date(x.starts_at).getTime()<=now)&&(!x.ends_at||new Date(x.ends_at).getTime()>=now));setBanners(eligible);setBannerIndex(0)}catch(_){if(alive){setBanners([]);setBannerIndex(0)}}}
   loadCategories();loadNeeds();loadBusinesses();loadPromotions();loadEvents();loadBanners();return()=>{alive=false}},[city?.id])
  useEffect(()=>{if(banners.length<2)return;const timer=setInterval(()=>setBannerIndex(i=>(i+1)%banners.length),6000);return()=>clearInterval(timer)},[banners.length])
@@ -138,16 +144,16 @@ export default function CityHomePage({citySlug='laguna'}){
     </div>
    </section>
    <HomeEventStrip view={highlight}/><section id='categorias' className='lvp-wrap lvp-categories home-lab-migration-categories'>
-    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>CATEGORIAS PRINCIPAIS</span><h2 className='sr-only'>Categorias principais</h2></div><a href={base+'/empresas'}>Ver todas ({categories.length}) <span aria-hidden='true'>→</span></a></div>
+    <div className='lvp-section-head'><div><h2>Categorias</h2></div><a href={base+'/empresas'}>Ver todas ({categories.length}) <span aria-hidden='true'>→</span></a></div>
     <div className='lvp-cat-box'>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.max(0,v-1))} disabled={catStart===0} aria-label='Categorias anteriores'>‹</button>
-     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id}><span><Icon name={categoryIcon(c.name,c.icon)} size={20}/></span><b>{c.name}</b></a>)}</div>
+     <div className='lvp-cat-grid'>{visibleCats.map(c=><a href={categoryHref(c)} key={c.id} style={categoryTone(c.name)}><span className='vl-cat-icon'><Icon name={categoryIcon(c.name,c.icon)} size={22}/></span><b>{c.name}</b></a>)}</div>
      <button className='lvp-arrow' type='button' onClick={()=>setCatStart(v=>Math.min(maxCatStart,v+1))} disabled={catStart>=maxCatStart} aria-label='Próximas categorias'>›</button>
     </div>
     <div className='sr-only lvp-category-count' aria-live='polite'>{categories.length} {categories.length===1?'categoria disponível':'categorias disponíveis'}</div>
    </section>
    <section id='explorar' className='lvp-wrap lvp-featured home-lab-migration-featured'>
-    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>NEGÓCIOS LOCAIS</span><h2>Empresas em destaque</h2><p>Encontre negócios reais cadastrados em {city?.name||'sua cidade'}.</p></div></div>
+    <div className='lvp-section-head'><div><h2>Empresas em destaque</h2><p>Encontre negócios reais cadastrados em {city?.name||'sua cidade'}.</p></div></div>
     {businessesLoading?<div className='lvp-business-grid lvp-skeleton-grid' aria-hidden='true'>{[0,1,2,3].map(i=><div className='lvp-skeleton-card' key={i}/>)}</div>:featuredBusinesses.length?<div className={'lvp-business-grid home-lab-migration-grid '+(featuredBusinesses.length===1?'lvp-business-grid-single':'')}>{featuredBusinesses.slice(0,8).map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=Number(stat.avg)||0;const status=businessOpenLabel(b);const contact=b.whatsapp||b.phone||'';const digits=String(contact).replace(/\D/g,'');const message=encodeURIComponent('Olá! Encontrei '+b.name+' na VitrineLocal e gostaria de saber mais.');const contactHref=b.whatsapp?'https://wa.me/'+digits+'?text='+message:b.phone?'tel:'+digits:base+'/empresa/'+encodeURIComponent(b.slug);return <article className='lvp-business-card home-lab-migration-card' key={b.id}>
       <div className={'lvp-business-image '+(!b.cover_url&&b.logo_url?'has-profile-logo':'')}>
        <a className='lvp-business-image-link' href={base+'/empresa/'+encodeURIComponent(b.slug)} aria-label={'Abrir perfil de '+b.name}>
@@ -159,98 +165,47 @@ export default function CityHomePage({citySlug='laguna'}){
       </div>
       <div className='lvp-business-body'>
        <div className='lvp-migration-title-row'><h3>{b.name}</h3>{b.verified&&<span className="verified">✓ Verificada</span>}</div>
-       <p>{b.short_description||'Conheça este negócio local.'}</p>
-       <div className='lvp-migration-meta'><span><Icon name='pin' size={11}/> {b.neighborhood||b.address||'Localização não informada'}</span><span className='lvp-card-rating'>{stat.count?<><Icon name='star' size={12}/> {avg.toFixed(1)}</>:<b className='lvp-card-new'>Novo</b>}</span></div>
+       <p>{limparTexto(b.short_description)||'Conheça este negócio local.'}</p>
+       <div className='lvp-migration-meta'><span><Icon name='pin' size={11}/> {b.neighborhood||b.address||'Localização não informada'}</span>{stat.count>0&&<span className='lvp-card-rating'><Icon name='star' size={12}/> {avg.toFixed(1)}</span>}</div>
        <div className='lvp-card-actions'><a className='lvp-whatsapp-action' href={contactHref} target={contact?'_blank':undefined} rel={contact?'noreferrer':undefined} onClick={e=>e.stopPropagation()}>{contact?<><HomeWhatsAppIcon/> WhatsApp</>:<>Ver perfil</>}</a><a className='lvp-profile-action' href={base+'/empresa/'+encodeURIComponent(b.slug)} onClick={e=>e.stopPropagation()}>Ver perfil</a></div>
       </div>
     </article>})}</div>:<div className='lvp-empty-panel'><h3>Ainda não há empresas em destaque.</h3><p>Explore o catálogo completo para encontrar negócios disponíveis em {city?.name||'sua cidade'}.</p><a href={base+'/empresas'}>Explorar empresas <Icon name='arrowRight' size={14}/></a></div>}
    {businessCount>0&&<div className='lvp-featured-footer'><a href={base+'/empresas'}>Ver todas as {businessCount} empresas <Icon name='arrowRight' size={14}/></a></div>}
    </section>
-   <section className='lvp-wrap lvp-sponsored-wrap'>
-    {banner?<a className='lvp-sponsored' href={bannerHref} target={bannerExternal?'_blank':undefined} rel={bannerExternal?'noreferrer':undefined}>
-      <div className='lvp-sponsored-image'><img src={bannerImage} alt={banner.title||'Espaço publicitário'}/></div>
-      <div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>DESTAQUE PATROCINADO</span><h2>{banner.title}</h2><p>{banner.description||'Publicidade publicada pela plataforma.'}</p><strong>Ver destaque →</strong></div>
-      {banners.length>1&&<span className='lvp-sponsored-badge'>{bannerIndex+1}/{banners.length}</span>}
-    </a>:<div className='lvp-sponsored lvp-empty-sponsored'><div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>ESPAÇO PREMIUM</span><h2>Seu negócio pode aparecer aqui.</h2><p>Este espaço só é preenchido quando um anúncio premium é cadastrado e publicado no sistema.</p><a href='/conta/publicidade'>Conhecer publicidade →</a></div></div>}
+   <section id='eventos' className='lvp-wrap lvp-events'>
+    <div className='lvp-section-head'><div><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Os próximos eventos da cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
+    {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda <Icon name="arrowRight" size={14}/></a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/evento/'+encodeURIComponent(e.page_slug||e.id)} key={e.id}><div className={'lvp-date'+(e.image_url?' has-image':'')} style={e.image_url?{backgroundImage:`url(${JSON.stringify(e.image_url)})`}:undefined}>{e.image_url?null:<><b>{d.day}</b><span>{d.month}</span></>}</div><div><h3>{e.title}</h3><p>{e.image_url?<><b>{d.day} {d.month}</b> · </>:null}<Icon name="pin" size={11}/> {e.location||'Local a confirmar'}{formatEventRange(e.event_date,e.event_end_date)}{e.start_time?<> <Icon name="clock" size={11}/> {String(e.start_time).slice(0,5)}</>:null}</p></div><span className='lvp-event-arrow'><Icon name="arrowRight" size={16}/></span></a>})}</div>:<div className='lvp-empty-panel'><h3>A agenda está tranquila por enquanto.</h3><p>Novos eventos publicados para a cidade aparecerão aqui automaticamente.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
    </section>
-   <section className='lvp-wrap lvp-needs'>
-    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>DO JEITO QUE VOCÊ PENSA</span><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
-    <div className='lvp-need-grid'>
-     {(visibleNeeds.length?visibleNeeds:fallbackNeeds()).map(need=><a href={needHref(need)} key={need.id}><span><Icon name={need.icon||'grid'} size={20}/></span><b>{need.name}</b><small>{need.description||'Descubra opções locais relacionadas a esta necessidade.'}</small></a>)}
-    </div>
-   </section>
-
    {promotions.length>0&&<section id='promocoes' className='lvp-soft'>
-    <div className='lvp-wrap'><div className='lvp-section-head'><div><span className='lvp-eyebrow'>OFERTAS</span><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Somente promoções ativas cadastradas no sistema.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
+    <div className='lvp-wrap'><div className='lvp-section-head'><div><h2>Promoções em {city?.name||'sua cidade'}</h2><p>Ofertas válidas das empresas da cidade.</p></div><a href={base+'/promocoes'}>Ver todas →</a></div>
      {promoError?<div className='lvp-empty-panel'><h3>Não foi possível carregar as promoções.</h3><p>{promoError}</p></div>:<div className={`lvp-promo-grid ${promotions.length===1?'lvp-promo-grid-single':''}`}>{promotions.slice(0,3).map(p=><a href={base+'/empresa/'+encodeURIComponent(p.businesses?.slug||'')} className='lvp-promo-card' key={p.id}>
        <div className='lvp-promo-image'>{p.image_url?<img src={p.image_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.cover_url?<img src={p.businesses.cover_url} alt={p.title||'Promoção'} loading='lazy'/>:p.businesses?.logo_url?<img src={p.businesses.logo_url} alt={p.title||'Promoção'} loading='lazy'/>:<div className='lvp-promo-image-placeholder'><Icon name="tag" size={24}/></div>}<strong>PROMOÇÃO</strong>{promotionDiscountPercent(p)!==null&&<em className="promo-discount-badge">-{promotionDiscountPercent(p)}%</em>}</div>
        <div className='lvp-promo-body'><span>{p.businesses?.name||'Empresa local'}</span><h3>{p.title}</h3><p>{p.description||'Confira esta oferta.'}</p><div className='lvp-price'>{p.price!=null?money(p.price):'Confira'}{p.original_price!=null&&<del>{money(p.original_price)}</del>}</div>{promotionValidUntil(p)&&<small className='lvp-promo-valid'>Válida até {promotionValidUntil(p)}</small>}<b>Ver oferta →</b></div>
       </a>)}</div>}
     </div>
    </section>}
-   <JobsTeaser cityId={city?.id} citySlug={city?.slug||citySlug} cityName={city?.name||'sua cidade'}/><section id='eventos' className='lvp-wrap lvp-events'>
-    <div className='lvp-section-head'><div><span className='lvp-eyebrow'>AGENDA LOCAL</span><h2>O que está acontecendo em {city?.name||'sua cidade'}</h2><p>Eventos publicados e ainda válidos para a cidade.</p></div><a href={base+'/eventos'}>Ver agenda →</a></div>
-    {loading?<div className='lvp-empty-panel'><h3>Carregando agenda…</h3></div>:eventError?<div className='lvp-empty-panel'><h3>Não foi possível carregar os eventos.</h3><p>{eventError}</p><a href={base+'/eventos'}>Abrir agenda <Icon name="arrowRight" size={14}/></a></div>:events.length?<div className='lvp-event-list'>{events.slice(0,3).map(e=>{const d=formatEventDate(e.event_date);return <a className='lvp-event' href={base+'/eventos'} key={e.id}><div className={'lvp-date'+(e.image_url?' has-image':'')} style={e.image_url?{backgroundImage:`url(${JSON.stringify(e.image_url)})`}:undefined}>{e.image_url?null:<><b>{d.day}</b><span>{d.month}</span></>}</div><div><h3>{e.title}</h3><p>{e.image_url?<><b>{d.day} {d.month}</b> · </>:null}<Icon name="pin" size={11}/> {e.location||'Local a confirmar'}{formatEventRange(e.event_date,e.event_end_date)}{e.start_time?<> <Icon name="clock" size={11}/> {String(e.start_time).slice(0,5)}</>:null}</p></div><span className='lvp-event-arrow'><Icon name="arrowRight" size={16}/></span></a>})}</div>:<div className='lvp-empty-panel'><h3>A agenda está tranquila por enquanto.</h3><p>Novos eventos publicados para a cidade aparecerão aqui automaticamente.</p><a href={base+'/eventos'}>Abrir agenda →</a></div>}
-   </section>
-   <section className='lvp-wrap lvp-local-guide'>
-    <div className='lvp-section-head'>
-     <div>
-      <span className='lvp-eyebrow'>GUIA LOCAL</span>
-      <h2>VitrineLocal em {city?.name||'sua cidade'}</h2>
-      <p>Encontre informações e negócios locais organizados em um só lugar.</p>
-     </div>
-    </div>
-    <div className='lvp-local-guide-copy'>
-     <p>O VitrineLocal reúne {businessCount} {businessCount===1?'empresa':'empresas'} cadastradas em {city?.name||'sua cidade'}, com categorias como {localCategoryText}. Consulte perfis de empresas, serviços, contatos, horários, promoções e eventos publicados para a cidade.</p>
-     <p>Use o catálogo para explorar negócios por categoria ou necessidade. A programação local e as ofertas ativas são atualizadas conforme novas informações são publicadas pelas empresas participantes.</p>
-    </div>
-    <div className='lvp-local-guide-links'>
-     <a href={base+'/empresas'}>Explorar empresas em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
-     <a href={base+'/promocoes'}>Ver promoções em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
-     <a href={base+'/eventos'}>Ver eventos em {city?.name||'sua cidade'} <Icon name="arrowRight" size={14}/></a>
+   <section className='lvp-wrap lvp-needs'>
+    <div className='lvp-section-head'><div><h2>O que você precisa hoje?</h2><p>Comece pela necessidade e descubra opções locais.</p></div></div>
+    <div className='lvp-need-grid'>
+     {(visibleNeeds.length?visibleNeeds:fallbackNeeds()).map(need=><a href={needHref(need)} key={need.id}><span><Icon name={need.icon||'grid'} size={20}/></span><b>{need.name}</b><small>{need.description||'Descubra opções locais relacionadas a esta necessidade.'}</small></a>)}
     </div>
    </section>
+   <JobsTeaser cityId={city?.id} citySlug={city?.slug||citySlug} cityName={city?.name||'sua cidade'}/>
+   {banner&&<section className='lvp-wrap lvp-sponsored-wrap'>
+    {banner?<a className='lvp-sponsored' href={bannerHref} target={bannerExternal?'_blank':undefined} rel={bannerExternal?'noreferrer':undefined}>
+      <div className='lvp-sponsored-image'><img src={bannerImage} alt={banner.title||'Espaço publicitário'}/></div>
+      <div className='lvp-sponsored-copy'><span className='lvp-sponsored-label'>DESTAQUE PATROCINADO</span><h2>{banner.title}</h2><p>{banner.description||'Publicidade publicada pela plataforma.'}</p><strong>Ver destaque →</strong></div>
+      {banners.length>1&&<span className='lvp-sponsored-badge'>{bannerIndex+1}/{banners.length}</span>}
+    </a>:null}
+   </section>}
+
    <section className='lvp-business-cta-section'>
-    <div className='lvp-wrap lvp-business-cta-wrap'><div><span className='lvp-eyebrow'>PARA EMPRESAS</span><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta?new=business' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
+    <div className='lvp-wrap lvp-business-cta-wrap'><div><h2>Sua empresa precisa ser encontrada.</h2><p>Crie seu espaço no VitrineLocal e coloque seu negócio na frente de quem está procurando o que você oferece.</p><div className='lvp-business-points'><span>✓ Perfil da empresa</span><span>✓ Produtos e serviços</span><span>✓ Promoções</span><span>✓ Mais visibilidade</span></div></div><a href='/conta/nova' className='lvp-business-cta-button'>Cadastrar minha empresa →</a></div>
+   </section>
+   <section className='lvp-wrap vl-home-about' aria-label={`Sobre o VitrineLocal em ${city?.name||'sua cidade'}`}>
+    <p>O VitrineLocal reúne {businessCount} {businessCount===1?'empresa':'empresas'} de {city?.name||'sua cidade'}, com categorias como {localCategoryText}. Veja perfis, contatos, horários, promoções e eventos da cidade, atualizados pelas próprias empresas.</p>
    </section>
   </main>
-  <nav className='lvp-mobile-bottom-nav' aria-label='Navegação principal mobile'>
-   <div className='lvp-mobile-bottom-nav-inner'>
-    <a href={base} className='is-active' aria-current='page'><Icon name='home' size={22}/><span>Início</span></a>
-    <a href={base+'#categorias'}><Icon name='grid' size={22}/><span>Categorias</span></a>
-    <a href='/usuario/perfil?mode=personal&tab=favorites'><Icon name='heart' size={22}/><span>Salvos</span></a>
-    <a href={base+'/eventos'}><Icon name='calendar' size={22}/><span>Eventos</span></a>
-   </div>
-  </nav>
-  <footer className='lvp-footer'>
-   <div className='lvp-wrap lvp-footer-grid'>
-    <div>
-     <img src='/vitrine-local-header-logo.svg' alt='VitrineLocal'/>
-     <p>A cidade em um só lugar.</p>
-    </div>
-    <div>
-     <b>Explorar</b>
-     <a href={base+'/empresas'}>Empresas</a>
-     <a href={base+'/promocoes'}>Promoções</a>
-     <a href={base+'/eventos'}>Eventos</a>
-     <a href={base+'#categorias'}>Categorias</a>
-    </div>
-    <div>
-     <b>Para empresas</b>
-     <a href='/conta?new=business'>Cadastrar empresa</a>
-     <a href='/conta/publicidade'>Publicidade</a>
-     <a href='/planos'>Planos</a>
-    </div>
-    <div>
-     <b>VitrineLocal</b>
-     <a href='/'>Início</a>
-     <a href='mailto:contato@vitrinelocal.net'>Contato</a>
-     <a href='/privacidade'>Privacidade</a>
-     <a href='/termos'>Termos</a>
-    </div>
-   </div>
-   <div className='lvp-footer-bottom'>© 2026 VitrineLocal · {city?.name||'Laguna'}, {city?.state||'SC'}</div>
-  </footer>
  </div>
 }
 

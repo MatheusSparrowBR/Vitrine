@@ -1,6 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
+const require_=p=>fs.readFileSync(p,'utf8')
 
 const css=()=>fs.readFileSync('src/public-home.css','utf8')
 const page=()=>fs.readFileSync('src/CityHomePage.jsx','utf8')
@@ -22,22 +23,18 @@ test('home mobile usa navegação por toque nas categorias, empresas, promoçõe
  assert.match(c,/scroll-snap-type:x mandatory/)
 })
 
-test('home mobile possui a navegação inferior no padrão do perfil e atalhos reais',()=>{
+test('home mobile usa o menu inferior único do site com atalhos reais',()=>{
  const p=page()
- const c=css()
- assert.match(p,/aria-label='Navegação principal mobile'/)
- assert.match(p,/className='lvp-mobile-bottom-nav-inner'/)
- assert.match(p,/href=\{base\+'#categorias'\}/)
- assert.match(p,/href='\/usuario\/perfil\?mode=personal&tab=favorites'/)
- assert.match(p,/href=\{base\+'\/eventos'\}/)
- assert.match(p,/name='home'/)
- assert.match(p,/name='grid'/)
- assert.match(p,/name='heart'/)
- assert.match(p,/name='calendar'/)
- assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*position:fixed/)
- assert.match(c,/\.lvp-mobile-bottom-nav\{[\s\S]*left:0;right:0;bottom:0/)
- assert.match(c,/\.lvp-mobile-bottom-nav-inner\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)/)
- assert.match(c,/\.lvp-mobile-bottom-nav a\.is-active\{[\s\S]*background:#eef5ff/)
+ const chrome=require_('src/SiteChrome.jsx'),c=require_('src/site-chrome.css'),app=require_('src/app-entry.jsx')
+ assert.doesNotMatch(p,/lvp-mobile-bottom-nav/)
+ assert.match(app,/<SiteFooter\/><MobileTabBar\/>/)
+ assert.match(chrome,/href: '\/usuario\/perfil\?mode=personal&tab=favorites'/)
+ assert.match(chrome,/href: `\$\{base\}\/eventos`/)
+ assert.match(chrome,/href: `\$\{base\}\/empresas\?buscar=1`/)
+ for(const icon of ['home','search','calendar','heart'])assert.ok(chrome.includes(`icon: '${icon}'`))
+ assert.match(c,/\.vl-tabbar \{ position: fixed; left: 0; right: 0; bottom: 0/)
+ assert.match(c,/grid-template-columns: repeat\(4, 1fr\)/)
+ assert.match(c,/safe-area-inset-bottom/)
 })
 
 test('home mobile reduz a altura do hero e mantém busca utilizável',()=>{

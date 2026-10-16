@@ -106,7 +106,7 @@ if(PRIVATE_PREFIXES.some(prefix=>path===prefix||path.startsWith(prefix+'/'))){
   robots='noindex,nofollow,noarchive'
   title=path.startsWith('/admin')?'Administração | VitrineLocal':
     path==='/login'?'Entrar | VitrineLocal':
-    path.startsWith('/usuario')?'Conta do usuário | VitrineLocal':'Minha conta | VitrineLocal'
+    path==='/usuario/login'?'Entrar | VitrineLocal':path==='/usuario/cadastro'?'Criar conta | VitrineLocal':path==='/conta/nova'?'Cadastrar empresa | VitrineLocal':path.startsWith('/usuario')?'Meu perfil | VitrineLocal':'Minha conta | VitrineLocal'
 }else if(isCatalogRoute&&catalogQueryKeys.length&&!isCleanCategoryRoute){
   robots='noindex,follow,max-image-preview:large'
 }
