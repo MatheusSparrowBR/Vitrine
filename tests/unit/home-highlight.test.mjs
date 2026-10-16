@@ -62,3 +62,11 @@ test('home e editor ligados',()=>{
  assert.match(editor,/from\('home_highlights'\)\.delete\(\)\.eq\('event_id', event\.id\)/)
  assert.match(read('src/home-event-highlight.css'),/\.home-hl-strip-section\{order:1/)
 })
+
+test('destaque da home mostra a arte inteira (sem cortar o cartaz) com cópia desfocada atrás',()=>{
+ const jsx=read('src/HomeEventHighlight.jsx')
+ assert.match(jsx,/className="home-hl-strip-blur"/)
+ const css=read('src/home-event-highlight.css')
+ assert.match(css,/\.home-hl-strip-image img\{position:relative;width:100%;height:100%;object-fit:contain\}/)
+ assert.doesNotMatch(css,/\.home-hl-strip-image img\{width:100%;height:100%;object-fit:cover\}/)
+})

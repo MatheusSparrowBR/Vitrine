@@ -32,7 +32,13 @@ export function HomeEventStrip({ view }) {
     <section className="lvp-wrap home-hl-strip-section" aria-label={`Evento em destaque: ${view.title}`}>
       <div className="home-hl-strip" style={{ '--hl-accent': view.accent }}>
         <a className="home-hl-strip-image" href={view.href} tabIndex={-1} aria-hidden="true">
-          {view.imageUrl ? <img src={view.imageUrl} alt="" loading="lazy" /> : <span>📅</span>}
+          {view.imageUrl
+            ? <>
+                {/* Cópia desfocada atrás: a arte inteira aparece sem cortar o cartaz. */}
+                <span className="home-hl-strip-blur" style={{ backgroundImage: `url("${view.imageUrl.replace(/"/g, '%22')}")` }} aria-hidden="true" />
+                <img src={view.imageUrl} alt="" loading="lazy" />
+              </>
+            : <span>📅</span>}
         </a>
         <div className="home-hl-strip-copy">
           <small>{view.badge}</small>
