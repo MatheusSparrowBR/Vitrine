@@ -5,7 +5,7 @@ import fs from 'node:fs'
 const read=path=>fs.readFileSync(path,'utf8')
 
 test('auth never trusts an external next redirect',()=>{
- const source=read('src/AuthPage.jsx')
+ const source=read('src/UserAuthPage.jsx')
  assert.match(source,/function safeNext\(value\)/)
  assert.match(source,/candidate\.startsWith\('\/'\)/)
  assert.match(source,/candidate\.startsWith\('\/\/'\)/)

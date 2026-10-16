@@ -1,0 +1,56 @@
+/* Rodapé, menu inferior do celular e trilha "você está aqui" — iguais em todas as páginas públicas. */
+
+/* ── trilha ── */
+.vl-trail { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; min-height: 36px; font-size: 14px; color: #5d7088; }
+.vl-trail-back { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #fff; border: 1px solid #dce6f0; color: #10233d; text-decoration: none; transition: .15s; }
+.vl-trail-back:hover { border-color: #216df3; color: #216df3; }
+.vl-trail ol { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.vl-trail li { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.vl-trail li + li::before { content: "›"; color: #9aaabd; }
+.vl-trail a { color: #5d7088; text-decoration: none; }
+.vl-trail a:hover { color: #216df3; text-decoration: underline; }
+.vl-trail [aria-current] { color: #10233d; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60vw; }
+
+/* ── menu inferior (só no celular) ── */
+.vl-tabbar { display: none; }
+@media (max-width: 760px) {
+  .vl-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; display: grid; grid-template-columns: repeat(4, 1fr);
+    background: rgba(255, 255, 255, .97); border-top: 1px solid #dce6f0; box-shadow: 0 -6px 20px rgba(9, 41, 77, .07);
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom)); backdrop-filter: blur(10px); }
+  .vl-tabbar a { min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 12px;
+    color: #5d7088; text-decoration: none; font-size: 12px; font-weight: 700; }
+  .vl-tabbar a.is-active { color: #216df3; }
+  .vl-tabbar a.is-active svg { transform: translateY(-1px); }
+  body.vl-has-tabbar { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
+  /* menus inferiores antigos de cada página (substituídos por este) */
+  .lvp-mobile-bottom-nav, .vl-events-mobile-bottom-nav, .vl-event-profile-mobile-bottom-nav, .mbp-mobile-bottom { display: none !important; }
+}
+
+/* ── rodapé ── */
+.vl-footer { background: #09294d; color: #c9d8e8; margin-top: 56px; padding: 48px 20px 0; font-size: 15px; }
+.vl-footer-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.3fr; gap: 32px; padding-bottom: 36px; }
+.vl-footer-grid b { display: block; color: #fff; font-size: 14px; letter-spacing: .02em; margin-bottom: 12px; }
+.vl-footer-grid a { display: flex; align-items: center; gap: 8px; min-height: 34px; color: #c9d8e8; text-decoration: none; }
+.vl-footer-grid a:hover { color: #fff; text-decoration: underline; }
+.vl-footer-brand img { width: 190px; height: auto; display: block; background: #fefefe; border-radius: 12px; padding: 8px 12px; }
+.vl-footer-brand a { min-height: 0; display: inline-block; }
+.vl-footer-brand p { margin: 14px 0 0; line-height: 1.5; max-width: 320px; }
+.vl-footer-cities { display: flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; }
+.vl-footer-contact a { word-break: break-word; }
+.vl-footer-bottom { max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  border-top: 1px solid rgba(255, 255, 255, .12); padding: 18px 0 24px; font-size: 14px; color: #93a9c2; }
+.vl-footer-legal { display: flex; gap: 18px; }
+.vl-footer-legal a { color: #93a9c2; text-decoration: none; }
+.vl-footer-legal a:hover { color: #fff; }
+/* o rodapé antigo da home sai (o novo vale para todas as páginas) */
+.lvp-footer { display: none !important; }
+@media (max-width: 900px) { .vl-footer-grid { grid-template-columns: 1fr 1fr; } .vl-footer-brand { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .vl-footer { padding: 36px 18px 0; } .vl-footer-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; } .vl-footer-contact { grid-column: 1 / -1; } }
+
+/* trilha sobre fundos personalizados (página de evento com tema, "em breve"): cápsula escura legível */
+.vl-trail.vl-event-profile-breadcrumbs a:not(.vl-trail-back) { background: none !important; border: 0 !important; padding: 0 !important; height: auto !important; box-shadow: none !important; font: inherit !important; }
+.is-themed .vl-trail, .vl-trail.ev-teaser-trail { width: fit-content; max-width: 100%; padding: 4px 16px 4px 4px; border-radius: 999px; background: rgba(6, 18, 36, .55); color: #fff; backdrop-filter: blur(6px); }
+.is-themed .vl-trail a, .vl-trail.ev-teaser-trail a, .is-themed .vl-trail [aria-current], .vl-trail.ev-teaser-trail [aria-current] { color: #fff !important; }
+.is-themed .vl-trail li + li::before, .vl-trail.ev-teaser-trail li + li::before { color: rgba(255, 255, 255, .7); }
+.is-themed .vl-trail-back, .ev-teaser-trail .vl-trail-back { background: rgba(255, 255, 255, .95) !important; border: 0 !important; color: #10233d !important; width: 32px !important; height: 32px !important; padding: 0 !important; }
+.vl-trail.ev-teaser-trail { margin: 0 auto 18px; }

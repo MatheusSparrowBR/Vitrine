@@ -41,14 +41,14 @@ test('horarios desktop usam tipografia maior para leitura',()=>{
 })
 
 
-test('perfil mobile usa Início no primeiro item e mantém quatro células de navegação com o mesmo tamanho',()=>{
+test('perfil mobile usa o menu inferior único do site (Início primeiro, quatro células iguais)',()=>{
  const page=fs.readFileSync('src/ModernBusinessProfilePage.jsx','utf8').replace(/\r\n/g,'\n')
- assert.match(page,/className="mbp-mobile-home"/)
- assert.ok(page.includes("href={'/'+citySlug}"))
- assert.match(page,/<span>Início<\/span>/)
- assert.doesNotMatch(page,/<span>Perfil<\/span>/)
- assert.ok(css.includes('.mbp-mobile-bottom>a'))
- assert.ok(css.includes('.mbp-mobile-bottom>.mbp-relationship-row-compact'))
- assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'))
- assert.ok(css.includes('width:100%;height:54px'))
+ const chrome=fs.readFileSync('src/SiteChrome.jsx','utf8'),chromeCss=fs.readFileSync('src/site-chrome.css','utf8')
+ assert.doesNotMatch(page,/mbp-mobile-bottom/)
+ assert.match(chrome,/label: 'Início', icon: 'home'/)
+ assert.match(chrome,/label: 'Buscar'/)
+ assert.match(chrome,/label: 'Eventos'/)
+ assert.match(chrome,/label: 'Salvos'/)
+ assert.ok(chromeCss.includes('grid-template-columns: repeat(4, 1fr)'))
+ assert.ok(chromeCss.includes('min-height: 54px'))
 })

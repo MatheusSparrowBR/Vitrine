@@ -125,10 +125,9 @@ test('onboarding comercial apresenta os quatro momentos do fluxo da empresa',asy
  await expect(page.locator('a[href="/planos"]').first()).toBeVisible()
 })
 
-test('página de planos do pré-lançamento não usa o cabeçalho global e preserva os três planos comerciais',async({page})=>{
+test('com o pré-lançamento desligado, /em-breve/planos leva aos planos atuais com os três planos',async({page})=>{
  await page.goto('/em-breve/planos',{waitUntil:'domcontentloaded'})
- await expect(page.locator('.vl-site-header')).toHaveCount(0)
- await expect(page.locator('.vl-prelaunch-plans-logo')).toBeVisible()
+ await expect(page).toHaveURL(/\/planos$/)
  await expect(page.getByRole('heading',{name:'Grátis'})).toBeVisible()
  await expect(page.getByRole('heading',{name:'Pro'})).toBeVisible()
  await expect(page.getByRole('heading',{name:'Premium'})).toBeVisible()

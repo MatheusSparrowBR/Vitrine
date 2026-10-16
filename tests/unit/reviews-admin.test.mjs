@@ -18,8 +18,8 @@ test('business cards render published review average and stars',()=>{
  const src=read('src/ModernBusinessesPage.jsx')
  assert.match(src,/loadPublicBusinessReviewSummaries/)
  assert.match(src,/rating/)
- assert.match(src,/mbl-rating/)
- assert.match(src,/mbl-stars/)
+ assert.match(src,/vl-bcard-rating/)
+ assert.match(src,/stat\.count>0&&<span className="vl-bcard-rating"><Icon name="star"/)
 })
 
 test('public review list exposes administrator edit marker',()=>{

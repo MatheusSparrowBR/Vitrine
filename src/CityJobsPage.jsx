@@ -6,6 +6,7 @@ import { isJobCurrent, JOB_TYPES, jobDeadlineLabel, jobTypeLabel, jobWhatsappUrl
 import './core.css'
 import './job-postings.css'
 import './city-jobs.css'
+import {PageTrail} from './SiteChrome.jsx'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -60,7 +61,7 @@ export default function CityJobsPage({ citySlug = 'laguna' }) {
     <div className="app">
       <PublicHeader city={city || { slug: citySlug, name: cityName }} />
       <main className="page city-jobs">
-        <div className="page-tools"><a className="back-link" href={base}>← Voltar para {cityName}</a></div>
+        <PageTrail items={[{label:cityName,href:base},{label:'Vagas',current:true}]}/>
         <span className="section-kicker">OPORTUNIDADES</span>
         <h1>Vagas em {cityName}</h1>
         <p>Vagas publicadas por empresas da cidade. Candidate-se direto pelo WhatsApp da empresa.</p>

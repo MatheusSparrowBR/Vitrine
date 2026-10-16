@@ -4,6 +4,8 @@ import {loadPublicBusinessReviewSummaries} from './public-review-summary.js'
 import {getOpenStatus} from './business-hours-utils.js'
 import './search-featured.css'
 import Icon,{isOfficialIcon} from './ui-icons.jsx'
+import {PageTrail} from './SiteChrome.jsx'
+import {limparTexto} from './site-context.js'
 
 const fallbackCats=[['Restaurantes','store'],['Lojas','bag'],['Serviços','wrench'],['Saúde','heart'],['Beleza','star'],['Turismo','pin'],['Automóveis','briefcase'],['Imóveis','grid'],['Pets','heart'],['Outros','grid']]
 const iconForCategory=(name,selected)=>{if(isOfficialIcon(selected))return selected;const n=String(name||'').toLowerCase();if(n.includes('restaur')||n.includes('café')||n.includes('lanche'))return'store';if(n.includes('loja')||n.includes('mercado')||n.includes('comérc'))return'bag';if(n.includes('servi'))return'wrench';if(n.includes('saúde'))return'heart';if(n.includes('beleza'))return'star';if(n.includes('turis'))return'pin';if(n.includes('auto'))return'briefcase';if(n.includes('imóv'))return'grid';if(n.includes('pet'))return'heart';return'grid'}
@@ -21,6 +23,8 @@ function syncQuery(values){
  history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))
 }
 
+const TONES=[['#e8f1ff','#216df3'],['#e9f8ef','#16a34a'],['#fff4e5','#d97706'],['#fdecef','#e11d48'],['#f1ebff','#7c3aed'],['#e6f7f9','#0891b2'],['#fef9e3','#ca8a04'],['#eef2f7','#475569']]
+const toneFor=name=>{let h=0;for(const ch of String(name||''))h=(h*31+ch.charCodeAt(0))>>>0;const[bg,fg]=TONES[h%TONES.length];return{'--cat-bg':bg,'--cat-fg':fg}}
 export default function ModernBusinessesPage({citySlug='laguna',categorySlug=''}){
  const[city,setCity]=useState(null)
  const[businesses,setBusinesses]=useState([])
@@ -106,12 +110,13 @@ export default function ModernBusinessesPage({citySlug='laguna',categorySlug=''}
 }
  const setNeedFilter=next=>{setNeed(next);syncQuery({need:next})}
  const setSearch=value=>{setQ(value);syncQuery({q:value})}
+ useEffect(()=>{if(new URLSearchParams(location.search).get('buscar')!=='1')return;const t=setTimeout(()=>{const el=document.getElementById('vl-busca-empresas');if(el){el.focus({preventScroll:true});el.scrollIntoView({block:'center',behavior:'smooth'})}},350);return()=>clearTimeout(t)},[])
  const setSortValue=value=>{setSort(value);syncQuery({sort:value})}
  const updateQuickFilter=(key)=>{const next={...quickFilters,[key]:!quickFilters[key]};setQuickFilters(next);const params={};Object.entries(next).forEach(([k,v])=>{if(v)params[{open:'aberto',delivery:'delivery',pickup:'retirada',dine:'consumo',verified:'verificada',searchFeatured:'busca_destaque'}[k]]='1'});const url=new URL(location.href);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));['aberto','delivery','retirada','consumo','verificada','busca_destaque'].filter(k=>!Object.values(params).includes('1')).forEach(k=>url.searchParams.delete(k));history.replaceState(null,'',url.pathname+(url.search?'?'+url.searchParams.toString():''))}
  const clearFilters=()=>{setQ('');setCat('');setNeed('');setSort('relevancia');const reset={open:false,delivery:false,pickup:false,dine:false,verified:false,searchFeatured:false};setQuickFilters(reset);location.href=`/${city.slug}/empresas`}
  const returnUrl=()=>{try{const stored=sessionStorage.getItem('vl_catalog_return_url');return stored&&stored.startsWith(`/${city.slug}/empresas`)?stored:`/${city.slug}/empresas`}catch{return`/${city.slug}/empresas`}}
 
- if(loading)return <main className="mbl-shell"><div className="mbl-loading">Carregando empresas…</div></main>
+ if(loading)return <div className="mbl-shell"><main className="mbl-page" aria-busy="true"><span className="sr-only" role="status">Carregando empresas…</span><div className="vl-skel vl-skel-title"/><div className="vl-skel vl-skel-bar"/><section className="mbl-grid vl-bgrid" aria-hidden="true">{[0,1,2,3,4,5].map(i=><div className="vl-bcard vl-skel-card" key={i}><div className="vl-skel vl-skel-media"/><div className="vl-skel-lines"><i className="vl-skel"/><i className="vl-skel"/><i className="vl-skel"/></div></div>)}</section></main></div>
  if(!city)return <main className="mbl-shell"><div className="mbl-error"><h1>Cidade não encontrada.</h1><a href="/laguna">Voltar</a></div></main>
 
  const selectedCategory=categories.find(item=>item.slug===cat)||null
@@ -119,12 +124,12 @@ export default function ModernBusinessesPage({citySlug='laguna',categorySlug=''}
  const catalogDescription=selectedCategory?`Encontre ${selectedCategory.name.toLowerCase()} em ${city.name}. Veja empresas locais, contatos, serviços e informações atualizadas.`:'Encontre negócios e serviços da cidade.'
 
  return <div className="mbl-shell"><main className="mbl-page">
-  <div className="mbl-breadcrumb"><a href={`/${city.slug}`}>Voltar para {city.name}</a><span>{city.name}</span><span>›</span><strong>{selectedCategory?.name||'Empresas'}</strong></div>
-  <section className="mbl-hero"><div><span className="mbl-kicker">{selectedCategory?'CATEGORIA LOCAL':'CATÁLOGO LOCAL'}</span><h1>{catalogHeading}</h1><p>{catalogDescription}</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
+  <PageTrail items={[{label:city.name,href:`/${city.slug}`},selectedCategory?{label:'Empresas',href:`/${city.slug}/empresas`}:{label:'Empresas',current:true},selectedCategory&&{label:selectedCategory.name,current:true}]}/>
+  <section className="mbl-hero"><div><h1>{catalogHeading}</h1><p>{catalogDescription}</p></div><div className="mbl-result-count"><strong>{items.length}</strong><span>{items.length===1?'resultado':'resultados'}</span></div></section>
   <section className="mbl-toolbar" aria-label="Filtros do catálogo">
    <div className="mbl-toolbar-sticky">
     <div className="mbl-toolbar-row">
-     <div className="mbl-search-large"><Icon name="search" size={18}/><input value={q} onChange={e=>setSearch(e.target.value)} placeholder="Buscar empresa, serviço ou bairro" aria-label="Buscar no catálogo"/></div>
+     <div className="mbl-search-large"><Icon name="search" size={18}/><input id="vl-busca-empresas" type="search" enterKeyHint="search" value={q} onChange={e=>setSearch(e.target.value)} placeholder="Buscar empresa, serviço ou bairro" aria-label="Buscar no catálogo"/></div>
      {(q||cat||need||Object.values(quickFilters).some(Boolean)||sort!=='relevancia')&&<button className="mbl-clear" type="button" onClick={clearFilters}>Limpar</button>}
      <button className="mbl-filters-toggle" type="button" onClick={()=>setShowMoreFilters(v=>!v)} aria-expanded={showMoreFilters} aria-controls="mbl-filter-panel"><Icon name="grid" size={15}/><span>{showMoreFilters?'Fechar filtros':'Filtros'}</span>{(q||cat||need||Object.values(quickFilters).some(Boolean)||sort!=='relevancia')&&<b>{(q?1:0)+(cat?1:0)+(need?1:0)+Object.values(quickFilters).filter(Boolean).length+(sort!=='relevancia'?1:0)}</b>}</button>
     </div>
@@ -139,12 +144,22 @@ export default function ModernBusinessesPage({citySlug='laguna',categorySlug=''}
     <div className="mbl-quick-filters">{[['open','Aberto agora'],['delivery','Delivery'],['pickup','Retirada'],['dine','Consumo no local'],['verified','Verificada'],['searchFeatured','Busca em destaque']].map(([key,label])=><button key={key} type="button" className={quickFilters[key]?'active':''} onClick={()=>updateQuickFilter(key)}>{quickFilters[key]?'✓ ':''}{label}</button>)}</div>
    </div>}
   </section>
-  {items.length?<section className="mbl-grid" aria-label="Empresas encontradas">{items.map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=stat.avg;return <article className="mbl-card" key={b.id}>
-    <a className="mbl-card-main" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`}>
-     <div className="mbl-cover">{b.cover_url?<img src={b.cover_url} alt={`${b.name} capa`} loading="lazy"/>:<div className="mbl-cover-placeholder"><Icon name="store" size={30}/></div>}{b.featured&&<span className="mbl-featured">Destaque</span>}{b.search_featured&&q.trim()&&<span className="mbl-search-featured">Busca em destaque</span>}{b.verified&&<span className="mbl-verified"><Icon name="check" size={11}/> Verificada</span>}{b.logo_url&&<span className="mbl-logo"><img src={b.logo_url} alt={`${b.name} logo`} loading="lazy"/></span>}</div>
-     <div className="mbl-body"><div className="mbl-category"><span>{b.categories?.name||'Empresa'}</span><span className="mbl-rating-inline">{stat.count?`${avg.toFixed(1)} · ${stat.count} avaliações`:'Ainda sem avaliações'}</span></div><h2>{b.name}</h2><p>{b.short_description||b.description||'Conheça este negócio local.'}</p><div className="mbl-footer"><span className="mbl-location"><Icon name="pin" size={11}/>{b.neighborhood||b.address||city.name+' - '+(city.state||'SC')}</span><div className="mbl-card-statuses">{isOpenNow(b.opening_hours)&&<span className="mbl-open-status">● Aberto agora</span>}{b.has_delivery&&<span>Delivery</span>}{b.has_pickup&&<span>Retirada</span>}{b.has_dine_in&&<span>Consumo</span>}</div><strong className={stat.count?'has-reviews':''} aria-label={stat.count?`${avg.toFixed(1)} de 5, ${stat.count} avaliações`:'Sem avaliações'}><span className="mbl-stars" aria-hidden="true">{stars(avg)}</span></strong></div></div>
+  {items.length?<section className="mbl-grid vl-bgrid" aria-label="Empresas encontradas">{items.map(b=>{const stat=ratings[b.id]||{avg:0,count:0};const avg=Number(stat.avg)||0;const aberto=isOpenNow(b.opening_hours);const tone=toneFor(b.categories?.name||b.name);const servicos=[b.has_delivery&&'Delivery',b.has_pickup&&'Retirada',b.has_dine_in&&'No local'].filter(Boolean);return <article className="mbl-card vl-bcard" key={b.id}>
+    <a className="mbl-card-main vl-bcard-main" href={`/${city.slug}/empresa/${encodeURIComponent(b.slug)}`}>
+     <div className={`vl-bcard-media${!b.cover_url&&b.logo_url?' is-logo':''}`} style={tone}>{b.cover_url?<img src={b.cover_url} alt="" loading="lazy"/>:b.logo_url?<img src={b.logo_url} alt="" loading="lazy"/>:<span className="vl-bcard-initial" aria-hidden="true">{String(b.name||'V').trim().charAt(0).toUpperCase()}</span>}{b.cover_url&&b.logo_url&&<span className="vl-bcard-logo"><img src={b.logo_url} alt="" loading="lazy"/></span>}</div>
+     <div className="vl-bcard-body">
+      <div className="vl-bcard-top"><span className="vl-bcard-cat">{b.categories?.name||'Empresa'}</span>{b.featured&&<span className="vl-bcard-featured"><Icon name="star" size={12} filled/> Destaque</span>}{b.search_featured&&q.trim()&&<span className="vl-bcard-featured">Em destaque na busca</span>}</div>
+      <h2>{b.name}{b.verified&&<span className="vl-bcard-verified" title="Empresa verificada" aria-label="Verificada"><Icon name="check" size={12}/></span>}</h2>
+      <p>{limparTexto(b.short_description||b.description)||'Conheça este negócio local.'}</p>
+      <div className="vl-bcard-meta">
+       {b.opening_hours&&<span className={aberto?'is-open':'is-closed'}>{aberto?'Aberto agora':'Fechado agora'}</span>}
+       <span><Icon name="pin" size={13}/>{b.neighborhood||b.address||city.name}</span>
+       {stat.count>0&&<span className="vl-bcard-rating"><Icon name="star" size={13} filled/>{avg.toFixed(1)} <small>({stat.count})</small></span>}
+       {servicos.length>0&&<span className="vl-bcard-services">{servicos.join(' · ')}</span>}
+      </div>
+     </div>
     </a>
-    {b.whatsapp&&<div className="mbl-card-actions"><a className="mbl-quick-contact" href={`https://wa.me/${String(b.whatsapp).replace(/\D/g,'')}`} target="_blank" rel="noreferrer"><Icon name="phone" size={13}/>WhatsApp</a></div>}
+    {b.whatsapp&&<a className="vl-bcard-wa" href={`https://wa.me/${String(b.whatsapp).replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Encontrei '+b.name+' na VitrineLocal.')}`} target="_blank" rel="noreferrer" aria-label={`Falar com ${b.name} no WhatsApp`}><Icon name="whatsapp" size={20}/><span>WhatsApp</span></a>}
    </article>})}</section>:<section className="mbl-empty"><div className="mbl-empty-icon"><Icon name={selectedCategory?'store':'search'} size={24}/></div><h2>{selectedCategory?<>Ainda não há {selectedCategory.name.toLowerCase()} cadastrados em {city.name}</>:'Nenhum resultado para sua busca'}</h2><p>{selectedCategory?<>Esta categoria já existe no VitrineLocal, mas ainda não possui empresas públicas cadastradas em {city.name}. Explore outras categorias para encontrar negócios locais.</>:'Tente remover um filtro ou pesquisar por outro termo para encontrar empresas locais.'}</p><div className="mbl-empty-actions"><button onClick={clearFilters}>Ver todas as empresas</button></div></section>}
  </main></div>
 }

@@ -1,4 +1,6 @@
 import React,{useEffect,useMemo,useState}from'react'
+import {PageTrail} from './SiteChrome.jsx'
+import {currentCitySlug} from './site-context.js'
 import{supabase as sharedSupabase}from'./supabase-client.js'
 import'./billing-plans.css'
 
@@ -62,7 +64,7 @@ export default function BillingPlansPage(){
  const paymentReturn=params.get('checkout')==='return'
  const currentStatusLabel=current?.status==='pending'?'Pagamento pendente':current?.status==='paused'?'Assinatura pausada':current?.status==='active'?'Assinatura ativa':'Plano atual'
  return <div className="vl-plans-app"><main className="page section">
-  <div className="plans-heading"><div className="plans-back"><a className="back-link" href={businessId?`/conta?business_id=${encodeURIComponent(businessId)}`:'/laguna'}>← {businessId?'Voltar para minha conta':'Voltar para Laguna'}</a></div><span className="section-kicker">PLANOS</span><h1>Escolha o plano ideal para o seu negócio</h1><p>Assinaturas mensais e anuais com cobrança recorrente pelo Mercado Pago.</p></div>
+  <div className="plans-heading"><PageTrail items={businessId?[{label:'Minha conta',href:`/conta?business_id=${encodeURIComponent(businessId)}`},{label:'Planos',current:true}]:[{label:'Início',href:`/${currentCitySlug()}`},{label:'Para empresas'},{label:'Planos',current:true}]}/><span className="section-kicker">PLANOS</span><h1>Escolha o plano ideal para o seu negócio</h1><p>Assinaturas mensais e anuais com cobrança recorrente pelo Mercado Pago.</p></div>
   {paymentReturn&&<div className="plan-message info">Estamos sincronizando o status da sua assinatura. O acesso pago só é liberado após a confirmação do Mercado Pago.</div>}
   <div className="billing-bar">{businesses.length>0&&<label>Empresa<select value={businessId} onChange={e=>setBusinessId(e.target.value)}>{businesses.map(b=><option key={b.id} value={b.id}>{b.name}{b.status==='pending'?' · em análise':''}</option>)}</select></label>}<div className="billing-toggle"><button type="button" className={interval==='monthly'?'active':''} onClick={()=>setIntervalValue('monthly')}>Mensal</button><button type="button" className={interval==='yearly'?'active':''} onClick={()=>setIntervalValue('yearly')}>Anual</button></div></div>
   {current&&<div className="billing-current"><div><span>ASSINATURA ATUAL</span><strong>{currentPlan?.name||'Plano ativo'}</strong><small>{current.provider==='mercadopago'?'Cobrança e status gerenciados pelo Mercado Pago.':'Gerenciado pela administração da plataforma.'}</small></div><div><b>{currentStatusLabel}</b><span>{current.ends_at?'Válido até '+new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeZone:'America/Sao_Paulo'}).format(new Date(current.ends_at)):current.provider_checkout_url&&current.status==='pending'?'Finalize o cadastro de pagamento para ativar o plano.':'Vigente conforme o status da assinatura.'}</span></div></div>}
