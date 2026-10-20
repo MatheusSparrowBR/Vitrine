@@ -19,3 +19,4 @@
 .cover-editor-explain strong{color:#12253e}
 .cover-editor-hint{margin:6px 0 0;color:#7a5a00;font-size:12px;font-weight:700}
 .cover-editor-controls input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+.cover-editor-autofit-bg{position:absolute;inset:-12%;background-size:cover;background-position:center;background-repeat:no-repeat;filter:blur(14px);opacity:.9;pointer-events:none}
