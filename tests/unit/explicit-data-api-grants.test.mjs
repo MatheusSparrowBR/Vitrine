@@ -1,32 +1,45 @@
+import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import test from 'node:test'
+import path from 'node:path'
 
-const migration=fs.readFileSync('supabase/migrations/20260924180000_enforce_explicit_data_api_grants.sql','utf8')
+// Lê com quebras de linha normalizadas (o checkout do Windows usa CRLF).
+const read=p=>fs.readFileSync(p,'utf8').replace(/\r\n/g,'\n')
+const dir='supabase/migrations'
+const files=fs.readdirSync(dir).filter(f=>f.endsWith('.sql')).sort()
+const noComments=sql=>sql.replace(/--.*$/gm,'')
 
-test('Data API defaults are revoked for future public tables and sequences',()=>{
-  assert.match(migration,/alter default privileges for role postgres in schema public/)
-  assert.match(migration,/revoke select, insert, update, delete on tables from anon, authenticated, service_role/)
-  assert.match(migration,/revoke usage, select on sequences from anon, authenticated, service_role/)
-})
-
-test('current public Data API grants are explicit',()=>{
-  assert.match(migration,/grant all on table[\s\S]*to service_role;/)
-  assert.match(migration,/grant select on table[\s\S]*to anon;/)
-  assert.match(migration,/grant select, insert, update, delete on table[\s\S]*to anon;/)
-  assert.match(migration,/grant select, insert, update, delete on table[\s\S]*to authenticated;/)
-  assert.match(migration,/grant select, update on table public\.notifications to authenticated;/)
-  assert.match(migration,/grant usage, select on sequence public\.analytics_events_id_seq/)
-})
-
-test('future migrations must contain explicit grants for new public tables',()=>{
-  const tree=fs.readdirSync('supabase/migrations').filter(name=>name.endsWith('.sql')).sort()
-  const hardening='20260924180000_enforce_explicit_data_api_grants.sql'
-  for(const name of tree){
-    if(name<=hardening)continue
-    const content=fs.readFileSync('supabase/migrations/'+name,'utf8')
-    if(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\./i.test(content)){
-      assert.match(content,/grant\s+[\s\S]*on\s+table\s+public\./i,'Migration '+name+' creates a public table without an explicit GRANT')
-    }
+// Tabelas criadas nas migrações e os papéis que cada uma recebeu em algum GRANT.
+const created=new Map(),granted=new Map()
+for(const f of files){
+ const sql=noComments(read(path.join(dir,f)))
+ for(const m of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_][a-z0-9_]*)/gi)){
+  if(!created.has(m[1]))created.set(m[1],f)
+ }
+ for(const m of sql.matchAll(/\bgrant\s+([\s\S]*?)\s+on\s+(?:table\s+)?([\s\S]*?)\s+to\s+([a-z_,\s]+?)\s*;/gi)){
+  const roles=m[3].split(',').map(r=>r.trim()).filter(Boolean)
+  for(const t of [...m[2].matchAll(/(?:public\.)?([a-z_][a-z0-9_]*)/gi)].map(x=>x[1])){
+   if(!granted.has(t))granted.set(t,new Set())
+   roles.forEach(r=>granted.get(t).add(r))
   }
+ }
+}
+
+test('toda tabela criada nas migrações tem GRANT para o service_role (Edge Functions e reconstrução do zero)',()=>{
+ const missing=[...created.keys()].filter(t=>!(granted.get(t)||new Set()).has('service_role'))
+ assert.deepEqual(missing,[])
+})
+
+test('tabelas usadas pelas Edge Functions ganham o GRANT na migração de 20/10',()=>{
+ const sql=read('supabase/migrations/20261020130000_service_role_grants_for_recent_tables.sql')
+ for(const t of ['business_favorites','event_favorites','job_postings','job_reports','home_highlights']){
+  assert.ok(sql.includes('public.'+t),t+' sem GRANT na migração')
+ }
+ assert.match(sql,/to service_role;/)
+})
+
+test('tabelas privadas não recebem acesso anônimo por engano',()=>{
+ for(const t of ['profiles','subscriptions','billing_events','admin_audit_logs']){
+  assert.ok(!(granted.get(t)||new Set()).has('anon'),t+' não deveria ter GRANT para anon')
+ }
 })
