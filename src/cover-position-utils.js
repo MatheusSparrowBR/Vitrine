@@ -1,8 +1,8 @@
 // Proporções reais das áreas onde a capa e a logo aparecem (medidas no site).
 // O editor usa estas mesmas proporções, para que a área segura corresponda ao que o visitante vê.
 export const COVER_FRAMES={
- profile:{desktop:{width:1000,height:400},mobile:{width:360,height:200}},
- home:{desktop:{width:1600,height:720},mobile:{width:390,height:570}},
+ profile:{desktop:{width:1180,height:380},mobile:{width:343,height:195}},
+ home:{desktop:{width:1265,height:718},mobile:{width:375,height:595}},
  logo:{desktop:{width:1,height:1},mobile:{width:1,height:1}}
 }
 // Largura mínima recomendada da imagem original (2x no celular, para telas de alta densidade).
@@ -12,6 +12,9 @@ export const COVER_MIN_WIDTHS={
  logo:{desktop:1000,mobile:1000}
 }
 export const COVER_FRAME_REFERENCE={desktop:{width:1180,height:330},mobile:{width:360,height:180}}
+// Abaixo desta proporção (largura / altura) o site mostra a imagem inteira sobre um fundo desfocado, em vez de cortar.
+export const AUTOFIT_RATIO=1.35
+
 export const DEFAULT_COVER_POSITION={xPct:0,yPct:0,zoom:1,scaleX:1,scaleY:1,unit:'percent'}
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,value))
 const numberOr=(value,fallback)=>Number.isFinite(Number(value))?Number(value):fallback
@@ -55,4 +58,16 @@ export function coverPositionCssVars(value={},mode='desktop'){
  return mode==='mobile'
   ? {'--cover-x-mobile':p.xPct+'%','--cover-y-mobile':p.yPct+'%','--cover-zoom-mobile':String(p.zoom),'--cover-scalex-mobile':String(p.scaleX),'--cover-scaley-mobile':String(p.scaleY)}
   : {'--cover-x-desktop':p.xPct+'%','--cover-y-desktop':p.yPct+'%','--cover-zoom-desktop':String(p.zoom),'--cover-scalex-desktop':String(p.scaleX),'--cover-scaley-desktop':String(p.scaleY)}
+}
+
+// Posição padrão: sem deslocamento, sem zoom e sem esticar. Aceita o formato novo (xPct/yPct) e o antigo (x/y).
+export function isDefaultCoverPosition(value){
+ const p=normalizeCoverPosition(value||{},'desktop')
+ return p.xPct===0&&p.yPct===0&&p.zoom===1&&p.scaleX===1&&p.scaleY===1
+}
+
+// Mesma regra para o site e para o editor: imagem quadrada ou alta, sem ajuste manual, aparece inteira.
+export function usesAutoFit(value,naturalWidth,naturalHeight){
+ if(!naturalWidth||!naturalHeight)return false
+ return naturalWidth/naturalHeight<AUTOFIT_RATIO&&isDefaultCoverPosition(value)&&coverFitOf(value||{})!=='contain'
 }
