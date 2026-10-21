@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-const page=fs.readFileSync(new URL('../../src/AdminAnalyticsPage.jsx',import.meta.url),'utf8')
+const page=fs.readFileSync(new URL('../../src/AdminAnalyticsPageFixed.jsx',import.meta.url),'utf8')
 const migration=fs.readFileSync(new URL('../../supabase/migrations/20260923150000_enable_analytics_realtime.sql',import.meta.url),'utf8')
 
 test('admin analytics subscribes to new analytics events',()=>{
