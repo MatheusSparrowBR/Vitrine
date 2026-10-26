@@ -147,7 +147,7 @@ const createBreadcrumbs=(cityName,categoryName='')=>{
   if(citySlug){
     items.push({'@type':'ListItem',position:2,name:cityName,item:CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)})
     if(parts[1]){
-      const label=parts[1]==='empresa'?'Empresas':
+      const label=parts[1]==='evento'?'Eventos':parts[1]==='empresa'?'Empresas':
         parts[1]==='empresas'?'Empresas':
         parts[1]==='promocoes'?'Promoções':
         parts[1]==='eventos'?'Eventos':
@@ -540,10 +540,63 @@ async function enrichBusinessMetadata(){
   ]})
 }
 
+// Página de um evento: título, descrição, imagem e schema Event próprios.
+// Só eventos publicados aparecem para o público; os demais saem do índice.
+async function enrichEventDetailMetadata(){
+  if(!citySlug||parts[1]!=='evento'||!parts[2]||!canReadPublicApi)return
+  const key=decodeURIComponent(parts[2])
+  const byId=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key)
+  const cityRows=await supabasePublic('cities',{select:'id,name,state,slug',slug:'eq.'+citySlug,active:'eq.true',limit:'1'})
+  const city=Array.isArray(cityRows)?cityRows[0]:null
+  if(!city?.id)return
+  const eventRows=await supabasePublic('events',{
+    select:'id,title,description,image_url,event_date,event_end_date,start_time,location,address,page_slug',
+    city_id:'eq.'+city.id,
+    [byId?'id':'page_slug']:'eq.'+key,
+    limit:'1'
+  })
+  const event=Array.isArray(eventRows)?eventRows[0]:null
+  if(!event){
+    if(Array.isArray(eventRows)){
+      title='Evento não encontrado | VitrineLocal'
+      description='Este evento não está disponível no VitrineLocal.'
+      robots='noindex,follow'
+      applyHead()
+    }
+    return
+  }
+  const eventUrl=CANONICAL_ORIGIN+'/'+encodeURIComponent(citySlug)+'/evento/'+encodeURIComponent(event.page_slug||event.id)
+  const startDate=event.event_date?event.event_date+'T'+(event.start_time?String(event.start_time).slice(0,5):'00:00')+':00-03:00':undefined
+  const endDate=event.event_end_date?event.event_end_date+'T23:59:00-03:00':startDate
+  const eventDescription=truncate(String(event.description||'').replace(/\s+/g,' ').trim()||'Confira '+event.title+' em '+city.name+': data, horário, local e informações no VitrineLocal.')
+  const image=absoluteUrl(event.image_url||'/laguna-hero.svg')
+
+  title=event.title+' — '+city.name+' | VitrineLocal'
+  description=eventDescription
+  canonicalUrl=eventUrl
+  applyHead()
+  firstMeta('property','og:image',image)
+  firstMeta('name','twitter:image',image)
+  setJsonLd('vl-seo-schema',{'@context':'https://schema.org','@graph':[
+    {
+      '@type':'Event','@id':eventUrl+'#event',name:event.title,url:eventUrl,description:eventDescription,image:image,
+      startDate:startDate,endDate:endDate,
+      eventStatus:'https://schema.org/EventScheduled',
+      eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',
+      location:{'@type':'Place',name:event.location||city.name,address:event.address||(city.name+', '+(city.state||''))}
+    },
+    createBreadcrumbs(city.name)
+  ]})
+}
+
 const enrich=async()=>{
   if(robots.startsWith('noindex'))return
   if(parts[1]==='empresa'){
     await enrichBusinessMetadata()
+    return
+  }
+  if(parts[1]==='evento'){
+    await enrichEventDetailMetadata()
     return
   }
   if(parts[1]==='eventos'){

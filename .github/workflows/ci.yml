@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_PRELAUNCH_MODE: 'false'
+      # Público por natureza (já vai no bundle). Sem elas o sitemap sai só com o fallback fixo.
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

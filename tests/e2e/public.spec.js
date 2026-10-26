@@ -115,8 +115,8 @@ test('catalogo moderno possui filtros e cards visuais',async({page})=>{
  await expect(page.locator('.mbl-chips')).toBeVisible()
  const cards=page.locator('.mbl-card')
  if(await cards.count()){
-  await expect(cards.first().locator('.mbl-body h2')).toBeVisible()
-  await expect(cards.first().locator('.mbl-footer')).toBeVisible()
+  await expect(cards.first().locator('.vl-bcard-body h2')).toBeVisible()
+  await expect(cards.first().locator('.vl-bcard-meta')).toBeVisible()
  }
 })
 
