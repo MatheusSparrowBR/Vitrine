@@ -119,6 +119,9 @@ html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-actio
 html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-action span, html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-relationship-row button span { font-size: 14px !important; }
 html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .is-active, html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-notifications.active { border-color: #b9cdf0 !important; background: #eef5ff !important; color: var(--vl-azul-escuro) !important; }
 html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-relationship-row button.is-active svg { color: #e11d48; }
+/* Delivery é ação de compra: vem primeiro e com destaque. */
+html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-ifood { border-color: #f5c9ae !important; background: #fff3ec !important; color: #9a3412 !important; }
+html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-ifood svg { color: #c2410c; }
 html body .vl-ifood-dot { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: #ea1d2c; color: #fff !important; font-size: 13px !important; font-weight: 900; font-style: italic; }
 html body .mbp-shell .mbp-profile-top .mbp-inline-action-message { flex-basis: 100%; font-size: 13px !important; color: var(--vl-cinza); }
 /* capa quadrada: a imagem inteira, sobre um fundo desfocado dela mesma */
@@ -151,8 +154,11 @@ html body .mbp-shell .mbp-map-loading { position: absolute; inset: 0; display: g
   html body .mbp-shell .mbp-profile-top .mbp-primary-row { grid-template-columns: 1.25fr 1fr; }
   html body .mbp-shell .mbp-profile-top .mbp-primary-cta, html body .mbp-shell .mbp-profile-top .mbp-secondary-cta { padding: 0 10px !important; white-space: nowrap; }
   html body .mbp-shell .mbp-profile-top .mbp-primary-cta, html body .mbp-shell .mbp-profile-top .mbp-secondary-cta { font-size: 15px !important; }
-  html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px; }
-  html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts::-webkit-scrollbar { display: none; }
+  /* Celular: todas as ações à vista em grade de 3 colunas (antes era uma linha com rolagem escondida). */
+  html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+  html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-action, html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-relationship-row button { width: 100% !important; height: auto !important; min-height: 64px !important; padding: 8px 4px !important; flex-direction: column !important; justify-content: center !important; gap: 4px !important; font-size: 13px !important; text-align: center; border-radius: 16px !important; }
+  html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-shortcut-action span, html body .mbp-shell .mbp-profile-top .mbp-profile-shortcuts .mbp-relationship-row button span { font-size: 13px !important; }
+  html body .mbp-shell .mbp-profile-top .mbp-inline-action-message { grid-column: 1 / -1; }
   html body .mbp-shell .mbp-note, html body .mbp-shell .mbp-side-title small { font-size: 13px !important; }
   html body .mbp-shell .mbp-hours li span, html body .mbp-shell .mbp-hours li strong, html body .mbp-shell .mbp-hours-today span, html body .mbp-shell .mbp-hours-today strong { font-size: 14px !important; }
   html body .mbp-shell .mbp-hours-details summary { min-height: 44px; display: flex; align-items: center; font-size: 15px !important; }

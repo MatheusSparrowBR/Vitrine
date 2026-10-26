@@ -93,6 +93,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     </div>
      <div className="mbp-identity-actions">
      <div className="mbp-profile-shortcuts" aria-label="Ações da empresa">
+      {business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer" title="Pedir delivery"><Icon name="motorcycle" size={17}/> Delivery</a>}
       <BusinessPersonalActions businessId={business.id}/>
       {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer" title="Instagram da empresa"><Icon name="instagram" size={17}/> Instagram</a>}
       <div className="mbp-business-notification mbp-inline-business-notification" aria-label="Receba novidades desta empresa">
@@ -101,7 +102,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
         <span className="mbp-notification-label">{businessNotificationLoading?'Ativando…':businessNotifications?'Avisos ligados':'Avisos'}</span>
        </button>
       </div>
-      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share} title="Compartilhar esta empresa"><Icon name="share" size={17}/> Compartilhar</button>{business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer" title="Pedir delivery"><Icon name="motorcycle" size={17}/> Delivery</a>}
+      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share} title="Compartilhar esta empresa"><Icon name="share" size={17}/> Compartilhar</button>
       {businessNotificationMessage&&<small className="mbp-inline-action-message">{businessNotificationMessage}</small>}
      </div>
     </div>
