@@ -13,6 +13,7 @@ const esc = value => String(value ?? '')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&apos;')
 
+const todayInSaoPaulo = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date())
 const encodePath = value => encodeURIComponent(String(value || ''))
 const validDate = value => {
   if (!value) return ''
@@ -68,9 +69,11 @@ async function buildUrls() {
       add(`/${slug}/vagas`, 'daily', '0.7', lastmod)
     }
 
-    const [businesses,categories] = await Promise.all([
+    const [businesses,categories,events] = await Promise.all([
       supabasePublic('public_business_directory?select=slug,city_id,updated_at,category_slug&limit=5000'),
       supabasePublic('categories?select=slug&active=eq.true&limit=5000'),
+      // Eventos publicados e ainda não encerrados (a política pública já filtra os demais).
+      supabasePublic('events?select=id,city_id,page_slug,updated_at&active=eq.true&event_end_date=gte.' + todayInSaoPaulo() + '&limit=5000'),
     ])
     const activeCategorySlugs = new Set((categories||[]).map(category => String(category.slug||'').trim()).filter(Boolean))
     const categoryLastmod = new Map()
@@ -93,6 +96,11 @@ async function buildUrls() {
         if (lastmod && (!previous || new Date(lastmod).getTime()>new Date(previous).getTime())) categoryLastmod.set(key,lastmod)
         else if (!previous) categoryLastmod.set(key,'')
       }
+    }
+
+    for (const event of events||[]) {
+      const citySlug = cityById[event.city_id]
+      if (citySlug) add(`/${encodePath(citySlug)}/evento/${encodePath(event.page_slug || event.id)}`, 'weekly', '0.7', validDate(event.updated_at))
     }
 
     for (const [key,lastmod] of categoryLastmod) {
