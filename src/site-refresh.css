@@ -143,7 +143,7 @@ html body .mbp-shell .mbp-profile-top .mbp-service-badge { font-size: 13px !impo
 html body .mbp-shell .mbp-profile-top .mbp-secondary-cta { white-space: nowrap; }
 html body .mbp-shell .mbp-profile-top .mbp-primary-cta svg, html body .mbp-shell .mbp-profile-top .mbp-secondary-cta svg { flex: none; width: 18px !important; height: 18px !important; }
 /* mapa: mais baixo e com aviso enquanto carrega */
-html body .mbp-shell .mbp-map-embed { position: relative; height: 280px !important; min-height: 0 !important; border-radius: 14px; overflow: hidden; background: #eef2f7; }
+html body .mbp-shell .mbp-map-embed { position: relative; width: 100%; height: 280px !important; min-height: 0 !important; aspect-ratio: auto !important; border-radius: 14px; overflow: hidden; background: #eef2f7; }
 html body .mbp-shell .mbp-map-embed iframe { position: relative; z-index: 1; width: 100%; height: 100% !important; border: 0; }
 html body .mbp-shell .mbp-map-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #71859b; font-size: 14px; }
 @media (max-width: 760px) {
