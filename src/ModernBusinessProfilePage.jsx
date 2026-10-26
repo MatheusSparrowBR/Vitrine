@@ -101,7 +101,7 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
         <span className="mbp-notification-label">{businessNotificationLoading?'Ativando…':businessNotifications?'Avisos ligados':'Avisos'}</span>
        </button>
       </div>
-      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share} title="Compartilhar esta empresa"><Icon name="share" size={17}/> Compartilhar</button>{business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer" title="Pedir pelo iFood"><span className="vl-ifood-dot" aria-hidden="true">i</span> iFood</a>}
+      <button type="button" className="mbp-shortcut-action mbp-shortcut-share" onClick={share} title="Compartilhar esta empresa"><Icon name="share" size={17}/> Compartilhar</button>{business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer" title="Pedir delivery"><Icon name="motorcycle" size={17}/> Delivery</a>}
       {businessNotificationMessage&&<small className="mbp-inline-action-message">{businessNotificationMessage}</small>}
      </div>
     </div>
