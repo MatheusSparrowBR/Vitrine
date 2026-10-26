@@ -24,7 +24,7 @@ test('modern public business profile exposes iFood only when a link exists',()=>
  const css=fs.readFileSync('src/modern-business-profile-ux.css','utf8')
  assert.match(page,/business\.ifood_url&&/)
  assert.match(page,/data-track="ifood"/)
- assert.match(page,/iFood/)
+ assert.match(page,/Delivery/)
  assert.doesNotMatch(page,/mbp-ifood-mark/)
  assert.doesNotMatch(page,/data-track="save"/)
  assert.match(page,/className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood"/)
