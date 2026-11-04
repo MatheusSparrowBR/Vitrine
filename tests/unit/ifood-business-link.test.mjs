@@ -17,7 +17,7 @@ test('iFood link is optional in business registration and account editing',()=>{
 
 test('public business profile only renders the iFood action when a URL exists',()=>{
   const profile=read('src/PublicCatalogPages.jsx')
-  assert.match(profile,/business\.ifood_url&&<a className="outline ifood-button"/)
+  assert.match(profile,/safeHttpUrl\(business\.ifood_url\)&&<a className="outline ifood-button"/)
   assert.match(profile,/Pedir delivery/)
 })
 

@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useState}from'react'
+import { safeHttpUrl } from './safe-url.js'
 import{supabase as sharedSupabase}from'./supabase-client.js'
 import{getActiveBusinessPromotions,promotionDiscountPercent,promotionValidUntil}from'./promotion-service.js'
 import{DAY_KEYS,formatHours,getOpenStatus}from'./business-hours-utils.js'
@@ -93,9 +94,9 @@ export default function ModernBusinessProfilePage({citySlug='laguna',businessSlu
     </div>
      <div className="mbp-identity-actions">
      <div className="mbp-profile-shortcuts" aria-label="Ações da empresa">
-      {business.ifood_url&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={business.ifood_url} target="_blank" rel="noreferrer" title="Pedir delivery"><Icon name="motorcycle" size={17}/> Delivery</a>}
+      {safeHttpUrl(business.ifood_url)&&<a className="mbp-shortcut-action mbp-shortcut-ifood" data-track="ifood" href={safeHttpUrl(business.ifood_url)} target="_blank" rel="noreferrer" title="Pedir delivery"><Icon name="motorcycle" size={17}/> Delivery</a>}
       <BusinessPersonalActions businessId={business.id}/>
-      {business.instagram_url&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={business.instagram_url} target="_blank" rel="noreferrer" title="Instagram da empresa"><Icon name="instagram" size={17}/> Instagram</a>}
+      {safeHttpUrl(business.instagram_url)&&<a className="mbp-shortcut-action mbp-shortcut-instagram" data-track="instagram" href={safeHttpUrl(business.instagram_url)} target="_blank" rel="noreferrer" title="Instagram da empresa"><Icon name="instagram" size={17}/> Instagram</a>}
       <div className="mbp-business-notification mbp-inline-business-notification" aria-label="Receba novidades desta empresa">
        <button type="button" className={'mbp-shortcut-action mbp-shortcut-notifications '+(businessNotifications?'active':'')} onClick={toggleBusinessNotifications} disabled={businessNotificationLoading} aria-pressed={businessNotifications} aria-label="Ativar notificações da empresa" title={businessNotifications?'Desativar notificações desta empresa':'Ativar notificações desta empresa'}>
         <Icon name="bell" size={15} className="mbp-notification-svg"/>
