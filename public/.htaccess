@@ -11,3 +11,13 @@ RewriteRule ^ - [L]
 
 # React/Vite SPA fallback: let the client-side router resolve all app routes.
 RewriteRule ^ index.html [L]
+
+# Cabeçalhos de segurança. A CSP começa em report-only: o navegador só registra o que bloquearia.
+# Só depois de conferir o console nas páginas principais troque para Content-Security-Policy.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com; frame-src https://www.google.com https://www.youtube-nocookie.com https://www.youtube.com https://www.openstreetmap.org; frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+</IfModule>
